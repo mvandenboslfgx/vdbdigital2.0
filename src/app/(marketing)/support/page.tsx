@@ -1,0 +1,49 @@
+import type { Metadata } from "next";
+import { Container, Section, Card } from "@/components/ui/container";
+import { SupportForm } from "@/components/forms/support-form";
+import { WhatsAppButton } from "@/components/chat/whatsapp-button";
+import { CarePackagesSection } from "@/components/sections/care-packages-section";
+import { siteConfig } from "@/config/site";
+import { getDictionary } from "@/i18n/get-dictionary";
+import { paths } from "@/i18n/config";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getDictionary();
+  return {
+    title: t("forms.supportTitle"),
+    description: t("forms.supportIntro"),
+    alternates: { canonical: paths.support },
+  };
+}
+
+export default async function SupportPage() {
+  const { t } = await getDictionary();
+
+  return (
+    <>
+      <Section variant="dark" className="pt-12">
+        <Container>
+          <h1 className="text-h1 mb-4">{t("forms.supportTitle")}</h1>
+          <p className="text-body-lg text-muted prose-width">{t("forms.supportPageIntro")}</p>
+        </Container>
+      </Section>
+      <Section variant="light">
+        <Container>
+          <div className="grid lg:grid-cols-2 gap-10">
+            <Card variant="light">
+              <SupportForm />
+            </Card>
+            <div className="space-y-6">
+              <Card variant="light">
+                <h2 className="text-h3 text-light-foreground mb-2">{t("forms.supportEmail")}</h2>
+                <p className="text-light-muted">{siteConfig.supportEmail}</p>
+              </Card>
+              <WhatsAppButton message={t("forms.whatsappMessageSupport")} />
+            </div>
+          </div>
+        </Container>
+      </Section>
+      <CarePackagesSection />
+    </>
+  );
+}

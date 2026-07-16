@@ -1,0 +1,8 @@
+# Supabase CLI — koppel met: npx supabase link --project-ref <PROJECT_REF>
+project_id = ""
+
+[db]
+major_version = 15
+
+[api]
+enabled = true
