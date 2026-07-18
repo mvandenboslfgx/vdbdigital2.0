@@ -39,12 +39,16 @@ export const DELIVERABLE_STATUS_NL: Record<string, string> = {
 
 export const QUOTE_STATUS_NL: Record<string, string> = {
   DRAFT: "Concept",
-  SENT: "Verstuurd",
+  IN_REVIEW: "Ter controle",
+  READY: "Gereed",
+  SENT: "Verzonden",
   VIEWED: "Bekeken",
   ACCEPTED: "Geaccepteerd",
   DECLINED: "Afgewezen",
   EXPIRED: "Verlopen",
   WITHDRAWN: "Ingetrokken",
+  SUPERSEDED: "Vervangen",
+  ARCHIVED: "Gearchiveerd",
 };
 
 export const INVOICE_STATUS_NL: Record<string, string> = {

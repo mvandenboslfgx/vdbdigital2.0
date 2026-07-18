@@ -341,16 +341,29 @@ export async function getPortalProject(id: string) {
 
 export async function listPortalQuotes() {
   const ctx = await requireCustomer();
+  if (!hasCustomerPermission(ctx.customerRole, "portal.quotes.view")) {
+    return { ctx, quotes: [] as PortalQuoteRow[], denied: true as const };
+  }
+
   const supabase = createServiceRoleClient();
   if (!supabase) return { ctx, quotes: [] as PortalQuoteRow[] };
 
   const { data } = await supabase
     .from("portal_quotes")
     .select(
-      "id, quote_number, title, status, total_cents, currency, valid_until, updated_at",
+      "id, quote_number, title, status, total_cents, currency, valid_until, updated_at, sent_at, project_id",
     )
     .eq("organization_id", ctx.organization.id)
-    .neq("status", "DRAFT")
+    .in("status", [
+      "SENT",
+      "VIEWED",
+      "ACCEPTED",
+      "DECLINED",
+      "EXPIRED",
+      "WITHDRAWN",
+      "SUPERSEDED",
+    ])
+    .is("archived_at", null)
     .order("updated_at", { ascending: false });
 
   return { ctx, quotes: (data ?? []) as PortalQuoteRow[] };
@@ -358,18 +371,56 @@ export async function listPortalQuotes() {
 
 export async function getPortalQuote(id: string) {
   const ctx = await requireCustomer();
-  const supabase = createServiceRoleClient();
-  if (!supabase) return { ctx, quote: null };
+  if (!hasCustomerPermission(ctx.customerRole, "portal.quotes.view")) {
+    return { ctx, quote: null, items: [], denied: true as const };
+  }
 
-  const { data } = await supabase
+  const supabase = createServiceRoleClient();
+  if (!supabase) return { ctx, quote: null, items: [] };
+
+  const { data: quote } = await supabase
     .from("portal_quotes")
     .select("*")
     .eq("id", id)
     .eq("organization_id", ctx.organization.id)
-    .neq("status", "DRAFT")
+    .in("status", [
+      "SENT",
+      "VIEWED",
+      "ACCEPTED",
+      "DECLINED",
+      "EXPIRED",
+      "WITHDRAWN",
+      "SUPERSEDED",
+    ])
     .maybeSingle();
 
-  return { ctx, quote: data };
+  if (!quote) return { ctx, quote: null, items: [] };
+
+  // Atomically mark first view SENT → VIEWED
+  if (quote.status === "SENT") {
+    const now = new Date().toISOString();
+    await supabase
+      .from("portal_quotes")
+      .update({
+        status: "VIEWED",
+        first_viewed_at: quote.first_viewed_at ?? now,
+        version: (quote.version ?? 1) + 1,
+        updated_at: now,
+      })
+      .eq("id", quote.id)
+      .eq("status", "SENT")
+      .eq("version", quote.version ?? 1);
+    quote.status = "VIEWED";
+    quote.first_viewed_at = quote.first_viewed_at ?? now;
+  }
+
+  const { data: items } = await supabase
+    .from("portal_quote_items")
+    .select("*")
+    .eq("quote_id", id)
+    .order("sort_order");
+
+  return { ctx, quote, items: items ?? [] };
 }
 
 export async function listPortalInvoices() {

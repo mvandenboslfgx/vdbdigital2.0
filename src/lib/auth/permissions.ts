@@ -39,6 +39,15 @@ export type Permission =
   | "projects.manage_deliverables"
   | "projects.view_internal_activity"
   | "quotes.manage"
+  | "quotes.view_all"
+  | "quotes.view_assigned"
+  | "quotes.create"
+  | "quotes.edit"
+  | "quotes.review"
+  | "quotes.send"
+  | "quotes.withdraw"
+  | "quotes.archive"
+  | "quotes.manage_terms"
   | "invoices.manage"
   | "files.manage"
   | "documents.view_all"
@@ -76,6 +85,9 @@ const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
     "documents.edit_metadata",
     "documents.manage_versions",
     "documents.download_internal",
+    "quotes.view_assigned",
+    "quotes.create",
+    "quotes.edit",
   ],
   SUPPORT: [
     "products.read",
@@ -95,6 +107,7 @@ const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
     "documents.upload",
     "documents.download_internal",
     "documents.archive",
+    "quotes.view_assigned",
   ],
   ADMIN: [
     "products.read",
@@ -132,6 +145,15 @@ const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
     "projects.manage_deliverables",
     "projects.view_internal_activity",
     "quotes.manage",
+    "quotes.view_all",
+    "quotes.view_assigned",
+    "quotes.create",
+    "quotes.edit",
+    "quotes.review",
+    "quotes.send",
+    "quotes.withdraw",
+    "quotes.archive",
+    "quotes.manage_terms",
     "invoices.manage",
     "files.manage",
     "documents.view_all",
@@ -188,6 +210,15 @@ const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
     "projects.manage_deliverables",
     "projects.view_internal_activity",
     "quotes.manage",
+    "quotes.view_all",
+    "quotes.view_assigned",
+    "quotes.create",
+    "quotes.edit",
+    "quotes.review",
+    "quotes.send",
+    "quotes.withdraw",
+    "quotes.archive",
+    "quotes.manage_terms",
     "invoices.manage",
     "files.manage",
     "documents.view_all",

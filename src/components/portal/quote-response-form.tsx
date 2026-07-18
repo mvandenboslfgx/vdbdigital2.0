@@ -10,7 +10,13 @@ import { Textarea } from "@/components/ui/textarea";
 
 const initial: PortalActionState = {};
 
-export function QuoteResponseForm({ quoteId }: { quoteId: string }) {
+export function QuoteResponseForm({
+  quoteId,
+  mode = "both",
+}: {
+  quoteId: string;
+  mode?: "both" | "accept" | "decline";
+}) {
   const [state, formAction, pending] = useActionState(
     respondToQuoteAction,
     initial,
@@ -19,10 +25,16 @@ export function QuoteResponseForm({ quoteId }: { quoteId: string }) {
   return (
     <form action={formAction} className="space-y-4 rounded-xl border border-border p-5">
       <input type="hidden" name="quoteId" value={quoteId} />
-      <h2 className="text-h3">Reageren</h2>
+      <h2 className="text-h3">
+        {mode === "accept"
+          ? "Bevestig acceptatie"
+          : mode === "decline"
+            ? "Bevestig afwijzing"
+            : "Reageren"}
+      </h2>
       <div>
         <label htmlFor="note" className="block text-small font-medium mb-1">
-          Opmerking (optioneel)
+          {mode === "decline" ? "Reden (optioneel)" : "Opmerking (optioneel)"}
         </label>
         <Textarea id="note" name="note" rows={3} maxLength={2000} />
       </div>
@@ -37,23 +49,22 @@ export function QuoteResponseForm({ quoteId }: { quoteId: string }) {
         </p>
       )}
       <div className="flex flex-wrap gap-3">
-        <Button
-          type="submit"
-          name="decision"
-          value="ACCEPT"
-          disabled={pending}
-        >
-          Offerte accepteren
-        </Button>
-        <Button
-          type="submit"
-          name="decision"
-          value="DECLINE"
-          variant="outline"
-          disabled={pending}
-        >
-          Offerte afwijzen
-        </Button>
+        {mode !== "decline" ? (
+          <Button type="submit" name="decision" value="ACCEPT" disabled={pending}>
+            Offerte accepteren
+          </Button>
+        ) : null}
+        {mode !== "accept" ? (
+          <Button
+            type="submit"
+            name="decision"
+            value="DECLINE"
+            variant="outline"
+            disabled={pending}
+          >
+            Offerte afwijzen
+          </Button>
+        ) : null}
       </div>
     </form>
   );

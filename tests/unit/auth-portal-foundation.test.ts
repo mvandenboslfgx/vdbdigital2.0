@@ -39,10 +39,14 @@ describe("Auth portal foundation — customer org roles", () => {
     expect(hasCustomerPermission("VIEW_ONLY", "portal.access")).toBe(true);
   });
 
-  it("PRIMARY and MEMBER can support; BILLING can respond to quotes", () => {
+  it("PRIMARY and MEMBER can accept quotes; BILLING views only", () => {
     expect(hasCustomerPermission("PRIMARY", "portal.support.create")).toBe(true);
     expect(hasCustomerPermission("MEMBER", "portal.support.reply")).toBe(true);
-    expect(hasCustomerPermission("BILLING", "portal.quotes.respond")).toBe(true);
+    expect(hasCustomerPermission("PRIMARY", "portal.quotes.accept")).toBe(true);
+    expect(hasCustomerPermission("MEMBER", "portal.quotes.decline")).toBe(true);
+    expect(hasCustomerPermission("BILLING", "portal.quotes.view")).toBe(true);
+    expect(hasCustomerPermission("BILLING", "portal.quotes.accept")).toBe(false);
+    expect(hasCustomerPermission("BILLING", "portal.quotes.respond")).toBe(false);
     expect(hasCustomerPermission("BILLING", "portal.support.create")).toBe(false);
   });
 });

@@ -3,11 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireCustomer } from "@/server/auth/require-customer";
-import { createServiceRoleClient } from "@/lib/database/server";
+import { createServiceRoleClient, createServerSupabaseClient } from "@/lib/database/server";
 import { verifyOrigin } from "@/lib/security/origin";
 import { writeAuditLog } from "@/lib/security/audit-log";
 import { checkRateLimit } from "@/lib/security/rate-limit";
 import { hasCustomerPermission } from "@/lib/auth/customer-permissions";
+import { validateSelectedOptionalQuoteItems } from "@/lib/commerce/quote-status";
 
 function denyPortalPermission(): PortalActionState {
   return {
@@ -42,7 +43,7 @@ const profileSchema = z.object({
   fullName: z.string().min(2).max(120),
 });
 
-/** Offerte accepteren/afwijzen — geen Mollie, geen checkout. */
+/** Offerte accepteren/afwijzen via RPC — digitale offerteacceptatie, geen Mollie. */
 export async function respondToQuoteAction(
   _prev: PortalActionState,
   formData: FormData,
@@ -61,7 +62,13 @@ export async function respondToQuoteAction(
   }
 
   const ctx = await requireCustomer();
-  if (!hasCustomerPermission(ctx.customerRole, "portal.quotes.respond")) {
+  const needsAccept = parsed.data.decision === "ACCEPT";
+  if (
+    !hasCustomerPermission(
+      ctx.customerRole,
+      needsAccept ? "portal.quotes.accept" : "portal.quotes.decline",
+    )
+  ) {
     return denyPortalPermission();
   }
   const limited = await checkRateLimit("portal-quote", ctx.user.id);
@@ -69,71 +76,136 @@ export async function respondToQuoteAction(
     return { error: "Te veel pogingen. Probeer later opnieuw." };
   }
 
-  const supabase = createServiceRoleClient();
-  if (!supabase) return { error: "Database niet beschikbaar." };
+  const service = createServiceRoleClient();
+  if (!service) return { error: "Database niet beschikbaar." };
 
-  const { data: quote } = await supabase
+  const { data: quote } = await service
     .from("portal_quotes")
-    .select("id, status, organization_id, version, terms_version")
+    .select(
+      "id, status, organization_id, version, terms_version, valid_until, project_id",
+    )
     .eq("id", parsed.data.quoteId)
     .eq("organization_id", ctx.organization.id)
     .maybeSingle();
 
-  if (!quote || (quote.status !== "SENT" && quote.status !== "VIEWED")) {
+  if (!quote) {
     return { error: "Deze offerte kan nu niet worden beantwoord." };
   }
 
-  const now = new Date().toISOString();
-  const update =
-    parsed.data.decision === "ACCEPT"
-      ? {
-          status: "ACCEPTED",
-          accepted_at: now,
-          declined_at: null,
-          accepted_by: ctx.user.id,
-          customer_note: parsed.data.note ?? null,
-          version: (quote.version ?? 1) + 1,
-        }
-      : {
-          status: "DECLINED",
-          declined_at: now,
-          accepted_at: null,
-          accepted_by: null,
-          customer_note: parsed.data.note ?? null,
-          version: (quote.version ?? 1) + 1,
-        };
+  if (
+    quote.valid_until &&
+    quote.valid_until.slice(0, 10) < new Date().toISOString().slice(0, 10)
+  ) {
+    return { error: "Deze offerte is verlopen en kan niet meer worden geaccepteerd." };
+  }
 
-  const { error } = await supabase
-    .from("portal_quotes")
-    .update(update)
-    .eq("id", quote.id)
-    .eq("version", quote.version ?? 1);
+  const userClient = await createServerSupabaseClient();
+  if (!userClient) return { error: "Sessie niet beschikbaar." };
 
-  if (error) {
+  const selectedRaw = String(formData.get("selectedOptionalIds") || "[]");
+  let selectedIds: string[] = [];
+  try {
+    const parsedIds = JSON.parse(selectedRaw);
+    if (Array.isArray(parsedIds)) {
+      selectedIds = parsedIds.filter((x) => typeof x === "string");
+    }
+  } catch {
+    selectedIds = [];
+  }
+
+  if (needsAccept) {
+    const { data: itemRows } = await service
+      .from("portal_quote_items")
+      .select("id, is_optional")
+      .eq("quote_id", quote.id);
+    const selection = validateSelectedOptionalQuoteItems(
+      (itemRows ?? []).map((row) => ({
+        id: row.id as string,
+        isOptional: Boolean(row.is_optional),
+      })),
+      selectedIds,
+    );
+    if (!selection.ok) {
+      return {
+        error:
+          "Ongeldige optionele regels. Alleen bestaande optionele onderdelen mogen worden geselecteerd.",
+      };
+    }
+    selectedIds = selection.selectedIds;
+  }
+
+  const { data: rpcRows, error: rpcError } = needsAccept
+    ? await userClient.rpc("accept_portal_quote", {
+        p_quote_id: quote.id,
+        p_expected_version: quote.version,
+        p_selected_optional_item_ids: selectedIds,
+      })
+    : await userClient.rpc("decline_portal_quote", {
+        p_quote_id: quote.id,
+        p_expected_version: quote.version,
+        p_reason: parsed.data.note ?? null,
+      });
+
+  if (rpcError) {
     return { error: "Opslaan mislukt. Probeer opnieuw." };
+  }
+
+  const row = Array.isArray(rpcRows) ? rpcRows[0] : rpcRows;
+  const ok = Boolean(row?.ok);
+  const detail = String(row?.detail ?? "");
+
+  if (!ok) {
+    const messages: Record<string, string> = {
+      EXPIRED: "Deze offerte is verlopen.",
+      INVALID_STATUS: "Deze offerte kan nu niet worden beantwoord.",
+      VERSION_CONFLICT: "De offerte is ondertussen gewijzigd. Vernieuw de pagina.",
+      ROLE_DENIED: "Je hebt geen rechten om te reageren.",
+      TERMS_REQUIRED: "Voorwaardenversie ontbreekt.",
+      ALREADY_ACCEPTED_OTHER: "Deze offerte is al geaccepteerd.",
+      ACCEPTANCE_CONFLICT: "Acceptatie conflicteert. Probeer opnieuw.",
+    };
+    return { error: messages[detail] ?? "Deze offerte kan nu niet worden beantwoord." };
+  }
+
+  if (detail === "ALREADY_ACCEPTED" || detail === "ALREADY_DECLINED") {
+    return {
+      success: true,
+      message: needsAccept
+        ? "Offerte was al geaccepteerd. Er is geen betaling gestart."
+        : "Offerte was al afgewezen.",
+    };
   }
 
   await writeAuditLog({
     userId: ctx.user.id,
-    action:
-      parsed.data.decision === "ACCEPT"
-        ? "portal.quote_accepted"
-        : "portal.quote_declined",
+    action: needsAccept ? "portal.quote_accepted" : "portal.quote_declined",
     metadata: {
       quoteId: quote.id,
       organizationId: ctx.organization.id,
       termsVersion: quote.terms_version ?? null,
+      detail,
     },
   });
 
+  if (quote.project_id) {
+    await service.from("portal_project_activity").insert({
+      project_id: quote.project_id,
+      actor_user_id: ctx.user.id,
+      activity_type: needsAccept ? "quote.accepted" : "quote.declined",
+      summary: needsAccept ? "Offerte geaccepteerd" : "Offerte afgewezen",
+      visibility: "CUSTOMER_VISIBLE",
+      metadata_safe: { quoteId: quote.id },
+    });
+  }
+
   revalidatePath("/portal/offertes");
   revalidatePath(`/portal/offertes/${quote.id}`);
+  revalidatePath("/admin/quotes");
   return {
     success: true,
-    message:
-      parsed.data.decision === "ACCEPT"
-        ? "Offerte geaccepteerd. Er is geen betaling gestart."
-        : "Offerte afgewezen.",
+    message: needsAccept
+      ? "Digitale offerteacceptatie vastgelegd. Er is geen betaling of factuur gestart."
+      : "Offerte afgewezen.",
   };
 }
 

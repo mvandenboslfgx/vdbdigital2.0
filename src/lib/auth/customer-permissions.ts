@@ -8,6 +8,10 @@ export type CustomerPortalPermission =
   | "portal.access"
   | "portal.profile.edit"
   | "portal.quotes.respond"
+  | "portal.quotes.view"
+  | "portal.quotes.download"
+  | "portal.quotes.accept"
+  | "portal.quotes.decline"
   | "portal.support.create"
   | "portal.support.reply"
   | "portal.billing.view"
@@ -28,20 +32,27 @@ const ROLE_PERMS: Record<CustomerOrgRole, readonly CustomerPortalPermission[]> =
     "portal.projects.view",
     "portal.documents.view",
     "portal.documents.download",
+    "portal.quotes.view",
+    "portal.quotes.download",
   ],
   BILLING: [
     "portal.access",
     "portal.profile.edit",
     "portal.billing.view",
-    "portal.quotes.respond",
     "portal.projects.view",
     "portal.documents.view",
     "portal.documents.download",
+    "portal.quotes.view",
+    "portal.quotes.download",
   ],
   MEMBER: [
     "portal.access",
     "portal.profile.edit",
     "portal.quotes.respond",
+    "portal.quotes.view",
+    "portal.quotes.download",
+    "portal.quotes.accept",
+    "portal.quotes.decline",
     "portal.support.create",
     "portal.support.reply",
     "portal.projects.view",
@@ -56,6 +67,10 @@ const ROLE_PERMS: Record<CustomerOrgRole, readonly CustomerPortalPermission[]> =
     "portal.access",
     "portal.profile.edit",
     "portal.quotes.respond",
+    "portal.quotes.view",
+    "portal.quotes.download",
+    "portal.quotes.accept",
+    "portal.quotes.decline",
     "portal.support.create",
     "portal.support.reply",
     "portal.billing.view",
