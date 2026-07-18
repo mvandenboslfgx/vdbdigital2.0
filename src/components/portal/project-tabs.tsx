@@ -10,6 +10,7 @@ export function PortalProjectTabShell({
     | "overview"
     | "milestones"
     | "deliverables"
+    | "documents"
     | "feedback"
     | "activity";
   children: React.ReactNode;
@@ -26,6 +27,7 @@ const TABS = [
   { href: "overview", label: "Overzicht" },
   { href: "milestones", label: "Mijlpalen" },
   { href: "deliverables", label: "Opleveringen" },
+  { href: "documents", label: "Documenten" },
   { href: "feedback", label: "Feedback" },
   { href: "activity", label: "Activiteit" },
 ] as const;

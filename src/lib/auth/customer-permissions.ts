@@ -14,7 +14,11 @@ export type CustomerPortalPermission =
   | "portal.projects.view"
   | "portal.projects.feedback"
   | "portal.projects.approve_deliverable"
-  | "portal.projects.complete_action";
+  | "portal.projects.complete_action"
+  | "portal.documents.view"
+  | "portal.documents.download"
+  | "portal.documents.upload"
+  | "portal.documents.manage_own_uploads";
 
 const ROLE_PERMS: Record<CustomerOrgRole, readonly CustomerPortalPermission[]> = {
   VIEW_ONLY: [
@@ -22,6 +26,8 @@ const ROLE_PERMS: Record<CustomerOrgRole, readonly CustomerPortalPermission[]> =
     "portal.profile.edit",
     "portal.billing.view",
     "portal.projects.view",
+    "portal.documents.view",
+    "portal.documents.download",
   ],
   BILLING: [
     "portal.access",
@@ -29,6 +35,8 @@ const ROLE_PERMS: Record<CustomerOrgRole, readonly CustomerPortalPermission[]> =
     "portal.billing.view",
     "portal.quotes.respond",
     "portal.projects.view",
+    "portal.documents.view",
+    "portal.documents.download",
   ],
   MEMBER: [
     "portal.access",
@@ -40,6 +48,9 @@ const ROLE_PERMS: Record<CustomerOrgRole, readonly CustomerPortalPermission[]> =
     "portal.projects.feedback",
     "portal.projects.approve_deliverable",
     "portal.projects.complete_action",
+    "portal.documents.view",
+    "portal.documents.download",
+    "portal.documents.upload",
   ],
   PRIMARY: [
     "portal.access",
@@ -52,6 +63,10 @@ const ROLE_PERMS: Record<CustomerOrgRole, readonly CustomerPortalPermission[]> =
     "portal.projects.feedback",
     "portal.projects.approve_deliverable",
     "portal.projects.complete_action",
+    "portal.documents.view",
+    "portal.documents.download",
+    "portal.documents.upload",
+    "portal.documents.manage_own_uploads",
   ],
 };
 

@@ -30,6 +30,7 @@
     "db:verify-customer-portal": "tsx scripts/verify-customer-portal.ts",
     "db:verify-auth-portal": "tsx scripts/verify-auth-portal.ts",
     "db:verify-project-management": "tsx scripts/verify-project-management.ts",
+    "db:verify-documents-storage": "tsx scripts/verify-documents-storage.ts",
     "catalog:verify-alignment": "tsx scripts/verify-catalog-alignment.ts",
     "catalog:verify-no-tawk": "tsx scripts/verify-catalog-no-tawk.ts",
     "checkout:release-gate": "tsx scripts/checkout-release-gate.ts"

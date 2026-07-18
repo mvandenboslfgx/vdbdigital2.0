@@ -65,6 +65,46 @@ export const TICKET_STATUS_NL: Record<string, string> = {
   CLOSED: "Gesloten",
 };
 
+export const DOCUMENT_STATUS_NL: Record<string, string> = {
+  UPLOADING: "Uploaden",
+  AVAILABLE: "Beschikbaar",
+  QUARANTINED: "In quarantaine",
+  REJECTED: "Afgewezen",
+  ARCHIVED: "Gearchiveerd",
+  DELETED: "Verwijderd",
+};
+
+export const DOCUMENT_VISIBILITY_NL: Record<string, string> = {
+  INTERNAL: "Intern",
+  CUSTOMER_VISIBLE: "Zichtbaar voor klant",
+  CUSTOMER_UPLOAD: "Door klant aangeleverd",
+  RESTRICTED: "Beperkt",
+};
+
+export const DOCUMENT_CATEGORY_NL: Record<string, string> = {
+  GENERAL: "Algemeen",
+  PROJECT_FILE: "Projectbestand",
+  DELIVERABLE: "Oplevering",
+  QUOTE: "Offerte",
+  INVOICE: "Factuur",
+  CONTRACT: "Contract",
+  BRIEFING: "Briefing",
+  DESIGN: "Ontwerp",
+  CONTENT: "Content",
+  REPORT: "Rapport",
+  SUPPORT_ATTACHMENT: "Supportbijlage",
+  OTHER: "Overig",
+};
+
+export const SCAN_STATUS_NL: Record<string, string> = {
+  NOT_REQUIRED: "Niet vereist",
+  PENDING: "In afwachting",
+  CLEAN: "Veilig",
+  SUSPICIOUS: "Verdacht",
+  INFECTED: "Geïnfecteerd",
+  FAILED: "Mislukt",
+};
+
 export const PROJECT_TYPE_NL: Record<string, string> = {
   WEBSITE: "Website",
   WEBSHOP: "Webshop",

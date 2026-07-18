@@ -41,6 +41,17 @@ export type Permission =
   | "quotes.manage"
   | "invoices.manage"
   | "files.manage"
+  | "documents.view_all"
+  | "documents.view_organization"
+  | "documents.upload"
+  | "documents.edit_metadata"
+  | "documents.manage_visibility"
+  | "documents.archive"
+  | "documents.restore"
+  | "documents.delete_physical"
+  | "documents.manage_versions"
+  | "documents.manage_scan_status"
+  | "documents.download_internal"
   | "messages.manage"
   | "support.manage"
   | "notifications.manage"
@@ -60,6 +71,11 @@ const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
     "projects.view_assigned",
     "projects.manage_milestones",
     "projects.manage_deliverables",
+    "documents.upload",
+    "documents.view_organization",
+    "documents.edit_metadata",
+    "documents.manage_versions",
+    "documents.download_internal",
   ],
   SUPPORT: [
     "products.read",
@@ -75,6 +91,10 @@ const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
     "messages.manage",
     "support.manage",
     "files.manage",
+    "documents.view_organization",
+    "documents.upload",
+    "documents.download_internal",
+    "documents.archive",
   ],
   ADMIN: [
     "products.read",
@@ -114,6 +134,16 @@ const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
     "quotes.manage",
     "invoices.manage",
     "files.manage",
+    "documents.view_all",
+    "documents.view_organization",
+    "documents.upload",
+    "documents.edit_metadata",
+    "documents.manage_visibility",
+    "documents.archive",
+    "documents.restore",
+    "documents.manage_versions",
+    "documents.manage_scan_status",
+    "documents.download_internal",
     "messages.manage",
     "support.manage",
     "notifications.manage",
@@ -160,6 +190,17 @@ const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
     "quotes.manage",
     "invoices.manage",
     "files.manage",
+    "documents.view_all",
+    "documents.view_organization",
+    "documents.upload",
+    "documents.edit_metadata",
+    "documents.manage_visibility",
+    "documents.archive",
+    "documents.restore",
+    "documents.delete_physical",
+    "documents.manage_versions",
+    "documents.manage_scan_status",
+    "documents.download_internal",
     "messages.manage",
     "support.manage",
     "notifications.manage",

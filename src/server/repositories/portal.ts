@@ -53,6 +53,12 @@ export type PortalFileRow = {
   mime_type: string;
   created_at: string;
   project_id: string | null;
+  title?: string;
+  category?: string;
+  visibility?: string;
+  version_number?: number;
+  size_bytes?: number;
+  document_number?: string;
 };
 
 export type PortalNotificationRow = {
@@ -384,19 +390,85 @@ export async function listPortalInvoices() {
   return { ctx, invoices: (data ?? []) as PortalInvoiceRow[] };
 }
 
-export async function listPortalFiles() {
+export async function listPortalFiles(filters?: { projectId?: string }) {
   const ctx = await requireCustomer();
+  if (!hasCustomerPermission(ctx.customerRole, "portal.documents.view")) {
+    return { ctx, files: [] as PortalFileRow[], denied: true as const };
+  }
+
   const supabase = createServiceRoleClient();
   if (!supabase) return { ctx, files: [] as PortalFileRow[] };
 
-  const { data } = await supabase
+  let query = supabase
     .from("portal_files")
-    .select("id, file_name, mime_type, created_at, project_id")
+    .select(
+      "id, document_number, title, file_name, mime_type, size_bytes, category, visibility, version_number, created_at, project_id, uploaded_by",
+    )
     .eq("organization_id", ctx.organization.id)
-    .eq("customer_visible", true)
+    .eq("status", "AVAILABLE")
+    .is("archived_at", null)
+    .in("visibility", ["CUSTOMER_VISIBLE", "CUSTOMER_UPLOAD"])
+    .in("scan_status", ["NOT_REQUIRED", "CLEAN"])
+    .eq("is_current", true)
     .order("created_at", { ascending: false });
 
+  if (filters?.projectId) {
+    query = query.eq("project_id", filters.projectId);
+  }
+
+  // BILLING: restrict categories
+  if (ctx.customerRole === "BILLING") {
+    query = query.in("category", ["QUOTE", "INVOICE", "CONTRACT"]);
+  }
+
+  const { data } = await query;
   return { ctx, files: (data ?? []) as PortalFileRow[] };
+}
+
+export async function getPortalDocument(id: string) {
+  const ctx = await requireCustomer();
+  if (!hasCustomerPermission(ctx.customerRole, "portal.documents.view")) {
+    return { ctx, document: null, versions: [], denied: true as const };
+  }
+
+  const supabase = createServiceRoleClient();
+  if (!supabase) return { ctx, document: null, versions: [] };
+
+  const { data: document } = await supabase
+    .from("portal_files")
+    .select("*")
+    .eq("id", id)
+    .eq("organization_id", ctx.organization.id)
+    .eq("status", "AVAILABLE")
+    .is("archived_at", null)
+    .in("visibility", ["CUSTOMER_VISIBLE", "CUSTOMER_UPLOAD"])
+    .in("scan_status", ["NOT_REQUIRED", "CLEAN"])
+    .maybeSingle();
+
+  if (!document) return { ctx, document: null, versions: [] };
+
+  if (
+    ctx.customerRole === "BILLING" &&
+    document.category !== "QUOTE" &&
+    document.category !== "INVOICE" &&
+    document.category !== "CONTRACT"
+  ) {
+    return { ctx, document: null, versions: [] };
+  }
+
+  const rootId = document.parent_document_id ?? document.id;
+  const { data: versions } = await supabase
+    .from("portal_files")
+    .select(
+      "id, version_number, title, created_at, size_bytes, is_current, visibility, status",
+    )
+    .or(`id.eq.${rootId},parent_document_id.eq.${rootId}`)
+    .eq("organization_id", ctx.organization.id)
+    .eq("status", "AVAILABLE")
+    .in("visibility", ["CUSTOMER_VISIBLE", "CUSTOMER_UPLOAD"])
+    .order("version_number", { ascending: false });
+
+  return { ctx, document, versions: versions ?? [] };
 }
 
 export async function listPortalConversations() {

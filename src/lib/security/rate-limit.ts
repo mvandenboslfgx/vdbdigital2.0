@@ -31,6 +31,10 @@ const BUCKET_LIMITS: Record<string, number> = {
   support: 10,
   checkout: 5,
   payment: 5,
+  "documents-upload": 20,
+  "documents-download": 60,
+  "portal-documents-upload": 10,
+  "portal-documents-download": 40,
 };
 
 /** Buckets that must fail closed without a working app limiter */

@@ -11,6 +11,7 @@ export function ProjectTabShell({
     | "milestones"
     | "actions"
     | "deliverables"
+    | "documents"
     | "feedback"
     | "activity"
     | "settings";
@@ -29,6 +30,7 @@ const TABS = [
   { href: "milestones", label: "Mijlpalen" },
   { href: "actions", label: "Acties" },
   { href: "deliverables", label: "Opleveringen" },
+  { href: "documents", label: "Documenten" },
   { href: "feedback", label: "Feedback" },
   { href: "activity", label: "Activiteit" },
   { href: "settings", label: "Instellingen" },
