@@ -31,12 +31,12 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
 
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://embed.tawk.to",
+    "script-src 'self' 'unsafe-inline'",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https:",
     "font-src 'self'",
-    "connect-src 'self' https://*.supabase.co https://api.mollie.com https://embed.tawk.to wss://*.tawk.to",
-    "frame-src https://embed.tawk.to https://www.mollie.com",
+    "connect-src 'self' https://*.supabase.co https://api.mollie.com",
+    "frame-src https://www.mollie.com",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",

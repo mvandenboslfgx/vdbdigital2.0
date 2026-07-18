@@ -39,10 +39,9 @@ describe("HTTP mutation route inventory", () => {
       if (route.path === "/api/webhooks/mollie") {
         expect(fileExists("src/app/api/webhooks/mollie/route.ts")).toBe(true);
       }
-      if (route.path === "/api/tawk/hash") {
-        expect(fileExists("src/app/api/tawk/hash/route.ts")).toBe(true);
-      }
     }
+    expect(API_MUTATION_ROUTES.some((r) => r.path.includes("tawk"))).toBe(false);
+    expect(fileExists("src/app/api/tawk/hash/route.ts")).toBe(false);
   });
 
   it("does not claim admin login POST exists", () => {

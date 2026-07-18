@@ -65,7 +65,7 @@ Legal pages render under both locales. Shell text (`last updated`) uses the dict
 
 All 16 seed slugs resolve under both `/shop/{slug}` and `/nl/shop/{slug}`:
 
-`starter-website`, `business-website`, `premium-website`, `conversiegerichte-landingspagina`, `complete-webshop`, `website-redesign`, `whatsapp-ai-starter`, `whatsapp-ai-business`, `tawk-to-livechat-installatie`, `reviewflow-setup`, `afsprakenautomatisering`, `maandelijks-websitebeheer`, `technisch-onderhoud`, `conversie-audit`, `supporturen-bundel`, `maatwerk-digitalisering`
+`starter-website`, `business-website`, `premium-website`, `conversiegerichte-landingspagina`, `complete-webshop`, `website-redesign`, `whatsapp-ai-starter`, `whatsapp-ai-business`, `reviewflow-setup`, `afsprakenautomatisering`, `maandelijks-websitebeheer`, `technisch-onderhoud`, `conversie-audit`, `supporturen-bundel`, `maatwerk-digitalisering`
 
 ## Legacy redirects (308)
 

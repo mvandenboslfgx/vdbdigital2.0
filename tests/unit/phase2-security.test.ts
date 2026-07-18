@@ -11,9 +11,20 @@ describe("Production env validation", () => {
     expect(validateProductionEnv().ok).toBe(true);
   });
 
-  it("lists missing production variables", () => {
+  it("lists missing production variables", async () => {
     vi.stubEnv("NODE_ENV", "production");
-    const result = validateProductionEnv();
+    vi.stubEnv("SUPABASE_SECRET_KEY", "");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "");
+    vi.stubEnv("MOLLIE_API_KEY", "");
+    vi.stubEnv("RESEND_API_KEY", "");
+    vi.stubEnv("EMAIL_FROM", "");
+    vi.resetModules();
+    const { validateProductionEnv: validate } = await import("@/config/env");
+    const result = validate();
+    expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.missing.length).toBeGreaterThan(0);
       expect(result.missing).toContain("SUPABASE_SECRET_KEY");
@@ -29,6 +40,7 @@ describe("CSP policy", () => {
     expect(middleware).not.toContain("unsafe-eval");
     expect(middleware).toContain("frame-ancestors 'none'");
     expect(middleware).toContain("form-action 'self'");
+    expect(middleware).not.toMatch(/tawk\.to/i);
   });
 });
 

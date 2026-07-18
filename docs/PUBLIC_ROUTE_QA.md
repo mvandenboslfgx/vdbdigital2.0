@@ -45,7 +45,6 @@ Status key: ✅ expected | ⚠️ known gap
 | `/shop/website-redesign` → `/nl/shop/…` | ✅ | ✅ | ✅ | |
 | `/shop/whatsapp-ai-starter` → `/nl/shop/…` | ✅ | ✅ | ✅ | |
 | `/shop/whatsapp-ai-business` → `/nl/shop/…` | ✅ | ✅ | ✅ | |
-| `/shop/tawk-to-livechat-installatie` → `/nl/shop/…` | ✅ | ✅ | ✅ | |
 | `/shop/reviewflow-setup` → `/nl/shop/…` | ✅ | ✅ | ✅ | |
 | `/shop/afsprakenautomatisering` → `/nl/shop/…` | ✅ | ✅ | ✅ | |
 | `/shop/maandelijks-websitebeheer` → `/nl/shop/…` | ✅ | ✅ | ✅ | |

@@ -10,7 +10,7 @@ const solutionLinks = [
   { key: "ai" as const, href: paths.aiAutomation },
   { key: "whatsapp" as const, href: paths.whatsappAi },
   { key: "reviews" as const, href: paths.reviewflows },
-  { key: "maintenance" as const, href: paths.support },
+  { key: "maintenance" as const, href: paths.websiteMaintenance },
 ];
 
 export async function SolutionsGridSection() {

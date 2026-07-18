@@ -5,7 +5,6 @@
 | Supabase | Database, Auth | Productie |
 | Mollie | Betalingen | Checkout |
 | Resend | E-mail | Formulieren, orders |
-| tawk.to | Livechat | Chat (optioneel) |
 | Upstash | Rate limiting | Productie (aanbevolen) |
 | Vercel | Hosting | Deployment |
 | WhatsApp Business | WhatsApp CTA | Optioneel |

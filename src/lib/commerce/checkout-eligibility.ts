@@ -12,6 +12,11 @@ import {
   buildP05CommercialItem,
   P05_TEST_SKU_SLUG,
 } from "@/config/commercial/p05-test-sku";
+import { calculateVatFromSubtotal } from "@/lib/utilities/vat";
+import {
+  isLegacyTawkProduct,
+  LEGACY_TAWK_PUBLIC_DENIED_MESSAGE,
+} from "@/lib/commerce/tawk-legacy-blocklist";
 
 export type CheckoutPriceMode = "FIXED" | "STARTING_FROM" | "QUOTE_ONLY";
 export type CheckoutCustomerType = "B2B" | "B2C";
@@ -28,6 +33,13 @@ function testOnlyCatalogExtras(): CommercialCatalogItem[] {
 }
 
 export function resolvePriceMode(product: Product): CheckoutPriceMode {
+  if (
+    product.priceMode === "FIXED" ||
+    product.priceMode === "STARTING_FROM" ||
+    product.priceMode === "QUOTE_ONLY"
+  ) {
+    return product.priceMode;
+  }
   if (product.billingType === "QUOTE_ONLY" || product.billingType === "FREE") {
     return "QUOTE_ONLY";
   }
@@ -56,11 +68,86 @@ export function findCommercialCatalogItem(
 
 export { canPublishForB2b, canPublishForB2c, P05_TEST_SKU_SLUG };
 
+/**
+ * Prefer DB commercial fields when present; otherwise undefined so callers
+ * fall back to the central commercial catalog config.
+ */
+export function commercialItemFromProductRow(
+  product: Product,
+): CommercialCatalogItem | undefined {
+  const hasDbCommercial =
+    product.priceStatus !== undefined ||
+    product.legalStatus !== undefined ||
+    product.publicationReady !== undefined;
+
+  if (!hasDbCommercial) return undefined;
+
+  const mode = resolvePriceMode(product);
+  const vatPercent = product.vatPercent ?? 21;
+  const vatRate = vatPercent / 100;
+  let pricing: CommercialCatalogItem["pricing"] = null;
+
+  if (mode !== "QUOTE_ONLY" && product.priceCents !== null) {
+    const stored = product.priceCents;
+    if (product.priceIncludesVat) {
+      // Integer-safe reverse from incl → excl using cent arithmetic
+      const exclVatCents = Math.round((stored * 100) / (100 + vatPercent));
+      const vatCents = calculateVatFromSubtotal(exclVatCents, vatRate);
+      pricing = {
+        exclVatCents,
+        inclVatCents: exclVatCents + vatCents,
+        vatRate,
+        mode:
+          mode === "FIXED"
+            ? "fixed"
+            : mode === "STARTING_FROM"
+              ? "starting_from"
+              : "quote_only",
+      };
+    } else {
+      const vatCents = calculateVatFromSubtotal(stored, vatRate);
+      pricing = {
+        exclVatCents: stored,
+        inclVatCents: stored + vatCents,
+        vatRate,
+        mode:
+          mode === "FIXED"
+            ? "fixed"
+            : mode === "STARTING_FROM"
+              ? "starting_from"
+              : "quote_only",
+      };
+    }
+  }
+
+  return {
+    id: product.id,
+    slug: product.slug,
+    category: "custom",
+    nameEn: product.name,
+    nameNl: product.name,
+    pricing,
+    quoteOnly: mode === "QUOTE_ONLY" || pricing === null,
+    oneTime: product.billingType === "ONE_TIME",
+    monthly: product.billingType === "MONTHLY",
+    b2b: product.audienceB2b ?? true,
+    b2c: product.audienceB2c ?? false,
+    legalType: "standard_service",
+    priceStatus: product.priceStatus ?? "DRAFT",
+    legalStatus: product.legalStatus ?? "NOT_REVIEWED",
+    foundingEligible: false,
+    foundingExclVatCents: null,
+    publicationReady: product.publicationReady ?? false,
+  };
+}
+
 export function hasLegalApprovalForCheckout(
   product: Product,
   customerType: CheckoutCustomerType,
 ): boolean {
-  const item = findCommercialCatalogItem(product.slug);
+  const item =
+    commercialItemFromProductRow(product) ??
+    findCommercialCatalogItem(product.slug);
   if (!item) {
     return false;
   }
@@ -71,6 +158,7 @@ export function hasLegalApprovalForCheckout(
 }
 
 export function canAddToDirectCheckout(product: Product): boolean {
+  if (isLegacyTawkProduct(product)) return false;
   if (!isDirectCheckoutEnabled()) return false;
   if (product.status !== "PUBLISHED") return false;
   if (resolvePriceMode(product) !== "FIXED") return false;
@@ -83,6 +171,9 @@ export function assertCheckoutAllowedForCustomer(
   product: Product,
   customerType: CheckoutCustomerType,
 ): string | null {
+  if (isLegacyTawkProduct(product)) {
+    return LEGACY_TAWK_PUBLIC_DENIED_MESSAGE;
+  }
   if (!isDirectCheckoutEnabled()) {
     return "Direct checkout is temporarily disabled";
   }

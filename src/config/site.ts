@@ -45,8 +45,11 @@ export const siteConfig = {
       { labelKey: "solutions.whatsappAi", href: paths.whatsappAi },
       { labelKey: "solutions.livechat", href: paths.livechat },
       { labelKey: "solutions.reviewflows", href: paths.reviewflows },
+      { labelKey: "solutions.appointmentAutomation", href: paths.appointmentAutomation },
       { labelKey: "solutions.customSoftware", href: paths.customSoftware },
       { labelKey: "solutions.websiteMaintenance", href: paths.websiteMaintenance },
+      { labelKey: "solutions.technicalSupport", href: paths.technicalSupport },
+      { labelKey: "solutions.conversionOptimisation", href: paths.conversionOptimisation },
     ],
       mobile: {
       solutionsOverview: {

@@ -109,7 +109,14 @@ export async function checkAdminAccess(): Promise<{
     const trusted = await loadTrustedAdminRole(user.id);
 
     if (!trusted || !trusted.isActive) {
-      return { authorized: false, redirectTo: "/admin/login" };
+      const { listCustomerMemberships } = await import(
+        "@/server/auth/require-customer"
+      );
+      const memberships = await listCustomerMemberships(user.id);
+      if (memberships.length > 0) {
+        return { authorized: false, redirectTo: "/portal" };
+      }
+      return { authorized: false, redirectTo: "/inloggen" };
     }
 
     const { getAal2RedirectPath } = await import("@/server/auth/require-aal2");
@@ -128,6 +135,6 @@ export async function checkAdminAccess(): Promise<{
       },
     };
   } catch {
-    return { authorized: false, redirectTo: "/admin/login" };
+    return { authorized: false, redirectTo: "/inloggen" };
   }
 }

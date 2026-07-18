@@ -6,46 +6,38 @@ import {
   isSupabaseDatabaseReady,
 } from "@/lib/database/server";
 import { allowDevFallback } from "@/lib/runtime/environment";
+import { mapDbProductRow } from "@/server/repositories/map-product";
+import {
+  isLegacyTawkCategorySlug,
+  isLegacyTawkProduct,
+} from "@/lib/commerce/tawk-legacy-blocklist";
 
 function mapDbProduct(row: Record<string, unknown>): Product {
-  return {
-    id: row.id as string,
-    slug: row.slug as string,
-    name: row.name as string,
-    shortDescription: row.short_description as string,
-    fullDescription: row.full_description as string,
-    categorySlug: (row.category as { slug: string })?.slug ?? "",
-    categoryName: (row.category as { name: string })?.name ?? "",
-    priceCents: row.price_cents as number | null,
-    fromPriceCents: row.from_price_cents as number | null,
-    billingType: row.billing_type as Product["billingType"],
-    deliveryTime: row.delivery_time as string,
-    includedItems: (row.included_items as string[]) ?? [],
-    excludedItems: (row.excluded_items as string[]) ?? [],
-    extensions: (row.extensions as string[]) ?? [],
-    faqs: [],
-    status: row.status as Product["status"],
-    featured: row.featured as boolean,
-    sortOrder: row.sort_order as number,
-    seoTitle: (row.seo_title as string) ?? "",
-    seoDescription: (row.seo_description as string) ?? "",
-    targetAudience: row.target_audience as string | undefined,
-    workflow: row.workflow as string | undefined,
-    requiredInput: (row.required_input as string[]) ?? undefined,
-  };
+  return mapDbProductRow(row);
+}
+
+function excludeLegacyTawkProducts(products: Product[]): Product[] {
+  return products.filter((p) => !isLegacyTawkProduct(p));
+}
+
+function excludeLegacyTawkCategories(cats: Category[]): Category[] {
+  return cats.filter((c) => !isLegacyTawkCategorySlug(c.slug));
 }
 
 function getDevSeedProducts(): Product[] {
   if (!allowDevFallback()) {
     return [];
   }
-  return seedProducts.filter((p) => p.status === "PUBLISHED");
+  return excludeLegacyTawkProducts(
+    seedProducts.filter((p) => p.status === "PUBLISHED"),
+  );
 }
 
 function getDevSeedProduct(slug: string): Product | null {
   if (!allowDevFallback()) {
     return null;
   }
+  if (isLegacyTawkProduct({ slug })) return null;
   return getSeedProductBySlug(slug) ?? null;
 }
 
@@ -77,10 +69,14 @@ export async function getAllProducts(): Promise<Product[]> {
     return getDevSeedProducts();
   }
 
-  return data.map(mapDbProduct);
+  return excludeLegacyTawkProducts(data.map(mapDbProduct));
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
+  if (isLegacyTawkProduct({ slug })) {
+    return null;
+  }
+
   if (!isSupabaseDatabaseReady()) {
     return getDevSeedProduct(slug);
   }
@@ -102,7 +98,9 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
     return getDevSeedProduct(slug);
   }
 
-  return mapDbProduct(data);
+  const product = mapDbProduct(data);
+  if (isLegacyTawkProduct(product)) return null;
+  return product;
 }
 
 export async function getFeaturedProductsList(): Promise<Product[]> {
@@ -112,12 +110,12 @@ export async function getFeaturedProductsList(): Promise<Product[]> {
 
 export async function getAllCategories(): Promise<Category[]> {
   if (!isSupabaseDatabaseReady()) {
-    return allowDevFallback() ? categories : [];
+    return allowDevFallback() ? excludeLegacyTawkCategories(categories) : [];
   }
 
   const supabase = createServiceRoleClient();
   if (!supabase) {
-    return allowDevFallback() ? categories : [];
+    return allowDevFallback() ? excludeLegacyTawkCategories(categories) : [];
   }
 
   const { data, error } = await supabase
@@ -126,25 +124,33 @@ export async function getAllCategories(): Promise<Category[]> {
     .order("sort_order");
 
   if (error || !data) {
-    return allowDevFallback() ? categories : [];
+    return allowDevFallback() ? excludeLegacyTawkCategories(categories) : [];
   }
 
-  return data.map((row) => ({
-    id: row.id as string,
-    slug: row.slug as string,
-    name: row.name as string,
-    description: row.description as string,
-    sortOrder: row.sort_order as number,
-  }));
+  return excludeLegacyTawkCategories(
+    data.map((row) => ({
+      id: row.id as string,
+      slug: row.slug as string,
+      name: row.name as string,
+      description: row.description as string,
+      sortOrder: row.sort_order as number,
+    })),
+  );
 }
 
 export async function getProductsByCategory(categorySlug: string): Promise<Product[]> {
+  if (isLegacyTawkCategorySlug(categorySlug)) {
+    return [];
+  }
   const products = await getAllProducts();
   return products.filter((p) => p.categorySlug === categorySlug);
 }
 
 /** Server-side product lookup for checkout — strikter dan publieke catalogus */
 export async function getProductForCheckout(slug: string): Promise<Product | null> {
+  if (isLegacyTawkProduct({ slug })) {
+    return null;
+  }
   const { canAddToDirectCheckout } = await import(
     "@/lib/commerce/checkout-eligibility"
   );

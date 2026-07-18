@@ -43,7 +43,6 @@ Legenda: MFA = AAL2 verplicht | Obj = object-level controle | Audit = auditlog
 | Functie | Route | Methoden | Auth | MFA | Audit |
 |---|---|---|---|---|---|
 | Mollie webhook | `/api/webhooks/mollie` | POST | webhook secret (prod verplicht) | — | payment_status |
-| tawk hash | `/api/tawk/hash` | POST | public + rate limit | — | — |
 | Auth callback | `/auth/callback` | GET | OAuth code exchange | — | — |
 
 ## Repositories / services (elevated)

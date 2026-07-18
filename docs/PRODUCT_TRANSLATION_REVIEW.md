@@ -30,7 +30,6 @@ Review of all **16 seed products** (`src/config/products.seed.ts`) against Dutch
 | Website Redesign (`website-redesign`) | Yes | Yes | Pending human review | Yes | READY_FOR_CONTENT_REVIEW |
 | WhatsApp AI Starter (`whatsapp-ai-starter`) | Yes | Yes | Pending human review | Yes | READY_FOR_CONTENT_REVIEW |
 | WhatsApp AI Business (`whatsapp-ai-business`) | Yes | Yes | Pending human review | Yes | READY_FOR_CONTENT_REVIEW |
-| tawk.to Live Chat Setup (`tawk-to-livechat-installatie`) | Yes | Yes | Pending human review | Yes | READY_FOR_CONTENT_REVIEW |
 | Review Flow Setup (`reviewflow-setup`) | Yes | Yes | Pending human review | Yes | READY_FOR_CONTENT_REVIEW |
 | Appointment Automation (`afsprakenautomatisering`) | Yes | Yes | Pending human review | Yes | READY_FOR_CONTENT_REVIEW |
 | Monthly Website Management (`maandelijks-websitebeheer`) | Yes | Yes | Pending human review | Yes | READY_FOR_CONTENT_REVIEW |

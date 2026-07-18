@@ -4,6 +4,7 @@
  */
 
 import { detectMollieKeyMode, assertMollieKeySafeForRuntime } from "@/lib/payments/mollie-mode";
+import { extractEmailAddress, isEmailFromAddress } from "@/lib/email/address";
 
 const PLACEHOLDER_EMAIL_FROM = [
   "onboarding@resend.dev",
@@ -55,7 +56,7 @@ export function isPlaceholderEmailFrom(email: string | undefined | null): boolea
 }
 
 export function isValidEmailSyntax(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  return isEmailFromAddress(email);
 }
 
 export function emailFromDomainAllowed(
@@ -63,7 +64,8 @@ export function emailFromDomainAllowed(
   allowedDomainsCsv: string | undefined,
 ): boolean {
   if (!allowedDomainsCsv) return !isPlaceholderEmailFrom(email);
-  const domain = email.split("@")[1]?.toLowerCase();
+  const bare = extractEmailAddress(email);
+  const domain = bare?.split("@")[1]?.toLowerCase();
   if (!domain) return false;
   const allowed = allowedDomainsCsv
     .split(",")

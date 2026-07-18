@@ -82,9 +82,6 @@ Optioneel verfijnen met header `Next-Action` is aanwezig (Server Actions).
 | checkout-payment | Pro | POST | `/checkout` | 5 | 10 min | Log → 429 |
 | cart-shop | Pro | POST | `/shop/*` | 30 | 10 min | Log → 429 |
 | cart-basket | Pro | POST | `/cart` | 20 | 10 min | Log → 429 |
-| tawk-hash | Pro | POST | `/api/tawk/hash` | 10 | 10 min | Log → 429 |
-
-**tawk-hash:** alleen wanneer `NEXT_PUBLIC_TAWK_WIDGET_ID` is ingesteld. Zolang tawk DISABLED: **niet aanmaken**.
 
 **Admin login:** geen regel — route heeft nog geen POST-mutatie.
 

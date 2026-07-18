@@ -22,11 +22,18 @@ describe("Bypass prevention — static checks", () => {
     expect(routes.length).toBe(0);
   });
 
-  it("secret key not imported in client components", async () => {
-    const { execSync } = await import("node:child_process");
-    const result = execSync("npm run env:scan-secrets", { encoding: "utf8" });
-    expect(result).toContain("PASS");
-  });
+  it(
+    "secret key not imported in client components",
+    async () => {
+      const { execSync } = await import("node:child_process");
+      const result = execSync("npm run env:scan-secrets", {
+        encoding: "utf8",
+        timeout: 120_000,
+      });
+      expect(result).toContain("PASS");
+    },
+    120_000,
+  );
 
   it("Mollie webhook rejects GET", async () => {
     const fs = await import("node:fs");

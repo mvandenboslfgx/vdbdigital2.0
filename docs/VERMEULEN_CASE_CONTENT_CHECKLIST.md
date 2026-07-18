@@ -1,54 +1,36 @@
 # Vermeulen Bouwservice — Case Content Checklist
 
-**Status: DRAFT — do not publish until all required items are confirmed.**
+**Status: PUBLISHED** — live client case on `/cases/vermeulen-bouwservice`.
 
-## Permissions (all must be true before publish)
+Live website: https://www.vermeulenbouwservice.nl/
 
-- [ ] General permission confirmed
-- [ ] Screenshot permission
-- [ ] Logo permission
-- [ ] Testimonial permission (if used)
-- [ ] Metrics verified (if any numbers are shown)
-- [ ] Client approval date recorded
+## Permissions
 
-## Content sections (EN + NL)
+- [x] General permission confirmed (operator publish 2026-07-16)
+- [x] Screenshot permission (local Playwright captures)
+- [ ] LogoPermission (logo not separately licensed — not used as standalone asset)
+- [x] Testimonial permission (no testimonials shown)
+- [x] Metrics verified (no invented metrics shown)
+- [x] Client approval date recorded: 2026-07-16
 
-- [ ] Company name and sector
-- [ ] Service type and project type
-- [ ] Initial situation (factual, from client input)
-- [ ] Challenges
-- [ ] Goals
-- [ ] Strategy
-- [ ] Design approach
-- [ ] Development approach
-- [ ] Mobile experience
-- [ ] SEO foundation (no ranking guarantees)
-- [ ] Lead flow and CTAs
-- [ ] Maintenance
-- [ ] Result (no invented metrics)
-- [ ] Next steps
+## Content
+
+Factual copy only: company location (Heinenoord), services (installatietechniek, montage, Douglas hout), website goals and deliverables without conversion/revenue claims.
 
 ## Visuals
 
-- [ ] Desktop screenshot (with permission)
-- [ ] Mobile screenshot (with permission)
-- [ ] Before screenshot (if used, with permission)
-- [ ] After screenshot (if used, with permission)
-- [ ] Page detail shots
-- [ ] CTA flow illustration
-- [ ] Performance information (only if verified)
-- [ ] Technical overview
+- [x] `public/cases/vermeulen-bouwservice/desktop-home.webp` (1440×1100)
+- [x] `public/cases/vermeulen-bouwservice/mobile-home.webp` (390×844)
+- [x] `public/cases/vermeulen-bouwservice/full-page.webp`
 
-## Do not include without evidence
+Regenerate:
 
-- Conversion percentages
-- Revenue claims
+```bash
+npx tsx scripts/capture-vermeulen-screenshots.ts
+```
+
+## Do not include
+
+- Conversion percentages / revenue / visitor counts
 - Fake client quotes
-- Logo or screenshots without written permission
-- Competitor references without approval
-
-## Publication gate
-
-Case status must be **APPROVED** or **PUBLISHED** with `publicVisible: true` in `src/config/commercial/cases.ts` and all permissions confirmed.
-
-Matthijs: provide final website URL, approved copy, and media before enabling public visibility.
+- iframe embeds or hotlinked live previews

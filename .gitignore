@@ -57,3 +57,7 @@ next-env.d.ts
 /supabase/.temp/
 /supabase/dump/
 /backups/
+
+
+# Local Supabase branch metadata
+/supabase/.branches/

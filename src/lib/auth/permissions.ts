@@ -7,6 +7,13 @@ export type Permission =
   | "products.update"
   | "products.publish"
   | "products.change_price"
+  | "products.archive"
+  | "products.legal_approve"
+  | "products.manage_media"
+  | "products.manage_addons"
+  | "products.import"
+  | "products.export"
+  | "categories.manage"
   | "orders.read"
   | "orders.update_status"
   | "payments.read"
@@ -15,6 +22,22 @@ export type Permission =
   | "leads.update"
   | "content.manage"
   | "cases.manage"
+  | "customers.view"
+  | "customers.create"
+  | "customers.edit"
+  | "customers.archive"
+  | "customers.invite"
+  | "organizations.manage"
+  | "projects.view_all"
+  | "projects.create"
+  | "projects.edit"
+  | "projects.archive"
+  | "quotes.manage"
+  | "invoices.manage"
+  | "files.manage"
+  | "messages.manage"
+  | "support.manage"
+  | "notifications.manage"
   | "roles.read"
   | "roles.manage"
   | "settings.read"
@@ -25,6 +48,7 @@ const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
   CONTENT: [
     "products.read",
     "products.update",
+    "products.manage_media",
     "content.manage",
     "cases.manage",
   ],
@@ -34,6 +58,11 @@ const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
     "leads.read",
     "leads.update",
     "payments.read",
+    "customers.view",
+    "projects.view_all",
+    "messages.manage",
+    "support.manage",
+    "files.manage",
   ],
   ADMIN: [
     "products.read",
@@ -41,6 +70,12 @@ const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
     "products.update",
     "products.publish",
     "products.change_price",
+    "products.archive",
+    "products.manage_media",
+    "products.manage_addons",
+    "products.import",
+    "products.export",
+    "categories.manage",
     "orders.read",
     "orders.update_status",
     "payments.read",
@@ -48,6 +83,22 @@ const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
     "leads.update",
     "content.manage",
     "cases.manage",
+    "customers.view",
+    "customers.create",
+    "customers.edit",
+    "customers.archive",
+    "customers.invite",
+    "organizations.manage",
+    "projects.view_all",
+    "projects.create",
+    "projects.edit",
+    "projects.archive",
+    "quotes.manage",
+    "invoices.manage",
+    "files.manage",
+    "messages.manage",
+    "support.manage",
+    "notifications.manage",
     "settings.read",
     "audit.read",
   ],
@@ -57,6 +108,13 @@ const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
     "products.update",
     "products.publish",
     "products.change_price",
+    "products.archive",
+    "products.legal_approve",
+    "products.manage_media",
+    "products.manage_addons",
+    "products.import",
+    "products.export",
+    "categories.manage",
     "orders.read",
     "orders.update_status",
     "payments.read",
@@ -65,6 +123,22 @@ const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
     "leads.update",
     "content.manage",
     "cases.manage",
+    "customers.view",
+    "customers.create",
+    "customers.edit",
+    "customers.archive",
+    "customers.invite",
+    "organizations.manage",
+    "projects.view_all",
+    "projects.create",
+    "projects.edit",
+    "projects.archive",
+    "quotes.manage",
+    "invoices.manage",
+    "files.manage",
+    "messages.manage",
+    "support.manage",
+    "notifications.manage",
     "roles.read",
     "roles.manage",
     "settings.read",
@@ -80,6 +154,8 @@ export const SENSITIVE_PERMISSIONS: ReadonlySet<Permission> = new Set([
   "settings.manage",
   "products.change_price",
   "products.publish",
+  "products.legal_approve",
+  "products.import",
 ]);
 
 export function getPermissionsForRole(role: AdminRole): readonly Permission[] {

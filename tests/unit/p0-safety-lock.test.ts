@@ -1,16 +1,20 @@
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "fs";
+import { existsSync } from "fs";
 import { join } from "path";
 
-describe("Tawk identity hash route safety", () => {
-  it("no longer signs arbitrary public emails", () => {
-    const source = readFileSync(
-      join(process.cwd(), "src/app/api/tawk/hash/route.ts"),
-      "utf8",
+describe("Tawk.to removal", () => {
+  it("does not ship a tawk hash API route", () => {
+    expect(existsSync(join(process.cwd(), "src/app/api/tawk/hash/route.ts"))).toBe(
+      false,
     );
-    expect(source).not.toContain("generateTawkVisitorHash");
-    expect(source).toContain("404");
-    expect(source).not.toMatch(/email:\s*z\.string\(\)\.email/);
+  });
+
+  it("does not ship tawk config or secure hash helpers", () => {
+    expect(existsSync(join(process.cwd(), "src/config/tawk.ts"))).toBe(false);
+    expect(existsSync(join(process.cwd(), "src/lib/chat/tawk-secure.ts"))).toBe(false);
+    expect(existsSync(join(process.cwd(), "src/components/chat/chat-provider.tsx"))).toBe(
+      false,
+    );
   });
 });
 

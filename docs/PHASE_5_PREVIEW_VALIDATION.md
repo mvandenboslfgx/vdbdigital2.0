@@ -31,7 +31,7 @@ npm run db:verify
 npm run db:test-rls
 ```
 
-Alle PASS. Mollie testkey (`test_`). tawk.to OPTIONAL — DISABLED.
+Alle PASS. Mollie testkey (`test_`). Geen externe livechatwidget actief.
 
 ### 4. Base URL resolution
 
@@ -76,7 +76,7 @@ Dashboard-configuratie Deployment Protection: **handmatig na deploy**.
 
 ### 12. WAF (Pro)
 
-6 regels handmatig (geen `tawk-hash` — tawk uit):
+6 regels handmatig:
 
 | Naam | Pad | Limiet | Venster | Mode |
 | --- | --- | ---: | ---: | --- |

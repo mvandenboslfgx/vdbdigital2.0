@@ -22,7 +22,6 @@ Er zijn **geen** aparte REST-endpoints zoals `/api/contact`. WAF-regels moeten d
 | Winkelwagen — product toevoegen | POST | `/shop/{slug}` (huidige productpagina) | Server Action `addToCartAction` via `startTransition` | Publiek |
 | Winkelwagen — verwijderen/aantal | POST | `/cart` | Server Action `removeFromCartAction` / `updateQuantityAction` | Publiek |
 | Mollie webhook | POST | `/api/webhooks/mollie` | Route Handler `route.ts` | Server-to-server (Mollie) |
-| tawk Secure Mode hash | POST | `/api/tawk/hash` | Route Handler (optioneel, tawk uit) | Publiek |
 
 ## Geen mutatie (nog)
 
@@ -42,7 +41,6 @@ Single source of truth: `src/config/waf-routes.ts`
 | `src/server/actions/checkout-actions.ts` | checkout |
 | `src/server/actions/cart-actions.ts` | winkelwagen / shop |
 | `src/app/api/webhooks/mollie/route.ts` | Mollie webhook |
-| `src/app/api/tawk/hash/route.ts` | tawk hash (optioneel) |
 
 ## WAF-implicaties
 

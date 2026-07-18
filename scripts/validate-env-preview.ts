@@ -1,5 +1,5 @@
 /**
- * Preview-omgeving env — core + checkout + e-mail (geen Upstash/tawk widget verplicht).
+ * Preview-omgeving env — core + checkout + e-mail (geen Upstash verplicht).
  * Gebruik: npm run env:validate:preview
  */
 import { loadEnvLocal } from "./lib/env-loader";

@@ -12,6 +12,8 @@ import {
 import { paths } from "@/i18n/config";
 import { WhatsAppAiChatVisual } from "@/components/visuals/whatsapp-ai-chat-visual";
 import { AutomationFlowVisual } from "@/components/visuals/automation-flow-visual";
+import { VermeulenCasePage } from "@/components/cases/vermeulen-case-page";
+import { resolveAppUrl } from "@/lib/url/app-url";
 
 const legacySlugs = {
   "conversie-website": "ConversionWebsite",
@@ -26,7 +28,6 @@ interface CasePageProps {
 
 function caseTypeLabel(
   type: string,
-  locale: "en" | "nl",
   labels: ReturnType<typeof getCommercialContent>["caseLabel"],
 ): string {
   if (type === "demonstration") return labels.demonstration;
@@ -39,18 +40,48 @@ export async function generateStaticParams() {
   return caseCatalog
     .filter((c) => isCasePubliclyVisible(c.slug))
     .map((c) => ({ slug: c.slug }))
-    .concat(
-      Object.keys(legacySlugs).map((slug) => ({ slug })),
-    );
+    .concat(Object.keys(legacySlugs).map((slug) => ({ slug })));
 }
 
-export async function generateMetadata({ params }: CasePageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: CasePageProps): Promise<Metadata> {
   const { slug } = await params;
   const { t } = await getDictionary();
   const commercial = getCaseBySlug(slug);
+  const base = resolveAppUrl().replace(/\/$/, "");
+
+  if (commercial?.slug === "vermeulen-bouwservice") {
+    const locale = await getLocale();
+    const ogImage = `${base}/cases/vermeulen-bouwservice/desktop-home.webp`;
+    return {
+      title:
+        locale === "nl"
+          ? "Vermeulen Bouwservice Website Case | VDB Digital"
+          : "Vermeulen Bouwservice Website Case | VDB Digital",
+      description:
+        locale === "nl"
+          ? "Bekijk hoe VDB Digital de professionele website voor S. Vermeulen Bouwservice vormgaf, gericht op montage, installatietechniek en Douglas houtbouw."
+          : "See how VDB Digital shaped the professional website for S. Vermeulen Bouwservice, focused on assembly, installation technology and Douglas timber construction.",
+      alternates: { canonical: `${paths.cases}/${slug}` },
+      openGraph: {
+        title: "Vermeulen Bouwservice Website Case | VDB Digital",
+        description:
+          locale === "nl"
+            ? "Professionele websitecase voor montage, installatietechniek en Douglas houtbouw."
+            : "Professional website case for assembly, installation technology and Douglas timber construction.",
+        images: [{ url: ogImage, width: 1440, height: 1100 }],
+        type: "article",
+      },
+      robots: { index: true, follow: true },
+    };
+  }
+
   if (commercial) {
     const locale = await getLocale();
-    const copy = getCommercialContent(locale)[commercial.i18nKey as "demoWhatsapp"];
+    const copy = getCommercialContent(locale)[
+      commercial.i18nKey as "demoWhatsapp"
+    ];
     return {
       title: copy.title,
       description: copy.summary,
@@ -76,6 +107,10 @@ export default async function CaseDetailPage({ params }: CasePageProps) {
   if (commercial) {
     if (!isCasePubliclyVisible(slug)) notFound();
 
+    if (commercial.slug === "vermeulen-bouwservice") {
+      return <VermeulenCasePage locale={locale} copy={c.vermeulen} />;
+    }
+
     const copy = c[commercial.i18nKey as keyof typeof c] as {
       title: string;
       summary: string;
@@ -88,7 +123,9 @@ export default async function CaseDetailPage({ params }: CasePageProps) {
       <>
         <Section variant="dark" className="pt-12">
           <Container>
-            <Badge className="mb-4">{caseTypeLabel(commercial.type, locale, c.caseLabel)}</Badge>
+            <Badge className="mb-4">
+              {caseTypeLabel(commercial.type, c.caseLabel)}
+            </Badge>
             <h1 className="text-h1 mb-4">{copy.title}</h1>
             <p className="text-body-lg text-muted prose-width">{copy.summary}</p>
           </Container>
@@ -166,7 +203,9 @@ export default async function CaseDetailPage({ params }: CasePageProps) {
         <Container>
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-              <h2 className="text-h2 text-light-foreground mb-4">{t("cases.whatItSolves")}</h2>
+              <h2 className="text-h2 text-light-foreground mb-4">
+                {t("cases.whatItSolves")}
+              </h2>
               <ul className="space-y-3 text-light-muted">
                 {outcomes.map((item) => (
                   <li key={item} className="flex gap-3">
@@ -177,13 +216,21 @@ export default async function CaseDetailPage({ params }: CasePageProps) {
               </ul>
             </div>
             <Card variant="light">
-              <h2 className="text-h3 text-light-foreground mb-3">{t("cases.interestTitle")}</h2>
-              <p className="text-small text-light-muted mb-5">{t("cases.interestBody")}</p>
+              <h2 className="text-h3 text-light-foreground mb-3">
+                {t("cases.interestTitle")}
+              </h2>
+              <p className="text-small text-light-muted mb-5">
+                {t("cases.interestBody")}
+              </p>
               <div className="space-y-2">
                 <LocaleLinkButton href={paths.quote} className="w-full">
                   {t("nav.quote")}
                 </LocaleLinkButton>
-                <LocaleLinkButton href={paths.contact} variant="outline" className="w-full">
+                <LocaleLinkButton
+                  href={paths.contact}
+                  variant="outline"
+                  className="w-full"
+                >
                   {t("nav.contact")}
                 </LocaleLinkButton>
               </div>

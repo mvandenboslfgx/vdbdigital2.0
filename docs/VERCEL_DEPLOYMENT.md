@@ -81,7 +81,7 @@ npm run db:verify && npm run db:test-rls
 ## Aandachtspunten
 
 - Mollie: alleen `test_` keys op Preview
-- tawk.to optioneel — geen WAF `tawk-hash` regel zolang uit
+- Geen externe livechatwidget; geen chat-hash WAF-regel nodig
 - Upstash niet vereist
 
 ## Status

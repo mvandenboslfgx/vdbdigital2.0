@@ -26,6 +26,10 @@
     "env:scan-secrets": "tsx scripts/scan-secrets.ts",
     "email:test": "tsx scripts/send-test-email.ts",
     "db:verify-p0-payments": "tsx scripts/verify-p0-payments.ts",
+    "db:verify-catalog-admin": "tsx scripts/verify-catalog-admin.ts",
+    "db:verify-customer-portal": "tsx scripts/verify-customer-portal.ts",
+    "catalog:verify-alignment": "tsx scripts/verify-catalog-alignment.ts",
+    "catalog:verify-no-tawk": "tsx scripts/verify-catalog-no-tawk.ts",
     "checkout:release-gate": "tsx scripts/checkout-release-gate.ts"
   },
   "dependencies": {

@@ -63,7 +63,7 @@ export const solutionsContent = {
       integrations: [
         "Mollie",
         "WhatsApp Business API",
-        "tawk.to",
+        "Live chat provider (your choice)",
         "Email and calendar tools where relevant",
       ],
       security: [
@@ -148,7 +148,7 @@ export const solutionsContent = {
       integrations: [
         "Mollie",
         "WhatsApp Business API",
-        "tawk.to",
+        "Live chat provider (your choice)",
         "E-mail- en kalendertools waar relevant",
       ],
       security: [
@@ -941,10 +941,10 @@ export const solutionsContent = {
     en: {
       metaTitle: "Live Chat | VDB Digital Software",
       metaDescription:
-        "Professional tawk.to live chat setup on your website — styling, triggers, offline messages and consent-aware loading.",
-      title: "Live chat with tawk.to",
+        "Professional live chat setup on your website — styling, triggers, offline messages and consent-aware loading.",
+      title: "Live chat for your website",
       description:
-        "Talk to visitors in real time. We install and configure tawk.to so it matches your brand, respects consent and gives your team a clean inbox workflow.",
+        "Talk to visitors in real time. We install and configure live chat so it matches your brand, respects consent and gives your team a clean inbox workflow.",
       problem: {
         title: "Forms alone leave hot intent waiting",
         body: "Some visitors will chat if you make it easy — but a default widget that loads too early, shifts layout or ignores cookie consent creates legal and UX friction.",
@@ -974,7 +974,7 @@ export const solutionsContent = {
         "Short team walkthrough",
       ],
       integrations: [
-        "tawk.to",
+        "Live chat provider (your choice)",
         "Your cookie consent banner",
         "Optional WhatsApp deep link",
         "Internal email alerts for offline messages",
@@ -991,7 +991,7 @@ export const solutionsContent = {
         "Teams pairing chat with WhatsApp for after hours",
       ],
       included: [
-        "Configured tawk.to widget on agreed pages",
+        "Configured live chat widget on agreed pages",
         "Consent-aware load strategy",
         "Trigger and offline message setup",
         "Operator quick-start notes",
@@ -1009,7 +1009,7 @@ export const solutionsContent = {
       ],
       faq: [
         {
-          q: "Why tawk.to?",
+          q: "Why a dedicated live chat tool?",
           a: "It is a practical live chat platform for small and mid-sized teams. We configure it properly rather than inventing a chat product you must maintain alone.",
         },
         {
@@ -1030,10 +1030,10 @@ export const solutionsContent = {
     nl: {
       metaTitle: "Livechat | VDB Digital Software",
       metaDescription:
-        "Professionele tawk.to livechat-setup op jouw website — styling, triggers, offlineberichten en toestemmingsbewust laden.",
-      title: "Livechat met tawk.to",
+        "Professionele livechat-setup op jouw website — styling, triggers, offlineberichten en toestemmingsbewust laden.",
+      title: "Livechat voor je website",
       description:
-        "Spreek bezoekers realtime. Wij installeren en configureren tawk.to zodat het bij jouw merk past, toestemming respecteert en jouw team een schone inboxworkflow geeft.",
+        "Spreek bezoekers realtime. Wij installeren en configureren van livechat zodat het bij jouw merk past, toestemming respecteert en jouw team een schone inboxworkflow geeft.",
       problem: {
         title: "Alleen formulieren laten hete intentie wachten",
         body: "Sommige bezoekers chatten graag als je het makkelijk maakt — maar een standaardwidget die te vroeg laadt, layout verschuift of cookietoestemming negeert, geeft juridische en UX-wrijving.",
@@ -1063,7 +1063,7 @@ export const solutionsContent = {
         "Korte teamwalkthrough",
       ],
       integrations: [
-        "tawk.to",
+        "Live chat provider (your choice)",
         "Jouw cookiebanner",
         "Optionele WhatsApp deep link",
         "Interne e-mailalerts voor offlineberichten",
@@ -1080,7 +1080,7 @@ export const solutionsContent = {
         "Teams die chat combineren met WhatsApp voor na werktijd",
       ],
       included: [
-        "Geconfigureerde tawk.to-widget op afgesproken pagina's",
+        "Geconfigureerde livechat-widget op afgesproken pagina's",
         "Toestemmingsbewuste laadstrategie",
         "Trigger- en offlineberichtsetup",
         "Operator quick-start notities",
@@ -1098,7 +1098,7 @@ export const solutionsContent = {
       ],
       faq: [
         {
-          q: "Waarom tawk.to?",
+          q: "Waarom een dedicated livechat-tool?",
           a: "Het is een praktische livechat voor kleine en middelgrote teams. Wij richten het goed in in plaats van een chatproduct te bouwen dat jij alleen moet onderhouden.",
         },
         {

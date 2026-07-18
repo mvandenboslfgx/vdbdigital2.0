@@ -61,7 +61,29 @@ describe("Sensitive permissions require AAL2", () => {
   it("marks critical permissions as sensitive", () => {
     expect(SENSITIVE_PERMISSIONS.has("roles.manage")).toBe(true);
     expect(SENSITIVE_PERMISSIONS.has("payments.refund")).toBe(true);
+    expect(SENSITIVE_PERMISSIONS.has("products.legal_approve")).toBe(true);
     expect(SENSITIVE_PERMISSIONS.has("products.read")).toBe(false);
+  });
+});
+
+describe("Catalog admin permissions", () => {
+  it("CONTENT cannot publish, change price, legal approve, or import", () => {
+    expect(hasPermission("CONTENT", "products.publish")).toBe(false);
+    expect(hasPermission("CONTENT", "products.change_price")).toBe(false);
+    expect(hasPermission("CONTENT", "products.legal_approve")).toBe(false);
+    expect(hasPermission("CONTENT", "products.import")).toBe(false);
+    expect(hasPermission("CONTENT", "categories.manage")).toBe(false);
+  });
+
+  it("ADMIN can manage catalog but not legal approval", () => {
+    expect(hasPermission("ADMIN", "categories.manage")).toBe(true);
+    expect(hasPermission("ADMIN", "products.archive")).toBe(true);
+    expect(hasPermission("ADMIN", "products.export")).toBe(true);
+    expect(hasPermission("ADMIN", "products.legal_approve")).toBe(false);
+  });
+
+  it("OWNER can legal approve", () => {
+    expect(hasPermission("OWNER", "products.legal_approve")).toBe(true);
   });
 });
 

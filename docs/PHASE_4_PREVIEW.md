@@ -2,7 +2,7 @@
 
 ## Status applicatie
 
-Build gate slaagt. Environment geconfigureerd (tawk optioneel uit, geen Upstash).
+Build gate slaagt. Environment geconfigureerd (geen Upstash).
 
 **Eindstatus:** `GEREED VOOR VERCEL PREVIEWCONFIGURATIE`
 

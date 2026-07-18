@@ -1,61 +1,94 @@
 import type { Metadata } from "next";
-import { Card, Badge } from "@/components/ui/container";
-import { getAdminProducts } from "@/server/repositories/admin-products";
-import { formatPriceLabel } from "@/lib/utilities/money";
+import { Suspense } from "react";
+import { AdminProductsTable, type ProductListRow } from "@/components/admin/admin-products-table";
+import { getAdminProductList } from "@/server/repositories/admin-products";
+import { getAdminCategoryOptions } from "@/server/repositories/admin-categories";
+import { checkAdminAccess } from "@/server/auth/require-admin";
+import { hasPermission } from "@/lib/auth/permissions";
 import {
-  assertProductTranslationComplete,
-  getProductPublicationAdvice,
-} from "@/i18n/localize-product";
+  getCheckoutBlockLabelsNl,
+  isDirectlySellableServerSide,
+  resolveStoredOrDerivedPriceMode,
+  resolveCommercialItemForProduct,
+} from "@/lib/commerce/catalog-admin-eligibility";
+import { canPublishForB2b, canPublishForB2c } from "@/config/commercial/pricing";
+import {
+  isLegacyTawkProduct,
+  LEGACY_TAWK_ADMIN_STATUS_LABEL,
+} from "@/lib/commerce/tawk-legacy-blocklist";
+import type { BillingType, PriceMode, ProductStatus } from "@/types";
 
 export const metadata: Metadata = {
-  title: "Manage products",
+  title: "Producten",
   robots: { index: false },
 };
 
-/**
- * Admin is English-first. Full EN/NL tab editors are not enabled yet.
- * Publication advice blocks incomplete translations conceptually —
- * nothing is auto-published from this screen.
- */
-export default async function AdminProductsPage() {
-  const products = await getAdminProducts();
+export default async function AdminProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const access = await checkAdminAccess();
+  const role = access.context?.role ?? "SUPPORT";
+
+  const list = await getAdminProductList({
+    q: typeof params.q === "string" ? params.q : undefined,
+    categoryId: typeof params.categoryId === "string" ? params.categoryId : undefined,
+    status: (typeof params.status === "string" ? params.status : "ALL") as ProductStatus | "ALL",
+    priceMode: (typeof params.priceMode === "string" ? params.priceMode : "ALL") as
+      | PriceMode
+      | "ALL",
+    billingType: (typeof params.billingType === "string" ? params.billingType : "ALL") as
+      | BillingType
+      | "ALL",
+    audience: (typeof params.audience === "string" ? params.audience : "ALL") as
+      | "B2B"
+      | "B2C"
+      | "BOTH"
+      | "ALL",
+    sort: (typeof params.sort === "string" ? params.sort : "sort_order") as
+      | "updated_at"
+      | "name"
+      | "sort_order"
+      | "price",
+    page: Number(params.page ?? 1) || 1,
+    pageSize: 20,
+  });
+
+  const categories = await getAdminCategoryOptions();
+
+  const rows: ProductListRow[] = list.products.map((p) => {
+    const commercial = resolveCommercialItemForProduct(p);
+    const legacyRemoved = isLegacyTawkProduct(p);
+    return {
+      ...p,
+      priceModeLabel: resolveStoredOrDerivedPriceMode(p),
+      checkoutBlockedReasons: legacyRemoved
+        ? [LEGACY_TAWK_ADMIN_STATUS_LABEL]
+        : getCheckoutBlockLabelsNl(p, "B2B"),
+      directlySellable: legacyRemoved ? false : isDirectlySellableServerSide(p),
+      b2bLegal: commercial ? canPublishForB2b(commercial) : false,
+      b2cLegal: commercial ? canPublishForB2c(commercial) : false,
+      legacyRemoved,
+      legacyStatusLabel: legacyRemoved ? LEGACY_TAWK_ADMIN_STATUS_LABEL : undefined,
+    };
+  });
 
   return (
-    <div>
-      <h1 className="text-h1 mb-2">Products</h1>
-      <p className="text-muted text-small mb-8 max-w-2xl">
-        English is required. Dutch must be complete before NL publication.
-        Translation advice is informational — no automatic publish.
-      </p>
-      <div className="space-y-3">
-        {products.map((p) => {
-          const advice = getProductPublicationAdvice(p);
-          const en = assertProductTranslationComplete(p, "en");
-          const nl = assertProductTranslationComplete(p, "nl");
-          return (
-            <Card key={p.id} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-              <div>
-                <p className="font-medium">{p.name}</p>
-                <p className="text-small text-muted">
-                  {p.categoryName} · {p.status}
-                </p>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  <Badge className={en.complete ? "" : "opacity-70"}>
-                    EN {en.complete ? "complete" : "incomplete"}
-                  </Badge>
-                  <Badge className={nl.complete ? "" : "opacity-70"}>
-                    NL {nl.complete ? "complete" : "incomplete"}
-                  </Badge>
-                  <Badge>{advice}</Badge>
-                </div>
-              </div>
-              <p className="text-primary font-medium">
-                {formatPriceLabel(p.priceCents, p.fromPriceCents, p.billingType, "en")}
-              </p>
-            </Card>
-          );
-        })}
-      </div>
-    </div>
+    <Suspense fallback={<p className="text-muted">Producten laden…</p>}>
+      <AdminProductsTable
+        rows={rows}
+        total={list.total}
+        page={list.page}
+        pageSize={list.pageSize}
+        categories={categories}
+        canCreate={hasPermission(role, "products.create")}
+        canExport={hasPermission(role, "products.export")}
+        canBulk={hasPermission(role, "products.update")}
+        schemaExtended={list.schemaExtended}
+        error={list.error}
+      />
+    </Suspense>
   );
 }

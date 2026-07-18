@@ -134,30 +134,29 @@ test.describe("Admin", () => {
   });
 });
 
-test.describe("Cookie consent & tawk.to", () => {
+test.describe("Cookie consent & contact FAB", () => {
   test("shows cookie banner on first visit", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByRole("dialog")).toBeVisible();
   });
 
-  test("tawk.to script not loaded before consent", async ({ page }) => {
+  test("tawk.to script never loaded", async ({ page }) => {
     await page.goto("/");
     const scripts = await page.locator('script[src*="embed.tawk.to"]').count();
     expect(scripts).toBe(0);
+    await page.getByRole("button", { name: /Accept all|Alles accepteren/i }).click();
+    const after = await page.locator('script[src*="embed.tawk.to"]').count();
+    expect(after).toBe(0);
   });
 
-  test("no tawk.to script without widget ID after consent", async ({ page }) => {
+  test("floating contact CTA links to contact page", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("button", { name: /Accept all/i }).click();
-    const scripts = await page.locator('script[src*="embed.tawk.to"]').count();
-    expect(scripts).toBe(0);
-  });
-
-  test("WhatsApp fallback visible when tawk disabled", async ({ page }) => {
-    await page.goto("/");
-    const floatingWhatsApp = page.locator('a[href*="wa.me"]');
-    const notConfigured = page.getByText(/WhatsApp.*not configured/i);
-    await expect(floatingWhatsApp.or(notConfigured).first()).toBeVisible();
+    const fab = page.getByRole("link", { name: /contact/i }).filter({
+      has: page.locator("svg"),
+    });
+    await expect(fab.first()).toBeVisible();
+    await expect(fab.first()).toHaveAttribute("href", /contact/);
+    await expect(page.getByText(/WhatsApp.*not configured/i)).toHaveCount(0);
   });
 });
 

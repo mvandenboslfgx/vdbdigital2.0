@@ -228,32 +228,6 @@ export const productsNl: Record<string, ProductCopy> = {
       "Geavanceerde WhatsApp-automatisering met workflows, planning en opvolging.",
   },
 
-  "tawk-to-livechat-installatie": {
-    name: "tawk.to livechat-installatie",
-    shortDescription:
-      "Professionele installatie en configuratie van tawk.to livechat op je website.",
-    fullDescription:
-      "We installeren en configureren tawk.to livechat op je website. Inclusief widget-styling, triggers, offlineberichten en teamopzet.",
-    categoryName: "Livechat",
-    deliveryTime: "3–5 werkdagen",
-    includedItems: [
-      "Widget-installatie",
-      "Custom styling",
-      "Triggerconfiguratie",
-      "Teamopzet",
-      "Korte training",
-    ],
-    excludedItems: ["tawk.to-abonnementskosten (gratis plan beschikbaar)"],
-    extensions: ["Pro-functieconfiguratie", "Chatbotflows"],
-    requiredInput: ["Bedrijfsnaam", "Doelgroep", "Gewenste functionaliteit"],
-    targetAudience: "MKB-bedrijven die professioneel online willen groeien.",
-    workflow: "Intake → ontwerp → bouw → oplevering → nazorg.",
-    faqs: [],
-    seoTitle: "tawk.to livechat-installatie | VDB Digital",
-    seoDescription:
-      "Professionele installatie en configuratie van tawk.to livechat op je website.",
-  },
-
   "reviewflow-setup": {
     name: "Reviewflow-setup",
     shortDescription:

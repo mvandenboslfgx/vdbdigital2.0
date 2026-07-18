@@ -43,14 +43,15 @@ Upstash wordt **niet** gebruikt.
 
 ## Chat / contact
 
-- **tawk.to:** optioneel — uitgeschakeld zonder Widget ID
-- **WhatsApp:** actieve fallback (`NEXT_PUBLIC_WHATSAPP_NUMBER`)
+- **Externe livechatwidgets:** niet actief � contact via `/contact`, offerte en supportkanalen
+- **Contact FAB:** vaste knop naar `/contact`
+- **WhatsApp:** optioneel via `NEXT_PUBLIC_WHATSAPP_NUMBER` (alleen getoond wanneer geconfigureerd)
 
 ## CSP externe domeinen
 
-- `embed.tawk.to` — livechat (alleen wanneer tawk actief + consent)
 - `*.supabase.co` — database/auth
 - `api.mollie.com` — betalingen
+- `www.mollie.com` — hosted checkout iframe
 
 ## Niet geïmplementeerd zonder credentials
 

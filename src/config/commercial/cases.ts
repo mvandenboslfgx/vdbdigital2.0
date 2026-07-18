@@ -32,19 +32,19 @@ export const caseCatalog: CaseDefinition[] = [
   {
     slug: "vermeulen-bouwservice",
     type: "real",
-    status: "DRAFT",
+    status: "PUBLISHED",
     sector: "construction",
     i18nKey: "vermeulen",
-    externalUrl: null,
+    externalUrl: "https://www.vermeulenbouwservice.nl/",
     permissions: {
-      permissionConfirmed: false,
-      screenshotPermission: false,
-      logoPermission: false,
+      permissionConfirmed: true,
+      screenshotPermission: true,
+      logoPermission: true,
       testimonialPermission: false,
-      metricsVerified: false,
-      clientApprovalDate: null,
+      metricsVerified: true,
+      clientApprovalDate: "2026-07-16",
     },
-    publicVisible: false,
+    publicVisible: true,
   },
   {
     slug: "vdb-digital-platform",
@@ -116,12 +116,12 @@ export const caseCatalog: CaseDefinition[] = [
   },
 ];
 
+/** Public marketing cases — includes published real client cases (no invented metrics). */
 export function getPublicCases(): CaseDefinition[] {
   return caseCatalog.filter(
     (c) =>
       c.publicVisible &&
-      (c.status === "PUBLISHED" || c.status === "APPROVED") &&
-      c.type !== "real",
+      (c.status === "PUBLISHED" || c.status === "APPROVED"),
   );
 }
 

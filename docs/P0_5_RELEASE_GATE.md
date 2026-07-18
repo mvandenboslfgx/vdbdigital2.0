@@ -23,7 +23,7 @@ Missing variable also means OFF. This gate **never** enables checkout.
 | Mollie status map | paid/failed/canceled/expired/authorized/refunded/charged_back |
 | Webhook claim/process | Mark PROCESSED after success; reclaim FAILED |
 | Refund/chargeback after PAID | Allowed |
-| Tawk hash route | 404 |
+| Externe chat-hash route | Afwezig (geen API-route) |
 | WhatsApp misconfig UI | Hidden |
 
 ### Code-complete but needs deployment/config

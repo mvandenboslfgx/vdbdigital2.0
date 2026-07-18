@@ -14,10 +14,7 @@
 | `RESEND_API_KEY` | ✓ | ✓ | ✓ | |
 | `EMAIL_FROM` | ✓ | ✓ | ✓ | Geverifieerde afzender |
 | `EMAIL_ADMIN` | ✓ | ✓ | ✓ | |
-| `NEXT_PUBLIC_WHATSAPP_NUMBER` | ✓ | ✓ | ✓ | Chatfallback |
-| `NEXT_PUBLIC_TAWK_PROPERTY_ID` | optioneel | optioneel | optioneel | |
-| `NEXT_PUBLIC_TAWK_WIDGET_ID` | — | — | — | **Niet instellen** = tawk DISABLED |
-| `TAWK_API_SECRET` | optioneel | optioneel | optioneel | Alleen bij actieve tawk |
+| `NEXT_PUBLIC_WHATSAPP_NUMBER` | ✓ | ✓ | ✓ | Optionele WhatsApp-CTA |
 
 **Production in Phase 5:** leeg of ongewijzigd.
 
@@ -44,7 +41,6 @@
 | `MOLLIE_WEBHOOK_TOKEN` | Optioneel applicatietoken (queryparam `token`) |
 | `VERCEL_AUTOMATION_BYPASS_SECRET` | Vereist voor Mollie op beschermde Preview |
 | `MOLLIE_WEBHOOK_SECRET` | Legacy alias — migreer naar TOKEN |
-| `NEXT_PUBLIC_TAWK_*` | Zonder Widget ID: tawk DISABLED |
 
 ## Niet gebruikt
 
@@ -64,6 +60,6 @@ Zie [VERCEL_WAF_RATE_LIMITING.md](./VERCEL_WAF_RATE_LIMITING.md).
 
 ## Integratiestatus
 
-- **tawk.to:** OPTIONAL — DISABLED
-- **WhatsApp:** actieve contactfallback
+- **Externe livechat-widgets:** verwijderd
+- **WhatsApp:** optionele contact-CTA
 - **Rate limiting:** VERCEL WAF CONFIGURATION REQUIRED

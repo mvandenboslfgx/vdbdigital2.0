@@ -34,7 +34,7 @@ Open [http://localhost:3000](http://localhost:3000) (English) or [http://localho
 | `npm run test:e2e` | E2E tests (Playwright) |
 | `npm run env:validate` | Validate env keys (no values logged) |
 | `npm run env:validate:database` | Supabase core keys only |
-| `npm run env:validate:preview` | Preview profile (no Upstash/tawk widget required) |
+| `npm run env:validate:preview` | Preview profile (no Upstash required) |
 | `npm run env:scan-secrets` | Secret leakage scan |
 | `npm run db:seed` | Database seed |
 | `npm run db:verify` | Database verification |

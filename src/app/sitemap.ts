@@ -74,6 +74,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "premium-webshop",
     "whatsapp-automatisering",
     "reviewflow-setup",
+    "vermeulen-bouwservice",
+    "vdb-digital-platform",
+    "demo-whatsapp-ai",
+    "demo-webshop",
+    "demo-review-flow",
   ];
 
   return [

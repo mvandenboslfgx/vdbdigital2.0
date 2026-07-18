@@ -77,15 +77,25 @@ describe("Commercial completion sprint", () => {
     expect(bar).not.toMatch(/setInterval|useCountdown|CountdownTimer|countdownTimer/i);
   });
 
-  it("keeps Vermeulen case non-public until approved", () => {
-    expect(isCasePubliclyVisible("vermeulen-bouwservice")).toBe(false);
+  it("publishes Vermeulen as a real live client case", () => {
+    expect(isCasePubliclyVisible("vermeulen-bouwservice")).toBe(true);
+    const vermeulen = getPublicCases().find(
+      (c) => c.slug === "vermeulen-bouwservice",
+    );
+    expect(vermeulen?.type).toBe("real");
+    expect(vermeulen?.externalUrl).toContain("vermeulenbouwservice.nl");
   });
 
-  it("labels demonstrations in public case list", () => {
+  it("labels public cases as demonstration, internal, or real", () => {
     const publicCases = getPublicCases();
-    expect(publicCases.every((c) => c.type === "demonstration" || c.type === "internal")).toBe(
-      true,
-    );
+    expect(
+      publicCases.every(
+        (c) =>
+          c.type === "demonstration" ||
+          c.type === "internal" ||
+          c.type === "real",
+      ),
+    ).toBe(true);
   });
 
   it("concept seed products require scope review when marked concept", () => {

@@ -4,7 +4,7 @@ import { Footer } from "@/components/layout/footer";
 
 import { CookieBanner } from "@/components/consent/cookie-banner";
 
-import { ChatProvider } from "@/components/chat/chat-provider";
+import { ContactFab } from "@/components/chat/contact-fab";
 
 import { FoundingClientBar } from "@/components/commercial/founding-client-bar";
 
@@ -78,7 +78,7 @@ export async function MarketingLayout({
 
       <CookieBanner />
 
-      <ChatProvider />
+      <ContactFab />
 
     </>
 

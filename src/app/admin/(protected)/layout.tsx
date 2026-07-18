@@ -8,14 +8,23 @@ export const dynamic = "force-dynamic";
 
 const adminNav = [
   { label: "Dashboard", href: "/admin", permission: null },
-  { label: "Products", href: "/admin/products", permission: "products.read" as const },
+  { label: "Klanten", href: "/admin/customers", permission: "customers.view" as const },
+  { label: "Projecten", href: "/admin/projects", permission: "projects.view_all" as const },
+  { label: "Offertes", href: "/admin/quotes", permission: "quotes.manage" as const },
+  { label: "Facturen", href: "/admin/invoices", permission: "invoices.manage" as const },
+  { label: "Bestanden", href: "/admin/files", permission: "files.manage" as const },
+  { label: "Berichten", href: "/admin/messages", permission: "messages.manage" as const },
+  { label: "Support", href: "/admin/support", permission: "support.manage" as const },
+  { label: "Producten", href: "/admin/products", permission: "products.read" as const },
+  { label: "Categorieën", href: "/admin/categories", permission: "products.read" as const },
+  { label: "Add-ons", href: "/admin/addons", permission: "products.read" as const },
   { label: "Orders", href: "/admin/orders", permission: "orders.read" as const },
   { label: "Leads", href: "/admin/leads", permission: "leads.read" as const },
-  { label: "Cases", href: "/admin/cases", permission: "cases.manage" as const },
-  { label: "Offers", href: "/admin/offers", permission: "settings.read" as const },
   { label: "Content", href: "/admin/content", permission: "content.manage" as const },
-  { label: "Settings", href: "/admin/settings", permission: "settings.read" as const },
-  { label: "Audit log", href: "/admin/audit-log", permission: "audit.read" as const },
+  { label: "Gebruikers", href: "/admin/users", permission: "roles.read" as const },
+  { label: "Rollen", href: "/admin/roles", permission: "roles.read" as const },
+  { label: "Instellingen", href: "/admin/settings", permission: "settings.read" as const },
+  { label: "Audit", href: "/admin/audit", permission: "audit.read" as const },
 ];
 
 export default async function AdminProtectedLayout({

@@ -31,11 +31,10 @@ const BUCKET_LIMITS: Record<string, number> = {
   support: 10,
   checkout: 5,
   payment: 5,
-  tawk: 10,
 };
 
 /** Buckets that must fail closed without a working app limiter */
-const FAIL_CLOSED_BUCKETS = new Set(["checkout", "tawk", "payment"]);
+const FAIL_CLOSED_BUCKETS = new Set(["checkout", "payment"]);
 
 function windowLimit(bucket: string): number {
   return BUCKET_LIMITS[bucket] ?? 10;
@@ -145,7 +144,7 @@ async function databaseRateLimit(
 /**
  * Application rate limit.
  * - Local development: hashed in-memory buckets
- * - Preview/Production: Upstash and/or Supabase RPC; fail closed for checkout/tawk/payment
+ * - Preview/Production: Upstash and/or Supabase RPC; fail closed for checkout/payment
  */
 export async function checkRateLimit(
   bucket: string,

@@ -5,7 +5,32 @@ export type BillingType =
   | "QUOTE_ONLY"
   | "FREE";
 
-export type ProductStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
+/** Marketing / workflow status. REVIEW & HIDDEN require catalog admin migration. */
+export type ProductStatus =
+  | "DRAFT"
+  | "REVIEW"
+  | "PUBLISHED"
+  | "HIDDEN"
+  | "ARCHIVED";
+
+export type PriceMode = "FIXED" | "STARTING_FROM" | "QUOTE_ONLY";
+
+export type PriceApprovalStatus =
+  | "DRAFT"
+  | "INTERNAL_REVIEW"
+  | "APPROVED"
+  | "PUBLISHED"
+  | "ARCHIVED";
+
+export type LegalApprovalStatus =
+  | "NOT_REVIEWED"
+  | "INTERNAL_REVIEW"
+  | "LEGAL_REVIEW_REQUIRED"
+  | "APPROVED_FOR_B2B"
+  | "APPROVED_FOR_B2C"
+  | "APPROVED_FOR_BOTH";
+
+export type CatalogLocale = "nl" | "en";
 
 export type OrderStatus =
   | "PENDING"
@@ -52,12 +77,61 @@ export interface ProductFaq {
   sortOrder: number;
 }
 
+export interface ProductTranslation {
+  locale: CatalogLocale;
+  name: string;
+  slug?: string | null;
+  shortDescription: string;
+  fullDescription: string;
+  benefits: string[];
+  includedItems: string[];
+  excludedItems: string[];
+  ctaLabel?: string | null;
+  quoteCtaLabel?: string | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  deliveryTime?: string | null;
+  targetAudience?: string | null;
+  workflow?: string | null;
+  warnings?: string | null;
+}
+
+export interface ProductMedia {
+  id: string;
+  storagePath: string;
+  mimeType: string;
+  byteSize: number;
+  width?: number | null;
+  height?: number | null;
+  sortOrder: number;
+  isPrimary: boolean;
+  altTextNl?: string | null;
+  altTextEn?: string | null;
+}
+
+export interface ProductAddon {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  nameNl?: string | null;
+  descriptionNl?: string | null;
+  priceCents: number | null;
+  priceMode: PriceMode;
+  billingType: BillingType;
+  audienceB2b: boolean;
+  audienceB2c: boolean;
+  isActive: boolean;
+  sortOrder: number;
+}
+
 export interface Product {
   id: string;
   slug: string;
   name: string;
   shortDescription: string;
   fullDescription: string;
+  categoryId?: string | null;
   categorySlug: string;
   categoryName: string;
   priceCents: number | null;
@@ -76,6 +150,39 @@ export interface Product {
   targetAudience?: string;
   workflow?: string;
   requiredInput?: string[];
+  /** Optional catalog-admin fields (present after migration / admin load) */
+  internalSku?: string | null;
+  priceMode?: PriceMode | null;
+  currency?: string;
+  vatPercent?: number;
+  priceIncludesVat?: boolean;
+  compareAtCents?: number | null;
+  priceLabel?: string | null;
+  costCents?: number | null;
+  badge?: string | null;
+  tags?: string[];
+  audienceB2b?: boolean;
+  audienceB2c?: boolean;
+  priceStatus?: PriceApprovalStatus;
+  legalStatus?: LegalApprovalStatus;
+  publicationReady?: boolean;
+  legalApprovedBy?: string | null;
+  legalApprovedAt?: string | null;
+  legalTermsVersion?: string | null;
+  legalInternalNote?: string | null;
+  benefits?: string[];
+  ctaLabel?: string | null;
+  quoteCtaLabel?: string | null;
+  warnings?: string | null;
+  version?: number;
+  updatedBy?: string | null;
+  updatedAt?: string;
+  createdAt?: string;
+  primaryImagePath?: string | null;
+  isConcept?: boolean;
+  translations?: ProductTranslation[];
+  media?: ProductMedia[];
+  addons?: ProductAddon[];
 }
 
 export interface Category {
@@ -84,6 +191,11 @@ export interface Category {
   name: string;
   description: string;
   sortOrder: number;
+  nameNl?: string | null;
+  descriptionNl?: string | null;
+  imagePath?: string | null;
+  isActive?: boolean;
+  productCount?: number;
 }
 
 export interface CartItem {

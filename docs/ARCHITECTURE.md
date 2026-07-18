@@ -24,7 +24,7 @@ Client Components → Server Actions → Services → Repositories → Supabase
 3. **Webhook als bron van waarheid** — return URL is alleen UI
 4. **Admin autorisatie server-side** — RBAC per actie
 5. **RLS deny-by-default** — service role alleen server-side
-6. **Consent vóór tracking/chat** — tawk.to lazy loaded na toestemming
+6. **Consent vóór tracking** — geen externe livechat-widgets; analytics/marketing alleen na toestemming
 
 ## Route groups
 

@@ -1,4 +1,11 @@
 import { z } from "zod";
+import { isEmailFromAddress } from "../lib/email/address";
+
+/** Bare email or Resend-style `Name <email@domain>`. */
+const emailFromField = z
+  .string()
+  .refine(isEmailFromAddress, { message: "Invalid email address" })
+  .optional();
 
 /** Publieke env — veilig voor clientbundles */
 const publicEnvSchema = z.object({
@@ -7,8 +14,6 @@ const publicEnvSchema = z.object({
   NEXT_PUBLIC_CONTACT_EMAIL: z.string().email().optional(),
   NEXT_PUBLIC_SUPPORT_EMAIL: z.string().email().optional(),
   NEXT_PUBLIC_WHATSAPP_NUMBER: z.string().optional(),
-  NEXT_PUBLIC_TAWK_PROPERTY_ID: z.string().optional(),
-  NEXT_PUBLIC_TAWK_WIDGET_ID: z.string().optional(),
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().optional(),
   NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional(),
   /** Legacy anon key (Supabase dashboard → API → anon) */
@@ -26,8 +31,6 @@ export function getPublicEnv(): PublicEnv {
     NEXT_PUBLIC_CONTACT_EMAIL: process.env.NEXT_PUBLIC_CONTACT_EMAIL,
     NEXT_PUBLIC_SUPPORT_EMAIL: process.env.NEXT_PUBLIC_SUPPORT_EMAIL,
     NEXT_PUBLIC_WHATSAPP_NUMBER: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER,
-    NEXT_PUBLIC_TAWK_PROPERTY_ID: process.env.NEXT_PUBLIC_TAWK_PROPERTY_ID,
-    NEXT_PUBLIC_TAWK_WIDGET_ID: process.env.NEXT_PUBLIC_TAWK_WIDGET_ID,
     NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
@@ -110,9 +113,8 @@ const serverEnvSchema = publicEnvSchema.extend({
   /** Vercel Deployment Protection bypass — uitsluitend Preview, server-side */
   VERCEL_AUTOMATION_BYPASS_SECRET: z.string().min(1).optional(),
   RESEND_API_KEY: z.string().min(1).optional(),
-  EMAIL_FROM: z.string().email().optional(),
-  EMAIL_ADMIN: z.string().email().optional(),
-  TAWK_API_SECRET: z.string().min(1).optional(),
+  EMAIL_FROM: emailFromField,
+  EMAIL_ADMIN: emailFromField,
   TURNSTILE_SECRET_KEY: z.string().min(1).optional(),
 });
 

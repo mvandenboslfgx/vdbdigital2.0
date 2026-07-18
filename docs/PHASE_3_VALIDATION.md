@@ -4,7 +4,7 @@ Datum: 2026-07-15
 
 ## Eindstatus
 
-**GEREED VOOR VERCEL PREVIEW** (database + build gate OK; Resend/Upstash/tawk widget nog handmatig voor volledige productie)
+**GEREED VOOR VERCEL PREVIEW** (database + build gate OK; Resend/Upstash nog handmatig voor volledige productie)
 
 ---
 
@@ -45,7 +45,7 @@ Datum: 2026-07-15
 | Script | Doel |
 |--------|------|
 | `npm run env:validate` | Alle groepen, informatief |
-| `npm run env:validate:database` | Alleen core/database (faalt niet op tawk/Mollie) |
+| `npm run env:validate:database` | Alleen core/database (faalt niet op optionele Mollie-keys) |
 | `npm run env:validate:preview` | Preview + e-mail + rate limit |
 | `npm run env:scan-secrets` | Leakage scan zonder waarden |
 
@@ -66,11 +66,11 @@ Remove-Item Env:BOOTSTRAP_USER_EMAIL
 ## Nog handmatig
 
 - `npx supabase login` + `npx supabase link --project-ref nhsrdnjfsxfikfbdmdfj` (optioneel, voor CLI workflow)
-- Resend, Upstash, tawk widget ID voor volledige preview/productie
+- Resend en Upstash voor volledige preview/productie
 - Owner bootstrap na Auth-user aanmaken
 - Producten publiceren via admin
 
 ## Resterende risico’s
 
 - Rate limiting fail-closed zonder Upstash in productie
-- E-mail en chat deels inactief zonder Resend/tawk widget
+- E-mail deels inactief zonder Resend; geen externe livechatwidget actief

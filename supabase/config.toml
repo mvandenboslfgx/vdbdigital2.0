@@ -1,5 +1,5 @@
 # Supabase CLI — koppel met: npx supabase link --project-ref <PROJECT_REF>
-project_id = ""
+project_id = "vdbdigital2"
 
 [db]
 major_version = 15

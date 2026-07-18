@@ -5,7 +5,6 @@ import { useConsent } from "./consent-provider";
 import { useI18n } from "@/i18n/provider";
 import { LocaleLink } from "@/i18n/locale-link";
 import { Button } from "@/components/ui/button";
-import { isTawkEmbedConfigured } from "@/config/tawk";
 import { paths } from "@/i18n/config";
 
 export function CookieBanner() {
@@ -13,10 +12,8 @@ export function CookieBanner() {
     useConsent();
   const { t } = useI18n();
   const [showDetails, setShowDetails] = useState(false);
-  const [functional, setFunctional] = useState(false);
   const [analytics, setAnalytics] = useState(false);
   const [marketing, setMarketing] = useState(false);
-  const tawkActive = isTawkEmbedConfigured();
 
   if (!showBanner) return null;
 
@@ -46,20 +43,6 @@ export function CookieBanner() {
                 <strong>{t("cookies.necessary")}</strong> — {t("cookies.necessaryBody")}
               </span>
             </label>
-            {tawkActive && (
-              <label className="flex items-center gap-3 text-small">
-                <input
-                  type="checkbox"
-                  checked={functional}
-                  onChange={(e) => setFunctional(e.target.checked)}
-                  className="rounded"
-                />
-                <span>
-                  <strong>{t("cookies.functional")}</strong> —{" "}
-                  {t("cookies.functionalBody")}
-                </span>
-              </label>
-            )}
             <label className="flex items-center gap-3 text-small">
               <input
                 type="checkbox"
@@ -104,7 +87,7 @@ export function CookieBanner() {
             <Button
               variant="secondary"
               onClick={() => {
-                savePreferences({ functional, analytics, marketing });
+                savePreferences({ functional: false, analytics, marketing });
                 setShowBanner(false);
               }}
               className="flex-1"

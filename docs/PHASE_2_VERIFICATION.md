@@ -18,7 +18,7 @@ Project: `c:\Users\XXX\vdbdigital2.0`
 | Checkout integriteit | PASS | Laag |
 | Mollie test mode | PASS | Laag |
 | Formulieren | PASS | Laag |
-| tawk.to + consent | PASS | Laag |
+| Contact/consent (geen externe chatwidget) | PASS | Laag |
 | CSP + security headers | PASS | Laag |
 | Rate limiting | PARTIAL | Middel — Upstash verplicht prod |
 | Audit logging | PARTIAL | Middel — alleen order events |
@@ -122,7 +122,7 @@ Project: `c:\Users\XXX\vdbdigital2.0`
 ## 10. Tests
 
 - Unit: BTW, validatie, auth, rate limit, webhook idempotency, production guards
-- E2E: homepage, shop, forms, admin block, consent/tawk, security headers
+- E2E: homepage, shop, forms, admin block, consent/contact, security headers
 - **Status:** PASS
 
 ---

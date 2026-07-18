@@ -25,8 +25,9 @@ export default function CookiesPage() {
 
       <h2 className="text-h3 text-light-foreground">Functional cookies</h2>
       <p>
-        Optional, for example live chat (tawk.to) when configured. Only loaded after
-        consent.
+        Optional enhancements that are not required for basic browsing. We do not
+        currently load third-party live-chat widgets. Any future functional cookies
+        are only placed after consent.
       </p>
 
       <h2 className="text-h3 text-light-foreground">Analytics cookies</h2>

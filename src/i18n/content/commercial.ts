@@ -132,7 +132,7 @@ export const commercialContent = {
       demonstration: "Demonstration",
       internal: "Internal project",
       draft: "Coming after approval",
-      real: "Client project",
+      real: "Live client case",
     },
     demoWhatsapp: {
       title: "WhatsApp AI flow",
@@ -160,9 +160,60 @@ export const commercialContent = {
       summary: "The system this website runs on — built in-house.",
     },
     vermeulen: {
-      title: "Vermeulen Bouwservice",
-      summary: "Construction services website — draft pending client approval and assets.",
-      status: "Awaiting approval",
+      label: "Live client case",
+      title: "S. Vermeulen Bouwservice",
+      summary:
+        "A clear, professional website for assembly, installation technology and Douglas timber construction.",
+      featuredIntro:
+        "A strong and clear website for an assembly company specialised in installation technology and Douglas timber construction.",
+      heroSubtitle:
+        "A professional online presence for assembly work, installation technology and Douglas timber construction.",
+      about:
+        "S. Vermeulen Bouwservice is an assembly company based in Heinenoord, active in installation technology, assembly projects and custom work with Douglas timber.",
+      goalsTitle: "Website goals",
+      goals: [
+        "Present services clearly",
+        "Convey trust and craftsmanship",
+        "Guide visitors quickly to contact or a quote request",
+        "Work well on mobile and desktop",
+      ],
+      solutionTitle: "What we delivered",
+      solutions: [
+        "Clear service structure",
+        "Strong hero presentation",
+        "Readable process overview",
+        "Direct contact options, including WhatsApp",
+        "Responsive design",
+        "Consistent visual identity",
+        "Clear calls to action",
+      ],
+      tags: [
+        "Web design",
+        "Responsive design",
+        "Service presentation",
+        "Quote-oriented",
+      ],
+      details: {
+        client: "S. Vermeulen Bouwservice",
+        industry: "Construction, assembly and installation technology",
+        type: "Business website",
+        status: "Live",
+        website: "vermeulenbouwservice.nl",
+      },
+      detailsTitle: "Project details",
+      previewTitle: "Website preview",
+      ctaTitle:
+        "Need a website that presents your craftsmanship professionally?",
+      viewCase: "View the full case",
+      openLive: "View live website",
+      openLiveHint: "Open live website",
+      liveBadge: "Live",
+      desktopAlt:
+        "Desktop homepage of S. Vermeulen Bouwservice — installation technology and Douglas timber construction",
+      mobileAlt: "Mobile homepage of S. Vermeulen Bouwservice",
+      fullPageAlt: "Extended homepage preview of vermeulenbouwservice.nl",
+      relatedService: "Website design & development",
+      status: "Live",
     },
     appointment: {
       online: "Online introduction",
@@ -300,7 +351,7 @@ export const commercialContent = {
       demonstration: "Demonstratie",
       internal: "Intern project",
       draft: "Volgt na goedkeuring",
-      real: "Klantproject",
+      real: "Live klantcase",
     },
     demoWhatsapp: {
       title: "WhatsApp AI-flow",
@@ -328,9 +379,60 @@ export const commercialContent = {
       summary: "Het systeem waarop deze website draait — in-house gebouwd.",
     },
     vermeulen: {
-      title: "Vermeulen Bouwservice",
-      summary: "Website voor bouwservice — concept wacht op klantgoedkeuring en assets.",
-      status: "Wacht op goedkeuring",
+      label: "Live klantcase",
+      title: "S. Vermeulen Bouwservice",
+      summary:
+        "Een overzichtelijke en professionele website voor montage, installatietechniek en Douglas houtbouw.",
+      featuredIntro:
+        "Een krachtige en overzichtelijke website voor een montagebedrijf gespecialiseerd in installatietechniek en Douglas houtbouw.",
+      heroSubtitle:
+        "Een professionele online presentatie voor montagewerk, installatietechniek en Douglas houtbouw.",
+      about:
+        "S. Vermeulen Bouwservice is een montagebedrijf uit Heinenoord, actief in installatietechniek, montageprojecten en maatwerk met Douglas hout.",
+      goalsTitle: "Doel van de website",
+      goals: [
+        "Diensten helder presenteren",
+        "Vertrouwen en vakmanschap uitstralen",
+        "Bezoekers snel naar contact of offerte begeleiden",
+        "Goed functioneren op mobiel en desktop",
+      ],
+      solutionTitle: "Oplossing",
+      solutions: [
+        "Duidelijke dienstenstructuur",
+        "Krachtige hero",
+        "Overzichtelijke werkwijze",
+        "Directe contactmogelijkheden, inclusief WhatsApp",
+        "Responsive ontwerp",
+        "Consistente visuele uitstraling",
+        "Duidelijke call-to-actions",
+      ],
+      tags: [
+        "Webdesign",
+        "Responsive ontwerp",
+        "Dienstenpresentatie",
+        "Offertegericht",
+      ],
+      details: {
+        client: "S. Vermeulen Bouwservice",
+        industry: "Bouw, montage en installatietechniek",
+        type: "Bedrijfswebsite",
+        status: "Live",
+        website: "vermeulenbouwservice.nl",
+      },
+      detailsTitle: "Projectdetails",
+      previewTitle: "Websitepreview",
+      ctaTitle:
+        "Ook een website die uw vakmanschap professioneel presenteert?",
+      viewCase: "Bekijk de volledige case",
+      openLive: "Bekijk live website",
+      openLiveHint: "Open live website",
+      liveBadge: "Live",
+      desktopAlt:
+        "Desktop-homepage van S. Vermeulen Bouwservice — installatietechniek en Douglas houtbouw",
+      mobileAlt: "Mobiele homepage van S. Vermeulen Bouwservice",
+      fullPageAlt: "Uitgebreide homepagepreview van vermeulenbouwservice.nl",
+      relatedService: "Webdesign & development",
+      status: "Live",
     },
     appointment: {
       online: "Online kennismaking",

@@ -9,6 +9,7 @@ import { RemoveFromCartButton } from "@/components/shop/remove-from-cart-button"
 import { CartQuantityControls } from "@/components/shop/cart-quantity-controls";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { paths } from "@/i18n/config";
+import { isDirectCheckoutEnabled } from "@/config/features";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getDictionary();
@@ -20,6 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function CartPage() {
   const { t } = await getDictionary();
+  const checkoutOn = isDirectCheckoutEnabled();
   const cart = await getCart();
   const { items, errors } = await validateCartItems(cart);
 
@@ -27,15 +29,37 @@ export default async function CartPage() {
     items.map((i) => ({ unitPriceCents: i.validatedPriceCents, quantity: i.quantity })),
   );
   const totals = calculateOrderTotals(subtotal);
+  const showEmpty =
+    cart.items.length === 0 || (!checkoutOn && items.length === 0);
 
   return (
     <Section variant="dark" className="pt-12 min-h-[60vh]">
       <Container>
         <h1 className="text-h1 mb-8">{t("cart.title")}</h1>
 
-        {cart.items.length === 0 ? (
-          <Card className="text-center py-12">
-            <p className="text-muted mb-4">{t("cart.empty")}</p>
+        {!checkoutOn && (
+          <Card className="mb-6 space-y-3">
+            <p className="text-muted">
+              Directe online betaling is momenteel uitgeschakeld. Bekijk producten in de shop
+              en vraag een offerte aan of neem contact op.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <LocaleLinkButton href={paths.shop}>{t("cart.toShop")}</LocaleLinkButton>
+              <LocaleLinkButton href={paths.quote} variant="outline">
+                {t("nav.quote")}
+              </LocaleLinkButton>
+              <LocaleLinkButton href={paths.contact} variant="ghost">
+                {t("nav.contact")}
+              </LocaleLinkButton>
+            </div>
+          </Card>
+        )}
+
+        {showEmpty ? (
+          <Card className="text-center py-12 space-y-4">
+            <p className="text-muted">
+              {checkoutOn ? t("cart.empty") : "Er zijn geen afrekenbare artikelen beschikbaar."}
+            </p>
             <LocaleLinkButton href={paths.shop}>{t("cart.toShop")}</LocaleLinkButton>
           </Card>
         ) : (
@@ -88,9 +112,13 @@ export default async function CartPage() {
                   <dd>{formatCents(totals.totalCents)}</dd>
                 </div>
               </dl>
-              {items.length > 0 && errors.length === 0 && (
+              {checkoutOn && items.length > 0 && errors.length === 0 ? (
                 <LocaleLinkButton href={paths.checkout} className="w-full mt-6">
                   {t("cart.checkout")}
+                </LocaleLinkButton>
+              ) : (
+                <LocaleLinkButton href={paths.quote} className="w-full mt-6">
+                  {t("shop.requestQuote")}
                 </LocaleLinkButton>
               )}
             </Card>

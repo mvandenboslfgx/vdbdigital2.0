@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Card } from "@/components/ui/container";
-import { isTawkEmbedConfigured } from "@/config/tawk";
 import { getSiteReadinessWarnings } from "@/config/commercial/site-readiness";
 import { foundingClientOfferConfig } from "@/config/commercial/founding-client-offer";
 import { isBookingConfigured } from "@/config/commercial/booking";
@@ -43,12 +42,8 @@ export default function AdminSettingsPage() {
             <dd>{foundingClientOfferConfig.enabled ? "Enabled" : "Disabled"}</dd>
           </div>
           <div className="flex justify-between gap-4">
-            <dt className="text-muted">tawk.to</dt>
-            <dd className="text-right">
-              {isTawkEmbedConfigured()
-                ? "OPTIONAL — ENABLED"
-                : "OPTIONAL — DISABLED (WhatsApp fallback active)"}
-            </dd>
+            <dt className="text-muted">Live chat widget</dt>
+            <dd className="text-right">Removed — contact page / WhatsApp only</dd>
           </div>
         </dl>
       </Card>

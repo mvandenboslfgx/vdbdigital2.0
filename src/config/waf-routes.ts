@@ -88,14 +88,6 @@ export const API_MUTATION_ROUTES: MutationRoute[] = [
     access: "server-to-server",
     handler: "POST in src/app/api/webhooks/mollie/route.ts",
   },
-  {
-    feature: "tawk Secure Mode hash (optioneel)",
-    method: "POST",
-    path: "/api/tawk/hash",
-    implementation: "Route Handler (JSON)",
-    access: "public",
-    handler: "POST in src/app/api/tawk/hash/route.ts",
-  },
 ];
 
 /** Publieke mutaties die WAF mag limiteren (webhook uitgesloten) */

@@ -275,7 +275,7 @@ Seedproducten in de database staan als **DRAFT + is_concept** en blijven via RLS
 ### Bedrijfsgegevens / providers
 - [ ] KvK, btw-nummer, publiek adres, telefoon  
 - [ ] Booking URL (Cal.com / Calendly / Google)  
-- [ ] tawk Widget ID (optioneel)  
+- [ ] Geen externe livechatwidget (bevestigd)  
 - [ ] Bevestigen Resend/Mollie webhook in env  
 
 ### Content
