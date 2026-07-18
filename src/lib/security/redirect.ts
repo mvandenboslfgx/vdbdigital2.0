@@ -50,3 +50,18 @@ export function safeInternalPathOr(
 ): string {
   return isSafeInternalPath(path) ? path : fallback;
 }
+
+/**
+ * Audience-aware post-login next: staff never lands on /portal via next;
+ * customers never land on /admin via next.
+ */
+export function audienceSafeInternalPath(
+  path: string | null | undefined,
+  audience: "staff" | "customer",
+  fallback: string,
+): string {
+  if (!isSafeInternalPath(path)) return fallback;
+  if (audience === "staff" && path.startsWith("/portal")) return fallback;
+  if (audience === "customer" && path.startsWith("/admin")) return fallback;
+  return path;
+}

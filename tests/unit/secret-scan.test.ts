@@ -29,18 +29,21 @@ describe("secret-scan rules", () => {
   });
 
   it("detects API token assignment", () => {
-    const findings = scanText(
-      "cfg.ts",
-      "API_TOKEN=abcdefghijklmnopqrstuvwxyz012345",
-    );
+    const token = testOnlyAssemble([
+      "abcdefghijklmnopqrstuvwxyz",
+      "012345",
+    ]);
+    const findings = scanText("cfg.ts", `API_TOKEN=${token}`);
     expect(findings.some((f) => f.ruleId === "generic_api_token_assignment")).toBe(true);
   });
 
   it("detects postgres connection string with password", () => {
-    const findings = scanText(
-      "cfg.ts",
-      "DATABASE_URL=postgresql://user:supersecret@db.example.com:5432/app",
-    );
+    const url = testOnlyAssemble([
+      "postgresql://user:",
+      "supersecret",
+      "@db.example.com:5432/app",
+    ]);
+    const findings = scanText("cfg.ts", `DATABASE_URL=${url}`);
     expect(findings.some((f) => f.ruleId === "postgres_url_with_password")).toBe(true);
   });
 
@@ -68,10 +71,12 @@ describe("secret-scan rules", () => {
   });
 
   it("detects connection string with real password", () => {
-    const findings = scanText(
-      "cfg.ts",
-      "DATABASE_URL=postgresql://user:supersecret@db.example.com:5432/app",
-    );
+    const url = testOnlyAssemble([
+      "postgresql://user:",
+      "supersecret",
+      "@db.example.com:5432/app",
+    ]);
+    const findings = scanText("cfg.ts", `DATABASE_URL=${url}`);
     expect(findings.some((f) => f.ruleId === "postgres_url_with_password")).toBe(true);
   });
 

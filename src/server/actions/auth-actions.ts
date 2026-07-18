@@ -50,7 +50,7 @@ export type AuthActionState = {
 
 function genericAuthError(): AuthActionState {
   return {
-    error: "Inloggen mislukt. Controleer je gegevens en probeer het opnieuw.",
+    error: "Inloggen is niet gelukt. Controleer je gegevens en probeer het opnieuw.",
   };
 }
 

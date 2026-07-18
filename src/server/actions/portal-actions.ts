@@ -7,6 +7,13 @@ import { createServiceRoleClient } from "@/lib/database/server";
 import { verifyOrigin } from "@/lib/security/origin";
 import { writeAuditLog } from "@/lib/security/audit-log";
 import { checkRateLimit } from "@/lib/security/rate-limit";
+import { hasCustomerPermission } from "@/lib/auth/customer-permissions";
+
+function denyPortalPermission(): PortalActionState {
+  return {
+    error: "Je hebt geen rechten voor deze actie binnen je organisatie.",
+  };
+}
 
 export type PortalActionState = {
   error?: string;
@@ -54,6 +61,9 @@ export async function respondToQuoteAction(
   }
 
   const ctx = await requireCustomer();
+  if (!hasCustomerPermission(ctx.customerRole, "portal.quotes.respond")) {
+    return denyPortalPermission();
+  }
   const limited = await checkRateLimit("portal-quote", ctx.user.id);
   if (!limited.success) {
     return { error: "Te veel pogingen. Probeer later opnieuw." };
@@ -145,6 +155,9 @@ export async function createSupportTicketAction(
   }
 
   const ctx = await requireCustomer();
+  if (!hasCustomerPermission(ctx.customerRole, "portal.support.create")) {
+    return denyPortalPermission();
+  }
   const limited = await checkRateLimit("portal-support", ctx.user.id);
   if (!limited.success) {
     return { error: "Te veel tickets. Probeer later opnieuw." };
@@ -199,6 +212,9 @@ export async function replySupportTicketAction(
   }
 
   const ctx = await requireCustomer();
+  if (!hasCustomerPermission(ctx.customerRole, "portal.support.reply")) {
+    return denyPortalPermission();
+  }
   const supabase = createServiceRoleClient();
   if (!supabase) return { error: "Database niet beschikbaar." };
 
@@ -258,6 +274,9 @@ export async function updatePortalProfileAction(
   }
 
   const ctx = await requireCustomer();
+  if (!hasCustomerPermission(ctx.customerRole, "portal.profile.edit")) {
+    return denyPortalPermission();
+  }
   const supabase = createServiceRoleClient();
   if (!supabase) return { error: "Database niet beschikbaar." };
 
