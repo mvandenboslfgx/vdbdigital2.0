@@ -2,12 +2,39 @@ export const PROJECT_STATUS_NL: Record<string, string> = {
   DRAFT: "Concept",
   PLANNED: "Gepland",
   IN_PROGRESS: "In uitvoering",
-  WAITING_FOR_CUSTOMER: "Wacht op jou",
-  REVIEW: "In review",
+  WAITING_FOR_CUSTOMER: "Wacht op klant",
+  REVIEW: "Ter beoordeling",
+  IN_REVIEW: "Ter beoordeling",
   COMPLETED: "Afgerond",
-  ON_HOLD: "On hold",
+  ON_HOLD: "Gepauzeerd",
   CANCELED: "Geannuleerd",
   ARCHIVED: "Gearchiveerd",
+};
+
+export const MILESTONE_STATUS_NL: Record<string, string> = {
+  NOT_STARTED: "Nog niet gestart",
+  IN_PROGRESS: "In uitvoering",
+  WAITING_FOR_CUSTOMER: "Wacht op klant",
+  COMPLETED: "Afgerond",
+  SKIPPED: "Overgeslagen",
+};
+
+export const ACTION_STATUS_NL: Record<string, string> = {
+  OPEN: "Open",
+  IN_PROGRESS: "In uitvoering",
+  WAITING: "Wachtend",
+  COMPLETED: "Afgerond",
+  CANCELED: "Geannuleerd",
+};
+
+export const DELIVERABLE_STATUS_NL: Record<string, string> = {
+  DRAFT: "Concept",
+  IN_REVIEW: "Interne review",
+  PENDING: "Concept",
+  SHARED: "Gedeeld",
+  APPROVED: "Goedgekeurd",
+  REJECTED: "Afgewezen",
+  SUPERSEDED: "Vervangen",
 };
 
 export const QUOTE_STATUS_NL: Record<string, string> = {

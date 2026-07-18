@@ -1,85 +1,55 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
-import { z } from "zod";
-import { requireAdmin } from "@/server/auth/require-admin";
-import { requirePermission } from "@/server/auth/require-permission";
-import { createServiceRoleClient } from "@/lib/database/server";
-import { writeAuditLog } from "@/lib/security/audit-log";
+import Link from "next/link";
+import { createProjectAction } from "@/server/actions/project-actions";
 import { listAdminOrganizations } from "@/server/repositories/admin-portal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { PROJECT_TYPE_NL, labelNl } from "@/lib/portal/labels";
+import { PROJECT_TYPES } from "@/lib/validation/projects";
 
 export const metadata: Metadata = {
   title: "Nieuw project",
   robots: { index: false },
 };
 
-async function createProject(formData: FormData) {
-  "use server";
-  const ctx = await requireAdmin();
-  await requirePermission(ctx, "projects.create");
-
-  const parsed = z
-    .object({
-      organizationId: z.string().uuid(),
-      name: z.string().min(2).max(200),
-      description: z.string().max(5000).optional(),
-      projectType: z.string().min(1),
-    })
-    .safeParse({
-      organizationId: formData.get("organizationId"),
-      name: formData.get("name"),
-      description: formData.get("description") || undefined,
-      projectType: formData.get("projectType"),
-    });
-
-  if (!parsed.success) {
-    redirect("/admin/projects/new?fout=1");
-  }
-
-  const supabase = createServiceRoleClient();
-  if (!supabase) redirect("/admin/projects/new?fout=1");
-
-  const { data, error } = await supabase
-    .from("portal_projects")
-    .insert({
-      organization_id: parsed.data.organizationId,
-      name: parsed.data.name,
-      description: parsed.data.description ?? null,
-      project_type: parsed.data.projectType,
-      status: "PLANNED",
-      customer_visible: true,
-      project_manager_id: ctx.user.id,
-    })
-    .select("id")
-    .single();
-
-  if (error || !data) {
-    redirect("/admin/projects/new?fout=1");
-  }
-
-  await writeAuditLog({
-    userId: ctx.user.id,
-    action: "admin.project_created",
-    metadata: { projectId: data.id },
+export default async function AdminNewProjectPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ fout?: string }>;
+}) {
+  const { fout } = await searchParams;
+  const { organizations } = await listAdminOrganizations({
+    pageSize: 100,
+    status: "ACTIVE",
   });
 
-  redirect(`/admin/projects/${data.id}`);
-}
-
-export default async function AdminNewProjectPage() {
-  const { organizations } = await listAdminOrganizations({ pageSize: 100 });
+  const activeOrgs = organizations.filter((o) => o.status === "ACTIVE");
 
   return (
     <div className="max-w-lg space-y-6">
-      <h1 className="text-h1">Nieuw project</h1>
-      {organizations.length === 0 ? (
+      <div>
+        <Link href="/admin/projects" className="text-small text-primary hover:underline">
+          ← Projecten
+        </Link>
+        <h1 className="text-h1 mt-2">Nieuw project</h1>
+        <p className="text-muted text-small mt-1">
+          Concept blijft standaard intern. Geen automatische klantmail in deze fase.
+        </p>
+      </div>
+
+      {fout ? (
+        <p className="text-sm text-red-600" role="alert">
+          Project aanmaken is niet gelukt. Controleer de gegevens en probeer opnieuw.
+        </p>
+      ) : null}
+
+      {activeOrgs.length === 0 ? (
         <p className="text-muted text-small">
-          Maak eerst een klant aan voordat je een project start.
+          Maak eerst een actieve klantorganisatie aan voordat je een project start.
         </p>
       ) : (
-        <form action={createProject} className="space-y-4">
+        <form action={createProjectAction} className="space-y-4">
           <div>
             <label htmlFor="organizationId" className="block text-small font-medium mb-1">
               Klantorganisatie
@@ -90,7 +60,7 @@ export default async function AdminNewProjectPage() {
               required
               className="w-full min-h-11 px-3 rounded-lg border border-border bg-background text-sm"
             >
-              {organizations.map((o) => (
+              {activeOrgs.map((o) => (
                 <option key={o.id} value={o.id}>
                   {o.trade_name || o.legal_name}
                 </option>
@@ -113,16 +83,70 @@ export default async function AdminNewProjectPage() {
               className="w-full min-h-11 px-3 rounded-lg border border-border bg-background text-sm"
               defaultValue="WEBSITE"
             >
-              <option value="WEBSITE">Website</option>
-              <option value="WEBSHOP">Webshop</option>
-              <option value="SOFTWARE">Software</option>
-              <option value="OPTIMISATION">Optimalisatie</option>
-              <option value="MAINTENANCE">Onderhoud</option>
-              <option value="BRANDING">Branding</option>
-              <option value="INTEGRATION">Integratie</option>
-              <option value="SUPPORT">Ondersteuning</option>
-              <option value="OTHER">Overig</option>
+              {PROJECT_TYPES.map((t) => (
+                <option key={t} value={t}>
+                  {labelNl(PROJECT_TYPE_NL, t)}
+                </option>
+              ))}
             </select>
+          </div>
+          <div>
+            <label htmlFor="priority" className="block text-small font-medium mb-1">
+              Prioriteit
+            </label>
+            <select
+              id="priority"
+              name="priority"
+              defaultValue="NORMAL"
+              className="w-full min-h-11 px-3 rounded-lg border border-border bg-background text-sm"
+            >
+              <option value="LOW">Laag</option>
+              <option value="NORMAL">Normaal</option>
+              <option value="HIGH">Hoog</option>
+              <option value="URGENT">Urgent</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="status" className="block text-small font-medium mb-1">
+              Initiële status
+            </label>
+            <select
+              id="status"
+              name="status"
+              defaultValue="DRAFT"
+              className="w-full min-h-11 px-3 rounded-lg border border-border bg-background text-sm"
+            >
+              <option value="DRAFT">Concept</option>
+              <option value="PLANNED">Gepland</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="visibility" className="block text-small font-medium mb-1">
+              Klantzichtbaarheid
+            </label>
+            <select
+              id="visibility"
+              name="visibility"
+              defaultValue="INTERNAL"
+              className="w-full min-h-11 px-3 rounded-lg border border-border bg-background text-sm"
+            >
+              <option value="INTERNAL">Alleen intern (standaard)</option>
+              <option value="CUSTOMER_VISIBLE">Zichtbaar voor klant</option>
+            </select>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="startDate" className="block text-small font-medium mb-1">
+                Startdatum
+              </label>
+              <Input id="startDate" name="startDate" type="date" />
+            </div>
+            <div>
+              <label htmlFor="plannedDeliveryDate" className="block text-small font-medium mb-1">
+                Geplande oplevering
+              </label>
+              <Input id="plannedDeliveryDate" name="plannedDeliveryDate" type="date" />
+            </div>
           </div>
           <div>
             <label htmlFor="description" className="block text-small font-medium mb-1">
@@ -130,7 +154,7 @@ export default async function AdminNewProjectPage() {
             </label>
             <Textarea id="description" name="description" rows={4} maxLength={5000} />
           </div>
-          <Button type="submit">Project opslaan</Button>
+          <Button type="submit">Concept opslaan</Button>
         </form>
       )}
     </div>

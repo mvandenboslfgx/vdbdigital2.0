@@ -10,15 +10,25 @@ export type CustomerPortalPermission =
   | "portal.quotes.respond"
   | "portal.support.create"
   | "portal.support.reply"
-  | "portal.billing.view";
+  | "portal.billing.view"
+  | "portal.projects.view"
+  | "portal.projects.feedback"
+  | "portal.projects.approve_deliverable"
+  | "portal.projects.complete_action";
 
 const ROLE_PERMS: Record<CustomerOrgRole, readonly CustomerPortalPermission[]> = {
-  VIEW_ONLY: ["portal.access", "portal.profile.edit", "portal.billing.view"],
+  VIEW_ONLY: [
+    "portal.access",
+    "portal.profile.edit",
+    "portal.billing.view",
+    "portal.projects.view",
+  ],
   BILLING: [
     "portal.access",
     "portal.profile.edit",
     "portal.billing.view",
     "portal.quotes.respond",
+    "portal.projects.view",
   ],
   MEMBER: [
     "portal.access",
@@ -26,6 +36,10 @@ const ROLE_PERMS: Record<CustomerOrgRole, readonly CustomerPortalPermission[]> =
     "portal.quotes.respond",
     "portal.support.create",
     "portal.support.reply",
+    "portal.projects.view",
+    "portal.projects.feedback",
+    "portal.projects.approve_deliverable",
+    "portal.projects.complete_action",
   ],
   PRIMARY: [
     "portal.access",
@@ -34,6 +48,10 @@ const ROLE_PERMS: Record<CustomerOrgRole, readonly CustomerPortalPermission[]> =
     "portal.support.create",
     "portal.support.reply",
     "portal.billing.view",
+    "portal.projects.view",
+    "portal.projects.feedback",
+    "portal.projects.approve_deliverable",
+    "portal.projects.complete_action",
   ],
 };
 

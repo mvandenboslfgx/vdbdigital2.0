@@ -29,9 +29,15 @@ export type Permission =
   | "customers.invite"
   | "organizations.manage"
   | "projects.view_all"
+  | "projects.view_assigned"
   | "projects.create"
   | "projects.edit"
   | "projects.archive"
+  | "projects.manage_members"
+  | "projects.manage_milestones"
+  | "projects.manage_actions"
+  | "projects.manage_deliverables"
+  | "projects.view_internal_activity"
   | "quotes.manage"
   | "invoices.manage"
   | "files.manage"
@@ -51,6 +57,9 @@ const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
     "products.manage_media",
     "content.manage",
     "cases.manage",
+    "projects.view_assigned",
+    "projects.manage_milestones",
+    "projects.manage_deliverables",
   ],
   SUPPORT: [
     "products.read",
@@ -60,6 +69,9 @@ const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
     "payments.read",
     "customers.view",
     "projects.view_all",
+    "projects.view_assigned",
+    "projects.manage_actions",
+    "projects.view_internal_activity",
     "messages.manage",
     "support.manage",
     "files.manage",
@@ -90,9 +102,15 @@ const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
     "customers.invite",
     "organizations.manage",
     "projects.view_all",
+    "projects.view_assigned",
     "projects.create",
     "projects.edit",
     "projects.archive",
+    "projects.manage_members",
+    "projects.manage_milestones",
+    "projects.manage_actions",
+    "projects.manage_deliverables",
+    "projects.view_internal_activity",
     "quotes.manage",
     "invoices.manage",
     "files.manage",
@@ -130,9 +148,15 @@ const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
     "customers.invite",
     "organizations.manage",
     "projects.view_all",
+    "projects.view_assigned",
     "projects.create",
     "projects.edit",
     "projects.archive",
+    "projects.manage_members",
+    "projects.manage_milestones",
+    "projects.manage_actions",
+    "projects.manage_deliverables",
+    "projects.view_internal_activity",
     "quotes.manage",
     "invoices.manage",
     "files.manage",

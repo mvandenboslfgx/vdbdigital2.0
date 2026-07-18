@@ -14,7 +14,8 @@ export const metadata: Metadata = {
 };
 
 export default async function PortalProjectsPage() {
-  const { projects } = await listPortalProjects();
+  const result = await listPortalProjects();
+  const projects = result.projects;
 
   return (
     <div className="space-y-6">
@@ -22,14 +23,14 @@ export default async function PortalProjectsPage() {
       {projects.length === 0 ? (
         <EmptyState
           title="Geen projecten"
-          description="Er zijn momenteel geen actieve projecten gekoppeld aan je account."
+          description="Er zijn momenteel geen projecten aan je account gekoppeld."
         />
       ) : (
         <ul className="space-y-3">
           {projects.map((p) => (
             <li key={p.id}>
               <Link
-                href={`/portal/projecten/${p.id}`}
+                href={`/portal/projecten/${p.id}/overview`}
                 className="block rounded-xl border border-border bg-surface p-5 hover:border-primary transition-colors"
               >
                 <div className="flex flex-wrap justify-between gap-2 mb-2">
@@ -40,13 +41,25 @@ export default async function PortalProjectsPage() {
                 </div>
                 <p className="text-small text-muted mb-3">
                   {labelNl(PROJECT_TYPE_NL, p.project_type)}
+                  {p.next_milestone_title
+                    ? ` · Volgende: ${p.next_milestone_title}`
+                    : ""}
+                  {p.open_customer_actions
+                    ? ` · ${p.open_customer_actions} open actie(s)`
+                    : ""}
                 </p>
-                <div className="h-2 rounded-full bg-surface-elevated overflow-hidden">
+                <div className="h-2 rounded-full bg-surface-elevated overflow-hidden mb-2">
                   <div
                     className="h-full bg-primary"
                     style={{ width: `${p.progress_percent}%` }}
                   />
                 </div>
+                <p className="text-small text-muted">
+                  {p.progress_percent}%
+                  {p.planned_delivery_date
+                    ? ` · Gepland ${new Date(p.planned_delivery_date).toLocaleDateString("nl-NL")}`
+                    : ""}
+                </p>
               </Link>
             </li>
           ))}

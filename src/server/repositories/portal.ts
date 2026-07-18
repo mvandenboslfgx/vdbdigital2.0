@@ -1,5 +1,6 @@
 import "server-only";
 import { createServiceRoleClient } from "@/lib/database/server";
+import { hasCustomerPermission } from "@/lib/auth/customer-permissions";
 import { requireCustomer } from "@/server/auth/require-customer";
 
 export type PortalProjectRow = {
@@ -11,6 +12,9 @@ export type PortalProjectRow = {
   progress_percent: number;
   planned_delivery_date: string | null;
   updated_at: string;
+  project_number?: string;
+  open_customer_actions?: number;
+  next_milestone_title?: string | null;
 };
 
 export type PortalQuoteRow = {
@@ -165,25 +169,92 @@ export async function getPortalDashboard() {
 
 export async function listPortalProjects() {
   const ctx = await requireCustomer();
+  if (!hasCustomerPermission(ctx.customerRole, "portal.projects.view")) {
+    return { ctx, projects: [] as PortalProjectRow[], denied: true as const };
+  }
+
   const supabase = createServiceRoleClient();
   if (!supabase) return { ctx, projects: [] as PortalProjectRow[] };
 
   const { data } = await supabase
     .from("portal_projects")
     .select(
-      "id, name, description, project_type, status, progress_percent, planned_delivery_date, updated_at",
+      "id, project_number, name, description, project_type, status, progress_percent, planned_delivery_date, updated_at",
     )
     .eq("organization_id", ctx.organization.id)
     .eq("customer_visible", true)
+    .is("archived_at", null)
     .order("updated_at", { ascending: false });
 
-  return { ctx, projects: (data ?? []) as PortalProjectRow[] };
+  const projects = (data ?? []) as PortalProjectRow[];
+  if (projects.length === 0) return { ctx, projects };
+
+  const ids = projects.map((p) => p.id);
+  const [{ data: actions }, { data: milestones }] = await Promise.all([
+    supabase
+      .from("portal_project_actions")
+      .select("id, project_id, status")
+      .in("project_id", ids)
+      .eq("customer_visible", true)
+      .eq("assigned_to_type", "CUSTOMER")
+      .neq("status", "COMPLETED")
+      .neq("status", "CANCELED"),
+    supabase
+      .from("portal_project_milestones")
+      .select("project_id, title, status, sort_order, completed_at")
+      .in("project_id", ids)
+      .eq("customer_visible", true)
+      .order("sort_order"),
+  ]);
+
+  const openByProject = new Map<string, number>();
+  for (const a of actions ?? []) {
+    openByProject.set(a.project_id, (openByProject.get(a.project_id) ?? 0) + 1);
+  }
+  const nextMilestone = new Map<string, string>();
+  for (const m of milestones ?? []) {
+    if (nextMilestone.has(m.project_id)) continue;
+    if (m.status === "COMPLETED" || m.completed_at) continue;
+    nextMilestone.set(m.project_id, m.title);
+  }
+
+  return {
+    ctx,
+    projects: projects.map((p) => ({
+      ...p,
+      open_customer_actions: openByProject.get(p.id) ?? 0,
+      next_milestone_title: nextMilestone.get(p.id) ?? null,
+    })),
+  };
 }
 
 export async function getPortalProject(id: string) {
   const ctx = await requireCustomer();
+  if (!hasCustomerPermission(ctx.customerRole, "portal.projects.view")) {
+    return {
+      ctx,
+      project: null,
+      milestones: [],
+      feedback: [],
+      actions: [],
+      deliverables: [],
+      activity: [],
+      denied: true as const,
+    };
+  }
+
   const supabase = createServiceRoleClient();
-  if (!supabase) return { ctx, project: null, milestones: [], feedback: [] };
+  if (!supabase) {
+    return {
+      ctx,
+      project: null,
+      milestones: [],
+      feedback: [],
+      actions: [],
+      deliverables: [],
+      activity: [],
+    };
+  }
 
   const { data: project } = await supabase
     .from("portal_projects")
@@ -191,11 +262,28 @@ export async function getPortalProject(id: string) {
     .eq("id", id)
     .eq("organization_id", ctx.organization.id)
     .eq("customer_visible", true)
+    .is("archived_at", null)
     .maybeSingle();
 
-  if (!project) return { ctx, project: null, milestones: [], feedback: [] };
+  if (!project) {
+    return {
+      ctx,
+      project: null,
+      milestones: [],
+      feedback: [],
+      actions: [],
+      deliverables: [],
+      activity: [],
+    };
+  }
 
-  const [{ data: milestones }, { data: feedback }] = await Promise.all([
+  const [
+    { data: milestones },
+    { data: feedback },
+    { data: actions },
+    { data: deliverables },
+    { data: activity },
+  ] = await Promise.all([
     supabase
       .from("portal_project_milestones")
       .select("*")
@@ -204,10 +292,34 @@ export async function getPortalProject(id: string) {
       .order("sort_order"),
     supabase
       .from("portal_project_feedback")
-      .select("id, body, decision, created_at")
+      .select("id, body, decision, created_at, visibility, status")
       .eq("project_id", id)
+      .eq("visibility", "CUSTOMER_SHARED")
+      .neq("status", "ARCHIVED")
       .order("created_at", { ascending: false })
       .limit(20),
+    supabase
+      .from("portal_project_actions")
+      .select("*")
+      .eq("project_id", id)
+      .eq("customer_visible", true)
+      .eq("assigned_to_type", "CUSTOMER")
+      .eq("assigned_organization_id", ctx.organization.id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("portal_project_deliverables")
+      .select("*")
+      .eq("project_id", id)
+      .eq("customer_visible", true)
+      .in("status", ["SHARED", "APPROVED", "REJECTED"])
+      .order("updated_at", { ascending: false }),
+    supabase
+      .from("portal_project_activity")
+      .select("id, activity_type, summary, created_at")
+      .eq("project_id", id)
+      .eq("visibility", "CUSTOMER_VISIBLE")
+      .order("created_at", { ascending: false })
+      .limit(30),
   ]);
 
   return {
@@ -215,6 +327,9 @@ export async function getPortalProject(id: string) {
     project,
     milestones: milestones ?? [],
     feedback: feedback ?? [],
+    actions: actions ?? [],
+    deliverables: deliverables ?? [],
+    activity: activity ?? [],
   };
 }
 
