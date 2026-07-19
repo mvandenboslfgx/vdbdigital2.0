@@ -90,7 +90,7 @@ describe("Preview Vercel protection bypass", () => {
   it("production URL has no bypass param", () => {
     process.env.VERCEL = "1";
     process.env.VERCEL_ENV = "production";
-    process.env.NEXT_PUBLIC_APP_URL = "https://www.vdbdigital.nl";
+    process.env.NEXT_PUBLIC_APP_URL = "https://vdbdigital.nl";
     delete process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
     process.env.MOLLIE_WEBHOOK_TOKEN = "app-token";
 

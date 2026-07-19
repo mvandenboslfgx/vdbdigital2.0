@@ -1,4 +1,8 @@
 import { paths } from "@/i18n/config";
+import {
+  CANONICAL_PRODUCTION_ORIGIN,
+  resolvePublicSiteUrl,
+} from "@/lib/url/app-url";
 
 function envOrEmpty(value: string | undefined): string {
   return value?.trim() ?? "";
@@ -10,7 +14,9 @@ export const siteConfig = {
   tagline: "Software built around your business.",
   description:
     "VDB Digital Software builds fast, scalable digital systems for businesses, entrepreneurs and ambitious ideas — custom websites, webshops, AI automation and ongoing support.",
-  url: process.env.NEXT_PUBLIC_APP_URL ?? "https://vdbdigital.nl",
+  /** Canonical public origin — production must be https://vdbdigital.nl */
+  url: resolvePublicSiteUrl(),
+  canonicalProductionOrigin: CANONICAL_PRODUCTION_ORIGIN,
   contactEmail: envOrEmpty(process.env.NEXT_PUBLIC_CONTACT_EMAIL) || "info@vdbdigital.nl",
   supportEmail:
     envOrEmpty(process.env.NEXT_PUBLIC_SUPPORT_EMAIL) || "support@vdbdigital.nl",

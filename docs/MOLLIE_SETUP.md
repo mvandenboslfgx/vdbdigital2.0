@@ -55,10 +55,10 @@ Zonder `VERCEL_AUTOMATION_BYPASS_SECRET` blokkeert checkout met configuratiefout
 ### Production (later)
 
 ```
-https://www.vdbdigital.nl/api/webhooks/mollie?token=<token>
+https://vdbdigital.nl/api/webhooks/mollie?token=<token>
 ```
 
-Geen Vercel-bypass in Production.
+Geen Vercel-bypass in Production. Canonical production origin is apex (`https://vdbdigital.nl`); `www` redirecteert naar apex.
 
 ---
 

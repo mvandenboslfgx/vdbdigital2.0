@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { isEmailFromAddress } from "../lib/email/address";
+import { evaluateProductionAppUrl } from "../lib/url/app-url";
 
 /** Bare email or Resend-style `Name <email@domain>`. */
 const emailFromField = z
@@ -175,6 +176,18 @@ export function validateProductionEnv(): { ok: true } | { ok: false; missing: st
   if (missing.length > 0) {
     return { ok: false, missing };
   }
+
+  // On Vercel production (or forced local prod gate), APP_URL must be exact apex.
+  const enforceOrigin =
+    process.env.REQUIRE_PRODUCTION_ENV === "1" ||
+    (process.env.VERCEL === "1" && process.env.VERCEL_ENV === "production");
+  if (enforceOrigin) {
+    const originCheck = evaluateProductionAppUrl(env.NEXT_PUBLIC_APP_URL);
+    if (!originCheck.ok) {
+      return { ok: false, missing: ["NEXT_PUBLIC_APP_URL"] };
+    }
+  }
+
   return { ok: true };
 }
 

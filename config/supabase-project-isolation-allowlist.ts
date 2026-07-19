@@ -9,6 +9,8 @@ export const VDB_APPROVED_REGION = "eu-west-1" as const;
 
 export const VDB_APPROVED_DOMAINS = [
   "vdbdigital.nl",
+  // Alias only: apex https://vdbdigital.nl is canonical; www must redirect to apex.
+  // Do not use www for Auth Site URL, NEXT_PUBLIC_APP_URL, or production webhooks.
   "www.vdbdigital.nl",
   "vermeulenbouwservice.nl",
   "www.vermeulenbouwservice.nl",
