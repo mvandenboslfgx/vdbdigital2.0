@@ -48,7 +48,7 @@ export async function CasesSection() {
           ))}
         </div>
         <div className="text-center mt-10 flex flex-wrap justify-center gap-3">
-          <LocaleLinkButton href={paths.cases} variant="outline">
+          <LocaleLinkButton href={paths.cases} variant="outline" tone="light">
             {t("cases.viewTypes")}
           </LocaleLinkButton>
           <LocaleLinkButton href={paths.quote}>{t("cases.discuss")}</LocaleLinkButton>

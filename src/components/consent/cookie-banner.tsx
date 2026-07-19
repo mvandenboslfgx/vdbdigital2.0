@@ -24,7 +24,7 @@ export function CookieBanner() {
       aria-describedby="cookie-desc"
       className="fixed inset-x-0 bottom-0 z-50 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-6"
     >
-      <div className="mx-auto max-w-2xl surface-card p-5 sm:p-6 shadow-2xl">
+      <div data-surface="dark" className="mx-auto max-w-2xl surface-card p-5 sm:p-6 shadow-2xl">
         <h2 id="cookie-title" className="text-h3 mb-2">
           {t("cookies.title")}
         </h2>

@@ -54,7 +54,7 @@ export default async function ForBusinessPage() {
             <LocaleLinkButton href={paths.quote} size="lg">
               {t("forBusiness.ctaQuote")}
             </LocaleLinkButton>
-            <LocaleLinkButton href={paths.solutions} variant="outline" size="lg">
+            <LocaleLinkButton href={paths.solutions} variant="outline" tone="light" size="lg">
               {t("forBusiness.ctaSolutions")}
             </LocaleLinkButton>
           </div>

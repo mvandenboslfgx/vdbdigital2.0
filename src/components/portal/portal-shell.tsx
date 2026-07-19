@@ -61,7 +61,7 @@ export function PortalShell({
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col md:flex-row">
+    <div data-surface="dark" className="min-h-screen bg-background flex flex-col md:flex-row">
       <div className="md:hidden flex items-center justify-between border-b border-border bg-surface px-4 h-14 pt-[env(safe-area-inset-top,0px)] min-h-14">
         <Link href="/portal" className="font-semibold font-display">
           {siteConfig.name}

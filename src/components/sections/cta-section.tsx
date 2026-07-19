@@ -9,7 +9,10 @@ export async function CtaSection() {
   return (
     <Section variant="light">
       <Container>
-        <div className="relative overflow-hidden rounded-2xl border border-light-border bg-light-surface p-10 md:p-16 text-center max-w-4xl mx-auto">
+        <div
+          data-surface="light"
+          className="relative mx-auto max-w-4xl overflow-hidden rounded-2xl border border-light-border bg-light-surface p-10 text-center md:p-16"
+        >
           <div
             className="pointer-events-none absolute inset-0 opacity-70"
             aria-hidden="true"
@@ -28,10 +31,20 @@ export async function CtaSection() {
               <LocaleLinkButton href={`${paths.contact}?intent=introduction`} size="lg">
                 {t("cta.intro")}
               </LocaleLinkButton>
-              <LocaleLinkButton href={paths.quote} variant="outline" size="lg">
+              <LocaleLinkButton
+                href={paths.quote}
+                variant="outline"
+                tone="light"
+                size="lg"
+              >
                 {t("cta.quote")}
               </LocaleLinkButton>
-              <LocaleLinkButton href={paths.shop} variant="ghost" size="lg">
+              <LocaleLinkButton
+                href={paths.shop}
+                variant="ghost"
+                tone="light"
+                size="lg"
+              >
                 {t("cta.shop")}
               </LocaleLinkButton>
             </div>

@@ -240,31 +240,54 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
             <h2 className="text-h2 text-light-foreground mb-6">
               {t("shop.websitePackages")}
             </h2>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {websitePackages.map((pkg) => {
                 const copy = commercial.packages[pkg.i18nKey];
                 const catalog = getPackageCatalogItem(pkg);
                 const price = catalog ? formatDualPrice(catalog, locale) : null;
                 return (
-                  <Card key={pkg.id} variant="light" className="flex flex-col h-full">
-                    <h3 className="text-h3 text-light-foreground mb-2">{copy.name}</h3>
-                    <p className="text-small text-light-muted mb-4 flex-1">{copy.summary}</p>
-                    {price ? (
-                      <div className="mb-4 space-y-1">
-                        <p className="text-sm font-medium text-primary">{price.exclLabel}</p>
-                        {price.inclLabel ? (
-                          <p className="text-xs text-light-muted">{price.inclLabel}</p>
-                        ) : null}
-                      </div>
-                    ) : null}
-                    <LocaleLinkButton
-                      href={`${paths.quote}?package=${pkg.slug}`}
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-center"
-                    >
-                      {t("shop.requestQuote")}
-                    </LocaleLinkButton>
+                  <Card
+                    key={pkg.id}
+                    variant="light"
+                    className="flex h-full min-w-0 flex-col"
+                  >
+                    <div className="flex min-h-0 flex-1 flex-col">
+                      <h3 className="text-h3 text-light-foreground mb-2">{copy.name}</h3>
+                      <p className="text-small mb-6 flex-1 text-light-muted">
+                        {copy.summary}
+                      </p>
+                      {price ? (
+                        <div className="mb-2 space-y-1.5">
+                          <p className="text-xl font-semibold tracking-tight text-primary">
+                            {price.amountLabel}
+                          </p>
+                          {price.vatExclNote ? (
+                            <p className="text-sm text-light-muted">{price.vatExclNote}</p>
+                          ) : null}
+                          {price.inclAmountLabel ? (
+                            <p className="text-sm text-light-muted">
+                              {price.inclAmountLabel}
+                            </p>
+                          ) : null}
+                          {price.scopeNote ? (
+                            <p className="text-xs leading-relaxed text-light-muted">
+                              {price.scopeNote}
+                            </p>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </div>
+                    <div className="mt-auto pt-6">
+                      <LocaleLinkButton
+                        href={`${paths.quote}?package=${pkg.slug}`}
+                        variant="outline"
+                        tone="light"
+                        size="sm"
+                        className="w-full justify-center"
+                      >
+                        {t("shop.requestQuote")}
+                      </LocaleLinkButton>
+                    </div>
                   </Card>
                 );
               })}
@@ -273,31 +296,54 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
 
           <div>
             <h2 className="text-h2 text-light-foreground mb-6">{t("shop.bundles")}</h2>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {commercialBundles.map((bundle) => {
                 const copy = commercial.bundles[bundle.i18nKey];
                 const catalog = getBundleCatalogItem(bundle);
                 const price = catalog ? formatDualPrice(catalog, locale) : null;
                 return (
-                  <Card key={bundle.id} variant="light" className="flex flex-col h-full">
-                    <h3 className="text-h3 text-light-foreground mb-2">{copy.name}</h3>
-                    <p className="text-small text-light-muted mb-4 flex-1">{copy.summary}</p>
-                    {price ? (
-                      <div className="mb-4 space-y-1">
-                        <p className="text-sm font-medium text-primary">{price.exclLabel}</p>
-                        {price.inclLabel ? (
-                          <p className="text-xs text-light-muted">{price.inclLabel}</p>
-                        ) : null}
-                      </div>
-                    ) : null}
-                    <LocaleLinkButton
-                      href={`${paths.quote}?package=${bundle.slug}`}
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-center"
-                    >
-                      {t("shop.requestQuote")}
-                    </LocaleLinkButton>
+                  <Card
+                    key={bundle.id}
+                    variant="light"
+                    className="flex h-full min-w-0 flex-col"
+                  >
+                    <div className="flex min-h-0 flex-1 flex-col">
+                      <h3 className="text-h3 text-light-foreground mb-2">{copy.name}</h3>
+                      <p className="text-small mb-6 flex-1 text-light-muted">
+                        {copy.summary}
+                      </p>
+                      {price ? (
+                        <div className="mb-2 space-y-1.5">
+                          <p className="text-xl font-semibold tracking-tight text-primary">
+                            {price.amountLabel}
+                          </p>
+                          {price.vatExclNote ? (
+                            <p className="text-sm text-light-muted">{price.vatExclNote}</p>
+                          ) : null}
+                          {price.inclAmountLabel ? (
+                            <p className="text-sm text-light-muted">
+                              {price.inclAmountLabel}
+                            </p>
+                          ) : null}
+                          {price.scopeNote ? (
+                            <p className="text-xs leading-relaxed text-light-muted">
+                              {price.scopeNote}
+                            </p>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </div>
+                    <div className="mt-auto pt-6">
+                      <LocaleLinkButton
+                        href={`${paths.quote}?package=${bundle.slug}`}
+                        variant="outline"
+                        tone="light"
+                        size="sm"
+                        className="w-full justify-center"
+                      >
+                        {t("shop.requestQuote")}
+                      </LocaleLinkButton>
+                    </div>
                   </Card>
                 );
               })}

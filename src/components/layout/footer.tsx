@@ -14,7 +14,7 @@ export function Footer() {
   const { t } = useI18n();
 
   return (
-    <footer className="border-t border-border bg-surface section-dark">
+    <footer data-surface="dark" className="border-t border-border bg-surface section-dark">
       <Container className="py-12 sm:py-16 pb-[max(3rem,env(safe-area-inset-bottom))]">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10">
           <div className="lg:col-span-1">

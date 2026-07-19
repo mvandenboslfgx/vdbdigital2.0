@@ -96,7 +96,10 @@ export function Header({ cartItemCount = 0 }: HeaderProps) {
     );
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-md pt-[env(safe-area-inset-top,0px)]">
+    <header
+      data-surface="dark"
+      className="sticky top-0 z-50 border-b border-border/80 bg-background/95 backdrop-blur-md pt-[env(safe-area-inset-top,0px)]"
+    >
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 page-pad-x sm:h-16">
         <Logo priority height={32} className="rounded-md sm:hidden" />
         <Logo priority height={40} className="hidden rounded-lg sm:inline-flex" />

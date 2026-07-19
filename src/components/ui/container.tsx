@@ -20,6 +20,7 @@ export function Section({
 }: HTMLAttributes<HTMLElement> & { variant?: "dark" | "light" }) {
   return (
     <section
+      data-surface={variant}
       className={cn(
         "py-12 sm:py-16 md:py-20 lg:py-24",
         variant === "dark" ? "section-dark" : "section-light",
@@ -37,6 +38,7 @@ export function Card({
 }: HTMLAttributes<HTMLDivElement> & { variant?: "dark" | "light" }) {
   return (
     <div
+      data-surface={variant}
       className={cn(
         "p-5 sm:p-6 md:p-8",
         variant === "dark" ? "surface-card" : "surface-card-light",
