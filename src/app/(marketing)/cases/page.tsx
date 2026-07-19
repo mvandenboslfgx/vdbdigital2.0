@@ -7,9 +7,11 @@ import { LocaleLinkButton } from "@/components/ui/locale-link-button";
 import { LinkButton } from "@/components/ui/link-button";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import { getCommercialContent } from "@/i18n/content/commercial";
-import { isCasePubliclyVisible } from "@/config/commercial/cases";
+import {
+  getCaseLiveUrl,
+  getFeaturedPortfolioCases,
+} from "@/config/commercial/cases";
 import { paths } from "@/i18n/config";
-import { VERMEULEN_LIVE_URL } from "@/components/visuals/site-browser-preview";
 import { cn } from "@/lib/utilities/cn";
 
 export const caseTypes = [
@@ -44,7 +46,7 @@ export default async function CasesPage() {
   const { t } = await getDictionary();
   const locale = await getLocale();
   const c = getCommercialContent(locale);
-  const showVermeulen = isCasePubliclyVisible("vermeulen-bouwservice");
+  const portfolio = getFeaturedPortfolioCases();
 
   return (
     <>
@@ -58,59 +60,87 @@ export default async function CasesPage() {
         </Container>
       </Section>
 
-      {showVermeulen ? (
+      {portfolio.length > 0 ? (
         <Section variant="light">
           <Container>
             <h2 className="text-h2 text-light-foreground mb-6">
-              {locale === "nl" ? "Live klantcase" : "Live client case"}
+              {locale === "nl" ? "Portfolio" : "Portfolio"}
             </h2>
-            <Card
-              variant="light"
-              className="group grid overflow-hidden p-0 md:grid-cols-2"
-            >
-              <div className="relative aspect-[16/11] md:aspect-auto md:min-h-[280px] overflow-hidden">
-                <Image
-                  src="/cases/vermeulen-bouwservice/desktop-home.webp"
-                  alt={c.vermeulen.desktopAlt}
-                  width={1440}
-                  height={1100}
-                  className={cn(
-                    "h-full w-full object-cover object-top transition-transform duration-500",
-                    "motion-safe:group-hover:scale-[1.02]",
-                  )}
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  priority
-                />
-              </div>
-              <div className="flex flex-col justify-center p-6 sm:p-8">
-                <Badge className="mb-3 w-fit">{c.vermeulen.label}</Badge>
-                <p className="text-xs text-light-muted mb-2">
-                  {c.vermeulen.details.type}
-                </p>
-                <h3 className="text-h3 text-light-foreground mb-3">
-                  {c.vermeulen.title}
-                </h3>
-                <p className="text-small text-light-muted mb-6">
-                  {c.vermeulen.summary}
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  <LocaleLinkButton
-                    href={`${paths.cases}/vermeulen-bouwservice`}
+            <div className="space-y-8">
+              {portfolio.map((item) => {
+                const copy =
+                  c[item.i18nKey as "vermeulen" | "grillGasten" | "trustbooker"];
+                const liveUrl = getCaseLiveUrl(item);
+                const isLive =
+                  item.launchStatus === "LIVE" && Boolean(liveUrl);
+                const image =
+                  item.slug === "trustbooker"
+                    ? `/cases/${item.assetDir}/desktop-dashboard.webp`
+                    : `/cases/${item.assetDir}/desktop-home.webp`;
+
+                return (
+                  <Card
+                    key={item.slug}
+                    variant="light"
+                    className="group grid overflow-hidden p-0 md:grid-cols-2"
                   >
-                    {locale === "nl" ? "Bekijk case" : "View case"}
-                  </LocaleLinkButton>
-                  <LinkButton
-                    href={VERMEULEN_LIVE_URL}
-                    external
-                    variant="outline"
-                    className="inline-flex items-center gap-2"
-                  >
-                    {c.vermeulen.openLive}
-                    <ExternalLink className="h-4 w-4" aria-hidden="true" />
-                  </LinkButton>
-                </div>
-              </div>
-            </Card>
+                    <div className="relative aspect-[16/11] md:aspect-auto md:min-h-[280px] overflow-hidden">
+                      <Image
+                        src={image}
+                        alt={copy.desktopAlt}
+                        width={1440}
+                        height={1100}
+                        className={cn(
+                          "h-full w-full object-cover object-top transition-transform duration-500",
+                          "motion-safe:group-hover:scale-[1.02]",
+                        )}
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        priority={item.sortOrder <= 20}
+                      />
+                    </div>
+                    <div className="flex flex-col justify-center p-6 sm:p-8">
+                      <Badge className="mb-3 w-fit">{copy.label}</Badge>
+                      <p className="text-xs text-light-muted mb-2">
+                        {copy.category}
+                      </p>
+                      <h3 className="text-h3 text-light-foreground mb-3">
+                        {copy.title}
+                      </h3>
+                      <p className="text-small text-light-muted mb-6">
+                        {copy.summary}
+                      </p>
+                      <div className="flex flex-wrap gap-3">
+                        <LocaleLinkButton
+                          href={`${paths.cases}/${item.slug}`}
+                        >
+                          {copy.viewCase}
+                        </LocaleLinkButton>
+                        {isLive && liveUrl ? (
+                          <LinkButton
+                            href={liveUrl}
+                            external
+                            variant="outline"
+                            tone="light"
+                            className="inline-flex items-center gap-2"
+                            aria-label={`${copy.openLive}: ${item.domainLabel}`}
+                          >
+                            {copy.openLive}
+                            <ExternalLink
+                              className="h-4 w-4"
+                              aria-hidden="true"
+                            />
+                          </LinkButton>
+                        ) : "launchNote" in copy && copy.launchNote ? (
+                          <span className="inline-flex items-center rounded-md border border-border/60 px-3 py-2 text-sm text-light-muted">
+                            {copy.launchNote}
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
           </Container>
         </Section>
       ) : null}
@@ -133,6 +163,7 @@ export default async function CasesPage() {
                 <LocaleLinkButton
                   href={`${paths.cases}/${item.slug}`}
                   variant="outline"
+                  tone="light"
                   size="sm"
                 >
                   {t("cases.moreAbout")}

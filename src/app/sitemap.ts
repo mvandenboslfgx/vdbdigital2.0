@@ -69,17 +69,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const { getAllProducts } = await import("@/server/repositories/products");
   const products = await getAllProducts();
 
+  const { getPublicCases, isCaseSearchIndexable } = await import(
+    "@/config/commercial/cases"
+  );
+
   const caseSlugs = [
     "conversie-website",
     "premium-webshop",
     "whatsapp-automatisering",
     "reviewflow-setup",
-    "vermeulen-bouwservice",
-    "vdb-digital-platform",
-    "demo-whatsapp-ai",
-    "demo-webshop",
-    "demo-review-flow",
+    ...getPublicCases()
+      .filter((c) => isCaseSearchIndexable(c) || c.type === "demonstration")
+      .map((c) => c.slug),
   ];
+  // TrustBooker stays noindex → excluded via isCaseSearchIndexable (COMING_SOON).
 
   return [
     ...staticRoutes.flatMap((route) =>

@@ -8,11 +8,14 @@ import {
   caseCatalog,
   getCaseBySlug,
   isCasePubliclyVisible,
+  isCaseSearchIndexable,
 } from "@/config/commercial/cases";
 import { paths } from "@/i18n/config";
 import { WhatsAppAiChatVisual } from "@/components/visuals/whatsapp-ai-chat-visual";
 import { AutomationFlowVisual } from "@/components/visuals/automation-flow-visual";
 import { VermeulenCasePage } from "@/components/cases/vermeulen-case-page";
+import { GrillGastenCasePage } from "@/components/cases/grill-gasten-case-page";
+import { TrustbookerCasePage } from "@/components/cases/trustbooker-case-page";
 import { resolveAppUrl } from "@/lib/url/app-url";
 
 const legacySlugs = {
@@ -50,38 +53,38 @@ export async function generateMetadata({
   const { t } = await getDictionary();
   const commercial = getCaseBySlug(slug);
   const base = resolveAppUrl().replace(/\/$/, "");
+  const locale = await getLocale();
+  const content = getCommercialContent(locale);
 
-  if (commercial?.slug === "vermeulen-bouwservice") {
-    const locale = await getLocale();
-    const ogImage = `${base}/cases/vermeulen-bouwservice/desktop-home.webp`;
+  if (
+    commercial?.slug === "vermeulen-bouwservice" ||
+    commercial?.slug === "grill-gasten" ||
+    commercial?.slug === "trustbooker"
+  ) {
+    const copy = content[commercial.i18nKey as "vermeulen" | "grillGasten" | "trustbooker"];
+    const asset =
+      commercial.slug === "trustbooker"
+        ? "desktop-dashboard.webp"
+        : "desktop-home.webp";
+    const ogImage = `${base}/cases/${commercial.assetDir}/${asset}`;
+    const indexable = isCaseSearchIndexable(commercial);
+
     return {
-      title:
-        locale === "nl"
-          ? "Vermeulen Bouwservice Website Case | VDB Digital"
-          : "Vermeulen Bouwservice Website Case | VDB Digital",
-      description:
-        locale === "nl"
-          ? "Bekijk hoe VDB Digital de professionele website voor S. Vermeulen Bouwservice vormgaf, gericht op montage, installatietechniek en Douglas houtbouw."
-          : "See how VDB Digital shaped the professional website for S. Vermeulen Bouwservice, focused on assembly, installation technology and Douglas timber construction.",
+      title: copy.seoTitle,
+      description: copy.seoDescription,
       alternates: { canonical: `${paths.cases}/${slug}` },
       openGraph: {
-        title: "Vermeulen Bouwservice Website Case | VDB Digital",
-        description:
-          locale === "nl"
-            ? "Professionele websitecase voor montage, installatietechniek en Douglas houtbouw."
-            : "Professional website case for assembly, installation technology and Douglas timber construction.",
+        title: copy.seoTitle,
+        description: copy.seoDescription,
         images: [{ url: ogImage, width: 1440, height: 1100 }],
         type: "article",
       },
-      robots: { index: true, follow: true },
+      robots: { index: indexable, follow: true },
     };
   }
 
   if (commercial) {
-    const locale = await getLocale();
-    const copy = getCommercialContent(locale)[
-      commercial.i18nKey as "demoWhatsapp"
-    ];
+    const copy = content[commercial.i18nKey as "demoWhatsapp"];
     return {
       title: copy.title,
       description: copy.summary,
@@ -109,6 +112,12 @@ export default async function CaseDetailPage({ params }: CasePageProps) {
 
     if (commercial.slug === "vermeulen-bouwservice") {
       return <VermeulenCasePage locale={locale} copy={c.vermeulen} />;
+    }
+    if (commercial.slug === "grill-gasten") {
+      return <GrillGastenCasePage locale={locale} copy={c.grillGasten} />;
+    }
+    if (commercial.slug === "trustbooker") {
+      return <TrustbookerCasePage locale={locale} copy={c.trustbooker} />;
     }
 
     const copy = c[commercial.i18nKey as keyof typeof c] as {

@@ -18,6 +18,30 @@ function publicationBlockers(c: CaseDefinition): string[] {
   if (c.type === "real" && c.status !== "PUBLISHED") {
     blockers.push("Real client cases require PUBLISHED status");
   }
+  if (
+    (c.launchStatus === "COMING_SOON" ||
+      c.launchStatus === "IN_DEVELOPMENT") &&
+    c.liveLinkActive
+  ) {
+    blockers.push("COMING_SOON/IN_DEVELOPMENT cannot have liveLinkActive");
+  }
+  if (c.liveLinkActive) {
+    if (c.launchStatus !== "LIVE") {
+      blockers.push("liveLinkActive requires launchStatus LIVE");
+    }
+    if (!c.externalUrl?.startsWith("https://")) {
+      blockers.push("LIVE live link requires valid HTTPS externalUrl");
+    }
+  }
+  if (
+    c.featured &&
+    c.assetDir &&
+    (c.launchStatus === "LIVE" ||
+      c.launchStatus === "COMING_SOON" ||
+      c.launchStatus === "IN_DEVELOPMENT")
+  ) {
+    // Screenshots expected under public/cases/{assetDir}/ — missing assets block polish, not catalog status.
+  }
   const p = c.permissions;
   if (!p.permissionConfirmed) blockers.push("Missing: permissionConfirmed");
   if (!p.screenshotPermission) blockers.push("Missing: screenshotPermission");
@@ -53,8 +77,12 @@ export default function AdminCasesPage() {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Badge>{c.status}</Badge>
+                  <Badge>{c.launchStatus}</Badge>
                   <Badge>{c.type}</Badge>
                   <Badge>{c.publicVisible ? "publicVisible" : "hidden"}</Badge>
+                  <Badge>
+                    {c.liveLinkActive ? "liveLinkActive" : "no live link"}
+                  </Badge>
                 </div>
               </div>
 

@@ -214,6 +214,121 @@ export const commercialContent = {
       fullPageAlt: "Extended homepage preview of vermeulenbouwservice.nl",
       relatedService: "Website design & development",
       status: "Live",
+      category: "Business website",
+      seoTitle: "Vermeulen Bouwservice Website Case | VDB Digital",
+      seoDescription:
+        "See how VDB Digital shaped the professional website for S. Vermeulen Bouwservice, focused on assembly, installation technology and Douglas timber construction.",
+    },
+    grillGasten: {
+      label: "Live client case",
+      title: "Grill Gasten",
+      summary:
+        "A powerful hospitality website for Grill Gasten, with a clear menu presentation, online ordering path, catering information and direct contact options.",
+      featuredIntro:
+        "A fast, user-friendly hospitality website with menu presentation, ordering options and catering requests.",
+      category: "Hospitality website & online ordering",
+      heroSubtitle:
+        "An order-focused hospitality website for smashburgers, loaded fries and catering.",
+      about:
+        "Grill Gasten is a hospitality brand with a public website covering menu presentation, online ordering, catering information and direct contact — including WhatsApp where published on the live site.",
+      goalsTitle: "The challenge",
+      goals: [
+        "Present dishes in a clear overview",
+        "Guide visitors quickly toward ordering",
+        "Explain delivery, pickup and catering clearly",
+        "Work well on mobile devices",
+      ],
+      solutionTitle: "The solution",
+      solutions: [
+        "Clear menu structure for smashburgers and loaded fries",
+        "Order-focused calls to action",
+        "Visible product pricing",
+        "Online ordering path with pickup and delivery",
+        "Catering request information",
+        "Contact and WhatsApp options",
+        "Responsive, mobile-optimised design",
+        "Hospitality-focused visual presentation",
+      ],
+      tags: ["Hospitality", "Online ordering", "Responsive", "Conversion"],
+      details: {
+        client: "Grill Gasten",
+        industry: "Hospitality and catering",
+        type: "Website and online ordering experience",
+        status: "Live",
+        website: "grillgasten.eu",
+      },
+      detailsTitle: "Project details",
+      previewTitle: "Website preview",
+      ctaTitle:
+        "Also looking for a website where customers can take action immediately?",
+      viewCase: "View case",
+      openLive: "View live website",
+      openLiveHint: "Open live website",
+      liveBadge: "Live",
+      desktopAlt:
+        "Desktop homepage of Grill Gasten — smashburgers and hospitality website",
+      mobileAlt: "Mobile homepage of Grill Gasten",
+      fullPageAlt: "Extended homepage preview of grillgasten.eu",
+      menuAlt: "Menu and ordering section preview of Grill Gasten",
+      relatedService: "Website design & development",
+      status: "Live",
+      seoTitle: "Grill Gasten Website Case | VDB Digital",
+      seoDescription:
+        "View the Grill Gasten website case: an order-focused hospitality site with menu presentation, catering and a strong mobile experience.",
+    },
+    trustbooker: {
+      label: "Coming soon",
+      title: "TrustBooker",
+      summary:
+        "A new digital platform in development, built with a focus on a safe, clear and professional user experience.",
+      featuredIntro:
+        "A global services marketplace platform currently being prepared for launch — preview only, not yet publicly live.",
+      category: "Software platform",
+      heroSubtitle:
+        "A new software platform currently being prepared for launch.",
+      about:
+        "TrustBooker is a global horizontal services marketplace under active development by VDB Digital. Customers and providers will be able to discover each other and work together through a secure, structured platform experience.",
+      goalsTitle: "Project goal",
+      goals: [
+        "Build a secure marketplace foundation for customers and service providers",
+        "Deliver a clear, professional dashboard experience",
+        "Apply role-based access and database security from the start",
+        "Prepare a responsive interface for desktop and mobile",
+      ],
+      solutionTitle: "Technical approach",
+      solutions: [
+        "TypeScript application architecture",
+        "Supabase backend with Row Level Security (RLS)",
+        "Secure authentication flows",
+        "Roles and permissions model",
+        "Responsive dashboard and onboarding interfaces",
+        "Local development and verification workflow before public launch",
+      ],
+      tags: ["Software", "Platform", "Dashboard", "Supabase", "Responsive"],
+      details: {
+        client: "TrustBooker",
+        industry: "Software / marketplace",
+        type: "Software platform",
+        status: "In development",
+        website: "Launch forthcoming",
+      },
+      detailsTitle: "Project status",
+      previewTitle: "Platform preview",
+      ctaTitle: "Also looking to develop a professional software platform?",
+      viewCase: "View project",
+      openLive: "",
+      openLiveHint: "View project",
+      liveBadge: "In development",
+      launchNote: "Launch forthcoming",
+      desktopAlt:
+        "TrustBooker desktop UI preview — in development, anonymised local interface",
+      mobileAlt: "TrustBooker mobile UI preview — in development",
+      fullPageAlt: "TrustBooker platform preview — in development",
+      relatedService: "Custom software development",
+      status: "In development",
+      seoTitle: "TrustBooker Software Platform | Coming soon",
+      seoDescription:
+        "Preview TrustBooker, a new software platform currently being prepared for launch by VDB Digital.",
     },
     appointment: {
       online: "Online introduction",
@@ -433,6 +548,121 @@ export const commercialContent = {
       fullPageAlt: "Uitgebreide homepagepreview van vermeulenbouwservice.nl",
       relatedService: "Webdesign & development",
       status: "Live",
+      category: "Bedrijfswebsite",
+      seoTitle: "Vermeulen Bouwservice Website Case | VDB Digital",
+      seoDescription:
+        "Bekijk hoe VDB Digital de professionele website voor S. Vermeulen Bouwservice vormgaf, gericht op montage, installatietechniek en Douglas houtbouw.",
+    },
+    grillGasten: {
+      label: "Live klantcase",
+      title: "Grill Gasten",
+      summary:
+        "Een krachtige horecawebsite voor Grill Gasten, met een duidelijke menupresentatie, online bestelroute, cateringinformatie en directe contactmogelijkheden.",
+      featuredIntro:
+        "Een snelle en gebruiksvriendelijke horecawebsite met menupresentatie, bestelmogelijkheden en cateringaanvragen.",
+      category: "Horecawebsite & online bestellen",
+      heroSubtitle:
+        "Een bestelgerichte horecawebsite voor smashburgers, loaded fries en catering.",
+      about:
+        "Grill Gasten is een horecamerk met een publieke website voor menupresentatie, online bestellen, cateringinformatie en direct contact — inclusief WhatsApp waar dat op de live website staat.",
+      goalsTitle: "Uitdaging",
+      goals: [
+        "Gerechten overzichtelijk presenteren",
+        "Bezoekers snel naar bestellen leiden",
+        "Bezorgen, afhalen en catering duidelijk uitleggen",
+        "Mobiel goed functioneren",
+      ],
+      solutionTitle: "Oplossing",
+      solutions: [
+        "Duidelijke menustructuur voor smashburgers en loaded fries",
+        "Bestelgerichte call-to-actions",
+        "Zichtbare productprijzen",
+        "Online bestelomgeving met afhalen en bezorgen",
+        "Cateringaanvragen",
+        "Contact- en WhatsAppmogelijkheden",
+        "Responsive, mobiel geoptimaliseerd ontwerp",
+        "Visuele horeca-uitstraling",
+      ],
+      tags: ["Horeca", "Online bestellen", "Responsive", "Conversie"],
+      details: {
+        client: "Grill Gasten",
+        industry: "Horeca en catering",
+        type: "Website en online bestelervaring",
+        status: "Live",
+        website: "grillgasten.eu",
+      },
+      detailsTitle: "Projectdetails",
+      previewTitle: "Websitepreview",
+      ctaTitle:
+        "Ook een website waarmee klanten direct actie kunnen ondernemen?",
+      viewCase: "Bekijk case",
+      openLive: "Bekijk live website",
+      openLiveHint: "Open live website",
+      liveBadge: "Live",
+      desktopAlt:
+        "Desktop-homepage van Grill Gasten — smashburgers en horecawebsite",
+      mobileAlt: "Mobiele homepage van Grill Gasten",
+      fullPageAlt: "Uitgebreide homepagepreview van grillgasten.eu",
+      menuAlt: "Menu- en bestelgedeelte van Grill Gasten",
+      relatedService: "Webdesign & development",
+      status: "Live",
+      seoTitle: "Grill Gasten Website Case | VDB Digital",
+      seoDescription:
+        "Bekijk de websitecase van Grill Gasten: een bestelgerichte horecawebsite met menupresentatie, catering en een sterke mobiele gebruikerservaring.",
+    },
+    trustbooker: {
+      label: "Binnenkort live",
+      title: "TrustBooker",
+      summary:
+        "Een nieuw digitaal platform in ontwikkeling, gebouwd met focus op een veilige, overzichtelijke en professionele gebruikerservaring.",
+      featuredIntro:
+        "Een wereldwijd dienstenmarktplaats-platform dat momenteel wordt voorbereid voor lancering — alleen preview, nog niet publiek live.",
+      category: "Softwareplatform",
+      heroSubtitle:
+        "Een nieuw softwareplatform dat momenteel wordt voorbereid voor lancering.",
+      about:
+        "TrustBooker is een wereldwijde horizontale dienstenmarktplaats in actieve ontwikkeling door VDB Digital. Opdrachtgevers en dienstverleners kunnen elkaar straks veilig ontdekken en samenwerken via een gestructureerde platformervaring.",
+      goalsTitle: "Projectdoel",
+      goals: [
+        "Een veilige marktplaatsfundament bouwen voor opdrachtgevers en dienstverleners",
+        "Een heldere, professionele dashboardervaring leveren",
+        "Rollen en databankbeveiliging vanaf het begin toepassen",
+        "Een responsive interface voorbereiden voor desktop en mobiel",
+      ],
+      solutionTitle: "Technische aanpak",
+      solutions: [
+        "TypeScript-applicatiearchitectuur",
+        "Supabase-backend met Row Level Security (RLS)",
+        "Veilige authenticatiestromen",
+        "Rollen- en permissionsmodel",
+        "Responsive dashboard- en onboardinginterfaces",
+        "Lokale ontwikkeling en verificatie vóór publieke lancering",
+      ],
+      tags: ["Software", "Platform", "Dashboard", "Supabase", "Responsive"],
+      details: {
+        client: "TrustBooker",
+        industry: "Software / marktplaats",
+        type: "Softwareplatform",
+        status: "In ontwikkeling",
+        website: "Lancering volgt",
+      },
+      detailsTitle: "Projectstatus",
+      previewTitle: "Platformpreview",
+      ctaTitle: "Ook een professioneel softwareplatform laten ontwikkelen?",
+      viewCase: "Bekijk project",
+      openLive: "",
+      openLiveHint: "Bekijk project",
+      liveBadge: "In ontwikkeling",
+      launchNote: "Lancering volgt",
+      desktopAlt:
+        "TrustBooker desktop-UI-preview — in ontwikkeling, geanonimiseerde lokale interface",
+      mobileAlt: "TrustBooker mobiele UI-preview — in ontwikkeling",
+      fullPageAlt: "TrustBooker platformpreview — in ontwikkeling",
+      relatedService: "Maatwerk softwareontwikkeling",
+      status: "In ontwikkeling",
+      seoTitle: "TrustBooker Softwareplatform | Binnenkort live",
+      seoDescription:
+        "Bekijk een preview van TrustBooker, een nieuw softwareplatform dat momenteel door VDB Digital wordt voorbereid voor lancering.",
     },
     appointment: {
       online: "Online kennismaking",

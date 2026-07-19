@@ -6,7 +6,7 @@ import { PackagesSection } from "@/components/sections/packages-section";
 import { FoundingClientSection } from "@/components/sections/founding-client-section";
 import { ProcessStepsSection } from "@/components/sections/process-steps-section";
 import { CasePreviewSection } from "@/components/sections/case-preview-section";
-import { FeaturedVermeulenSection } from "@/components/sections/featured-vermeulen-section";
+import { FeaturedProjectsSection } from "@/components/sections/featured-vermeulen-section";
 import { PopularProductsSection } from "@/components/sections/popular-products-section";
 import { FaqSection } from "@/components/sections/faq-section";
 import { CtaSection } from "@/components/sections/cta-section";
@@ -30,7 +30,7 @@ export default async function HomePage() {
       <PackagesSection />
       <FoundingClientSection />
       <ProcessStepsSection />
-      <FeaturedVermeulenSection />
+      <FeaturedProjectsSection />
       <CasePreviewSection />
       <PopularProductsSection products={products} />
       <FaqSection />
