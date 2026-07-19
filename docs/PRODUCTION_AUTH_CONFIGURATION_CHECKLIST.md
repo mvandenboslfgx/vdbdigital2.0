@@ -15,33 +15,43 @@ Project identity (CLI/API verified 2026-07-19):
 
 ---
 
-## Screenshot review attempt (2026-07-19 ~22:15)
+## Screenshot review attempt (2026-07-19 ~23:05)
 
-### AUTH DASHBOARD SCREENSHOT REVIEW — BLOCKED
+### AUTH / ORIGIN SCREENSHOT REVIEW — PARTIAL
 
 | Check | Result |
 |-------|--------|
 | Project ref for review | Expected `nhsrdnjfsxfikfbdmdfj` / `vdb nieuw` |
-| Screenshots in chat / `docs/evidence/auth-dashboard/` | **MISSING** — geen afbeeldingen ontvangen of gevonden |
-| Live Dashboard browser tab | Nog op Supabase **sign-in** (`returnTo` = Auth URL config voor juiste ref) |
-| Site URL / Redirect URLs / SMTP / templates / MFA / CAPTCHA gelezen uit UI | **Nee** |
-| Instellingen gewijzigd | **Nee** |
-| Code / migraties / commit / deploy | **Nee** |
+| Screenshots in chat | **3 ontvangen** (Vercel env row; Supabase Project Overview; Supabase Project Settings → General) |
+| Site URL / Redirect URLs / Providers / SMTP / templates / MFA / CAPTCHA / Domains | **MISSING** — niet in aangeleverde beelden |
+| Instellingen gewijzigd door reviewer | **Nee** |
+| Code / migraties / commit / deploy door reviewer | **Nee** |
 
-- **Status (review als geheel):** OPERATOR REVIEW REQUIRED
-- **Huidige waarde gemaskeerd:** (geen Dashboard-waarden beschikbaar)
-- **Verwachte waarde:** Screenshots of ingelogde Dashboard-sessie voor project `nhsrdnjfsxfikfbdmdfj` covering URL config, providers, templates, SMTP, MFA, attack protection, sessions
-- **Verschil:** Review kan niet worden uitgevoerd zonder beeldmateriaal
-- **Risico:** Verkeerde VERIFIED/INCORRECT-classificatie als er geraden wordt
-- **Exacte handmatige actie:** Sla screenshots (zonder secrets) op in gitignored `docs/evidence/auth-dashboard/` of plak ze in de chat, minstens: (1) project header met naam/ref, (2) URL Configuration Site URL + Redirect URLs, (3) Providers, (4) Email templates list/detail, (5) SMTP, (6) MFA, (7) Rate limits / CAPTCHA / Attack protection, (8) Sessions/security. Bevestig tegelijk productie `NEXT_PUBLIC_APP_URL` origin (gemaskeerd: alleen host, geen secrets).
+#### Wat zichtbaar is
+
+| Onderdeel | Status | Evidence (geen secrets) |
+|-----------|--------|-------------------------|
+| Supabase projectnaam `vdb nieuw` | VERIFIED | Project Settings → General → Project name |
+| Supabase projectref `nhsrdnjfsxfikfbdmdfj` | VERIFIED | Project Settings → General → Project ID |
+| Region `eu-west-1` | VERIFIED | Project Settings → Project region |
+| Overview PRODUCTION / Healthy | VERIFIED | Project Overview header + status |
+| Vercel env key `NEXT_PUBLIC_APP_URL` aanwezig | VERIFIED | Vercel Environment Variables row |
+| Vercel env **waarde** exact `https://vdbdigital.nl` | OPERATOR REVIEW REQUIRED | Waarde is **Sensitive** / verborgen — niet leesbaar |
+| Vercel env scope | OPERATOR REVIEW REQUIRED | Scope toont **Production and Preview** (niet Production-only); Preview mag geen productie-apex forceren tenzij bewust gescheiden |
+| Vercel Domains (apex primary + www→apex) | MISSING | Geen Domains-screenshot |
+| Supabase Auth Site URL | MISSING | Geen URL Configuration-screenshot |
+| Redirect allowlist | MISSING | Geen Redirect URLs-screenshot |
+| Providers / templates / SMTP / MFA / CAPTCHA / sessions | MISSING | Geen Auth-detail-screenshots |
+| Backups | OPERATOR REVIEW REQUIRED | Overview toont **Last Backup: No backups** (FREE / geen bevestigde backup) |
+
+- **Status (review als geheel):** OPERATOR REVIEW REQUIRED (partieel bewijs; Auth URL/security nog open)
 - **Blokkeert productieapply:** ja
-
-Tot screenshots aanwezig zijn blijven alle Dashboard-onderdelen hieronder op hun eerdere status (**OPERATOR REVIEW REQUIRED** of code-side VERIFIED/N/A). Er worden **geen** statuses naar VERIFIED gezet op basis van ontbrekende UI-evidence.
+- **Exacte handmatige actie (resterend):** (1) open Vercel env → toon/confirm waarde exact `https://vdbdigital.nl` (of screenshot met zichtbare host, geen andere secrets); overweeg Production-only + aparte Preview-waarde; (2) Vercel Domains: apex primary + www redirect; (3) Supabase Auth → URL Configuration (Site URL + redirects); (4) Providers; (5) Email templates; (6) SMTP; (7) MFA; (8) CAPTCHA/rate limits/sessions.
 
 **App contract (code, read-only):** invitation-first; password + magic link; no OAuth/phone/anonymous; admin AAL2/TOTP; redirects use `resolveAppUrl()` / `NEXT_PUBLIC_APP_URL`.
 
 **Canonical production origin (code contract):** `https://vdbdigital.nl`  
-**Vercel Production `NEXT_PUBLIC_APP_URL`:** OPERATOR REVIEW REQUIRED until Matthijs confirms Production env is exactly `https://vdbdigital.nl` (no slash, no www, no localhost).
+**Vercel Production `NEXT_PUBLIC_APP_URL`:** OPERATOR REVIEW REQUIRED — key aanwezig op Production (+ Preview); exacte waarde niet zichtbaar door Sensitive-maskering.
 
 **Verwachte Supabase Site URL:** `https://vdbdigital.nl`  
 **Verwachte Redirect URLs:**
@@ -49,7 +59,7 @@ Tot screenshots aanwezig zijn blijven alle Dashboard-onderdelen hieronder op hun
 - `https://vdbdigital.nl/auth/callback?next=/portal`
 - `https://vdbdigital.nl/wachtwoord-herstellen`
 
-Dashboardwaarden hieronder blijven **OPERATOR REVIEW REQUIRED** zonder aangeleverde screenshots. Geen VERIFIED voor Site URL/redirects tot screenshot-review.
+Geen VERIFIED voor Site URL, redirects, providers, templates, SMTP, MFA of CAPTCHA zonder zichtbaar UI-bewijs.
 
 ---
 
@@ -58,9 +68,9 @@ Dashboardwaarden hieronder blijven **OPERATOR REVIEW REQUIRED** zonder aangeleve
 ### Project name / ref
 - **Status:** VERIFIED
 - **Gecontroleerd op:** 2026-07-19
-- **Gecontroleerd door:** Cursor agent (CLI `projects list` + MCP `get_project`)
-- **Veilige evidence-referentie:** linked=`true`, name=`vdb nieuw`, ref=`nhsrdnjfsxfikfbdmdfj`
-- **Huidige waarde gemaskeerd:** n/a
+- **Gecontroleerd door:** Cursor agent (CLI/MCP eerder) + operator screenshots 2026-07-19 ~23:05
+- **Veilige evidence-referentie:** Project Settings General — name=`vdb nieuw`, Project ID=`nhsrdnjfsxfikfbdmdfj`, region=`eu-west-1`; Overview PRODUCTION Healthy
+- **Huidige waarde gemaskeerd:** n/a (geen secrets; member e-mail niet vastgelegd)
 - **Verwachte waarde:** vdb nieuw / nhsrdnjfsxfikfbdmdfj
 - **Benodigde actie:** none
 - **Blokkeert productieapply:** nee
@@ -289,23 +299,26 @@ Do not change values in the first verification pass — classify only.
 
 | Field | Value |
 |-------|--------|
-| Operator (Dashboard) | _pending — screenshots not supplied_ |
+| Operator (Dashboard) | partial screenshots supplied (project identity + Vercel env key) |
 | Date (code/API pass) | 2026-07-19 |
-| Date (screenshot review) | 2026-07-19 — **BLOCKED** (no images) |
-| Production origin confirmed | **no** |
+| Date (screenshot review) | 2026-07-19 — **PARTIAL** (3 images; Auth URL/security MISSING) |
+| Production origin confirmed | **no** (APP_URL waarde Sensitive/verborgen; Domains MISSING; Site URL MISSING) |
 | Checklist complete (all actionable VERIFIED or N/A) | **no** |
 | Readiness gate impact | Remains **PRODUCTION MIGRATION GATE CONDITIONAL PASS** |
 | Auth settings mutated this round | **no** |
 | Customer invite / production e-mail sent | **no** |
-| Commit of checklist after this round | **not done** (review incomplete) |
+| Commit of checklist after this round | pending operator request |
 
 ### Open blockers (must clear for Auth → VERIFIED / full PASS)
 
-1. Operator login to project `nhsrdnjfsxfikfbdmdfj` Auth URL Configuration — confirm Site URL + allowlist.
-2. Confirm e-mail templates (especially magic link + reset) use production origin and Dutch VDB copy.
-3. Confirm custom SMTP + SPF/DKIM for production.
-4. Confirm providers: email on; OAuth/phone/anonymous off; no public signup.
-5. Enroll staff MFA (currently 0 factors) and document recovery.
-6. Decide CAPTCHA/rate limits; align production `NEXT_PUBLIC_APP_URL` (not localhost).
+1. Confirm Vercel `NEXT_PUBLIC_APP_URL` **value** exactly `https://vdbdigital.nl` (host zichtbaar); prefer Production-only vs shared Preview scope.
+2. Vercel Domains: `vdbdigital.nl` primary + `www` → apex redirect.
+3. Supabase Auth URL Configuration — Site URL + redirect allowlist (callback / portal / wachtwoord-herstellen).
+4. Confirm e-mail templates (especially magic link + reset) use production apex and VDB copy.
+5. Confirm custom SMTP + SPF/DKIM for production (or explicit blocker).
+6. Confirm providers: email/password + magic link on; OAuth/phone/anonymous off; no public signup bypass.
+7. Enroll staff MFA (API earlier: 0 factors) and document recovery.
+8. CAPTCHA / Auth rate limits / sessions — operator review.
+9. Backup/PITR posture (Overview: No backups) — accept or remediate before full PASS.
 
 Until these are `VERIFIED`, do **not** create `production-migration-readiness-pass` and do **not** run production apply.

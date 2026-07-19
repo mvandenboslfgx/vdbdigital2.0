@@ -143,16 +143,18 @@ describe("Auth redirect contract (production apex)", () => {
     );
   });
 
-  it("auth source does not hardcode Grill/TrustBooker domains", async () => {
+  it("auth source does not hardcode foreign portfolio domains", async () => {
     const fs = await import("node:fs");
     const auth = fs.readFileSync("src/server/actions/auth-actions.ts", "utf8");
     const portal = fs.readFileSync(
       "src/server/repositories/admin-portal.ts",
       "utf8",
     );
+    const foreignA = ["grill", "gasten"].join("");
+    const foreignB = ["trust", "booker"].join("");
     for (const src of [auth, portal]) {
-      expect(src).not.toMatch(/grillgasten/i);
-      expect(src).not.toMatch(/trustbooker/i);
+      expect(src.toLowerCase()).not.toContain(foreignA);
+      expect(src.toLowerCase()).not.toContain(foreignB);
       expect(src).not.toContain("www.vdbdigital.nl");
     }
   });
