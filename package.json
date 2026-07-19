@@ -34,7 +34,8 @@
     "db:verify-quotes-acceptance": "tsx scripts/verify-quotes-acceptance.ts",
     "catalog:verify-alignment": "tsx scripts/verify-catalog-alignment.ts",
     "catalog:verify-no-tawk": "tsx scripts/verify-catalog-no-tawk.ts",
-    "checkout:release-gate": "tsx scripts/checkout-release-gate.ts"
+    "checkout:release-gate": "tsx scripts/checkout-release-gate.ts",
+    "db:verify-invoices-financial": "tsx scripts/verify-invoices-financial.ts"
   },
   "dependencies": {
     "@mollie/api-client": "^4.6.0",

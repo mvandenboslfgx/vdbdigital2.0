@@ -53,11 +53,22 @@ export const QUOTE_STATUS_NL: Record<string, string> = {
 
 export const INVOICE_STATUS_NL: Record<string, string> = {
   DRAFT: "Concept",
+  IN_REVIEW: "Ter controle",
+  READY: "Gereed",
+  ISSUED: "Uitgegeven",
   OPEN: "Openstaand",
+  PARTIALLY_PAID: "Gedeeltelijk betaald",
   PAID: "Betaald",
-  OVERDUE: "Vervallen",
+  OVERDUE: "Verlopen",
   CANCELED: "Geannuleerd",
   CREDITED: "Gecrediteerd",
+  ARCHIVED: "Gearchiveerd",
+};
+
+export const INVOICE_TYPE_NL: Record<string, string> = {
+  INVOICE: "Factuur",
+  CREDIT_NOTE: "Creditnota",
+  PROFORMA: "Proforma",
 };
 
 export const TICKET_STATUS_NL: Record<string, string> = {

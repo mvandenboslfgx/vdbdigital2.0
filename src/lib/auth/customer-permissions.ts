@@ -15,6 +15,8 @@ export type CustomerPortalPermission =
   | "portal.support.create"
   | "portal.support.reply"
   | "portal.billing.view"
+  | "portal.invoices.view"
+  | "portal.invoices.download"
   | "portal.projects.view"
   | "portal.projects.feedback"
   | "portal.projects.approve_deliverable"
@@ -29,6 +31,8 @@ const ROLE_PERMS: Record<CustomerOrgRole, readonly CustomerPortalPermission[]> =
     "portal.access",
     "portal.profile.edit",
     "portal.billing.view",
+    "portal.invoices.view",
+    "portal.invoices.download",
     "portal.projects.view",
     "portal.documents.view",
     "portal.documents.download",
@@ -39,6 +43,8 @@ const ROLE_PERMS: Record<CustomerOrgRole, readonly CustomerPortalPermission[]> =
     "portal.access",
     "portal.profile.edit",
     "portal.billing.view",
+    "portal.invoices.view",
+    "portal.invoices.download",
     "portal.projects.view",
     "portal.documents.view",
     "portal.documents.download",
@@ -55,6 +61,8 @@ const ROLE_PERMS: Record<CustomerOrgRole, readonly CustomerPortalPermission[]> =
     "portal.quotes.decline",
     "portal.support.create",
     "portal.support.reply",
+    "portal.invoices.view",
+    "portal.invoices.download",
     "portal.projects.view",
     "portal.projects.feedback",
     "portal.projects.approve_deliverable",
@@ -74,6 +82,8 @@ const ROLE_PERMS: Record<CustomerOrgRole, readonly CustomerPortalPermission[]> =
     "portal.support.create",
     "portal.support.reply",
     "portal.billing.view",
+    "portal.invoices.view",
+    "portal.invoices.download",
     "portal.projects.view",
     "portal.projects.feedback",
     "portal.projects.approve_deliverable",

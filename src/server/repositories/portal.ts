@@ -31,11 +31,18 @@ export type PortalQuoteRow = {
 export type PortalInvoiceRow = {
   id: string;
   invoice_number: string;
+  invoice_type?: string;
+  title?: string | null;
   status: string;
   total_cents: number;
+  amount_due_cents?: number;
+  amount_paid_cents?: number;
   currency: string;
   due_date: string | null;
   issue_date: string | null;
+  paid_at?: string | null;
+  project_id?: string | null;
+  quote_id?: string | null;
 };
 
 export type PortalTicketRow = {
@@ -425,20 +432,104 @@ export async function getPortalQuote(id: string) {
 
 export async function listPortalInvoices() {
   const ctx = await requireCustomer();
+  if (
+    !hasCustomerPermission(ctx.customerRole, "portal.invoices.view") &&
+    !hasCustomerPermission(ctx.customerRole, "portal.billing.view")
+  ) {
+    return { ctx, invoices: [] as PortalInvoiceRow[], denied: true as const };
+  }
+
   const supabase = createServiceRoleClient();
   if (!supabase) return { ctx, invoices: [] as PortalInvoiceRow[] };
 
   const { data } = await supabase
     .from("portal_invoices")
     .select(
-      "id, invoice_number, status, total_cents, currency, due_date, issue_date",
+      "id, invoice_number, invoice_type, title, status, total_cents, amount_due_cents, amount_paid_cents, currency, due_date, issue_date, paid_at, project_id, quote_id",
     )
     .eq("organization_id", ctx.organization.id)
     .eq("customer_visible", true)
-    .neq("status", "DRAFT")
+    .in("status", [
+      "ISSUED",
+      "OPEN",
+      "PARTIALLY_PAID",
+      "PAID",
+      "OVERDUE",
+      "CANCELED",
+      "CREDITED",
+    ])
     .order("issue_date", { ascending: false });
 
   return { ctx, invoices: (data ?? []) as PortalInvoiceRow[] };
+}
+
+export async function getPortalInvoice(id: string) {
+  const ctx = await requireCustomer();
+  if (
+    !hasCustomerPermission(ctx.customerRole, "portal.invoices.view") &&
+    !hasCustomerPermission(ctx.customerRole, "portal.billing.view")
+  ) {
+    return { ctx, invoice: null, items: [], creditNotes: [], denied: true as const };
+  }
+
+  const supabase = createServiceRoleClient();
+  if (!supabase) {
+    return { ctx, invoice: null, items: [], creditNotes: [] };
+  }
+
+  const { data: invoice } = await supabase
+    .from("portal_invoices")
+    .select(
+      "id, invoice_number, invoice_type, title, description, status, total_cents, subtotal_cents, vat_cents, discount_cents, amount_due_cents, amount_paid_cents, currency, due_date, issue_date, paid_at, payment_instruction, project_id, quote_id, document_id",
+    )
+    .eq("id", id)
+    .eq("organization_id", ctx.organization.id)
+    .eq("customer_visible", true)
+    .in("status", [
+      "ISSUED",
+      "OPEN",
+      "PARTIALLY_PAID",
+      "PAID",
+      "OVERDUE",
+      "CANCELED",
+      "CREDITED",
+    ])
+    .maybeSingle();
+
+  if (!invoice) {
+    return { ctx, invoice: null, items: [], creditNotes: [] };
+  }
+
+  const [{ data: items }, { data: creditNotes }] = await Promise.all([
+    supabase
+      .from("portal_invoice_items")
+      .select(
+        "id, title, description, quantity, unit_label, unit_price_cents, tax_cents, total_cents, sort_order",
+      )
+      .eq("invoice_id", id)
+      .order("sort_order"),
+    supabase
+      .from("portal_invoices")
+      .select("id, invoice_number, status, total_cents, currency")
+      .eq("credits_invoice_id", id)
+      .eq("customer_visible", true)
+      .in("status", [
+        "ISSUED",
+        "OPEN",
+        "PARTIALLY_PAID",
+        "PAID",
+        "OVERDUE",
+        "CANCELED",
+        "CREDITED",
+      ]),
+  ]);
+
+  return {
+    ctx,
+    invoice,
+    items: items ?? [],
+    creditNotes: creditNotes ?? [],
+  };
 }
 
 export async function listPortalFiles(filters?: { projectId?: string }) {

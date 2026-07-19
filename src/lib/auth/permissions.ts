@@ -49,6 +49,18 @@ export type Permission =
   | "quotes.archive"
   | "quotes.manage_terms"
   | "invoices.manage"
+  | "invoices.view_all"
+  | "invoices.view_assigned"
+  | "invoices.create"
+  | "invoices.edit"
+  | "invoices.review"
+  | "invoices.issue"
+  | "invoices.cancel"
+  | "invoices.archive"
+  | "invoices.record_payment"
+  | "invoices.reverse_payment"
+  | "invoices.create_credit_note"
+  | "invoices.manage_external_references"
   | "files.manage"
   | "documents.view_all"
   | "documents.view_organization"
@@ -108,6 +120,7 @@ const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
     "documents.download_internal",
     "documents.archive",
     "quotes.view_assigned",
+    "invoices.view_assigned",
   ],
   ADMIN: [
     "products.read",
@@ -155,6 +168,18 @@ const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
     "quotes.archive",
     "quotes.manage_terms",
     "invoices.manage",
+    "invoices.view_all",
+    "invoices.view_assigned",
+    "invoices.create",
+    "invoices.edit",
+    "invoices.review",
+    "invoices.issue",
+    "invoices.cancel",
+    "invoices.archive",
+    "invoices.record_payment",
+    "invoices.reverse_payment",
+    "invoices.create_credit_note",
+    "invoices.manage_external_references",
     "files.manage",
     "documents.view_all",
     "documents.view_organization",
@@ -220,6 +245,18 @@ const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
     "quotes.archive",
     "quotes.manage_terms",
     "invoices.manage",
+    "invoices.view_all",
+    "invoices.view_assigned",
+    "invoices.create",
+    "invoices.edit",
+    "invoices.review",
+    "invoices.issue",
+    "invoices.cancel",
+    "invoices.archive",
+    "invoices.record_payment",
+    "invoices.reverse_payment",
+    "invoices.create_credit_note",
+    "invoices.manage_external_references",
     "files.manage",
     "documents.view_all",
     "documents.view_organization",

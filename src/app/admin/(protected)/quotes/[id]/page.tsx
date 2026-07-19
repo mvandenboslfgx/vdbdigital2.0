@@ -11,6 +11,7 @@ import {
   sendQuoteAction,
   withdrawQuoteAction,
 } from "@/server/actions/quote-actions";
+import { createInvoiceFromAcceptedQuoteAction } from "@/server/actions/invoice-actions";
 import { hasPermission } from "@/lib/auth/permissions";
 
 export const metadata: Metadata = { title: "Offerte", robots: { index: false } };
@@ -189,6 +190,15 @@ export default async function AdminQuoteDetailPage({
             />
             <Button type="submit" variant="outline">
               Intrekken
+            </Button>
+          </form>
+        ) : null}
+        {hasPermission(ctx.role, "invoices.create") &&
+        quote.status === "ACCEPTED" ? (
+          <form action={createInvoiceFromAcceptedQuoteAction}>
+            <input type="hidden" name="quoteId" value={quote.id} />
+            <Button type="submit" variant="outline">
+              Factuurconcept maken
             </Button>
           </form>
         ) : null}

@@ -11,7 +11,7 @@ const adminNav = [
   { label: "Klanten", href: "/admin/customers", permission: "customers.view" as const },
   { label: "Projecten", href: "/admin/projects", permission: "projects.view_all" as const },
   { label: "Offertes", href: "/admin/quotes", permission: "quotes.view_assigned" as const },
-  { label: "Facturen", href: "/admin/invoices", permission: "invoices.manage" as const },
+  { label: "Facturen", href: "/admin/invoices", permission: "invoices.view_assigned" as const },
   { label: "Documenten", href: "/admin/documents", permission: "documents.view_organization" as const },
   { label: "Berichten", href: "/admin/messages", permission: "messages.manage" as const },
   { label: "Support", href: "/admin/support", permission: "support.manage" as const },
