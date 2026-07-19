@@ -94,8 +94,12 @@ export const siteConfig = {
     lastUpdated: "2026-07-15",
   },
   brand: {
-    logo: "/brand/vdb-digital-logo.png",
+    /** Square mark for schema.org / fallback icon consumers */
+    logo: "/brand/vdb-logo-mark-light.svg",
     logoAlt: "VDB Digital Software",
+    openGraphImage: "/brand/opengraph-image.jpg",
+    twitterImage: "/brand/twitter-image.jpg",
+    themeColor: "#08090B",
   },
 } as const;
 

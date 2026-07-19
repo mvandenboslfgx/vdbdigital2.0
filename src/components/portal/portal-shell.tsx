@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utilities/cn";
+import { VdbLogo } from "@/components/brand/VdbLogo";
 import { siteConfig } from "@/config/site";
 
 export type PortalNavItem = { label: string; href: string };
@@ -63,8 +64,12 @@ export function PortalShell({
   return (
     <div data-surface="dark" className="min-h-screen bg-background flex flex-col md:flex-row">
       <div className="md:hidden flex items-center justify-between border-b border-border bg-surface px-4 h-14 pt-[env(safe-area-inset-top,0px)] min-h-14">
-        <Link href="/portal" className="font-semibold font-display">
-          {siteConfig.name}
+        <Link
+          href="/portal"
+          className="inline-flex items-center"
+          aria-label={`${siteConfig.name} — klantenportaal`}
+        >
+          <VdbLogo lockup="header" variant="light" alt="" className="h-8 w-auto" />
         </Link>
         <button
           type="button"
@@ -96,10 +101,14 @@ export function PortalShell({
 
       <aside className="hidden md:flex md:w-64 md:flex-col md:border-r md:border-border md:bg-surface md:min-h-screen">
         <div className="p-5 border-b border-border">
-          <Link href="/portal" className="font-semibold font-display text-lg">
-            {siteConfig.name}
+          <Link
+            href="/portal"
+            className="inline-flex flex-col gap-1"
+            aria-label={`${siteConfig.name} — klantenportaal`}
+          >
+            <VdbLogo lockup="header" variant="light" alt="" className="h-9 w-auto" />
+            <span className="text-small text-muted">Klantenportaal</span>
           </Link>
-          <p className="text-small text-muted mt-1">Klantenportaal</p>
           <p className="text-small mt-3 truncate">{organizationName}</p>
           <p className="text-small text-muted truncate">{displayName}</p>
         </div>

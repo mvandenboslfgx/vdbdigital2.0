@@ -3,7 +3,7 @@
 import { ChevronDown, Menu, ShoppingCart, X } from "lucide-react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { cn } from "@/lib/utilities/cn";
-import { Logo } from "@/components/navigation/logo";
+import { BrandLink } from "@/components/brand/BrandLink";
 import { siteConfig } from "@/config/site";
 import { paths } from "@/i18n/config";
 import { useI18n } from "@/i18n/provider";
@@ -101,8 +101,7 @@ export function Header({ cartItemCount = 0 }: HeaderProps) {
       className="sticky top-0 z-50 border-b border-border/80 bg-background/95 backdrop-blur-md pt-[env(safe-area-inset-top,0px)]"
     >
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 page-pad-x sm:h-16">
-        <Logo priority height={32} className="rounded-md sm:hidden" />
-        <Logo priority height={40} className="hidden rounded-lg sm:inline-flex" />
+        <BrandLink variant="light" priority />
 
         <nav className="hidden lg:flex items-center gap-0.5" aria-label={t("nav.mainNav")}>
           {siteConfig.navigation.main.map((item) => {
@@ -184,7 +183,10 @@ export function Header({ cartItemCount = 0 }: HeaderProps) {
             aria-label={t("nav.mobileNav")}
           >
             <div className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border page-pad-x">
-              <Logo height={32} className="rounded-md" />
+              <BrandLink
+                variant="light"
+                logoClassName="h-9 w-auto max-w-[min(10rem,calc(100vw-11rem))] object-contain object-left"
+              />
               <div className="flex items-center gap-2">
                 <LanguageSwitcherBoundary />
                 <button

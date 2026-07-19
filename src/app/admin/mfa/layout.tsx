@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { requireAdminWithoutMfa } from "@/server/auth/require-admin";
 import { getMfaStatus } from "@/server/auth/mfa-status";
 import { logoutAction } from "@/server/actions/auth-actions";
+import { VdbLogo } from "@/components/brand/VdbLogo";
 import { siteConfig } from "@/config/site";
 
 export default async function AdminMfaLayout({
@@ -24,8 +25,13 @@ export default async function AdminMfaLayout({
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <header className="border-b border-border p-4 flex items-center justify-between">
-        <Link href="/admin" className="font-semibold">
-          {siteConfig.name} Admin — MFA
+        <Link
+          href="/admin"
+          className="inline-flex items-center gap-3"
+          aria-label={`${siteConfig.name} Admin — MFA`}
+        >
+          <VdbLogo lockup="header" variant="light" alt="" className="h-9 w-auto" />
+          <span className="text-small text-muted">MFA</span>
         </Link>
         <form action={logoutAction}>
           <button

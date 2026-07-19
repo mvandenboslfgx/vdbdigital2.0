@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Card, Container } from "@/components/ui/container";
-import { Logo } from "@/components/navigation/logo";
+import { BrandLink } from "@/components/brand/BrandLink";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -12,7 +12,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <Container className="max-w-md w-full">
         <Card>
           <div className="flex justify-center mb-6">
-            <Logo height={48} linked className="rounded-lg" />
+            <BrandLink variant="light" priority logoClassName="h-12 w-auto" />
           </div>
           {children}
         </Card>

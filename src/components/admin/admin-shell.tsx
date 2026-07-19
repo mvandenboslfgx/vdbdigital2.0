@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utilities/cn";
+import { VdbLogo } from "@/components/brand/VdbLogo";
 import { siteConfig } from "@/config/site";
 
 interface AdminNavItem {
@@ -68,8 +69,12 @@ export function AdminShell({
   return (
     <div data-surface="dark" className="min-h-screen bg-background flex flex-col md:flex-row">
       <div className="md:hidden flex items-center justify-between border-b border-border bg-surface px-4 h-14 pt-[env(safe-area-inset-top,0px)] min-h-14">
-        <Link href="/admin" className="font-semibold font-display">
-          {siteConfig.name} Admin
+        <Link
+          href="/admin"
+          className="inline-flex items-center gap-2 font-semibold font-display"
+          aria-label={`${siteConfig.name} Admin`}
+        >
+          <VdbLogo lockup="header" variant="light" alt="" className="h-8 w-auto" />
         </Link>
         <button
           type="button"
@@ -103,8 +108,13 @@ export function AdminShell({
       )}
 
       <aside className="w-64 border-r border-border bg-surface p-4 hidden md:flex md:flex-col">
-        <Link href="/admin" className="font-semibold text-lg font-display block mb-8">
-          {siteConfig.name} Admin
+        <Link
+          href="/admin"
+          className="mb-8 inline-flex flex-col gap-1"
+          aria-label={`${siteConfig.name} Admin`}
+        >
+          <VdbLogo lockup="header" variant="light" alt="" className="h-9 w-auto" />
+          <span className="text-small text-muted">Admin</span>
         </Link>
         <AdminNavLinks nav={nav} />
         <div className="mt-auto pt-8 space-y-2">

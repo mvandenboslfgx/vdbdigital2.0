@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, Sora, JetBrains_Mono } from "next/font/google";
 import "@/styles/globals.css";
 import { siteConfig } from "@/config/site";
@@ -6,6 +6,11 @@ import { ConsentProvider } from "@/components/consent/consent-provider";
 import { OrganizationJsonLd } from "@/components/seo/organization-json-ld";
 import { getDictionary, getLocale, getMessages } from "@/i18n/get-dictionary";
 import { I18nProvider } from "@/i18n/provider";
+
+export const viewport: Viewport = {
+  themeColor: siteConfig.brand.themeColor,
+  colorScheme: "dark light",
+};
 
 const bodyFont = Plus_Jakarta_Sans({
   variable: "--font-body",
@@ -35,22 +40,48 @@ export async function generateMetadata(): Promise<Metadata> {
       template: `%s | ${siteConfig.name}`,
     },
     description: t("meta.description"),
+    manifest: "/brand/site.webmanifest",
     openGraph: {
       type: "website",
       locale: locale === "nl" ? "nl_NL" : "en_GB",
       siteName: siteConfig.name,
       title: siteConfig.name,
       description: t("meta.description"),
-      images: [{ url: siteConfig.brand.logo, alt: siteConfig.brand.logoAlt }],
+      images: [
+        {
+          url: siteConfig.brand.openGraphImage,
+          width: 1200,
+          height: 630,
+          alt: siteConfig.brand.logoAlt,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: siteConfig.name,
       description: t("meta.description"),
+      images: [siteConfig.brand.twitterImage],
     },
     icons: {
-      icon: siteConfig.brand.logo,
-      apple: siteConfig.brand.logo,
+      icon: [
+        { url: "/brand/favicon.ico" },
+        { url: "/brand/favicon.svg", type: "image/svg+xml" },
+        { url: "/brand/favicon-32.png", sizes: "32x32", type: "image/png" },
+      ],
+      apple: [
+        {
+          url: "/brand/apple-touch-icon.png",
+          sizes: "180x180",
+          type: "image/png",
+        },
+      ],
+      other: [
+        {
+          rel: "mask-icon",
+          url: "/brand/safari-pinned-tab.svg",
+          color: "#08090b",
+        },
+      ],
     },
     alternates: {
       languages: {

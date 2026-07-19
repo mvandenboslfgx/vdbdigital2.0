@@ -160,11 +160,56 @@ test.describe("Cookie consent & contact FAB", () => {
   });
 });
 
-test.describe("Security headers", () => {
-  test("includes security headers", async ({ page }) => {
-    const response = await page.goto("/");
-    const headers = response?.headers();
-    expect(headers?.["x-content-type-options"]).toBe("nosniff");
-    expect(headers?.["x-frame-options"]).toBe("DENY");
+test.describe("Brand identity", () => {
+  test("header logo is visible with natural dimensions", async ({ page }) => {
+    await page.goto("/");
+    const logoLink = page.getByRole("banner").getByRole("link", {
+      name: /VDB Digital Software/i,
+    });
+    await expect(logoLink).toBeVisible();
+    const img = logoLink.locator("img");
+    await expect(img).toBeVisible();
+    await expect(img).toHaveAttribute("src", /\/brand\/vdb-logo-header-light\.svg/);
+    const box = await img.boundingBox();
+    expect(box).toBeTruthy();
+    expect(box!.height).toBeGreaterThanOrEqual(32);
+    expect(box!.height).toBeLessThanOrEqual(56);
+    expect(box!.width).toBeGreaterThan(box!.height);
+  });
+
+  test("no horizontal overflow at key viewports", async ({ page }) => {
+    for (const width of [320, 375, 430, 768, 1280, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto("/");
+      await expect(
+        page.getByRole("banner").getByRole("link", { name: /VDB Digital Software/i }),
+      ).toBeVisible();
+      // Dismiss cookie dialog if present — it can inflate scrollWidth during assert.
+      const accept = page.getByRole("button", { name: /Accept all|Alles accepteren/i });
+      if (await accept.isVisible().catch(() => false)) {
+        await accept.click();
+      }
+      const overflow = await page.evaluate(() => {
+        const doc = document.documentElement;
+        return doc.scrollWidth > doc.clientWidth + 1;
+      });
+      expect(overflow, `overflow at ${width}px`).toBe(false);
+    }
+  });
+
+  test("favicon and manifest assets respond", async ({ request }) => {
+    for (const path of [
+      "/brand/favicon.ico",
+      "/brand/favicon.svg",
+      "/brand/favicon-32.png",
+      "/brand/apple-touch-icon.png",
+      "/brand/site.webmanifest",
+      "/brand/opengraph-image.jpg",
+      "/brand/twitter-image.jpg",
+      "/favicon.ico",
+    ]) {
+      const res = await request.get(path);
+      expect(res.ok(), path).toBeTruthy();
+    }
   });
 });

@@ -1,7 +1,8 @@
 import { Container } from "@/components/ui/container";
-import { Logo } from "@/components/navigation/logo";
+import { VdbLogo } from "@/components/brand/VdbLogo";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { paths } from "@/i18n/config";
+import { LocaleLink } from "@/i18n/locale-link";
 import { LocaleLinkButton } from "@/components/ui/locale-link-button";
 import { WebsitePreviewVisual } from "@/components/visuals/website-preview-visual";
 
@@ -13,8 +14,19 @@ export async function HeroSection() {
       <Container>
         <div className="grid lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-12 items-center">
           <div className="lg:col-span-7 animate-fade-in min-w-0">
-            <Logo priority height={40} className="mb-5 rounded-lg sm:mb-7 sm:hidden" />
-            <Logo priority height={52} className="mb-8 hidden rounded-lg sm:inline-flex" />
+            <LocaleLink
+              href="/"
+              aria-label="VDB Digital Software — naar de homepage"
+              className="mb-5 inline-flex sm:mb-8"
+            >
+              <VdbLogo
+                lockup="stacked"
+                variant="light"
+                priority
+                alt=""
+                className="h-14 w-auto sm:h-16 lg:h-[4.5rem]"
+              />
+            </LocaleLink>
             <h1 className="text-display mb-4 sm:mb-6 max-w-3xl">{t("home.heroTitle")}</h1>
             <p className="text-body-lg text-muted max-w-prose mb-6 sm:mb-8">
               {t("home.heroBody")}

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Container, Section, Card } from "@/components/ui/container";
 import { siteConfig } from "@/config/site";
 import { CtaSection } from "@/components/sections/cta-section";
-import { Logo } from "@/components/navigation/logo";
+import { BrandLink } from "@/components/brand/BrandLink";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { paths } from "@/i18n/config";
 
@@ -22,7 +22,7 @@ export default async function AboutPage() {
     <>
       <Section variant="dark" className="pt-12">
         <Container>
-          <Logo height={48} className="mb-8 rounded-lg" />
+          <BrandLink variant="light" className="mb-8" logoClassName="h-12 w-auto" />
           <h1 className="text-h1 mb-4">
             {t("about.title", { name: siteConfig.name })}
           </h1>

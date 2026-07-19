@@ -1,0 +1,23 @@
+{
+  "name": "VDB Digital Software",
+  "short_name": "VDB Digital",
+  "description": "VDB Digital Software — websites, software en digitale automatisering.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#08090B",
+  "theme_color": "#08090B",
+  "icons": [
+    {
+      "src": "/brand/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
