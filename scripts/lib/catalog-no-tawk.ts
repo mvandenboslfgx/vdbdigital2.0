@@ -95,7 +95,9 @@ function classifyRepoPath(pathRel: string): TawkMatchClass | null {
   if (
     p.includes("tawk-legacy-blocklist") ||
     p.includes("catalog-no-tawk") ||
-    p.includes("verify-catalog-no-tawk")
+    p.includes("verify-catalog-no-tawk") ||
+    p.includes("audit-supabase-full") ||
+    p.includes("SUPABASE_ISOLATION")
   ) {
     return "LEGACY_CLEANUP_MIGRATION";
   }
