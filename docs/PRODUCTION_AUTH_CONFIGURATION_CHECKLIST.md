@@ -36,8 +36,8 @@ Project identity (CLI/API verified 2026-07-19):
 | Region `eu-west-1` | VERIFIED | Project Settings → Project region |
 | Overview PRODUCTION / Healthy | VERIFIED | Project Overview header + status |
 | Vercel env key `NEXT_PUBLIC_APP_URL` aanwezig | VERIFIED | Vercel Environment Variables row |
-| Vercel env **waarde** exact `https://vdbdigital.nl` | OPERATOR REVIEW REQUIRED | Waarde is **Sensitive** / verborgen — niet leesbaar |
-| Vercel env scope | OPERATOR REVIEW REQUIRED | Scope toont **Production and Preview** (niet Production-only); Preview mag geen productie-apex forceren tenzij bewust gescheiden |
+| Vercel env **waarde** exact `https://vdbdigital.nl` | VERIFIED | Edit-dialog screenshot 2026-07-19 ~23:14 — value exactly `https://vdbdigital.nl` (no slash, no www, HTTPS) |
+| Vercel env scope | OPERATOR REVIEW REQUIRED | Eerdere row: **Production and Preview**; bevestig of Preview bewust dezelfde apex gebruikt of een aparte Preview-waarde nodig heeft |
 | Vercel Domains (apex primary + www→apex) | MISSING | Geen Domains-screenshot |
 | Supabase Auth Site URL | MISSING | Geen URL Configuration-screenshot |
 | Redirect allowlist | MISSING | Geen Redirect URLs-screenshot |
@@ -51,7 +51,7 @@ Project identity (CLI/API verified 2026-07-19):
 **App contract (code, read-only):** invitation-first; password + magic link; no OAuth/phone/anonymous; admin AAL2/TOTP; redirects use `resolveAppUrl()` / `NEXT_PUBLIC_APP_URL`.
 
 **Canonical production origin (code contract):** `https://vdbdigital.nl`  
-**Vercel Production `NEXT_PUBLIC_APP_URL`:** OPERATOR REVIEW REQUIRED — key aanwezig op Production (+ Preview); exacte waarde niet zichtbaar door Sensitive-maskering.
+**Vercel Production `NEXT_PUBLIC_APP_URL`:** VERIFIED — exact `https://vdbdigital.nl` (screenshot edit-dialog 2026-07-19 ~23:14). Scope Production+Preview blijft OPERATOR REVIEW REQUIRED.
 
 **Verwachte Supabase Site URL:** `https://vdbdigital.nl`  
 **Verwachte Redirect URLs:**
@@ -299,20 +299,20 @@ Do not change values in the first verification pass — classify only.
 
 | Field | Value |
 |-------|--------|
-| Operator (Dashboard) | partial screenshots supplied (project identity + Vercel env key) |
+| Operator (Dashboard) | partial screenshots (project identity + Vercel APP_URL value) |
 | Date (code/API pass) | 2026-07-19 |
-| Date (screenshot review) | 2026-07-19 — **PARTIAL** (3 images; Auth URL/security MISSING) |
-| Production origin confirmed | **no** (APP_URL waarde Sensitive/verborgen; Domains MISSING; Site URL MISSING) |
+| Date (screenshot review) | 2026-07-19 — **PARTIAL** (APP_URL value VERIFIED; Auth URL/security/Domains nog open) |
+| Production origin confirmed | **partial** — Vercel `NEXT_PUBLIC_APP_URL` = `https://vdbdigital.nl` VERIFIED; Domains MISSING; Supabase Site URL MISSING |
 | Checklist complete (all actionable VERIFIED or N/A) | **no** |
 | Readiness gate impact | Remains **PRODUCTION MIGRATION GATE CONDITIONAL PASS** |
 | Auth settings mutated this round | **no** |
 | Customer invite / production e-mail sent | **no** |
-| Commit of checklist after this round | pending operator request |
+| Commit of checklist after this round | pending |
 
 ### Open blockers (must clear for Auth → VERIFIED / full PASS)
 
-1. Confirm Vercel `NEXT_PUBLIC_APP_URL` **value** exactly `https://vdbdigital.nl` (host zichtbaar); prefer Production-only vs shared Preview scope.
-2. Vercel Domains: `vdbdigital.nl` primary + `www` → apex redirect.
+1. Vercel Domains: `vdbdigital.nl` primary + `www` → apex redirect.
+2. Confirm Preview env scope for `NEXT_PUBLIC_APP_URL` (shared Production+Preview vs aparte Preview-waarde).
 3. Supabase Auth URL Configuration — Site URL + redirect allowlist (callback / portal / wachtwoord-herstellen).
 4. Confirm e-mail templates (especially magic link + reset) use production apex and VDB copy.
 5. Confirm custom SMTP + SPF/DKIM for production (or explicit blocker).
