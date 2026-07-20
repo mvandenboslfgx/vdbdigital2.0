@@ -177,7 +177,7 @@ Geen VERIFIED voor Site URL, redirects, providers, templates, SMTP, MFA of CAPTC
 | Invite user | OPERATOR REVIEW REQUIRED | ja | Prefer app invite flow; if used, VDB branding + prod links |
 | Magic link | OPERATOR REVIEW REQUIRED | ja | **In use** (`signInWithOtp`); must land on `/auth/callback` |
 | Change email address | OPERATOR REVIEW REQUIRED | ja | Prod links; secure change flow |
-| Reset password | OPERATOR REVIEW REQUIRED | ja | Must align with `/wachtwoord-herstellen` |
+| Reset password | VERIFIED (delivery) + OPERATOR REVIEW REQUIRED (NL copy + link target) | nee* | Controlled inbox 2026-07-20 15:19: from `noreply@vdbdigital.nl` / VDB Digital Software; English default body (“Reset your password”). Confirm link opens `https://vdbdigital.nl/wachtwoord-herstellen`. Prefer NL template before go-live. |
 | Reauthentication | OPERATOR REVIEW REQUIRED | ja | Review if enabled |
 | Security notifications | OPERATOR REVIEW REQUIRED | nee* | Enable preferred; *does not block schema apply but recommended before go-live |
 
@@ -196,9 +196,8 @@ Evidence: Dashboard inaccessible this round → operator screenshots under `docs
 - **Veilige evidence-referentie:** Auth SMTP — custom SMTP **ON**; host `smtp.resend.com`; port `465`; username `resend`; sender `noreply@vdbdigital.nl`; sender name `VDB Digital Software`; min interval 60s. Password field masked in UI. **Geen wachtwoord vastgelegd.**
 - **Verwachte waarde:** Custom SMTP (not built-in rate-limited mail) for production
 - **Benodigde actie:** **Roteer** SMTP-wachtwoord dat eerder in chat is gedeeld; daarna update in Supabase + Resend. Controlled testmail optional.
-- **Testmail:** only to controlled internal address — **not executed** this round
+- **Testmail:** controlled internal inbox — **PASS** 2026-07-20 (password reset received via Resend/custom SMTP; TLS). No secrets captured.
 - **Blokkeert productieapply:** nee for SMTP UI (rotate shared secret remains ops hygiene before go-live)
-
 ### Alignment with app mail (`EMAIL_FROM` / Resend)
 - **Status:** VERIFIED (domain + Auth sender) + OPERATOR REVIEW REQUIRED (`EMAIL_FROM` exact string in Vercel/env)
 - **Gecontroleerd op:** 2026-07-20
@@ -332,7 +331,7 @@ Do not change values in the first verification pass — classify only.
 
 1. **Roteer** SMTP-wachtwoord dat in chat is gedeeld; update Supabase SMTP + Resend.
 2. Email provider detail: password + magic link toggles; confirm OAuth list fully scrolled (none unexpected).
-3. E-mail templates (magic link + reset) — apex + VDB copy.
+3. E-mail templates: NL copy for reset/magic link; confirm reset link host is apex `/wachtwoord-herstellen`.
 4. Enroll staff MFA (API earlier: 0 factors) and document recovery.
 5. CAPTCHA / Auth rate limits / sessions — operator review.
 6. Decide keep/remove localhost redirect entries.
