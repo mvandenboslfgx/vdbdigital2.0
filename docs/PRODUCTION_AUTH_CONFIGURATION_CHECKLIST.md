@@ -24,7 +24,7 @@ Project identity (CLI/API verified 2026-07-19):
 | Project ref for review | Expected `nhsrdnjfsxfikfbdmdfj` / `vdb nieuw` |
 | Screenshots in chat | Meerdere ontvangen (project identity; Vercel APP_URL edit; Vercel Domains 2026-07-20) |
 | Site URL / Redirect URLs | **PARTIEEL VERIFIED** — URL Configuration screenshot 2026-07-20 |
-| Providers / SMTP / templates / MFA / CAPTCHA | **MISSING** — niet in aangeleverde beelden |
+| Providers / SMTP / templates / MFA / CAPTCHA | **PARTIEEL** — Providers/signups screenshot 2026-07-20; SMTP/templates/MFA/CAPTCHA nog open |
 | Instellingen gewijzigd door reviewer | **Nee** |
 | Code / migraties / commit / deploy door reviewer | **Nee** |
 
@@ -55,7 +55,7 @@ Project identity (CLI/API verified 2026-07-19):
 
 - **Status (review als geheel):** OPERATOR REVIEW REQUIRED (partieel bewijs; Auth URL/security nog open)
 - **Blokkeert productieapply:** ja
-- **Exacte handmatige actie (resterend):** (1) decide keep/remove localhost redirects; (2) Providers; (3) Email templates; (4) SMTP; (5) MFA; (6) CAPTCHA/rate limits/sessions; (7) optional www DNS Change Recommended; (8) Preview APP_URL scope.
+- **Exacte handmatige actie (resterend):** (1) Email-provider detail (password + magic link toggles); (2) SMTP settings screenshot zonder secrets; (3) Email templates; (4) MFA; (5) CAPTCHA/rate limits/sessions; (6) localhost redirects; (7) optional www DNS; (8) Preview APP_URL scope. **Nooit wachtwoorden/API-keys in chat of checklist plakken.**
 
 **App contract (code, read-only):** invitation-first; password + magic link; no OAuth/phone/anonymous; admin AAL2/TOTP; redirects use `resolveAppUrl()` / `NEXT_PUBLIC_APP_URL`.
 
@@ -191,50 +191,59 @@ Evidence: Dashboard inaccessible this round → operator screenshots under `docs
 
 ### Custom SMTP
 - **Status:** OPERATOR REVIEW REQUIRED
-- **Blokkeert productieapply:** ja
+- **Gecontroleerd op:** 2026-07-20
+- **Gecontroleerd door:** Cursor agent
+- **Veilige evidence-referentie:** Geen SMTP-settings screenshot. Operator gaf mondeling aan dat SMTP-username `resend` is (Resend SMTP-patroon). **Geen wachtwoord/secret vastgelegd.**
 - **Verwachte waarde:** Custom SMTP (not built-in rate-limited mail) for production
-- **Benodigde actie:** Confirm provider; sender domain VDB/auth; sender name `VDB Digital Software`; SPF/DKIM confirmed; DMARC reviewed; no link rewriting/tracking that breaks Auth URLs
+- **Benodigde actie:** Screenshot Auth → SMTP (host/port/user/sender zichtbaar; wachtwoord gemaskeerd). Daarna **roteer** elk wachtwoord dat in chat is gedeeld.
 - **Testmail:** only to controlled internal address — **not executed** this round
+- **Blokkeert productieapply:** ja tot SMTP UI bewezen + sender domain/SPF/DKIM beoordeeld
 
 ### Alignment with app mail (`EMAIL_FROM` / Resend)
 - **Status:** OPERATOR REVIEW REQUIRED
 - **Blokkeert productieapply:** ja if Auth SMTP domain ≠ verified sending domain
-- **Benodigde actie:** Compare Auth SMTP sender domain with production Resend/`EMAIL_FROM` (names only in evidence)
+- **Benodigde actie:** Compare Auth SMTP sender domain with production Resend/`EMAIL_FROM` (names only in evidence; no secrets)
 
 ---
 
 ## 5. Providers and registration (code + remote metadata + Dashboard)
 
 ### Email / password
-- **Status:** VERIFIED (app) + OPERATOR REVIEW REQUIRED (Dashboard enabled flag)
-- **Evidence:** `signInWithPassword` on `/inloggen`
-- **Blokkeert productieapply:** ja until Dashboard confirms Email provider on
+- **Status:** VERIFIED (app) + VERIFIED (Dashboard Email provider Enabled)
+- **Gecontroleerd op:** 2026-07-20
+- **Evidence:** `signInWithPassword` on `/inloggen`; Auth screenshot — Email **Enabled**
+- **Benodigde actie:** Open Email provider detail — confirm password sign-in + magic link toggles explicitly
+- **Blokkeert productieapply:** nee for Email-on; detail toggles remain recommended review
 
 ### Magic link
-- **Status:** VERIFIED (app uses it) + OPERATOR REVIEW REQUIRED (Dashboard)
-- **Evidence:** `signInWithOtp`, `shouldCreateUser: false`
-- **Blokkeert productieapply:** ja until template + provider confirmed
+- **Status:** VERIFIED (app uses it) + OPERATOR REVIEW REQUIRED (Dashboard Email detail)
+- **Evidence:** `signInWithOtp`, `shouldCreateUser: false`; Email provider Enabled but inner “magic link” toggle not screenshotted
+- **Blokkeert productieapply:** ja until Email-provider detail of template confirms OTP/magic link path
 
 ### OAuth / social
-- **Status:** NOT APPLICABLE (app) + OPERATOR REVIEW REQUIRED (Dashboard must show none unexpected)
-- **Evidence:** no `signInWithOAuth` in app
-- **Remote identities providers (metadata):** `email` only
-- **Blokkeert productieapply:** ja if Dashboard has unexpected OAuth clients
+- **Status:** NOT APPLICABLE (app) + OPERATOR REVIEW REQUIRED (Dashboard full list)
+- **Evidence:** no `signInWithOAuth` in app; screenshot toont Phone/SAML/Web3 Disabled; andere social rows mogelijk buiten frame
+- **Benodigde actie:** Scroll volledige Providers-lijst — bevestig geen Google/GitHub/etc. Enabled
+- **Blokkeert productieapply:** ja if unexpected OAuth enabled
 
 ### Phone auth
-- **Status:** NOT APPLICABLE (app) + OPERATOR REVIEW REQUIRED (Dashboard should be off)
-- **Remote:** users with phone = 0
-- **Blokkeert productieapply:** ja if phone auth enabled without product support
+- **Status:** VERIFIED (Dashboard Disabled) + NOT APPLICABLE (app)
+- **Gecontroleerd op:** 2026-07-20
+- **Evidence:** Auth Providers — Phone **Disabled**
+- **Blokkeert productieapply:** nee
 
 ### Anonymous sign-ins
-- **Status:** NOT APPLICABLE (app) + OPERATOR REVIEW REQUIRED (Dashboard should be off)
-- **Blokkeert productieapply:** ja if enabled
+- **Status:** VERIFIED (Dashboard Disabled)
+- **Gecontroleerd op:** 2026-07-20
+- **Evidence:** User Signups — Allow anonymous sign-ins **Disabled**
+- **Blokkeert productieapply:** nee
 
 ### Public signup vs invitation-first
-- **Status:** VERIFIED (app invitation-first)
-- **Evidence:** no `auth.signUp`; `/account-aanmaken` creates lead only; invites via `admin.createUser`
-- **Dashboard:** OPERATOR REVIEW REQUIRED — disable open signup if present
-- **Blokkeert productieapply:** ja if public signup enabled in Dashboard
+- **Status:** VERIFIED (app) + VERIFIED (Dashboard)
+- **Gecontroleerd op:** 2026-07-20
+- **Evidence:** no `auth.signUp`; invites via admin; Dashboard **Allow new users to sign up = Disabled**
+- **Also visible:** Allow manual linking **Disabled**; Confirm email **Enabled**
+- **Blokkeert productieapply:** nee for signup policy
 
 ---
 
@@ -309,8 +318,8 @@ Do not change values in the first verification pass — classify only.
 |-------|--------|
 | Operator (Dashboard) | partial screenshots (Vercel origin/domains + Supabase URL Configuration) |
 | Date (code/API pass) | 2026-07-19 |
-| Date (screenshot review) | 2026-07-20 — **PARTIAL** (URL Configuration complete; providers/templates/SMTP/MFA open) |
-| Production origin confirmed | **yes (Vercel + Supabase Site URL + redirects)** — remaining Auth security/email still open |
+| Date (screenshot review) | 2026-07-20 — **PARTIAL** (URL + signup/providers partial; SMTP/templates/MFA open) |
+| Production origin confirmed | **yes (Vercel + Supabase Site URL + redirects)** — Auth email/SMTP/MFA still open |
 | Checklist complete (all actionable VERIFIED or N/A) | **no** |
 | Readiness gate impact | Remains **PRODUCTION MIGRATION GATE CONDITIONAL PASS** |
 | Auth settings mutated this round | **no** |
@@ -319,14 +328,13 @@ Do not change values in the first verification pass — classify only.
 
 ### Open blockers (must clear for Auth → VERIFIED / full PASS)
 
-1. Decide keep/remove localhost redirect entries.
-2. Optional: resolve Vercel **DNS Change Recommended** on `www.vdbdigital.nl`.
-3. Confirm Preview env scope for `NEXT_PUBLIC_APP_URL`.
-4. Confirm e-mail templates (especially magic link + reset) use production apex and VDB copy.
-5. Confirm custom SMTP + SPF/DKIM for production (or explicit blocker).
-6. Confirm providers: email/password + magic link on; OAuth/phone/anonymous off; no public signup bypass.
-7. Enroll staff MFA (API earlier: 0 factors) and document recovery.
-8. CAPTCHA / Auth rate limits / sessions — operator review.
-9. Backup/PITR posture (Overview: No backups) — accept or remediate before full PASS.
+1. SMTP settings screenshot (no secrets) + rotate any password shared in chat; confirm SPF/DKIM.
+2. Email provider detail: password + magic link toggles; confirm OAuth list fully scrolled (none unexpected).
+3. E-mail templates (magic link + reset) — apex + VDB copy.
+4. Enroll staff MFA (API earlier: 0 factors) and document recovery.
+5. CAPTCHA / Auth rate limits / sessions — operator review.
+6. Decide keep/remove localhost redirect entries.
+7. Optional: Vercel www DNS Change Recommended; Preview APP_URL scope.
+8. Backup/PITR posture (Overview: No backups) — accept or remediate before full PASS.
 
 Until these are `VERIFIED`, do **not** create `production-migration-readiness-pass` and do **not** run production apply.
