@@ -24,7 +24,7 @@ Project identity (CLI/API verified 2026-07-19):
 | Project ref for review | Expected `nhsrdnjfsxfikfbdmdfj` / `vdb nieuw` |
 | Screenshots in chat | Meerdere ontvangen (project identity; Vercel APP_URL edit; Vercel Domains 2026-07-20) |
 | Site URL / Redirect URLs | **PARTIEEL VERIFIED** — URL Configuration screenshot 2026-07-20 |
-| Providers / SMTP / templates / MFA / CAPTCHA | **PARTIEEL** — Providers/signups screenshot 2026-07-20; SMTP/templates/MFA/CAPTCHA nog open |
+| Providers / SMTP / templates / MFA / CAPTCHA | **PARTIEEL** — Providers + SMTP VERIFIED; templates/MFA/CAPTCHA nog open |
 | Instellingen gewijzigd door reviewer | **Nee** |
 | Code / migraties / commit / deploy door reviewer | **Nee** |
 
@@ -55,7 +55,7 @@ Project identity (CLI/API verified 2026-07-19):
 
 - **Status (review als geheel):** OPERATOR REVIEW REQUIRED (partieel bewijs; Auth URL/security nog open)
 - **Blokkeert productieapply:** ja
-- **Exacte handmatige actie (resterend):** (1) Email-provider detail (password + magic link toggles); (2) SMTP settings screenshot zonder secrets; (3) Email templates; (4) MFA; (5) CAPTCHA/rate limits/sessions; (6) localhost redirects; (7) optional www DNS; (8) Preview APP_URL scope. **Nooit wachtwoorden/API-keys in chat of checklist plakken.**
+- **Exacte handmatige actie (resterend):** (1) **Roteer** eerder gedeeld SMTP-wachtwoord; (2) Email-provider detail (magic link); (3) Email templates; (4) MFA enrollment; (5) CAPTCHA/rate limits/sessions; (6) localhost redirects; (7) optional www DNS; (8) Preview APP_URL scope. **Nooit wachtwoorden/API-keys in chat plakken.**
 
 **App contract (code, read-only):** invitation-first; password + magic link; no OAuth/phone/anonymous; admin AAL2/TOTP; redirects use `resolveAppUrl()` / `NEXT_PUBLIC_APP_URL`.
 
@@ -190,21 +190,21 @@ Evidence: Dashboard inaccessible this round → operator screenshots under `docs
 ## 4. SMTP (Dashboard)
 
 ### Custom SMTP
-- **Status:** OPERATOR REVIEW REQUIRED
+- **Status:** VERIFIED
 - **Gecontroleerd op:** 2026-07-20
-- **Gecontroleerd door:** Cursor agent
-- **Veilige evidence-referentie:** Geen Supabase SMTP-settings screenshot. Resend API keys (namen only): `supabase-auth-production`, `website vdb` — operator stelt dat deze in env staan. **Geen key-waarden vastgelegd.**
+- **Gecontroleerd door:** Cursor agent (operator screenshot Enable custom SMTP)
+- **Veilige evidence-referentie:** Auth SMTP — custom SMTP **ON**; host `smtp.resend.com`; port `465`; username `resend`; sender `noreply@vdbdigital.nl`; sender name `VDB Digital Software`; min interval 60s. Password field masked in UI. **Geen wachtwoord vastgelegd.**
 - **Verwachte waarde:** Custom SMTP (not built-in rate-limited mail) for production
-- **Benodigde actie:** Screenshot Auth → SMTP (host/user/sender; wachtwoord gemaskeerd). Bevestig Vercel/env gebruikt aparte keys voor app vs Auth zonder waarden te plakken.
+- **Benodigde actie:** **Roteer** SMTP-wachtwoord dat eerder in chat is gedeeld; daarna update in Supabase + Resend. Controlled testmail optional.
 - **Testmail:** only to controlled internal address — **not executed** this round
-- **Blokkeert productieapply:** ja tot Auth SMTP UI bewezen + sender domain/SPF/DKIM beoordeeld
+- **Blokkeert productieapply:** nee for SMTP UI (rotate shared secret remains ops hygiene before go-live)
 
 ### Alignment with app mail (`EMAIL_FROM` / Resend)
-- **Status:** VERIFIED (sending domain) + OPERATOR REVIEW REQUIRED (Auth SMTP UI + EMAIL_FROM match)
+- **Status:** VERIFIED (domain + Auth sender) + OPERATOR REVIEW REQUIRED (`EMAIL_FROM` exact string in Vercel/env)
 - **Gecontroleerd op:** 2026-07-20
-- **Veilige evidence-referentie:** Resend Domains — `vdbdigital.nl` status **Verified**; banner “Domain verified: Your domain is ready to send emails.”; region Ireland (eu-west-1). Tracking metrics not configured (optional; not required for Auth).
-- **Benodigde actie:** Nog steeds Auth → SMTP screenshot (host/user/sender, wachtwoord gemaskeerd) + bevestig sender domain = `vdbdigital.nl` / app `EMAIL_FROM`
-- **Blokkeert productieapply:** ja tot Auth SMTP UI bewezen (Resend domain alleen is niet voldoende)
+- **Veilige evidence-referentie:** Resend domain `vdbdigital.nl` Verified; Auth SMTP sender `noreply@vdbdigital.nl` / `VDB Digital Software`; Resend key names `supabase-auth-production`, `website vdb`
+- **Benodigde actie:** Confirm production app `EMAIL_FROM` uses same apex domain (value not pasted here)
+- **Blokkeert productieapply:** nee if operator confirms env alignment; else review
 
 ---
 
@@ -330,7 +330,7 @@ Do not change values in the first verification pass — classify only.
 
 ### Open blockers (must clear for Auth → VERIFIED / full PASS)
 
-1. Auth → SMTP settings screenshot (no secrets) + confirm sender uses verified `vdbdigital.nl`; rotate any password previously shared in chat.
+1. **Roteer** SMTP-wachtwoord dat in chat is gedeeld; update Supabase SMTP + Resend.
 2. Email provider detail: password + magic link toggles; confirm OAuth list fully scrolled (none unexpected).
 3. E-mail templates (magic link + reset) — apex + VDB copy.
 4. Enroll staff MFA (API earlier: 0 factors) and document recovery.
