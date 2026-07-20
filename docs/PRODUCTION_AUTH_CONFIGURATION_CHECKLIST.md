@@ -46,7 +46,7 @@ Project identity (CLI/API verified 2026-07-19):
 | Vercel default `vdbdigital2-0.vercel.app` | VERIFIED (platform host) | Production Valid Configuration — niet canonical; niet gebruiken als Auth Site URL |
 | Supabase Auth Site URL | VERIFIED | URL Configuration — exact `https://vdbdigital.nl` |
 | Redirect `…/auth/callback` | VERIFIED | Op allowlist |
-| Redirect `…/auth/callback?next=/portal` | MISSING | Code magic-link gebruikt query-variant; voeg exact toe voor fail-closed match |
+| Redirect `…/auth/callback?next=/portal` | VERIFIED | Allowlist screenshot 2026-07-20 — Total URLs: 7 |
 | Redirect `…/wachtwoord-herstellen` | VERIFIED | Op allowlist |
 | Redirect `…/uitnodiging/accepteren` | VERIFIED (path) | Op allowlist; app-owned invite + `?token=` |
 | Localhost redirect entries | OPERATOR REVIEW REQUIRED | 3× `http://localhost:3000/…` aanwezig — OK voor local; Site URL is niet localhost |
@@ -55,7 +55,7 @@ Project identity (CLI/API verified 2026-07-19):
 
 - **Status (review als geheel):** OPERATOR REVIEW REQUIRED (partieel bewijs; Auth URL/security nog open)
 - **Blokkeert productieapply:** ja
-- **Exacte handmatige actie (resterend):** (1) Add allowlist entry `https://vdbdigital.nl/auth/callback?next=/portal`; (2) decide keep/remove localhost redirects; (3) Providers; (4) Email templates; (5) SMTP; (6) MFA; (7) CAPTCHA/rate limits/sessions; (8) optional www DNS Change Recommended.
+- **Exacte handmatige actie (resterend):** (1) decide keep/remove localhost redirects; (2) Providers; (3) Email templates; (4) SMTP; (5) MFA; (6) CAPTCHA/rate limits/sessions; (7) optional www DNS Change Recommended; (8) Preview APP_URL scope.
 
 **App contract (code, read-only):** invitation-first; password + magic link; no OAuth/phone/anonymous; admin AAL2/TOTP; redirects use `resolveAppUrl()` / `NEXT_PUBLIC_APP_URL`.
 
@@ -99,15 +99,14 @@ Geen VERIFIED voor Site URL, redirects, providers, templates, SMTP, MFA of CAPTC
 - **Blokkeert productieapply:** nee
 
 ### Redirect allowlist — `/auth/callback`
-- **Status:** VERIFIED (base path) + MISSING (query variant)
+- **Status:** VERIFIED
 - **Gecontroleerd op:** 2026-07-20
 - **Gecontroleerd door:** Cursor agent (screenshot + code)
-- **Veilige evidence-referentie:** Allowlist `https://vdbdigital.nl/auth/callback`; code magic link → `…/auth/callback?next=/portal`
-- **Huidige waarde gemaskeerd:** base path aanwezig; query-variant niet in lijst
+- **Veilige evidence-referentie:** Allowlist bevat `https://vdbdigital.nl/auth/callback` en `https://vdbdigital.nl/auth/callback?next=/portal` (Total URLs: 7)
+- **Huidige waarde gemaskeerd:** beide aanwezig
 - **Verwachte waarde:** `https://vdbdigital.nl/auth/callback` and `https://vdbdigital.nl/auth/callback?next=/portal`
-- **Benodigde actie:** Add exact `https://vdbdigital.nl/auth/callback?next=/portal`
-- **Blokkeert productieapply:** ja (magic-link portal redirect risk tot query-variant toegevoegd)
-
+- **Benodigde actie:** none
+- **Blokkeert productieapply:** nee
 ### Redirect allowlist — password reset `/wachtwoord-herstellen`
 - **Status:** VERIFIED
 - **Gecontroleerd op:** 2026-07-20
@@ -310,8 +309,8 @@ Do not change values in the first verification pass — classify only.
 |-------|--------|
 | Operator (Dashboard) | partial screenshots (Vercel origin/domains + Supabase URL Configuration) |
 | Date (code/API pass) | 2026-07-19 |
-| Date (screenshot review) | 2026-07-20 — **PARTIAL** (Site URL VERIFIED; portal query redirect MISSING; providers/templates/SMTP/MFA open) |
-| Production origin confirmed | **mostly** — Vercel APP_URL + Domains + Supabase Site URL VERIFIED; magic-link `?next=/portal` allowlist entry MISSING |
+| Date (screenshot review) | 2026-07-20 — **PARTIAL** (URL Configuration complete; providers/templates/SMTP/MFA open) |
+| Production origin confirmed | **yes (Vercel + Supabase Site URL + redirects)** — remaining Auth security/email still open |
 | Checklist complete (all actionable VERIFIED or N/A) | **no** |
 | Readiness gate impact | Remains **PRODUCTION MIGRATION GATE CONDITIONAL PASS** |
 | Auth settings mutated this round | **no** |
@@ -320,15 +319,14 @@ Do not change values in the first verification pass — classify only.
 
 ### Open blockers (must clear for Auth → VERIFIED / full PASS)
 
-1. **Add** Redirect URL: `https://vdbdigital.nl/auth/callback?next=/portal` (code uses this for magic link).
-2. Decide keep/remove localhost redirect entries.
-3. Optional: resolve Vercel **DNS Change Recommended** on `www.vdbdigital.nl`.
-4. Confirm Preview env scope for `NEXT_PUBLIC_APP_URL`.
-5. Confirm e-mail templates (especially magic link + reset) use production apex and VDB copy.
-6. Confirm custom SMTP + SPF/DKIM for production (or explicit blocker).
-7. Confirm providers: email/password + magic link on; OAuth/phone/anonymous off; no public signup bypass.
-8. Enroll staff MFA (API earlier: 0 factors) and document recovery.
-9. CAPTCHA / Auth rate limits / sessions — operator review.
-10. Backup/PITR posture (Overview: No backups) — accept or remediate before full PASS.
+1. Decide keep/remove localhost redirect entries.
+2. Optional: resolve Vercel **DNS Change Recommended** on `www.vdbdigital.nl`.
+3. Confirm Preview env scope for `NEXT_PUBLIC_APP_URL`.
+4. Confirm e-mail templates (especially magic link + reset) use production apex and VDB copy.
+5. Confirm custom SMTP + SPF/DKIM for production (or explicit blocker).
+6. Confirm providers: email/password + magic link on; OAuth/phone/anonymous off; no public signup bypass.
+7. Enroll staff MFA (API earlier: 0 factors) and document recovery.
+8. CAPTCHA / Auth rate limits / sessions — operator review.
+9. Backup/PITR posture (Overview: No backups) — accept or remediate before full PASS.
 
 Until these are `VERIFIED`, do **not** create `production-migration-readiness-pass` and do **not** run production apply.
