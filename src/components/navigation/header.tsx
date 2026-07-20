@@ -5,6 +5,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { cn } from "@/lib/utilities/cn";
 import { BrandLink } from "@/components/brand/BrandLink";
 import { siteConfig } from "@/config/site";
+import { isDirectCheckoutEnabled } from "@/config/features";
 import { paths } from "@/i18n/config";
 import { useI18n } from "@/i18n/provider";
 import { LocaleLink, useLocalePathname } from "@/i18n/locale-link";
@@ -71,6 +72,7 @@ export function Header({ cartItemCount = 0 }: HeaderProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const panelId = useId();
   const closeMenu = useCallback(() => setMobileOpen(false), []);
+  const showCart = isDirectCheckoutEnabled();
 
   useLockBody(mobileOpen);
 
@@ -125,21 +127,29 @@ export function Header({ cartItemCount = 0 }: HeaderProps) {
         <div className="flex items-center gap-1 sm:gap-2">
           <LanguageSwitcherBoundary className="hidden md:inline-flex" />
           <LocaleLink
-            href={paths.cart}
-            className="relative flex h-11 w-11 items-center justify-center rounded-lg hover:bg-surface-elevated transition-colors"
-            aria-label={
-              cartItemCount > 0
-                ? `${t("nav.cart")}, ${cartItemCount}`
-                : t("nav.cart")
-            }
+            href={paths.login}
+            className="hidden sm:inline-flex min-h-10 items-center px-2.5 py-2 text-sm text-muted hover:text-foreground"
           >
-            <ShoppingCart className="h-5 w-5" />
-            {cartItemCount > 0 && (
-              <span className="absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded bg-primary px-1 text-[10px] font-semibold leading-none text-white">
-                {cartItemCount > 99 ? "99+" : cartItemCount}
-              </span>
-            )}
+            {t("nav.login")}
           </LocaleLink>
+          {showCart ? (
+            <LocaleLink
+              href={paths.cart}
+              className="relative flex h-11 w-11 items-center justify-center rounded-lg hover:bg-surface-elevated transition-colors"
+              aria-label={
+                cartItemCount > 0
+                  ? `${t("nav.cart")}, ${cartItemCount}`
+                  : t("nav.cart")
+              }
+            >
+              <ShoppingCart className="h-5 w-5" />
+              {cartItemCount > 0 && (
+                <span className="absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded bg-primary px-1 text-[10px] font-semibold leading-none text-white">
+                  {cartItemCount > 99 ? "99+" : cartItemCount}
+                </span>
+              )}
+            </LocaleLink>
+          ) : null}
 
           <LocaleLink
             href={`${paths.contact}?intent=introduction`}
@@ -265,6 +275,14 @@ export function Header({ cartItemCount = 0 }: HeaderProps) {
                     {t(item.labelKey)}
                   </LocaleLink>
                 ))}
+
+              <LocaleLink
+                href={paths.login}
+                onClick={closeMenu}
+                className={cn(linkClass(paths.login), "border-b border-border rounded-none")}
+              >
+                {t("nav.login")}
+              </LocaleLink>
 
               <div className="pt-5 space-y-2">
                 <LocaleLink

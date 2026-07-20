@@ -9,7 +9,7 @@ const nl: Messages = {
   },
   nav: {
     solutions: "Oplossingen",
-    shop: "Shop",
+    shop: "Pakketten & prijzen",
     forBusiness: "Voor bedrijven",
     cases: "Cases",
     process: "Werkwijze",
@@ -18,6 +18,7 @@ const nl: Messages = {
     contact: "Contact",
     quote: "Vraag een voorstel aan",
     scheduleIntro: "Plan een kennismaking",
+    login: "Klantlogin",
     cart: "Winkelwagen",
     allSolutions: "Alle oplossingen",
     openMenu: "Menu openen",
@@ -80,9 +81,12 @@ const nl: Messages = {
     ctaIntro: "Plan een kennismaking",
     ctaSolutions: "Bekijk onze oplossingen",
     ctaQuote: "Vraag een voorstel aan",
-    ctaShop: "Bekijk de shop →",
+    ctaCases: "Bekijk cases →",
     visualTitle: "Wat we leveren",
-    visualNote: "Illustratie van onze focus — geen verzonnen cijfers.",
+    visualNote: "Illustratie van onze focus — helder, mobiel-first en conversiegericht.",
+    visualPointStructure: "Heldere structuur",
+    visualPointMobile: "Mobiel-first layout",
+    visualPointCta: "Conversiegerichte CTA",
     statusConversion: "Conversiegericht",
     statusAvailable: "Beschikbaar",
     websitesStores: "Websites & webshops",
@@ -110,24 +114,29 @@ const nl: Messages = {
     intro: "Plan een kennismaking",
     quote: "Vraag een voorstel aan",
     contact: "Contact opnemen",
-    shop: "Naar de shop",
+    cases: "Bekijk cases",
   },
   cases: {
-    eyebrow: "Oplossingstypes",
-    title: "Wat we bouwen — zonder verzonnen klantcases",
-    body: "We publiceren alleen klantcases met expliciete toestemming. Tot die tijd tonen we de typen oplossingen die we leveren — geen fictieve resultaten of reviews.",
+    eyebrow: "Geselecteerd werk",
+    title: "Echte klantprojecten, eigen producten en zorgvuldig gelabelde concepten",
+    body: "We publiceren klantwerk met toestemming. Eigen producten en concepten labelen we duidelijk, zodat je altijd weet wat je bekijkt.",
     viewTypes: "Bekijk oplossingstypes",
     discuss: "Bespreek jouw project",
-    pageTitle: "Eerlijke cases, geen neprecensies",
+    pageTitle: "Geselecteerd werk",
     pageIntro:
-      "Klantcases plaatsen we alleen mét toestemming. Hieronder vind je oplossingstypes die VDB Digital levert — zonder verzonnen resultaatcijfers.",
+      "Echte klantprojecten, eigen productontwikkeling en zorgvuldig gelabelde concepten.",
+    groupClient: "Klantprojecten",
+    groupOwn: "Eigen softwareproducten",
+    groupConcepts: "Concepten & demonstraties",
+    groupConceptsIntro:
+      "Oplossingsvoorbeelden en demoflows die laten zien hoe we werken — duidelijk gelabeld als concept.",
     pageMetaDescription:
       "Oplossingstypes van VDB Digital. Echte klantcases volgen alleen met toestemming.",
     moreAbout: "Meer over dit type",
     whatItSolves: "Wat dit oplost",
     interestTitle: "Interesse?",
     interestBody:
-      "Dit is een oplossingstype, geen verzonnen klantcase. Wil je iets vergelijkbaars? Vraag een offerte aan of neem contact op.",
+      "Op zoek naar iets vergelijkbaars? Vraag een voorstel aan of plan een kennismaking.",
     notFound: "Oplossingstype niet gevonden",
     homeType1Title: "Conversiegerichte websites",
     homeType1Body:
@@ -166,7 +175,7 @@ const nl: Messages = {
     itemReviewflowSetupType: "Reviewflow",
     itemReviewflowSetupFocus: "Reputatie & opvolging",
     detailConversionWebsiteContent:
-      "Een bedrijfswebsite die duidelijk maakt wat je doet, voor wie, en wat de volgende stap is. Geen fictieve klantcase — wel het oplossingstype dat we bouwen voor dienstverleners die serieuze online aanwezigheid nodig hebben.",
+      "Een bedrijfswebsite die duidelijk maakt wat je doet, voor wie, en wat de volgende stap is — het oplossingstype dat we bouwen voor dienstverleners die serieuze online aanwezigheid nodig hebben.",
     detailConversionWebsiteOutcome1: "Heldere dienst- en positioneringsstructuur",
     detailConversionWebsiteOutcome2: "Offerte- of contactflow op de juiste plekken",
     detailConversionWebsiteOutcome3: "Mobiel-first en performancegericht",
@@ -288,7 +297,7 @@ const nl: Messages = {
     sendSupport: "Aanvraag versturen",
     thanksContact: "Bedankt! We nemen zo snel mogelijk contact met je op.",
     thanksQuote: "Offerteaanvraag ontvangen. We nemen zo snel mogelijk contact op.",
-    thanksSupport: "Supportaanvraag ontvangen. Ons team volgt zo snel mogelijk op.",
+    thanksSupport: "Supportaanvraag ontvangen. Wij volgen zo snel mogelijk op.",
     quoteBookingHint:
       "Sneller verder? Je kunt ook al een kennismaking inplannen terwijl we je aanvraag bekijken.",
     quoteMeetingNote:
@@ -351,7 +360,7 @@ const nl: Messages = {
     formLoading: "Formulier laden…",
     supportEmail: "Support e-mail",
     supportPageIntro:
-      "Heb je hulp nodig met je website, webshop of automatisering? Ons supportteam staat voor je klaar.",
+      "Heb je hulp nodig met je website, webshop of automatisering? VDB Digital Software staat klaar voor technische support en doorlopende zorg.",
     step: {
       type: "Klanttype",
       contact: "Contact",
@@ -387,10 +396,10 @@ const nl: Messages = {
     eyebrow: "Oplossing",
     included: "Wat is inbegrepen",
     benefits: "Voordelen",
-    interestTitle: "Interesse in {title}?",
+    interestTitle: "Interesse in deze oplossing?",
     interestBody:
       "Neem contact op of vraag een vrijblijvende offerte aan. We helpen je de juiste aanpak te kiezen.",
-    viewShop: "Bekijk shop",
+    viewShop: "Bekijk pakketten & prijzen",
   },
   product: {
     description: "Beschrijving",
@@ -423,7 +432,7 @@ const nl: Messages = {
   about: {
     title: "Over {name}",
     intro:
-      "{name} is een Europees software- en digitaliseringsbedrijf. Wij bouwen websites, webshops en automatiseringen voor organisaties die digitaal serieus willen groeien — met technische kwaliteit, heldere communicatie en systemen die meeschalen.",
+      "{name} bouwt maatwerkwebsites, webshops en bedrijfssoftware voor organisaties die digitale systemen nodig hebben waarop ze kunnen vertrouwen — met heldere communicatie, degelijke techniek en zonder theater.",
     mission: "Missie",
     missionBody:
       "Digitale systemen leveren die aanvragen verhogen, handmatig werk verminderen en professioneel overkomen — niet alleen mooi, maar werkbaar.",
@@ -433,26 +442,53 @@ const nl: Messages = {
     approach: "Werkwijze",
     approachBody:
       "Duidelijke scope, realistische planning en geen beloftes over cijfers die we niet kunnen onderbouwen. Kwaliteit boven snelle shortcuts.",
+    who: "Wie we zijn",
+    whoBody:
+      "{name} is een softwarestudio gevestigd in Nederland. Het werk wordt rechtstreeks geleid door de founder — strategie, ontwerpkeuzes en oplevering blijven dicht bij de mensen die jouw product bouwen.",
+    why: "Waarom we bestaan",
+    whyBody:
+      "Te veel bedrijven blijven steken met versnipperde tools, trage websites of automatisering die net niet past. Wij bestaan om die frictie te vervangen door systemen die aansluiten op hoe het bedrijf écht werkt.",
+    collaboration: "Hoe we samenwerken",
+    collaborationBody:
+      "Korte kennismaking, helder voorstel, zichtbare mijlpalen en eerlijke afwegingen. Je weet altijd wat in scope zit, wat volgt, en hoe keuzes doorwerken in planning en budget.",
+    expertise: "Technische expertise",
+    expertiseBody:
+      "Moderne webapplicaties, e-commerce met betrouwbare betalingen, integraties, automatiseringsflows en veilige klantportalen — gebouwd met onderhoudbaarheid en performance als uitgangspunt.",
+    clients: "Voor wie we werken",
+    clientsBody:
+      "Dienstverleners, lokale ondernemers en groeiende bedrijven die een serieuze online aanwezigheid of maatwerktools nodig hebben — vooral B2B en ambitieuze mkb’ers, geen massaconsumentenmerken.",
+    quality: "Kwaliteit & security",
+    qualityBody:
+      "Productiewerk volgt veilige defaults: minimale rechten, zorgvuldige omgang met persoonsgegevens, geteste releases en een duidelijke overdracht. Geen securitytheater.",
+    location: "Locatie & werkgebied",
+    locationBody:
+      "Gevestigd in Nederland, werkzaam voor klanten door het hele land — standaard online, op locatie wanneer het project daar echt baat bij heeft.",
+    meet: "Kennismaken",
+    meetBody:
+      "Liever eerst een gesprek dan een voorstel? Plan een kennismaking en we brengen in kaart wat past — zonder sales-script.",
   },
   process: {
     eyebrow: "Werkwijze",
     title: "Onze werkwijze",
     sectionTitle: "Van idee tot resultaat",
     intro:
-      "Elk project doorloopt een gestructureerd proces — transparant, efficiënt en gericht op resultaat. Geen verrassingen, wel duidelijke communicatie en kwaliteit.",
+      "Elk project volgt dezelfde vijf stappen — transparant, efficiënt en gericht op resultaat. Geen verrassingen, wel duidelijke communicatie en kwaliteit.",
     moreLink: "Meer over onze werkwijze",
-    step1Title: "Intake & analyse",
+    step1Title: "Kennismaking",
     step1Body:
-      "We bespreken je doelen, doelgroep en huidige situatie. Geen standaardpakket — wel een passend plan.",
-    step2Title: "Ontwerp & architectuur",
+      "We bespreken doelen, doelgroep en randvoorwaarden. Je vertrekt met duidelijkheid over de fit — geen pushy pitch.",
+    step2Title: "Strategie & scope",
     step2Body:
-      "Wireframes, design en technische architectuur. Alles afgestemd op conversie, snelheid en schaalbaarheid.",
-    step3Title: "Realisatie & test",
+      "Prioriteiten, succescriteria en een realistisch voorstel. Scope, planning en investering zijn expliciet vóór de bouw start.",
+    step3Title: "Ontwerp & ontwikkeling",
     step3Body:
-      "Ontwikkeling, integraties en grondig testen op desktop, mobiel en toegankelijkheid.",
-    step4Title: "Oplevering & groei",
+      "Structuur, design en engineering in één loop. Je beoordeelt voortgang tegen de afgesproken scope, niet tegen een black box.",
+    step4Title: "Testen & opleveren",
     step4Body:
-      "Lancering, training en doorlopende ondersteuning. Wij blijven partner in je digitale groei.",
+      "Checks op desktop, mobiel en toegankelijkheid, overdracht en go-live. Documentatie en training waar nodig.",
+    step5Title: "Groei & ondersteuning",
+    step5Body:
+      "Optioneel onderhoud, verbeteringen en technische support zodat het systeem meegroeit met het bedrijf.",
     expectTitle: "Wat je van ons mag verwachten",
     expect1: "Duidelijke planning en vaste contactpersoon",
     expect2: "Regelmatige updates over voortgang",

@@ -8,6 +8,7 @@ const stepKeys = [
   { title: "process.step2Title", body: "process.step2Body" },
   { title: "process.step3Title", body: "process.step3Body" },
   { title: "process.step4Title", body: "process.step4Body" },
+  { title: "process.step5Title", body: "process.step5Body" },
 ] as const;
 
 export async function ProcessSection() {
@@ -26,7 +27,7 @@ export async function ProcessSection() {
           <p className="text-label text-primary mb-3">{t("process.eyebrow")}</p>
           <h2 className="text-h2">{t("process.sectionTitle")}</h2>
         </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-8">
           {steps.map((item) => (
             <div key={item.step}>
               <span className="text-label text-primary">{item.step}</span>

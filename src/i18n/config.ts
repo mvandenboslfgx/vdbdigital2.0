@@ -41,6 +41,7 @@ export const paths = {
   support: "/support",
   contact: "/contact",
   quote: "/quote",
+  login: "/inloggen",
   cart: "/cart",
   checkout: "/checkout",
   checkoutSuccess: "/checkout/success",

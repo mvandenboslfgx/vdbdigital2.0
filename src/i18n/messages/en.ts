@@ -7,7 +7,7 @@ const en = {
   },
   nav: {
     solutions: "Solutions",
-    shop: "Shop",
+    shop: "Packages & pricing",
     forBusiness: "For business",
     cases: "Cases",
     process: "Process",
@@ -16,6 +16,7 @@ const en = {
     contact: "Contact",
     quote: "Request a proposal",
     scheduleIntro: "Schedule an introduction",
+    login: "Client login",
     cart: "Cart",
     allSolutions: "All solutions",
     openMenu: "Open menu",
@@ -77,9 +78,12 @@ const en = {
     ctaIntro: "Schedule an introduction",
     ctaSolutions: "View our solutions",
     ctaQuote: "Request a proposal",
-    ctaShop: "Browse the shop →",
+    ctaCases: "View cases →",
     visualTitle: "What we deliver",
-    visualNote: "Illustration of our focus — no invented metrics.",
+    visualNote: "Illustration of our focus — structured, mobile-first and conversion-led.",
+    visualPointStructure: "Clear structure",
+    visualPointMobile: "Mobile-first layout",
+    visualPointCta: "Conversion-focused CTA",
     statusConversion: "Conversion-led",
     statusAvailable: "Available",
     websitesStores: "Websites & stores",
@@ -107,24 +111,29 @@ const en = {
     intro: "Schedule an introduction",
     quote: "Request a proposal",
     contact: "Get in touch",
-    shop: "Go to shop",
+    cases: "View cases",
   },
   cases: {
-    eyebrow: "Solution types",
-    title: "What we build — without invented client stories",
-    body: "We only publish client cases with explicit permission. Until then we show the types of solutions we deliver — no fabricated results or reviews.",
+    eyebrow: "Selected work",
+    title: "Real client projects, own products and carefully labelled concepts",
+    body: "We publish client work with permission. Own products and concepts are labelled clearly so you always know what you are looking at.",
     viewTypes: "View solution types",
     discuss: "Discuss your project",
-    pageTitle: "Honest cases, no fake reviews",
+    pageTitle: "Selected work",
     pageIntro:
-      "We publish client cases only with permission. Below are solution types VDB Digital delivers — so you can see what we build without invented metrics.",
+      "Real client projects, own product development and carefully labelled concepts.",
+    groupClient: "Client projects",
+    groupOwn: "Own software products",
+    groupConcepts: "Concepts & demonstrations",
+    groupConceptsIntro:
+      "Solution examples and demo flows that show how we work — clearly labelled as concepts.",
     pageMetaDescription:
       "Solution types from VDB Digital. Real client cases are published only with permission.",
     moreAbout: "More about this type",
     whatItSolves: "What this solves",
     interestTitle: "Interested?",
     interestBody:
-      "This is a solution type, not a fabricated client case. Want something similar? Request a quote or get in touch.",
+      "Looking for something similar? Request a proposal or schedule an introduction.",
     notFound: "Solution type not found",
     homeType1Title: "Conversion-focused websites",
     homeType1Body:
@@ -163,7 +172,7 @@ const en = {
     itemReviewflowSetupType: "Review flow",
     itemReviewflowSetupFocus: "Reputation & follow-up",
     detailConversionWebsiteContent:
-      "A business website that clearly explains what you do, for whom, and what the next step is. Not a fabricated client case — but the solution type we build for service businesses that need a serious online presence.",
+      "A business website that clearly explains what you do, for whom, and what the next step is — the solution type we build for service businesses that need a serious online presence.",
     detailConversionWebsiteOutcome1: "Clear service and positioning structure",
     detailConversionWebsiteOutcome2: "Quote or contact flow in the right places",
     detailConversionWebsiteOutcome3: "Mobile-first and performance-focused",
@@ -284,7 +293,7 @@ const en = {
     sendSupport: "Submit request",
     thanksContact: "Thank you! We will get back to you as soon as possible.",
     thanksQuote: "Quote request received. We will contact you shortly.",
-    thanksSupport: "Support request received. Our team will follow up soon.",
+    thanksSupport: "Support request received. We will follow up soon.",
     quoteBookingHint:
       "Want to move faster? You can also schedule an introduction call while we review your request.",
     quoteMeetingNote:
@@ -345,7 +354,7 @@ const en = {
     formLoading: "Loading form…",
     supportEmail: "Support email",
     supportPageIntro:
-      "Need help with your website, online store or automation? Our support team is here for you.",
+      "Need help with your website, online store or automation? VDB Digital Software is available for technical support and ongoing care.",
     step: {
       type: "Customer type",
       contact: "Contact",
@@ -381,10 +390,10 @@ const en = {
     eyebrow: "Solution",
     included: "What's included",
     benefits: "Benefits",
-    interestTitle: "Interested in {title}?",
+    interestTitle: "Interested in this solution?",
     interestBody:
       "Get in touch or request a no-obligation quote. We help you choose the right approach for your situation.",
-    viewShop: "Browse shop",
+    viewShop: "View packages & pricing",
   },
   product: {
     description: "Description",
@@ -417,7 +426,7 @@ const en = {
   about: {
     title: "About {name}",
     intro:
-      "{name} is a European software and digitalisation company. We build websites, online stores and automations for organisations that want serious digital growth — with technical quality, clear communication and systems that scale.",
+      "{name} builds custom websites, online stores and business software for organisations that need digital systems they can rely on — with clear communication, solid engineering and no theatre.",
     mission: "Mission",
     missionBody:
       "Deliver digital systems that increase enquiries, reduce manual work and look professional — not just polished, but workable.",
@@ -427,26 +436,53 @@ const en = {
     approach: "Approach",
     approachBody:
       "Clear scope, realistic planning, and no promises about numbers we cannot substantiate. Quality over shortcuts.",
+    who: "Who we are",
+    whoBody:
+      "{name} is a Netherlands-based software studio. Work is led directly by the founder — strategy, design decisions and delivery stay close to the people who build your product.",
+    why: "Why we exist",
+    whyBody:
+      "Too many businesses get stuck with fragmented tools, slow websites or automation that never quite fits. We exist to replace that friction with systems that match how the business actually operates.",
+    collaboration: "How we collaborate",
+    collaborationBody:
+      "Short introduction, clear proposal, visible milestones and honest trade-offs. You always know what is in scope, what is next, and how decisions affect timeline and budget.",
+    expertise: "Technical expertise",
+    expertiseBody:
+      "Modern web applications, e-commerce with reliable payments, integrations, automation flows and secure customer portals — built with maintainability and performance in mind.",
+    clients: "Who we work with",
+    clientsBody:
+      "Service businesses, local operators and growing companies that need a serious online presence or custom tooling — typically B2B and ambitious SMEs rather than mass-market consumer brands.",
+    quality: "Quality & security",
+    qualityBody:
+      "Production work follows secure defaults: least-privilege access, careful handling of personal data, tested releases and clear handover. We do not invent security theatre.",
+    location: "Location & reach",
+    locationBody:
+      "Based in the Netherlands, working with clients across the country — online by default, on-site when the project genuinely benefits from it.",
+    meet: "Get to know us",
+    meetBody:
+      "Prefer a conversation before a proposal? Schedule an introduction and we will map what fits — without a sales script.",
   },
   process: {
     eyebrow: "Process",
     title: "How we work",
     sectionTitle: "From idea to outcome",
     intro:
-      "Every project follows a structured process — transparent, efficient and results-oriented. No surprises; clear communication and quality.",
+      "Every project follows the same five steps — transparent, efficient and results-oriented. No surprises; clear communication and quality.",
     moreLink: "More about our process",
-    step1Title: "Discovery & analysis",
+    step1Title: "Introduction",
     step1Body:
-      "We discuss your goals, audience and current situation. No off-the-shelf package — a plan that fits.",
-    step2Title: "Design & architecture",
+      "We discuss goals, audience and constraints. You leave with clarity on fit — not a pushy pitch.",
+    step2Title: "Strategy & scope",
     step2Body:
-      "Wireframes, design and technical architecture. Everything aligned with conversion, speed and scalability.",
-    step3Title: "Build & test",
+      "Priorities, success criteria and a realistic proposal. Scope, timeline and investment become explicit before build starts.",
+    step3Title: "Design & development",
     step3Body:
-      "Development, integrations and thorough testing on desktop, mobile and accessibility.",
-    step4Title: "Launch & growth",
+      "Structure, design and engineering in one loop. You review progress against the agreed scope, not a black box.",
+    step4Title: "Testing & delivery",
     step4Body:
-      "Go-live, training and ongoing support. We stay a partner in your digital growth.",
+      "Desktop, mobile and accessibility checks, handover and go-live. Documentation and training when needed.",
+    step5Title: "Growth & support",
+    step5Body:
+      "Optional maintenance, improvements and technical support so the system keeps pace with the business.",
     expectTitle: "What you can expect",
     expect1: "Clear planning and a dedicated contact",
     expect2: "Regular progress updates",

@@ -2,16 +2,7 @@ import { Container, Section } from "@/components/ui/container";
 import { getLocale } from "@/i18n/get-dictionary";
 import { getCommercialContent } from "@/i18n/content/commercial";
 
-const stepKeys = [
-  "step1",
-  "step2",
-  "step3",
-  "step4",
-  "step5",
-  "step6",
-  "step7",
-  "step8",
-] as const;
+const stepKeys = ["step1", "step2", "step3", "step4", "step5"] as const;
 
 export async function ProcessStepsSection() {
   const locale = await getLocale();
@@ -24,9 +15,11 @@ export async function ProcessStepsSection() {
           {locale === "nl" ? "Werkwijze" : "Process"}
         </p>
         <h2 className="text-h2 text-light-foreground mb-10">
-          {locale === "nl" ? "Van kennismaking tot doorlopende support" : "From introduction to ongoing support"}
+          {locale === "nl"
+            ? "Van kennismaking tot groei"
+            : "From introduction to growth"}
         </h2>
-        <ol className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <ol className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {stepKeys.map((key, index) => (
             <li
               key={key}

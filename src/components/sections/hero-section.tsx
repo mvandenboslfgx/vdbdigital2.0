@@ -58,12 +58,12 @@ export async function HeroSection() {
             </div>
             <p className="mt-4 sm:mt-6 animate-fade-in-late">
               <LocaleLinkButton
-                href={paths.shop}
+                href={paths.cases}
                 variant="ghost"
                 size="sm"
                 className="px-0 sm:px-3"
               >
-                {t("home.ctaShop")}
+                {t("home.ctaCases")}
               </LocaleLinkButton>
             </p>
           </div>

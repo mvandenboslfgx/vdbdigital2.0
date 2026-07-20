@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { Container, Section, Card } from "@/components/ui/container";
 import { LocaleLinkButton } from "@/components/ui/locale-link-button";
 import { LocaleLink } from "@/i18n/locale-link";
-import { siteConfig } from "@/config/site";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import { paths } from "@/i18n/config";
 import { BookingCta } from "@/components/commercial/booking-cta";
@@ -255,19 +254,16 @@ export async function SolutionPageContent(props: SolutionPageSections) {
       <Section variant="dark">
         <Container className="text-center">
           <h2 className="text-h2 mb-4">
-            {t("solution.interestTitle", { title: title.toLowerCase() })}
+            {t("solution.interestTitle")}
           </h2>
           <p className="text-muted mb-6 prose-width mx-auto">{t("solution.interestBody")}</p>
           <div className="flex flex-wrap justify-center gap-3">
-            <LocaleLinkButton href={ctaHref} size="lg">
-              {resolvedCtaLabel}
-            </LocaleLinkButton>
-            <BookingCta />
+            <BookingCta variant="primary" />
             <LocaleLinkButton href={paths.quote} variant="outline" size="lg">
               {t("nav.quote")}
             </LocaleLinkButton>
-            <LocaleLinkButton href={paths.shop} variant="ghost" size="lg">
-              {t("solution.viewShop")}
+            <LocaleLinkButton href={paths.cases} variant="ghost" size="lg">
+              {t("cta.cases")}
             </LocaleLinkButton>
           </div>
         </Container>
@@ -281,10 +277,11 @@ export function createSolutionMetadata(
   description: string,
   path: string,
 ): Metadata {
+  const pageTitle = title.replace(/\s*\|\s*VDB Digital Software\s*$/i, "").trim();
   return {
-    title,
+    title: pageTitle,
     description,
     alternates: { canonical: path },
-    openGraph: { title: `${title} | ${siteConfig.name}`, description },
+    openGraph: { title: pageTitle, description },
   };
 }

@@ -1,13 +1,16 @@
 import { VisualFrame } from "@/components/visuals/visual-frame";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 interface WebsitePreviewVisualProps {
   className?: string;
 }
 
 /** Illustrative website layout — no fake client or revenue data */
-export function WebsitePreviewVisual({ className }: WebsitePreviewVisualProps) {
+export async function WebsitePreviewVisual({ className }: WebsitePreviewVisualProps) {
+  const { t } = await getDictionary();
+
   return (
-    <VisualFrame title="Website preview" className={className}>
+    <VisualFrame title={t("home.visualTitle")} className={className}>
       <div className="space-y-3">
         <div className="h-8 rounded-md bg-primary/20" />
         <div className="grid grid-cols-3 gap-2">
@@ -21,15 +24,15 @@ export function WebsitePreviewVisual({ className }: WebsitePreviewVisualProps) {
         <ul className="space-y-1.5 text-xs text-muted">
           <li className="flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-success" />
-            Clear structure
+            {t("home.visualPointStructure")}
           </li>
           <li className="flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-success" />
-            Mobile-first layout
+            {t("home.visualPointMobile")}
           </li>
           <li className="flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-success" />
-            Conversion-focused CTA
+            {t("home.visualPointCta")}
           </li>
         </ul>
       </div>

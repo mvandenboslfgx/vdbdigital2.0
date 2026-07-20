@@ -7,6 +7,7 @@ import { useConsent } from "@/components/consent/consent-provider";
 import { useI18n } from "@/i18n/provider";
 import { LocaleLink } from "@/i18n/locale-link";
 import { LanguageSwitcherBoundary } from "@/i18n/language-switcher-boundary";
+import { paths } from "@/i18n/config";
 
 export function Footer() {
   const { footer } = siteConfig.navigation;
@@ -26,6 +27,12 @@ export function Footer() {
               <LanguageSwitcherBoundary />
             </div>
             <div className="mt-4 flex flex-wrap gap-3">
+              <LocaleLink
+                href={paths.login}
+                className="text-small text-muted hover:text-primary transition-colors"
+              >
+                {t("nav.login")}
+              </LocaleLink>
               {hasSocial("linkedin") && (
                 <a
                   href={siteConfig.social.linkedin}
@@ -107,22 +114,37 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row justify-between gap-4">
-          <p className="text-small text-muted">
-            © {new Date().getFullYear()} {siteConfig.legalName}. {t("footer.rights")}
-          </p>
-          {hasCompanyLocation() ? (
+        <div className="mt-12 pt-8 border-t border-border flex flex-col gap-4 sm:flex-row sm:justify-between">
+          <div className="space-y-2">
             <p className="text-small text-muted">
-              {siteConfig.company.address} · {siteConfig.company.city}
+              © {new Date().getFullYear()} {siteConfig.legalName}. {t("footer.rights")}
+            </p>
+            <p className="text-small text-muted">
+              {[
+                siteConfig.company.kvk ? `KvK ${siteConfig.company.kvk}` : null,
+                siteConfig.company.vat ? `BTW ${siteConfig.company.vat}` : null,
+                siteConfig.company.phone || null,
+              ]
+                .filter(Boolean)
+                .join(" · ") || (
+                <a
+                  href={`mailto:${siteConfig.contactEmail}`}
+                  className="hover:text-foreground transition-colors"
+                >
+                  {siteConfig.contactEmail}
+                </a>
+              )}
+            </p>
+          </div>
+          {hasCompanyLocation() ? (
+            <p className="text-small text-muted sm:text-right">
+              {siteConfig.company.address}
+              <br />
+              {siteConfig.company.city}, {siteConfig.company.country}
             </p>
           ) : (
-            <p className="text-small text-muted">
-              <a
-                href={`mailto:${siteConfig.contactEmail}`}
-                className="hover:text-foreground transition-colors"
-              >
-                {siteConfig.contactEmail}
-              </a>
+            <p className="text-small text-muted sm:text-right">
+              {siteConfig.company.country}
             </p>
           )}
         </div>

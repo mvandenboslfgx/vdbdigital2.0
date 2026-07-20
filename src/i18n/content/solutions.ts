@@ -26,7 +26,7 @@ export type BilingualSolutionContent = Record<Locale, SolutionContent>;
 export const solutionsContent = {
   overview: {
     en: {
-      metaTitle: "Solutions | VDB Digital Software",
+      metaTitle: "Solutions",
       metaDescription:
         "Custom websites, online stores, AI automation, WhatsApp AI, live chat, review flows and ongoing support from VDB Digital Software.",
       title: "Digital solutions built around your business",
@@ -111,7 +111,7 @@ export const solutionsContent = {
       ],
     },
     nl: {
-      metaTitle: "Oplossingen | VDB Digital Software",
+      metaTitle: "Oplossingen",
       metaDescription:
         "Maatwerkwebsites, webshops, AI-automatisering, WhatsApp AI, livechat, reviewflows en doorlopende support van VDB Digital Software.",
       title: "Digitale oplossingen rond jouw bedrijf",
@@ -199,7 +199,7 @@ export const solutionsContent = {
 
   websites: {
     en: {
-      metaTitle: "Custom Websites | VDB Digital Software",
+      metaTitle: "Custom Websites",
       metaDescription:
         "Custom business websites and landing pages that build trust, load fast and turn visitors into clear next steps.",
       title: "Custom websites",
@@ -290,7 +290,7 @@ export const solutionsContent = {
       ],
     },
     nl: {
-      metaTitle: "Maatwerkwebsites | VDB Digital Software",
+      metaTitle: "Maatwerkwebsites",
       metaDescription:
         "Maatwerk bedrijfswebsites en landingspagina's die vertrouwen wekken, snel laden en bezoekers naar een duidelijke vervolgstap leiden.",
       title: "Maatwerkwebsites",
@@ -384,7 +384,7 @@ export const solutionsContent = {
 
   webshops: {
     en: {
-      metaTitle: "Online Stores | VDB Digital Software",
+      metaTitle: "Online Stores",
       metaDescription:
         "Professional online stores with catalogue, cart, Mollie Hosted Checkout and order flows — built for trust and day-to-day operations.",
       title: "Professional online stores",
@@ -475,7 +475,7 @@ export const solutionsContent = {
       ],
     },
     nl: {
-      metaTitle: "Webshops | VDB Digital Software",
+      metaTitle: "Webshops",
       metaDescription:
         "Professionele webshops met catalogus, winkelwagen, Mollie Hosted Checkout en orderflows — gebouwd voor vertrouwen en dagelijkse operatie.",
       title: "Professionele webshops",
@@ -569,7 +569,7 @@ export const solutionsContent = {
 
   "ai-automation": {
     en: {
-      metaTitle: "AI Automation | VDB Digital Software",
+      metaTitle: "AI Automation",
       metaDescription:
         "Practical AI and workflow automation that cuts repetitive work, speeds follow-up and keeps humans in control of decisions.",
       title: "AI & automation",
@@ -660,7 +660,7 @@ export const solutionsContent = {
       ],
     },
     nl: {
-      metaTitle: "AI-automatisering | VDB Digital Software",
+      metaTitle: "AI-automatisering",
       metaDescription:
         "Praktische AI- en workflowautomatisering die repetitief werk vermindert, opvolging versnelt en mensen de beslissingen laat nemen.",
       title: "AI & automatisering",
@@ -754,7 +754,7 @@ export const solutionsContent = {
 
   "whatsapp-ai": {
     en: {
-      metaTitle: "WhatsApp AI | VDB Digital Software",
+      metaTitle: "WhatsApp AI",
       metaDescription:
         "WhatsApp Business AI that answers common questions, captures leads and hands conversations to your team when judgment is needed.",
       title: "WhatsApp Business AI",
@@ -845,7 +845,7 @@ export const solutionsContent = {
       ],
     },
     nl: {
-      metaTitle: "WhatsApp AI | VDB Digital Software",
+      metaTitle: "WhatsApp AI",
       metaDescription:
         "WhatsApp Business AI die veelgestelde vragen beantwoordt, leads opvangt en gesprekken overdraagt aan jouw team wanneer beoordeling nodig is.",
       title: "WhatsApp Business AI",
@@ -939,7 +939,7 @@ export const solutionsContent = {
 
   livechat: {
     en: {
-      metaTitle: "Live Chat | VDB Digital Software",
+      metaTitle: "Live Chat",
       metaDescription:
         "Professional live chat setup on your website — styling, triggers, offline messages and consent-aware loading.",
       title: "Live chat for your website",
@@ -1028,7 +1028,7 @@ export const solutionsContent = {
       ],
     },
     nl: {
-      metaTitle: "Livechat | VDB Digital Software",
+      metaTitle: "Livechat",
       metaDescription:
         "Professionele livechat-setup op jouw website — styling, triggers, offlineberichten en toestemmingsbewust laden.",
       title: "Livechat voor je website",
@@ -1120,7 +1120,7 @@ export const solutionsContent = {
 
   reviewflows: {
     en: {
-      metaTitle: "Review Flows | VDB Digital Software",
+      metaTitle: "Review Flows",
       metaDescription:
         "Ethical automated review invitation flows after appointments, deliveries or service visits — no review manipulation.",
       title: "Review and feedback flows",
@@ -1209,7 +1209,7 @@ export const solutionsContent = {
       ],
     },
     nl: {
-      metaTitle: "Reviewflows | VDB Digital Software",
+      metaTitle: "Reviewflows",
       metaDescription:
         "Ethische automatische review-uitnodigingen na afspraken, leveringen of dienstverlening — zonder reviewmanipulatie.",
       title: "Review- en feedbackflows",
@@ -1301,7 +1301,7 @@ export const solutionsContent = {
 
   "appointment-automation": {
     en: {
-      metaTitle: "Appointment Automation | VDB Digital Software",
+      metaTitle: "Appointment Automation",
       metaDescription:
         "Automate booking confirmations, reminders and no-show reduction flows around your calendar — with people still confirming exceptions.",
       title: "Appointment automation",
@@ -1391,7 +1391,7 @@ export const solutionsContent = {
       ],
     },
     nl: {
-      metaTitle: "Afspraakautomatisering | VDB Digital Software",
+      metaTitle: "Afspraakautomatisering",
       metaDescription:
         "Automatiseer boekingsbevestigingen, herinneringen en no-show-reductie rond jouw agenda — met mensen die uitzonderingen blijven bevestigen.",
       title: "Afspraakautomatisering",
@@ -1484,7 +1484,7 @@ export const solutionsContent = {
 
   "website-maintenance": {
     en: {
-      metaTitle: "Website Maintenance | VDB Digital Software",
+      metaTitle: "Website Maintenance",
       metaDescription:
         "Scoped website maintenance: updates, monitoring, small fixes and content assists — without unlimited work claims.",
       title: "Website maintenance",
@@ -1573,7 +1573,7 @@ export const solutionsContent = {
       ],
     },
     nl: {
-      metaTitle: "Websiteonderhoud | VDB Digital Software",
+      metaTitle: "Websiteonderhoud",
       metaDescription:
         "Afgestemd websiteonderhoud: updates, monitoring, kleine fixes en contenthulp — zonder claims over onbeperkt werk.",
       title: "Websiteonderhoud",
@@ -1665,7 +1665,7 @@ export const solutionsContent = {
 
   "technical-support": {
     en: {
-      metaTitle: "Technical Support | VDB Digital Software",
+      metaTitle: "Technical Support",
       metaDescription:
         "Technical support for your VDB Digital Software stack — incident triage, fixes and guided changes with clear severity and response expectations.",
       title: "Technical support",
@@ -1754,7 +1754,7 @@ export const solutionsContent = {
       ],
     },
     nl: {
-      metaTitle: "Technische support | VDB Digital Software",
+      metaTitle: "Technische support",
       metaDescription:
         "Technische support voor jouw VDB Digital Software-stack — incidenttriage, fixes en begeleide wijzigingen met duidelijke severity en responseverwachtingen.",
       title: "Technische support",
@@ -1846,7 +1846,7 @@ export const solutionsContent = {
 
   "conversion-optimisation": {
     en: {
-      metaTitle: "Conversion Optimisation | VDB Digital Software",
+      metaTitle: "Conversion Optimisation",
       metaDescription:
         "Practical conversion optimisation for your website or store — clarity, structure and UX improvements without fake metrics or ranking guarantees.",
       title: "Conversion optimisation",
@@ -1934,7 +1934,7 @@ export const solutionsContent = {
       ],
     },
     nl: {
-      metaTitle: "Conversie-optimalisatie | VDB Digital Software",
+      metaTitle: "Conversie-optimalisatie",
       metaDescription:
         "Praktische conversie-optimalisatie voor jouw website of webshop — helderheid, structuur en UX-verbeteringen zonder nepmetrics of rankinggaranties.",
       title: "Conversie-optimalisatie",
@@ -2025,7 +2025,7 @@ export const solutionsContent = {
 
   "custom-software": {
     en: {
-      metaTitle: "Custom Software | VDB Digital Software",
+      metaTitle: "Custom Software",
       metaDescription:
         "Custom software and internal tools built around your workflows — scoped discovery, secure delivery and room to extend.",
       title: "Custom software",
@@ -2115,7 +2115,7 @@ export const solutionsContent = {
       ],
     },
     nl: {
-      metaTitle: "Maatwerksoftware | VDB Digital Software",
+      metaTitle: "Maatwerksoftware",
       metaDescription:
         "Maatwerksoftware en interne tools rond jouw workflows — discovery met scope, veilige oplevering en ruimte om uit te breiden.",
       title: "Maatwerksoftware",

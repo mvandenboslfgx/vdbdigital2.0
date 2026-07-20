@@ -40,12 +40,12 @@ export async function CtaSection() {
                 {t("cta.quote")}
               </LocaleLinkButton>
               <LocaleLinkButton
-                href={paths.shop}
+                href={paths.cases}
                 variant="ghost"
                 tone="light"
                 size="lg"
               >
-                {t("cta.shop")}
+                {t("cta.cases")}
               </LocaleLinkButton>
             </div>
           </div>

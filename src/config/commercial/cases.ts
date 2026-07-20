@@ -297,6 +297,20 @@ export function getPublicCases(): CaseDefinition[] {
     });
 }
 
+/** Public cases grouped for marketing portfolio pages. */
+export function getCasesByPortfolioGroup(): {
+  client: CaseDefinition[];
+  own: CaseDefinition[];
+  concepts: CaseDefinition[];
+} {
+  const visible = getPublicCases();
+  return {
+    client: visible.filter((c) => c.type === "real"),
+    own: visible.filter((c) => c.type === "internal"),
+    concepts: visible.filter((c) => c.type === "demonstration"),
+  };
+}
+
 /** Featured portfolio cases for homepage / overview (live before coming soon). */
 export function getFeaturedPortfolioCases(): CaseDefinition[] {
   return getPublicCases().filter(

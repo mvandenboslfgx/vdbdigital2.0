@@ -20,6 +20,21 @@ export default function TermsPage() {
       <h2 className="text-h3 text-light-foreground">Company details</h2>
       <CompanyLegalBlock />
 
+      <h2 className="text-h3 text-light-foreground">Scope of these terms</h2>
+      <p>
+        These terms primarily cover business-to-business (B2B) services and digital
+        products. Where mandatory consumer law applies to a consumer (B2C)
+        purchase, those statutory rights prevail over conflicting clauses.
+      </p>
+
+      <h2 className="text-h3 text-light-foreground">Complaints</h2>
+      <p>
+        Complaints about services or products can be sent to{" "}
+        {siteConfig.contactEmail}. We aim to acknowledge complaints within five
+        business days and resolve them within a reasonable period. Escalation to
+        the competent Dutch court remains available where required by law.
+      </p>
+
       <h2 className="text-h3 text-light-foreground">Offer and agreement</h2>
       <p>
         Quotes and shop offers are non-binding until acceptance and payment (shop)
