@@ -22,8 +22,8 @@ Project identity (CLI/API verified 2026-07-19):
 | Check | Result |
 |-------|--------|
 | Project ref for review | Expected `nhsrdnjfsxfikfbdmdfj` / `vdb nieuw` |
-| Screenshots in chat | **3 ontvangen** (Vercel env row; Supabase Project Overview; Supabase Project Settings → General) |
-| Site URL / Redirect URLs / Providers / SMTP / templates / MFA / CAPTCHA / Domains | **MISSING** — niet in aangeleverde beelden |
+| Screenshots in chat | Meerdere ontvangen (project identity; Vercel APP_URL edit; Vercel Domains 2026-07-20) |
+| Site URL / Redirect URLs / Providers / SMTP / templates / MFA / CAPTCHA | **MISSING** — niet in aangeleverde beelden |
 | Instellingen gewijzigd door reviewer | **Nee** |
 | Code / migraties / commit / deploy door reviewer | **Nee** |
 
@@ -38,7 +38,11 @@ Project identity (CLI/API verified 2026-07-19):
 | Vercel env key `NEXT_PUBLIC_APP_URL` aanwezig | VERIFIED | Vercel Environment Variables row |
 | Vercel env **waarde** exact `https://vdbdigital.nl` | VERIFIED | Edit-dialog screenshot 2026-07-19 ~23:14 — value exactly `https://vdbdigital.nl` (no slash, no www, HTTPS) |
 | Vercel env scope | OPERATOR REVIEW REQUIRED | Eerdere row: **Production and Preview**; bevestig of Preview bewust dezelfde apex gebruikt of een aparte Preview-waarde nodig heeft |
-| Vercel Domains (apex primary + www→apex) | MISSING | Geen Domains-screenshot |
+| Vercel Domains — apex `vdbdigital.nl` Production | VERIFIED | Domains screenshot 2026-07-20 — Valid Configuration + Production |
+| Vercel Domains — `www.vdbdigital.nl` → apex | VERIFIED (redirect) | 307 redirect naar `vdbdigital.nl` zichtbaar |
+| Vercel Domains — `www.vdbdigital.nl` DNS | OPERATOR REVIEW REQUIRED | Badge **DNS Change Recommended** + “View DNS configuration” — redirect OK, DNS-opschoning open |
+| Extra domain `www.vdbdigital.shop` → apex | VERIFIED (alias redirect) | 307 → `vdbdigital.nl` (shop-alias; geen Site URL) |
+| Vercel default `vdbdigital2-0.vercel.app` | VERIFIED (platform host) | Production Valid Configuration — niet canonical; niet gebruiken als Auth Site URL |
 | Supabase Auth Site URL | MISSING | Geen URL Configuration-screenshot |
 | Redirect allowlist | MISSING | Geen Redirect URLs-screenshot |
 | Providers / templates / SMTP / MFA / CAPTCHA / sessions | MISSING | Geen Auth-detail-screenshots |
@@ -46,7 +50,7 @@ Project identity (CLI/API verified 2026-07-19):
 
 - **Status (review als geheel):** OPERATOR REVIEW REQUIRED (partieel bewijs; Auth URL/security nog open)
 - **Blokkeert productieapply:** ja
-- **Exacte handmatige actie (resterend):** (1) open Vercel env → toon/confirm waarde exact `https://vdbdigital.nl` (of screenshot met zichtbare host, geen andere secrets); overweeg Production-only + aparte Preview-waarde; (2) Vercel Domains: apex primary + www redirect; (3) Supabase Auth → URL Configuration (Site URL + redirects); (4) Providers; (5) Email templates; (6) SMTP; (7) MFA; (8) CAPTCHA/rate limits/sessions.
+- **Exacte handmatige actie (resterend):** (1) Vercel: optioneel DNS Change Recommended voor `www.vdbdigital.nl` oplossen; Preview-scope APP_URL bevestigen; (2) Supabase Auth → URL Configuration (Site URL + redirects); (3) Providers; (4) Email templates; (5) SMTP; (6) MFA; (7) CAPTCHA/rate limits/sessions.
 
 **App contract (code, read-only):** invitation-first; password + magic link; no OAuth/phone/anonymous; admin AAL2/TOTP; redirects use `resolveAppUrl()` / `NEXT_PUBLIC_APP_URL`.
 
@@ -301,8 +305,8 @@ Do not change values in the first verification pass — classify only.
 |-------|--------|
 | Operator (Dashboard) | partial screenshots (project identity + Vercel APP_URL value) |
 | Date (code/API pass) | 2026-07-19 |
-| Date (screenshot review) | 2026-07-19 — **PARTIAL** (APP_URL value VERIFIED; Auth URL/security/Domains nog open) |
-| Production origin confirmed | **partial** — Vercel `NEXT_PUBLIC_APP_URL` = `https://vdbdigital.nl` VERIFIED; Domains MISSING; Supabase Site URL MISSING |
+| Date (screenshot review) | 2026-07-20 — **PARTIAL** (Vercel APP_URL + Domains VERIFIED; Supabase Auth URL/security nog open) |
+| Production origin confirmed | **partial** — Vercel APP_URL + apex Production + www→apex redirect VERIFIED; Supabase Site URL MISSING; www DNS warning open |
 | Checklist complete (all actionable VERIFIED or N/A) | **no** |
 | Readiness gate impact | Remains **PRODUCTION MIGRATION GATE CONDITIONAL PASS** |
 | Auth settings mutated this round | **no** |
@@ -311,7 +315,7 @@ Do not change values in the first verification pass — classify only.
 
 ### Open blockers (must clear for Auth → VERIFIED / full PASS)
 
-1. Vercel Domains: `vdbdigital.nl` primary + `www` → apex redirect.
+1. Optional: resolve Vercel **DNS Change Recommended** on `www.vdbdigital.nl` (redirect already VERIFIED).
 2. Confirm Preview env scope for `NEXT_PUBLIC_APP_URL` (shared Production+Preview vs aparte Preview-waarde).
 3. Supabase Auth URL Configuration — Site URL + redirect allowlist (callback / portal / wachtwoord-herstellen).
 4. Confirm e-mail templates (especially magic link + reset) use production apex and VDB copy.
