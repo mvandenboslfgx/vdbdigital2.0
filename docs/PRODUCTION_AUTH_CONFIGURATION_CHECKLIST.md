@@ -200,9 +200,11 @@ Evidence: Dashboard inaccessible this round → operator screenshots under `docs
 - **Blokkeert productieapply:** ja tot SMTP UI bewezen + sender domain/SPF/DKIM beoordeeld
 
 ### Alignment with app mail (`EMAIL_FROM` / Resend)
-- **Status:** OPERATOR REVIEW REQUIRED
-- **Blokkeert productieapply:** ja if Auth SMTP domain ≠ verified sending domain
-- **Benodigde actie:** Compare Auth SMTP sender domain with production Resend/`EMAIL_FROM` (names only in evidence; no secrets)
+- **Status:** VERIFIED (sending domain) + OPERATOR REVIEW REQUIRED (Auth SMTP UI + EMAIL_FROM match)
+- **Gecontroleerd op:** 2026-07-20
+- **Veilige evidence-referentie:** Resend Domains — `vdbdigital.nl` status **Verified**; banner “Domain verified: Your domain is ready to send emails.”; region Ireland (eu-west-1). Tracking metrics not configured (optional; not required for Auth).
+- **Benodigde actie:** Nog steeds Auth → SMTP screenshot (host/user/sender, wachtwoord gemaskeerd) + bevestig sender domain = `vdbdigital.nl` / app `EMAIL_FROM`
+- **Blokkeert productieapply:** ja tot Auth SMTP UI bewezen (Resend domain alleen is niet voldoende)
 
 ---
 
@@ -328,7 +330,7 @@ Do not change values in the first verification pass — classify only.
 
 ### Open blockers (must clear for Auth → VERIFIED / full PASS)
 
-1. SMTP settings screenshot (no secrets) + rotate any password shared in chat; confirm SPF/DKIM.
+1. Auth → SMTP settings screenshot (no secrets) + confirm sender uses verified `vdbdigital.nl`; rotate any password previously shared in chat.
 2. Email provider detail: password + magic link toggles; confirm OAuth list fully scrolled (none unexpected).
 3. E-mail templates (magic link + reset) — apex + VDB copy.
 4. Enroll staff MFA (API earlier: 0 factors) and document recovery.
