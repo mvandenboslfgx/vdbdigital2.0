@@ -193,11 +193,11 @@ Evidence: Dashboard inaccessible this round → operator screenshots under `docs
 - **Status:** OPERATOR REVIEW REQUIRED
 - **Gecontroleerd op:** 2026-07-20
 - **Gecontroleerd door:** Cursor agent
-- **Veilige evidence-referentie:** Geen SMTP-settings screenshot. Operator gaf mondeling aan dat SMTP-username `resend` is (Resend SMTP-patroon). **Geen wachtwoord/secret vastgelegd.**
+- **Veilige evidence-referentie:** Geen Supabase SMTP-settings screenshot. Resend API keys (namen only): `supabase-auth-production`, `website vdb` — operator stelt dat deze in env staan. **Geen key-waarden vastgelegd.**
 - **Verwachte waarde:** Custom SMTP (not built-in rate-limited mail) for production
-- **Benodigde actie:** Screenshot Auth → SMTP (host/port/user/sender zichtbaar; wachtwoord gemaskeerd). Daarna **roteer** elk wachtwoord dat in chat is gedeeld.
+- **Benodigde actie:** Screenshot Auth → SMTP (host/user/sender; wachtwoord gemaskeerd). Bevestig Vercel/env gebruikt aparte keys voor app vs Auth zonder waarden te plakken.
 - **Testmail:** only to controlled internal address — **not executed** this round
-- **Blokkeert productieapply:** ja tot SMTP UI bewezen + sender domain/SPF/DKIM beoordeeld
+- **Blokkeert productieapply:** ja tot Auth SMTP UI bewezen + sender domain/SPF/DKIM beoordeeld
 
 ### Alignment with app mail (`EMAIL_FROM` / Resend)
 - **Status:** VERIFIED (sending domain) + OPERATOR REVIEW REQUIRED (Auth SMTP UI + EMAIL_FROM match)
