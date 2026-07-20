@@ -430,7 +430,7 @@ const nl: Messages = {
     a5: "Starter dekt basis automatische antwoorden en leadopvang. Business voegt geavanceerde workflows, afsprakenplanning, lead scoring en maandelijkse optimalisatie toe.",
   },
   about: {
-    title: "Over {name}",
+    title: "Over ons",
     intro:
       "{name} bouwt maatwerkwebsites, webshops en bedrijfssoftware voor organisaties die digitale systemen nodig hebben waarop ze kunnen vertrouwen — met heldere communicatie, degelijke techniek en zonder theater.",
     mission: "Missie",

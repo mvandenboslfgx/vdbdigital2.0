@@ -11,7 +11,7 @@ import { paths } from "@/i18n/config";
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getDictionary();
   return {
-    title: t("about.title", { name: siteConfig.name }),
+    title: t("about.title"),
     description: t("meta.description"),
     alternates: { canonical: paths.about },
   };
@@ -27,7 +27,7 @@ export default async function AboutPage() {
         <Container>
           <BrandLink variant="light" className="mb-8" logoClassName="h-12 w-auto" />
           <h1 className="text-h1 mb-4">
-            {t("about.title", { name })}
+            {t("about.title")}
           </h1>
           <p className="text-body-lg text-muted prose-width">
             {t("about.intro", { name })}

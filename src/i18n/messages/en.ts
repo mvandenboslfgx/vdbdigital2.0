@@ -424,7 +424,7 @@ const en = {
     a5: "Starter covers basic automated replies and lead capture. Business adds advanced workflows, appointment scheduling, lead scoring and monthly optimisation.",
   },
   about: {
-    title: "About {name}",
+    title: "About",
     intro:
       "{name} builds custom websites, online stores and business software for organisations that need digital systems they can rely on — with clear communication, solid engineering and no theatre.",
     mission: "Mission",
