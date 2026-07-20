@@ -23,7 +23,8 @@ Project identity (CLI/API verified 2026-07-19):
 |-------|--------|
 | Project ref for review | Expected `nhsrdnjfsxfikfbdmdfj` / `vdb nieuw` |
 | Screenshots in chat | Meerdere ontvangen (project identity; Vercel APP_URL edit; Vercel Domains 2026-07-20) |
-| Site URL / Redirect URLs / Providers / SMTP / templates / MFA / CAPTCHA | **MISSING** — niet in aangeleverde beelden |
+| Site URL / Redirect URLs | **PARTIEEL VERIFIED** — URL Configuration screenshot 2026-07-20 |
+| Providers / SMTP / templates / MFA / CAPTCHA | **MISSING** — niet in aangeleverde beelden |
 | Instellingen gewijzigd door reviewer | **Nee** |
 | Code / migraties / commit / deploy door reviewer | **Nee** |
 
@@ -43,14 +44,18 @@ Project identity (CLI/API verified 2026-07-19):
 | Vercel Domains — `www.vdbdigital.nl` DNS | OPERATOR REVIEW REQUIRED | Badge **DNS Change Recommended** + “View DNS configuration” — redirect OK, DNS-opschoning open |
 | Extra domain `www.vdbdigital.shop` → apex | VERIFIED (alias redirect) | 307 → `vdbdigital.nl` (shop-alias; geen Site URL) |
 | Vercel default `vdbdigital2-0.vercel.app` | VERIFIED (platform host) | Production Valid Configuration — niet canonical; niet gebruiken als Auth Site URL |
-| Supabase Auth Site URL | MISSING | Geen URL Configuration-screenshot |
-| Redirect allowlist | MISSING | Geen Redirect URLs-screenshot |
-| Providers / templates / SMTP / MFA / CAPTCHA / sessions | MISSING | Geen Auth-detail-screenshots |
+| Supabase Auth Site URL | VERIFIED | URL Configuration — exact `https://vdbdigital.nl` |
+| Redirect `…/auth/callback` | VERIFIED | Op allowlist |
+| Redirect `…/auth/callback?next=/portal` | MISSING | Code magic-link gebruikt query-variant; voeg exact toe voor fail-closed match |
+| Redirect `…/wachtwoord-herstellen` | VERIFIED | Op allowlist |
+| Redirect `…/uitnodiging/accepteren` | VERIFIED (path) | Op allowlist; app-owned invite + `?token=` |
+| Localhost redirect entries | OPERATOR REVIEW REQUIRED | 3× `http://localhost:3000/…` aanwezig — OK voor local; Site URL is niet localhost |
+| Foreign / www / wildcards op allowlist | VERIFIED (afwezig) | Geen TrustBooker/Grill/www/wildcards zichtbaar |
 | Backups | OPERATOR REVIEW REQUIRED | Overview toont **Last Backup: No backups** (FREE / geen bevestigde backup) |
 
 - **Status (review als geheel):** OPERATOR REVIEW REQUIRED (partieel bewijs; Auth URL/security nog open)
 - **Blokkeert productieapply:** ja
-- **Exacte handmatige actie (resterend):** (1) Vercel: optioneel DNS Change Recommended voor `www.vdbdigital.nl` oplossen; Preview-scope APP_URL bevestigen; (2) Supabase Auth → URL Configuration (Site URL + redirects); (3) Providers; (4) Email templates; (5) SMTP; (6) MFA; (7) CAPTCHA/rate limits/sessions.
+- **Exacte handmatige actie (resterend):** (1) Add allowlist entry `https://vdbdigital.nl/auth/callback?next=/portal`; (2) decide keep/remove localhost redirects; (3) Providers; (4) Email templates; (5) SMTP; (6) MFA; (7) CAPTCHA/rate limits/sessions; (8) optional www DNS Change Recommended.
 
 **App contract (code, read-only):** invitation-first; password + magic link; no OAuth/phone/anonymous; admin AAL2/TOTP; redirects use `resolveAppUrl()` / `NEXT_PUBLIC_APP_URL`.
 
@@ -84,84 +89,84 @@ Geen VERIFIED voor Site URL, redirects, providers, templates, SMTP, MFA of CAPTC
 ## 2. URL Configuration (Dashboard)
 
 ### Site URL
-- **Status:** OPERATOR REVIEW REQUIRED
-- **Gecontroleerd op:** 2026-07-19
-- **Gecontroleerd door:** Cursor agent (Dashboard login wall)
-- **Veilige evidence-referentie:** `docs/evidence/auth-dashboard/README-session-2026-07-19.md`
-- **Huidige waarde gemaskeerd:** (niet gelezen)
+- **Status:** VERIFIED
+- **Gecontroleerd op:** 2026-07-20
+- **Gecontroleerd door:** Cursor agent (operator screenshot URL Configuration)
+- **Veilige evidence-referentie:** Auth → URL Configuration — Site URL field
+- **Huidige waarde gemaskeerd:** `https://vdbdigital.nl`
 - **Verwachte waarde:** `https://vdbdigital.nl` (HTTPS apex only; no www, no localhost, no trailing slash)
-- **Benodigde actie:** Operator opent Auth → URL Configuration; set Site URL to chosen production origin; confirm no TrustBooker/Grill/foreign domains
-- **Blokkeert productieapply:** ja
+- **Benodigde actie:** none
+- **Blokkeert productieapply:** nee
 
 ### Redirect allowlist — `/auth/callback`
-- **Status:** OPERATOR REVIEW REQUIRED
-- **Gecontroleerd op:** 2026-07-19
-- **Gecontroleerd door:** Cursor agent (code + Dashboard inaccessible)
-- **Veilige evidence-referentie:** `src/app/auth/callback/route.ts`; magic link `redirectTo` → `{APP_URL}/auth/callback?next=/portal`
-- **Huidige waarde gemaskeerd:** (niet gelezen)
-- **Verwachte waarde:** `https://<prod-origin>/auth/callback` and optionally `https://<prod-origin>/auth/callback?next=/portal` (prefer exact paths)
-- **Benodigde actie:** Confirm present on allowlist; remove foreign/preview unless approved
-- **Blokkeert productieapply:** ja
+- **Status:** VERIFIED (base path) + MISSING (query variant)
+- **Gecontroleerd op:** 2026-07-20
+- **Gecontroleerd door:** Cursor agent (screenshot + code)
+- **Veilige evidence-referentie:** Allowlist `https://vdbdigital.nl/auth/callback`; code magic link → `…/auth/callback?next=/portal`
+- **Huidige waarde gemaskeerd:** base path aanwezig; query-variant niet in lijst
+- **Verwachte waarde:** `https://vdbdigital.nl/auth/callback` and `https://vdbdigital.nl/auth/callback?next=/portal`
+- **Benodigde actie:** Add exact `https://vdbdigital.nl/auth/callback?next=/portal`
+- **Blokkeert productieapply:** ja (magic-link portal redirect risk tot query-variant toegevoegd)
 
 ### Redirect allowlist — password reset `/wachtwoord-herstellen`
-- **Status:** OPERATOR REVIEW REQUIRED
-- **Gecontroleerd op:** 2026-07-19
-- **Gecontroleerd door:** Cursor agent (code)
-- **Veilige evidence-referentie:** `src/server/actions/auth-actions.ts` reset → `{APP_URL}/wachtwoord-herstellen`
-- **Huidige waarde gemaskeerd:** (niet gelezen)
-- **Verwachte waarde:** `https://<prod-origin>/wachtwoord-herstellen`
-- **Benodigde actie:** Confirm on allowlist
-- **Blokkeert productieapply:** ja
+- **Status:** VERIFIED
+- **Gecontroleerd op:** 2026-07-20
+- **Gecontroleerd door:** Cursor agent (screenshot)
+- **Veilige evidence-referentie:** Allowlist `https://vdbdigital.nl/wachtwoord-herstellen`
+- **Huidige waarde gemaskeerd:** aanwezig
+- **Verwachte waarde:** `https://vdbdigital.nl/wachtwoord-herstellen`
+- **Benodigde actie:** none
+- **Blokkeert productieapply:** nee
 
 ### Account activation / confirm email
 - **Status:** OPERATOR REVIEW REQUIRED
-- **Gecontroleerd op:** 2026-07-19
-- **Gecontroleerd door:** Cursor agent (code)
-- **Veilige evidence-referentie:** UI hubs `/account-activeren`, `/e-mail-bevestigen`; invite create uses `email_confirm: true` — confirm-signup may be rare
-- **Huidige waarde gemaskeerd:** (niet gelezen)
-- **Verwachte waarde:** If confirm-email enabled, template/redirect must use `/auth/callback` or documented hub on production origin — no localhost
+- **Gecontroleerd op:** 2026-07-20
+- **Gecontroleerd door:** Cursor agent (code; templates not screenshotted)
+- **Veilige evidence-referentie:** UI hubs `/account-activeren`, `/e-mail-bevestigen`; invite create uses `email_confirm: true`
+- **Huidige waarde gemaskeerd:** (templates niet gelezen)
+- **Verwachte waarde:** If confirm-email enabled, template/redirect must use `/auth/callback` or documented hub on production origin
 - **Benodigde actie:** Review Confirm signup setting + template redirect
 - **Blokkeert productieapply:** ja
 
 ### Invitation acceptance
-- **Status:** OPERATOR REVIEW REQUIRED (Auth allowlist) / app route VERIFIED in code
-- **Gecontroleerd op:** 2026-07-19
+- **Status:** VERIFIED (allowlist path) / app route VERIFIED in code
+- **Gecontroleerd op:** 2026-07-20
 - **Gecontroleerd door:** Cursor agent
-- **Veilige evidence-referentie:** `/uitnodiging/accepteren?token=` is app-owned (not Supabase Auth redirect); still ensure e-mail bodies use production origin
-- **Huidige waarde gemaskeerd:** n/a for allowlist
-- **Verwachte waarde:** Invite e-mails link to `https://<prod-origin>/uitnodiging/accepteren?token=…`
-- **Benodigde actie:** Confirm invite e-mail content / admin invite builder origin
-- **Blokkeert productieapply:** ja (wrong origin in invite mail)
+- **Veilige evidence-referentie:** Allowlist `https://vdbdigital.nl/uitnodiging/accepteren`; app builds `{APP_URL}/uitnodiging/accepteren?token=`
+- **Huidige waarde gemaskeerd:** path aanwezig
+- **Verwachte waarde:** Invite e-mails link to `https://vdbdigital.nl/uitnodiging/accepteren?token=…`
+- **Benodigde actie:** Confirm invite e-mail body uses apex (template/SMTP screenshots still open)
+- **Blokkeert productieapply:** ja tot e-mail/template origin bewezen
 
 ### Preview URLs
-- **Status:** OPERATOR REVIEW REQUIRED
-- **Gecontroleerd op:** 2026-07-19
-- **Gecontroleerd door:** Cursor agent
-- **Veilige evidence-referentie:** —
-- **Huidige waarde gemaskeerd:** (niet gelezen)
+- **Status:** VERIFIED (afwezig op Auth allowlist)
+- **Gecontroleerd op:** 2026-07-20
+- **Gecontroleerd door:** Cursor agent (screenshot)
+- **Veilige evidence-referentie:** Geen `*.vercel.app` / preview wildcards in Redirect URLs
+- **Huidige waarde gemaskeerd:** n/a
 - **Verwachte waarde:** Only consciously approved Vercel preview origins, or none
-- **Benodigde actie:** Remove unapproved preview wildcards
-- **Blokkeert productieapply:** ja if unknown domains present
+- **Benodigde actie:** none for Auth allowlist
+- **Blokkeert productieapply:** nee
 
 ### Localhost redirects
 - **Status:** OPERATOR REVIEW REQUIRED
-- **Gecontroleerd op:** 2026-07-19
-- **Gecontroleerd door:** Cursor agent
-- **Veilige evidence-referentie:** Local APP_URL is localhost (dev). Production Site URL must not be localhost.
-- **Huidige waarde gemaskeerd:** (niet gelezen)
+- **Gecontroleerd op:** 2026-07-20
+- **Gecontroleerd door:** Cursor agent (screenshot)
+- **Veilige evidence-referentie:** Allowlist bevat 3× `http://localhost:3000/…` (callback, reset, invite)
+- **Huidige waarde gemaskeerd:** localhost entries aanwezig; **Site URL is niet localhost**
 - **Verwachte waarde:** Localhost only if local Auth tests required; document retention
-- **Benodigde actie:** Confirm production Site URL is HTTPS prod origin
-- **Blokkeert productieapply:** ja if Site URL is localhost
+- **Benodigde actie:** Keep for local dev or remove before strict go-live
+- **Blokkeert productieapply:** nee (Site URL is apex)
 
 ### Foreign / case domains (TrustBooker, Grill Gasten, other projects)
-- **Status:** OPERATOR REVIEW REQUIRED
-- **Gecontroleerd op:** 2026-07-19
-- **Gecontroleerd door:** Cursor agent
-- **Veilige evidence-referentie:** Isolation allowlist: case domains are product/case context only — not Auth origins
-- **Huidige waarde gemaskeerd:** (niet gelezen)
+- **Status:** VERIFIED (afwezig)
+- **Gecontroleerd op:** 2026-07-20
+- **Gecontroleerd door:** Cursor agent (screenshot)
+- **Veilige evidence-referentie:** Redirect URLs tonen alleen vdbdigital.nl + localhost
+- **Huidige waarde gemaskeerd:** n/a
 - **Verwachte waarde:** No TrustBooker / Grill Gasten / foreign company domains on Auth allowlist
-- **Benodigde actie:** Scan Redirect URLs list; remove foreign entries
-- **Blokkeert productieapply:** ja if present
+- **Benodigde actie:** none
+- **Blokkeert productieapply:** nee
 
 ---
 
@@ -303,10 +308,10 @@ Do not change values in the first verification pass — classify only.
 
 | Field | Value |
 |-------|--------|
-| Operator (Dashboard) | partial screenshots (project identity + Vercel APP_URL value) |
+| Operator (Dashboard) | partial screenshots (Vercel origin/domains + Supabase URL Configuration) |
 | Date (code/API pass) | 2026-07-19 |
-| Date (screenshot review) | 2026-07-20 — **PARTIAL** (Vercel APP_URL + Domains VERIFIED; Supabase Auth URL/security nog open) |
-| Production origin confirmed | **partial** — Vercel APP_URL + apex Production + www→apex redirect VERIFIED; Supabase Site URL MISSING; www DNS warning open |
+| Date (screenshot review) | 2026-07-20 — **PARTIAL** (Site URL VERIFIED; portal query redirect MISSING; providers/templates/SMTP/MFA open) |
+| Production origin confirmed | **mostly** — Vercel APP_URL + Domains + Supabase Site URL VERIFIED; magic-link `?next=/portal` allowlist entry MISSING |
 | Checklist complete (all actionable VERIFIED or N/A) | **no** |
 | Readiness gate impact | Remains **PRODUCTION MIGRATION GATE CONDITIONAL PASS** |
 | Auth settings mutated this round | **no** |
@@ -315,14 +320,15 @@ Do not change values in the first verification pass — classify only.
 
 ### Open blockers (must clear for Auth → VERIFIED / full PASS)
 
-1. Optional: resolve Vercel **DNS Change Recommended** on `www.vdbdigital.nl` (redirect already VERIFIED).
-2. Confirm Preview env scope for `NEXT_PUBLIC_APP_URL` (shared Production+Preview vs aparte Preview-waarde).
-3. Supabase Auth URL Configuration — Site URL + redirect allowlist (callback / portal / wachtwoord-herstellen).
-4. Confirm e-mail templates (especially magic link + reset) use production apex and VDB copy.
-5. Confirm custom SMTP + SPF/DKIM for production (or explicit blocker).
-6. Confirm providers: email/password + magic link on; OAuth/phone/anonymous off; no public signup bypass.
-7. Enroll staff MFA (API earlier: 0 factors) and document recovery.
-8. CAPTCHA / Auth rate limits / sessions — operator review.
-9. Backup/PITR posture (Overview: No backups) — accept or remediate before full PASS.
+1. **Add** Redirect URL: `https://vdbdigital.nl/auth/callback?next=/portal` (code uses this for magic link).
+2. Decide keep/remove localhost redirect entries.
+3. Optional: resolve Vercel **DNS Change Recommended** on `www.vdbdigital.nl`.
+4. Confirm Preview env scope for `NEXT_PUBLIC_APP_URL`.
+5. Confirm e-mail templates (especially magic link + reset) use production apex and VDB copy.
+6. Confirm custom SMTP + SPF/DKIM for production (or explicit blocker).
+7. Confirm providers: email/password + magic link on; OAuth/phone/anonymous off; no public signup bypass.
+8. Enroll staff MFA (API earlier: 0 factors) and document recovery.
+9. CAPTCHA / Auth rate limits / sessions — operator review.
+10. Backup/PITR posture (Overview: No backups) — accept or remediate before full PASS.
 
 Until these are `VERIFIED`, do **not** create `production-migration-readiness-pass` and do **not** run production apply.
