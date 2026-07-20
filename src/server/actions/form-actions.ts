@@ -240,6 +240,12 @@ export async function submitQuoteAction(
       locale,
     });
     if (error) {
+      console.error("[submitQuoteAction] quote_requests insert failed", {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+      });
       return {
         errors: ["Your quote request could not be saved."],
         values,
