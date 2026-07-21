@@ -4,6 +4,7 @@ const ALLOWED_INTERNAL_PREFIXES = [
   "/admin",
   "/portal",
   "/inloggen",
+  "/geen-toegang",
   "/account-aanmaken",
   "/wachtwoord-vergeten",
   "/wachtwoord-herstellen",

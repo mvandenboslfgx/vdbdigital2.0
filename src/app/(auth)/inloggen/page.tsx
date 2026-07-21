@@ -6,9 +6,11 @@ import { getOptionalAuthenticatedUser } from "@/server/auth/require-session";
 import { resolvePostLoginPath } from "@/server/auth/resolve-home";
 import { isSafeInternalPath } from "@/lib/security/redirect";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Inloggen",
-  robots: { index: false },
+  robots: { index: false, follow: false },
 };
 
 export default async function InloggenPage({
@@ -19,6 +21,7 @@ export default async function InloggenPage({
   const params = await searchParams;
   const user = await getOptionalAuthenticatedUser();
   if (user) {
+    // Terminal destinations (e.g. /geen-toegang) must not bounce back here.
     redirect(await resolvePostLoginPath(user.id, params.next));
   }
 
@@ -26,9 +29,11 @@ export default async function InloggenPage({
   const fout =
     params.fout === "geblokkeerd"
       ? "Dit account is geblokkeerd. Neem contact op met VDB Digital."
-      : params.fout === "geen-toegang"
-        ? "Je account heeft nog geen toegang. Vraag een uitnodiging of accountaanvraag aan."
-        : null;
+      : params.fout === "sessie"
+        ? "De inloglink is ongeldig of verlopen. Vraag een nieuwe link aan."
+        : params.fout === "config"
+          ? "Inloggen is tijdelijk niet beschikbaar. Probeer het later opnieuw."
+          : null;
 
   return (
     <>

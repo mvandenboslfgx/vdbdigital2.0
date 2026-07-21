@@ -62,6 +62,7 @@ describe("Auth portal foundation — login copy + routes", () => {
   it("ships canonical Dutch auth routes", () => {
     for (const path of [
       "src/app/(auth)/inloggen/page.tsx",
+      "src/app/(auth)/geen-toegang/page.tsx",
       "src/app/(auth)/wachtwoord-vergeten/page.tsx",
       "src/app/(auth)/wachtwoord-herstellen/page.tsx",
       "src/app/(auth)/uitnodiging/accepteren/page.tsx",

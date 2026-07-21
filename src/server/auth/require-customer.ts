@@ -34,18 +34,25 @@ async function loadStaffRole(userId: string): Promise<boolean> {
   return Boolean(data?.role);
 }
 
-/** Actieve organisatielidmaatschappen voor de huidige gebruiker. */
-export async function listCustomerMemberships(
+export type CustomerMembershipRow = {
+  membershipId: string;
+  customerRole: CustomerOrgRole;
+  organization: CustomerOrganization;
+};
+
+export type CustomerMembershipLookup =
+  | { ok: true; memberships: CustomerMembershipRow[] }
+  | { ok: false; reason: "unavailable" };
+
+/**
+ * Actieve organisatielidmaatschappen — onderscheidt lege resultaten van
+ * schema/DB-fouten (fail-closed voor post-login).
+ */
+export async function lookupCustomerMemberships(
   userId: string,
-): Promise<
-  Array<{
-    membershipId: string;
-    customerRole: CustomerOrgRole;
-    organization: CustomerOrganization;
-  }>
-> {
+): Promise<CustomerMembershipLookup> {
   const supabase = createServiceRoleClient();
-  if (!supabase) return [];
+  if (!supabase) return { ok: false, reason: "unavailable" };
 
   const { data, error } = await supabase
     .from("organization_members")
@@ -55,9 +62,10 @@ export async function listCustomerMemberships(
     .eq("user_id", userId)
     .eq("status", "ACTIVE");
 
-  if (error || !data) return [];
+  if (error) return { ok: false, reason: "unavailable" };
+  if (!data) return { ok: true, memberships: [] };
 
-  return data
+  const memberships = data
     .map((row) => {
       const rawOrg = row.organization as unknown;
       const org = (Array.isArray(rawOrg) ? rawOrg[0] : rawOrg) as
@@ -85,7 +93,18 @@ export async function listCustomerMemberships(
         },
       };
     })
-    .filter((m): m is NonNullable<typeof m> => m !== null);
+    .filter((m): m is CustomerMembershipRow => m !== null);
+
+  return { ok: true, memberships };
+}
+
+/** Actieve organisatielidmaatschappen voor de huidige gebruiker. */
+export async function listCustomerMemberships(
+  userId: string,
+): Promise<CustomerMembershipRow[]> {
+  const result = await lookupCustomerMemberships(userId);
+  if (!result.ok) return [];
+  return result.memberships;
 }
 
 export async function requireCustomer(
