@@ -1,0 +1,10 @@
+{
+  "CHECKOUT_ENABLED": {
+    "default": false,
+    "notes": "fail-closed"
+  },
+  "P05_MIGRATION_APPLIED": {
+    "default": "unset",
+    "notes": "operator hint only"
+  }
+}

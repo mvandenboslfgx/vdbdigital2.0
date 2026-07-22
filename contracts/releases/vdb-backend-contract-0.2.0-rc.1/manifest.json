@@ -1,0 +1,8 @@
+{
+  "contractVersion": "vdb-backend-contract@0.2.0-rc.1",
+  "schemaVersion": "2026.07.22.partner-rc1",
+  "minimumCompatibleClientVersion": ">=0.2.0-rc.1",
+  "generatedAt": "local-freeze",
+  "sourceHeadHint": "shared-partner-backend-rc1",
+  "unpublished": true
+}

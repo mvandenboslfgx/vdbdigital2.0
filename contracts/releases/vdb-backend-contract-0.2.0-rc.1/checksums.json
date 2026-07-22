@@ -1,0 +1,23 @@
+{
+  "contractVersion": "vdb-backend-contract@0.2.0-rc.1",
+  "schemaVersion": "2026.07.22.partner-rc1",
+  "database.types.ts": "43590d90252c6813aa2d4cecfcb88abdba21c3c2133c0df1d46fb91f4e90c64a",
+  "manifest.json": "f2cea9f387c4c03ab207ff565f05ba6a90ae6c761c834cae590112d24d958f25",
+  "roles.json": "98097501d6fc41445c36b7294b306d60141f46c5b747b8c290001c6bbeddf8fb",
+  "enums.json": "4ce220b685c714afa1fc40b9e9ebc5b3961e7cd8586a7f636e3464aafb70a46b",
+  "rpcs.json": "21719e867e4bd3c6ce8b11b6d1030a28b8ab9871a07cb539c1903946d71f88a9",
+  "error-codes.json": "2f996c51f5094bfac4c4b5e50e89ca37f5079755cea265128c1b5ac1f552d29b",
+  "feature-flags.json": "483d8a4f226af88bb8b431d733750b5dc26dcd039c0cb6449e6b78aea4faab28",
+  "storage-buckets.json": "33503f8cc1c013925055e03dab3347f5dd226ef3d1589c2e35b04a7f5c4d7ccb",
+  "financial-invariants.json": "d7e3f7716458119822eda86cd9b1dbed514662f45961a6abd8829745da996f51",
+  "migration-manifest.json": "509e88cd15d62788ad18f02d0fa5b0a6171843f285bcf78b06e1a7e6c9fb93ca",
+  "tables.json": "f7e969273fed6f4ae693c99693dde99a8a1a5ff0aff150693c7d0c2407069545",
+  "migrations/20260722100000_partner_identity_roles.sql": "9184ada8546d565b4d2fefd34872d7f4882ff6e39bd49725056f1e3a31d47c42",
+  "migrations/20260722110000_partner_applications_profiles_codes.sql": "3ebf64ce136c478bee3181e3db5a9ce847f31f67626b97b914e24a09e3adb33d",
+  "migrations/20260722120000_partner_leads_and_sales.sql": "137676c21bc69d21d688cf49ce0fddc71b77dc594afaebadf7bcd688bded5ecf",
+  "migrations/20260722130000_partner_commissions_and_ledger.sql": "e734673ddbad4c01cc272da40c1c622aa5dbcf2e14e01a7063e21764672ecfaf",
+  "migrations/20260722140000_partner_payouts.sql": "f434e08e5ab5e3a71676542d043c3e9f44dffefdc130c232a8dd71dc426f4ec2",
+  "migrations/20260722150000_partner_cash_receipts_adjustments.sql": "964344536aa1842927b277c334a0eb1a133420cc5da748f8def29c66ec976353",
+  "migrations/20260722160000_partner_rls_and_rpcs.sql": "b356503c584383a2e1e003c7bdef0cf78887ddf23c2130658e486100e0d0518f",
+  "migrations/20260722170000_partner_verify_contracts.sql": "f4002471d92aba99e4151b3d8e9d89afc5ee465dd243b2913f94ec4bbcb913a9"
+}

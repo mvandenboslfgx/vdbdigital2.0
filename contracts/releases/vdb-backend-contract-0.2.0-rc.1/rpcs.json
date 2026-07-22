@@ -1,0 +1,44 @@
+{
+  "count": 13,
+  "rpcs": [
+    {
+      "name": "submit_partner_application"
+    },
+    {
+      "name": "review_partner_application"
+    },
+    {
+      "name": "create_partner_lead"
+    },
+    {
+      "name": "review_partner_lead"
+    },
+    {
+      "name": "confirm_partner_sale"
+    },
+    {
+      "name": "request_partner_payout"
+    },
+    {
+      "name": "approve_partner_payout_request"
+    },
+    {
+      "name": "record_partner_payout_paid"
+    },
+    {
+      "name": "record_partner_cash_receipt"
+    },
+    {
+      "name": "process_partner_refund_adjustment"
+    },
+    {
+      "name": "partner_financial_summary"
+    },
+    {
+      "name": "partner_available_liability_cents"
+    },
+    {
+      "name": "verify_partner_admin_contracts"
+    }
+  ]
+}

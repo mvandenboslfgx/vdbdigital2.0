@@ -1,0 +1,17 @@
+{
+  "partnerTables": [
+    "partner_profiles",
+    "partner_applications",
+    "partner_codes",
+    "partner_leads",
+    "partner_sales",
+    "partner_commissions",
+    "partner_payout_requests",
+    "partner_payouts",
+    "partner_ledger_transactions",
+    "partner_ledger_entries",
+    "partner_cash_receipts",
+    "partner_adjustments"
+  ],
+  "marketingLeadsUntouched": true
+}
