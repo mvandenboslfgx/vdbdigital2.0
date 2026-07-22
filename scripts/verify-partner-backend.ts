@@ -1,0 +1,313 @@
+/**
+ * Local partner backend integrity: scenarios 4–6, 8–10 + financial invariants.
+ * Uses only supabase_db_vdbdigital2. No remote. No sibling containers.
+ */
+import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
+import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { resolve } from "node:path";
+
+const CONTAINER = "supabase_db_vdbdigital2";
+
+function psql(sql: string): string {
+  return execFileSync(
+    "docker",
+    [
+      "exec",
+      "-i",
+      CONTAINER,
+      "psql",
+      "-U",
+      "postgres",
+      "-d",
+      "postgres",
+      "-v",
+      "ON_ERROR_STOP=1",
+      "-At",
+      "-F",
+      "\t",
+      "-c",
+      sql,
+    ],
+    { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
+  ).trim();
+}
+
+function assert(cond: boolean, msg: string) {
+  if (!cond) throw new Error(msg);
+}
+
+function sha256(s: string) {
+  return createHash("sha256").update(s).digest("hex");
+}
+
+async function main() {
+  console.log("=== Partner backend local integrity ===");
+
+  // Contract verify RPC
+  const verifyOut = psql(
+    `SELECT check_name, ok::text FROM public.verify_partner_admin_contracts() WHERE ok IS NOT TRUE;`,
+  );
+  assert(verifyOut === "", `verify_partner_admin_contracts failures:\n${verifyOut}`);
+  console.log("CONTRACT VERIFY: PASS");
+
+  // Synthetic fixture users (auth.users + profiles)
+  psql(`
+DO $$
+DECLARE
+  staff_id uuid := 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1';
+  partner_a uuid := 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1';
+  partner_b uuid := 'cccccccc-cccc-cccc-cccc-ccccccccccc1';
+  customer_id uuid := 'dddddddd-dddd-dddd-dddd-ddddddddddd1';
+BEGIN
+  -- Clean prior fixture rows (idempotent); disable ledger immutability for reset only
+  ALTER TABLE public.partner_ledger_entries DISABLE TRIGGER USER;
+  ALTER TABLE public.partner_ledger_transactions DISABLE TRIGGER USER;
+  DELETE FROM public.partner_ledger_entries WHERE transaction_id IN (
+    SELECT id FROM public.partner_ledger_transactions
+    WHERE idempotency_key LIKE 'fixture:%'
+       OR idempotency_key LIKE '%:ledger'
+       OR actor_user_id IN (staff_id, partner_a, partner_b)
+  );
+  DELETE FROM public.partner_ledger_transactions
+  WHERE idempotency_key LIKE 'fixture:%'
+     OR actor_user_id IN (staff_id, partner_a, partner_b);
+  ALTER TABLE public.partner_ledger_entries ENABLE TRIGGER USER;
+  ALTER TABLE public.partner_ledger_transactions ENABLE TRIGGER USER;
+
+  DELETE FROM public.partner_adjustments WHERE partner_id IN (SELECT id FROM public.partner_profiles WHERE user_id IN (partner_a, partner_b));
+  DELETE FROM public.partner_cash_receipts WHERE actor_user_id IN (staff_id, partner_a, partner_b);
+  DELETE FROM public.partner_payouts WHERE partner_id IN (SELECT id FROM public.partner_profiles WHERE user_id IN (partner_a, partner_b));
+  DELETE FROM public.partner_payout_requests WHERE partner_id IN (SELECT id FROM public.partner_profiles WHERE user_id IN (partner_a, partner_b));
+  DELETE FROM public.partner_commissions WHERE partner_id IN (SELECT id FROM public.partner_profiles WHERE user_id IN (partner_a, partner_b));
+  UPDATE public.partner_leads SET converted_sale_id = NULL WHERE partner_id IN (SELECT id FROM public.partner_profiles WHERE user_id IN (partner_a, partner_b));
+  DELETE FROM public.partner_sales WHERE partner_id IN (SELECT id FROM public.partner_profiles WHERE user_id IN (partner_a, partner_b));
+  DELETE FROM public.partner_leads WHERE partner_id IN (SELECT id FROM public.partner_profiles WHERE user_id IN (partner_a, partner_b));
+  DELETE FROM public.partner_codes WHERE partner_id IN (SELECT id FROM public.partner_profiles WHERE user_id IN (partner_a, partner_b));
+  DELETE FROM public.partner_applications WHERE user_id IN (partner_a, partner_b);
+  DELETE FROM public.partner_profiles WHERE user_id IN (partner_a, partner_b);
+  DELETE FROM public.admin_roles WHERE user_id = staff_id;
+  DELETE FROM public.profiles WHERE id IN (staff_id, partner_a, partner_b, customer_id);
+  DELETE FROM auth.users WHERE id IN (staff_id, partner_a, partner_b, customer_id);
+
+  INSERT INTO auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+  VALUES
+    (staff_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'staff.partner.fixture@example.invalid', crypt('x', gen_salt('bf')), NOW(), '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb, NOW(), NOW()),
+    (partner_a, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'partner.a.fixture@example.invalid', crypt('x', gen_salt('bf')), NOW(), '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb, NOW(), NOW()),
+    (partner_b, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'partner.b.fixture@example.invalid', crypt('x', gen_salt('bf')), NOW(), '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb, NOW(), NOW()),
+    (customer_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'customer.fixture@example.invalid', crypt('x', gen_salt('bf')), NOW(), '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb, NOW(), NOW());
+
+  INSERT INTO public.profiles (id, email, full_name, is_active)
+  VALUES
+    (staff_id, 'staff.partner.fixture@example.invalid', 'Staff Fixture', TRUE),
+    (partner_a, 'partner.a.fixture@example.invalid', 'Partner A', TRUE),
+    (partner_b, 'partner.b.fixture@example.invalid', 'Partner B', TRUE),
+    (customer_id, 'customer.fixture@example.invalid', 'Customer', TRUE)
+  ON CONFLICT (id) DO UPDATE SET email = EXCLUDED.email, is_active = TRUE;
+
+  INSERT INTO public.admin_roles (user_id, role)
+  VALUES (staff_id, 'ADMIN')
+  ON CONFLICT (user_id) DO NOTHING;
+END $$;
+`);
+
+  // Scenario 4: partner A submits application; staff approves
+  const appA = psql(`
+SELECT public.submit_partner_application('Partner A BV','Partner A','partner.a.fixture@example.invalid',NULL,NULL,NULL)
+FROM (SELECT set_config('request.jwt.claim.sub','bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1',true)) s;
+`);
+  assert(!!appA, "scenario4: application id missing");
+
+  const partnerAId = psql(`
+SELECT public.review_partner_application('${appA}'::uuid, true, NULL, 'PARTNERA')
+FROM (SELECT set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1',true)) s;
+`);
+  assert(!!partnerAId, "scenario5 prep: partner A id");
+
+  // Partner B
+  const appB = psql(`
+SELECT public.submit_partner_application('Partner B BV','Partner B','partner.b.fixture@example.invalid')
+FROM (SELECT set_config('request.jwt.claim.sub','cccccccc-cccc-cccc-cccc-ccccccccccc1',true)) s;
+`);
+  const partnerBId = psql(`
+SELECT public.review_partner_application('${appB}'::uuid, true, NULL, 'PARTNERB')
+FROM (SELECT set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1',true)) s;
+`);
+
+  // Scenario 4: create lead
+  const leadA = psql(`
+SELECT public.create_partner_lead('Lead A','lead.a@example.invalid','dedupe-a','Co A',NULL,'hello','PARTNERA')
+FROM (SELECT set_config('request.jwt.claim.sub','bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1',true)) s;
+`);
+  const leadB = psql(`
+SELECT public.create_partner_lead('Lead B','lead.b@example.invalid','dedupe-b')
+FROM (SELECT set_config('request.jwt.claim.sub','cccccccc-cccc-cccc-cccc-ccccccccccc1',true)) s;
+`);
+  assert(!!leadA && !!leadB, "scenario4 leads");
+  console.log("SCENARIO 4: PASS");
+
+  // Scenario 5: staff reviews lead
+  psql(`
+SELECT public.review_partner_lead('${leadA}'::uuid, 'IN_REVIEW'::public.partner_lead_status, NULL)
+FROM (SELECT set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1',true)) s;
+`);
+  const leadStatus = psql(`SELECT status::text FROM public.partner_leads WHERE id = '${leadA}'::uuid;`);
+  assert(leadStatus === "IN_REVIEW", `scenario5 status=${leadStatus}`);
+  console.log("SCENARIO 5: PASS");
+
+  // Scenario 6 + 8: confirm sale → one commission
+  const saleId = psql(`
+SELECT public.confirm_partner_sale('${leadA}'::uuid, 100000, 'fixture:sale-a', 1000, 'EUR', NULL, NULL)
+FROM (SELECT set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1',true)) s;
+`);
+  // idempotent retry
+  const saleId2 = psql(`
+SELECT public.confirm_partner_sale('${leadA}'::uuid, 100000, 'fixture:sale-a', 1000, 'EUR', NULL, NULL)
+FROM (SELECT set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1',true)) s;
+`);
+  assert(saleId === saleId2, "idempotent sale");
+  const saleStatus = psql(`SELECT status::text FROM public.partner_sales WHERE id = '${saleId}'::uuid;`);
+  const leadConv = psql(`SELECT status::text FROM public.partner_leads WHERE id = '${leadA}'::uuid;`);
+  assert(saleStatus === "SETTLED" && leadConv === "CONVERTED", "scenario6 status sync");
+  const commCount = psql(`SELECT COUNT(*)::text FROM public.partner_commissions WHERE partner_sale_id = '${saleId}'::uuid;`);
+  assert(commCount === "1", `one commission got ${commCount}`);
+  console.log("SCENARIO 6: PASS");
+  console.log("SCENARIO 8: PASS");
+
+  // Balanced ledger
+  const unbalanced = psql(`
+SELECT COUNT(*)::text FROM (
+  SELECT t.id FROM public.partner_ledger_transactions t
+  JOIN public.partner_ledger_entries e ON e.transaction_id = t.id
+  GROUP BY t.id
+  HAVING SUM(e.debit_cents) <> SUM(e.credit_cents)
+) x;
+`);
+  assert(unbalanced === "0", "ledger unbalanced");
+
+  // Scenario 9: payout
+  const avail = Number(psql(`SELECT public.partner_available_liability_cents('${partnerAId}'::uuid);`));
+  assert(avail === 10000, `expected 10000 commission got ${avail}`);
+  const reqId = psql(`
+SELECT public.request_partner_payout(10000, 'fixture:payout-req-a', 'EUR')
+FROM (SELECT set_config('request.jwt.claim.sub','bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1',true)) s;
+`);
+  const payoutId = psql(`
+SELECT public.approve_partner_payout_request('${reqId}'::uuid, true, NULL)
+FROM (SELECT set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1',true)) s;
+`);
+  psql(`
+SELECT public.record_partner_payout_paid('${payoutId}'::uuid, 'EXT-1', 'fixture:payout-paid-a')
+FROM (SELECT set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1',true)) s;
+`);
+  const payoutStatus = psql(`SELECT status::text FROM public.partner_payouts WHERE id = '${payoutId}'::uuid;`);
+  assert(payoutStatus === "PAID", "payout paid");
+  const availAfter = Number(psql(`SELECT public.partner_available_liability_cents('${partnerAId}'::uuid);`));
+  assert(availAfter === 0, `available after payout ${availAfter}`);
+
+  // Double payout blocked
+  let doubleBlocked = false;
+  try {
+    psql(`
+SELECT public.request_partner_payout(10000, 'fixture:payout-req-a2', 'EUR')
+FROM (SELECT set_config('request.jwt.claim.sub','bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1',true)) s;
+`);
+  } catch {
+    doubleBlocked = true;
+  }
+  assert(doubleBlocked, "double payout must fail");
+
+  // Refund after payout — paid status immutable
+  psql(`
+SELECT public.process_partner_refund_adjustment('${partnerAId}'::uuid, 10000, 'refund after payout', 'partner_sale', '${saleId}'::uuid, '${payoutId}'::uuid, 'fixture:refund-adj', 'EUR')
+FROM (SELECT set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1',true)) s;
+`);
+  const stillPaid = psql(`SELECT status::text FROM public.partner_payouts WHERE id = '${payoutId}'::uuid;`);
+  assert(stillPaid === "PAID", "paid payout immutable");
+  console.log("SCENARIO 9: PASS");
+
+  // Cash receipt
+  psql(`
+SELECT public.record_partner_cash_receipt(5000, 'fixture:cash-1', NULL, 'bank', 'EUR')
+FROM (SELECT set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1',true)) s;
+`);
+
+  // Scenario 10 RLS: set role and jwt
+  const rlsA = psql(`
+SELECT set_config('role','authenticated',true);
+SELECT set_config('request.jwt.claim.role','authenticated',true);
+SELECT set_config('request.jwt.claim.sub','bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1',true);
+SELECT COUNT(*)::text FROM public.partner_leads WHERE partner_id = '${partnerBId}'::uuid;
+`);
+  const rlsACount = rlsA.split("\n").pop();
+  assert(rlsACount === "0", `partner A must not see B leads, got ${rlsACount}`);
+
+  const rlsB = psql(`
+SELECT set_config('role','authenticated',true);
+SELECT set_config('request.jwt.claim.role','authenticated',true);
+SELECT set_config('request.jwt.claim.sub','cccccccc-cccc-cccc-cccc-ccccccccccc1',true);
+SELECT COUNT(*)::text FROM public.partner_leads WHERE id = '${leadA}'::uuid;
+`);
+  const rlsBCount = rlsB.split("\n").pop();
+  assert(rlsBCount === "0", `partner B must not see A lead`);
+
+  const rlsCust = psql(`
+SELECT set_config('role','authenticated',true);
+SELECT set_config('request.jwt.claim.role','authenticated',true);
+SELECT set_config('request.jwt.claim.sub','dddddddd-dddd-dddd-dddd-ddddddddddd1',true);
+SELECT COUNT(*)::text FROM public.partner_commissions;
+`);
+  assert(rlsCust.split("\n").pop() === "0", "customer denied commissions");
+
+  const rlsAnonDenied = (() => {
+    try {
+      const rlsAnon = psql(`
+SELECT set_config('role','anon',true);
+SELECT COUNT(*)::text FROM public.partner_profiles;
+`);
+      return rlsAnon.split("\n").pop() === "0";
+    } catch (e) {
+      const msg = String(e);
+      return msg.includes("permission denied");
+    }
+  })();
+  assert(rlsAnonDenied, "anon denied profiles");
+
+  // Reset role
+  psql(`SELECT set_config('role','postgres',true);`);
+  console.log("SCENARIO 10 RLS: PASS");
+  console.log("RLS TESTS: PASS (isolation + customer + anon)");
+
+  // Checksums artifact
+  const migrations = [
+    "20260722100000_partner_identity_roles.sql",
+    "20260722110000_partner_applications_profiles_codes.sql",
+    "20260722120000_partner_leads_and_sales.sql",
+    "20260722130000_partner_commissions_and_ledger.sql",
+    "20260722140000_partner_payouts.sql",
+    "20260722150000_partner_cash_receipts_adjustments.sql",
+    "20260722160000_partner_rls_and_rpcs.sql",
+    "20260722170000_partner_verify_contracts.sql",
+  ];
+  const manifest: Record<string, string> = {
+    contractVersion: "vdb-backend-contract@0.2.0-rc.1",
+    schemaVersion: "2026.07.22.partner-rc1",
+  };
+  for (const m of migrations) {
+    const p = resolve("supabase/migrations", m);
+    manifest[m] = sha256(readFileSync(p, "utf8"));
+  }
+  mkdirSync(resolve("docs/artifacts"), { recursive: true });
+  writeFileSync(
+    resolve("docs/artifacts/partner-backend-contract-checksums.json"),
+    JSON.stringify(manifest, null, 2) + "\n",
+  );
+
+  console.log("FINANCIAL INTEGRITY: PASS");
+  console.log("RESULT: PASS");
+}
+
+main().catch((e) => {
+  console.error("RESULT: FAIL", e);
+  process.exit(1);
+});

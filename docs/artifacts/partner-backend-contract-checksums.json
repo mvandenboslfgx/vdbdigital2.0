@@ -1,0 +1,12 @@
+{
+  "contractVersion": "vdb-backend-contract@0.2.0-rc.1",
+  "schemaVersion": "2026.07.22.partner-rc1",
+  "20260722100000_partner_identity_roles.sql": "9184ada8546d565b4d2fefd34872d7f4882ff6e39bd49725056f1e3a31d47c42",
+  "20260722110000_partner_applications_profiles_codes.sql": "3ebf64ce136c478bee3181e3db5a9ce847f31f67626b97b914e24a09e3adb33d",
+  "20260722120000_partner_leads_and_sales.sql": "137676c21bc69d21d688cf49ce0fddc71b77dc594afaebadf7bcd688bded5ecf",
+  "20260722130000_partner_commissions_and_ledger.sql": "e734673ddbad4c01cc272da40c1c622aa5dbcf2e14e01a7063e21764672ecfaf",
+  "20260722140000_partner_payouts.sql": "f434e08e5ab5e3a71676542d043c3e9f44dffefdc130c232a8dd71dc426f4ec2",
+  "20260722150000_partner_cash_receipts_adjustments.sql": "964344536aa1842927b277c334a0eb1a133420cc5da748f8def29c66ec976353",
+  "20260722160000_partner_rls_and_rpcs.sql": "b356503c584383a2e1e003c7bdef0cf78887ddf23c2130658e486100e0d0518f",
+  "20260722170000_partner_verify_contracts.sql": "f4002471d92aba99e4151b3d8e9d89afc5ee465dd243b2913f94ec4bbcb913a9"
+}
