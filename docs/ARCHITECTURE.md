@@ -1,5 +1,19 @@
 # Architectuur
 
+## Multi-repository platform
+
+VDB Digital 2.0 is the **canonical backend owner** for a three-repo platform (website, mobile, partner portal): shared Auth/DB/Storage in staging and production; **isolated** local Supabase stacks. See:
+
+- `docs/shared-backend-architecture.md`
+- `docs/repository-responsibilities.md`
+- `docs/environment-matrix.md`
+- `docs/local-infrastructure-isolation.md`
+- `docs/backend-contract.md`
+- `docs/backend-change-proposal-template.md`
+- `docs/staging-integration-plan.md`
+- `docs/cross-repository-test-plan.md`
+- `docs/migration-ownership.md`
+
 ## Stack
 
 - **Next.js 16** (App Router, React Server Components)

@@ -1,8 +1,32 @@
-# Supabase CLI — koppel met: npx supabase link --project-ref <PROJECT_REF>
+# Supabase CLI - koppel met: npx supabase link --project-ref <PROJECT_REF>
+# Local stack identity for VDB Digital 2.0 (CANONICAL_BACKEND_OWNER).
+# Definitive port reservation - do NOT use Partner (544xx) or Mobile (545xx) ranges.
 project_id = "vdbdigital2"
-
-[db]
-major_version = 15
 
 [api]
 enabled = true
+# Port to use for the API URL.
+port = 54321
+
+[db]
+# Port to use for the local database URL.
+port = 54322
+# Port used by db diff for the shadow database (must stay in 543xx band).
+shadow_port = 54320
+major_version = 15
+
+[studio]
+enabled = true
+# Port to use for Supabase Studio.
+port = 54323
+
+# Email testing server (Mailpit / Inbucket UI).
+[inbucket]
+enabled = true
+port = 54324
+
+# Analytics (when not excluded with `supabase start -x analytics`).
+# Keep in this repo's 543xx band - never 544xx/545xx.
+[analytics]
+enabled = true
+port = 54327
