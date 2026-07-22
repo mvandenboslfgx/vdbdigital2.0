@@ -1,0 +1,266 @@
+{
+  "audit_id": "VDB_DIGITAL_FORENSIC_END_TO_END_AUDIT-2026-07-21",
+  "audited_at": "2026-07-22T00:02:35+02:00",
+  "git_head": "1544d445d1d05c700b59360bdd4015afb0727bb8",
+  "git_tag": "production-database-apply-ready",
+  "project_ref": "nhsrdnjfsxfikfbdmdfj",
+  "verdict": "VDB DIGITAL FORENSIC AUDIT FAIL",
+  "production_go_no_go": "NO-GO",
+  "counts": { "P0": 0, "P1": 4, "P2": 12, "P3": 7 },
+  "findings": [
+    {
+      "id": "P1-001",
+      "severity": "P1",
+      "title": "Staff quotes/invoices view_assigned without assignment filter",
+      "evidence_level": "PROVEN",
+      "locations": [
+        "src/server/repositories/admin-quotes.ts",
+        "src/server/repositories/admin-invoices.ts"
+      ],
+      "attack_path": "Authenticated staff with quotes.view_assigned or invoices.view_assigned can list/read all rows via service-role repository paths; projects correctly filter by project_manager_id.",
+      "impact": "Horizontal privilege escalation among staff; customer financial data overexposure.",
+      "production_blocker": true,
+      "recommended_fix": "Enforce assignment/org filters matching permission semantics; add regression tests."
+    },
+    {
+      "id": "P1-002",
+      "severity": "P1",
+      "title": "Admin documents list not org-scoped for view_organization",
+      "evidence_level": "PROVEN",
+      "locations": ["src/server/repositories/admin-documents.ts"],
+      "attack_path": "Permission gate allows access then service-role query returns all documents without organization filter.",
+      "impact": "Cross-organization document metadata/content exposure among staff roles.",
+      "production_blocker": true,
+      "recommended_fix": "Filter by organization (and project membership) consistent with permission name."
+    },
+    {
+      "id": "P1-003",
+      "severity": "P1",
+      "title": "Invoice SECURITY DEFINER RPCs executable by any authenticated staff",
+      "evidence_level": "PROVEN",
+      "locations": [
+        "supabase/migrations/20260719160000_invoices_financial_documents.sql",
+        "supabase/migrations/20260719170000_invoice_payment_reversal_integrity.sql"
+      ],
+      "attack_path": "GRANT EXECUTE TO authenticated; functions only check is_staff_admin() (any admin_roles row), bypassing app permission matrix (invoices.issue etc.).",
+      "impact": "Vertical privilege escalation within staff; financial state changes without intended RBAC.",
+      "production_blocker": true,
+      "recommended_fix": "Revoke authenticated execute; call via service role after requirePermission, or encode fine-grained checks in RPC."
+    },
+    {
+      "id": "P1-004",
+      "severity": "P1",
+      "title": "Mollie webhook token optional (fail-open when unset)",
+      "evidence_level": "PROVEN",
+      "locations": [
+        "src/lib/payments/webhook-url.ts",
+        "src/app/api/webhooks/mollie/route.ts"
+      ],
+      "attack_path": "If MOLLIE_WEBHOOK_TOKEN unset, verifyMollieWebhookToken returns valid; attacker with paymentId can trigger processing path.",
+      "impact": "Unauthenticated webhook invocation / email side effects / API load. Cannot forge paid without Mollie, but unsafe for production enablement.",
+      "production_blocker": true,
+      "recommended_fix": "Fail-closed require token in production; reject when unset."
+    },
+    {
+      "id": "P2-001",
+      "severity": "P2",
+      "title": "Apply docs still cite pre-freeze HEAD b01d518 and mixed freeze status",
+      "evidence_level": "PROVEN",
+      "locations": [
+        "docs/PRODUCTION_DATABASE_APPLY_MANIFEST.md",
+        "docs/PRODUCTION_DATABASE_APPLY_MANIFEST_READINESS.md",
+        "docs/FINAL_PRODUCTION_DATABASE_APPLY_PLAN.md"
+      ],
+      "impact": "Operator confusion; wrong apply HEAD if followed literally.",
+      "production_blocker": false,
+      "recommended_fix": "Update docs to freeze HEAD 1544d44 and resolve NOT EXECUTED vs PASS wording."
+    },
+    {
+      "id": "P2-002",
+      "severity": "P2",
+      "title": "Manifest SHA256 changed from c4cc9d… to 948073dd…; gitignored evidence stale",
+      "evidence_level": "PROVEN",
+      "locations": [
+        "docs/PRODUCTION_DATABASE_APPLY_MANIFEST.md",
+        "docs/evidence/PRODUCTION_DATABASE_APPLY_MANIFEST_READINESS-2026-07-21.md"
+      ],
+      "impact": "Authorization messages using old hash would be invalid.",
+      "production_blocker": false,
+      "recommended_fix": "Use only current hash 948073dd…; archive old evidence clearly."
+    },
+    {
+      "id": "P2-003",
+      "severity": "P2",
+      "title": "FINAL plan backup path 20260721-210514 vs proven 20260721-222511",
+      "evidence_level": "PROVEN",
+      "locations": ["docs/FINAL_PRODUCTION_DATABASE_APPLY_PLAN.md"],
+      "impact": "Wrong backup selected for apply.",
+      "production_blocker": false,
+      "recommended_fix": "Align FINAL plan to 222511."
+    },
+    {
+      "id": "P2-004",
+      "severity": "P2",
+      "title": "Full vitest suite: 1 timeout failure in commercial-price.test.ts",
+      "evidence_level": "FAILED",
+      "locations": ["tests/unit/commercial-price.test.ts"],
+      "impact": "CI flake / incomplete proof of commercial pricing UI labels.",
+      "production_blocker": false,
+      "recommended_fix": "Stabilize/async timeout; re-run to confirm flake vs real fail."
+    },
+    {
+      "id": "P2-005",
+      "severity": "P2",
+      "title": "Playwright e2e blocked by occupied localhost:3000",
+      "evidence_level": "FAILED",
+      "locations": ["tests/e2e/site.spec.ts", "docs/evidence/forensic-audit-2026-07-21/19-e2e.txt"],
+      "impact": "End-to-end site flows UNPROVEN this audit.",
+      "production_blocker": false,
+      "recommended_fix": "Free port or reuseExistingServer; re-run e2e."
+    },
+    {
+      "id": "P2-006",
+      "severity": "P2",
+      "title": "Some db:verify-* scripts use .env remote while labeling local",
+      "evidence_level": "PROVEN",
+      "locations": [
+        "scripts/verify-p0-payments.ts",
+        "scripts/verify-catalog-admin.ts",
+        "scripts/verify-customer-portal.ts"
+      ],
+      "impact": "False FAIL against production (RPCs not applied yet) or REFUSE; confuses local gate evidence.",
+      "production_blocker": false,
+      "recommended_fix": "Force docker-local target like other verifiers; never hit remote unless explicit."
+    },
+    {
+      "id": "P2-007",
+      "severity": "P2",
+      "title": "Deployment provenance: origin/main at b01d518; freeze HEAD local-only ahead +2",
+      "evidence_level": "PROVEN",
+      "locations": ["git status", "git log"],
+      "impact": "Live site not proven to match freeze baseline.",
+      "production_blocker": true,
+      "recommended_fix": "Deploy/push only after fixes + explicit authorization; verify Vercel deployment SHA."
+    },
+    {
+      "id": "P2-008",
+      "severity": "P2",
+      "title": "Sitemap incomplete vs marketing solutions routes",
+      "evidence_level": "SUPPORTED",
+      "locations": ["src/app/sitemap.ts", "src/app/(marketing)/solutions/**"],
+      "impact": "SEO discoverability gaps.",
+      "production_blocker": false,
+      "recommended_fix": "Include all public indexable solutions URLs."
+    },
+    {
+      "id": "P2-009",
+      "severity": "P2",
+      "title": "error.tsx only under marketing segment",
+      "evidence_level": "PROVEN",
+      "locations": ["src/app/(marketing)/error.tsx"],
+      "impact": "Poor error UX for admin/portal/shop on failures.",
+      "production_blocker": false,
+      "recommended_fix": "Add segment error boundaries."
+    },
+    {
+      "id": "P2-010",
+      "severity": "P2",
+      "title": "Auth callback builds redirects from request.url origin",
+      "evidence_level": "SUPPORTED",
+      "locations": ["src/app/auth/callback/route.ts"],
+      "impact": "Host-header open redirect risk if mis-proxied (UNPROVEN on Vercel).",
+      "production_blocker": false,
+      "recommended_fix": "Use canonical resolveAppUrl()."
+    },
+    {
+      "id": "P2-011",
+      "severity": "P2",
+      "title": "npm audit: moderate postcss via next (2 findings)",
+      "evidence_level": "PROVEN",
+      "locations": ["npm audit", "docs/evidence/forensic-audit-2026-07-21/07-npm-audit.txt"],
+      "impact": "Theoretical CSS stringify XSS in toolchain; exploitability in this app low/unproven. audit fix --force would downgrade Next — do not apply.",
+      "production_blocker": false,
+      "recommended_fix": "Track Next patch; never npm audit fix --force."
+    },
+    {
+      "id": "P2-012",
+      "severity": "P2",
+      "title": "Accessibility, Lighthouse performance, mobile matrix largely UNPROVEN this run",
+      "evidence_level": "UNPROVEN",
+      "locations": ["docs/audits/VDB_DIGITAL_TEST_AND_EVIDENCE_MATRIX-2026-07-21.md"],
+      "impact": "Cannot claim WCAG AA or Core Web Vitals PASS.",
+      "production_blocker": false,
+      "recommended_fix": "Dedicated a11y/perf audit pass with tooling evidence."
+    },
+    {
+      "id": "P3-001",
+      "severity": "P3",
+      "title": "No web app manifest",
+      "evidence_level": "PROVEN",
+      "locations": ["src/app"],
+      "impact": "PWA/install metadata missing.",
+      "production_blocker": false,
+      "recommended_fix": "Add manifest if product requires."
+    },
+    {
+      "id": "P3-002",
+      "severity": "P3",
+      "title": "CSP allows 'unsafe-inline' scripts/styles",
+      "evidence_level": "PROVEN",
+      "locations": ["src/middleware.ts"],
+      "impact": "Weaker XSS defense-in-depth.",
+      "production_blocker": false,
+      "recommended_fix": "Nonce/hash CSP when feasible."
+    },
+    {
+      "id": "P3-003",
+      "severity": "P3",
+      "title": "Duplicate solution URL variants (livechat/live-chat, reviewflows/review-flows)",
+      "evidence_level": "PROVEN",
+      "locations": ["src/app/(marketing)/solutions/**"],
+      "impact": "Duplicate content / canonical complexity.",
+      "production_blocker": false,
+      "recommended_fix": "Canonicalize with redirects."
+    },
+    {
+      "id": "P3-004",
+      "severity": "P3",
+      "title": "Portal deliverables and opleveringen parallel routes",
+      "evidence_level": "SUPPORTED",
+      "locations": ["src/app/portal/(protected)/projecten/[id]/**"],
+      "impact": "UX duplication risk.",
+      "production_blocker": false,
+      "recommended_fix": "Consolidate or redirect."
+    },
+    {
+      "id": "P3-005",
+      "severity": "P3",
+      "title": "Next.js middleware → proxy deprecation warning on build",
+      "evidence_level": "PROVEN",
+      "locations": ["docs/evidence/forensic-audit-2026-07-21/09-build.txt"],
+      "impact": "Future Next upgrade friction.",
+      "production_blocker": false,
+      "recommended_fix": "Migrate when Next docs require."
+    },
+    {
+      "id": "P3-006",
+      "severity": "P3",
+      "title": "robots.txt does not disallow /portal/",
+      "evidence_level": "SUPPORTED",
+      "locations": ["src/app/robots.ts"],
+      "impact": "Mitigated by noindex on auth/portal pages; defense-in-depth gap.",
+      "production_blocker": false,
+      "recommended_fix": "Disallow /portal/ and auth paths in robots."
+    },
+    {
+      "id": "P3-007",
+      "severity": "P3",
+      "title": "Locale cookie lacks Secure flag",
+      "evidence_level": "PROVEN",
+      "locations": ["src/middleware.ts"],
+      "impact": "Low; locale preference only.",
+      "production_blocker": false,
+      "recommended_fix": "Set Secure in production."
+    }
+  ]
+}
