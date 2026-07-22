@@ -1,8 +1,11 @@
 # Staging Integration Plan — Shared VDB Supabase
 
-**Status:** PLAN — staging project not yet provisioned in this freeze  
+**Status:** PLAN — staging project not yet provisioned  
 **Canonical migrations:** VDB Digital 2.0 only  
-**Consumers:** Website, Mobile, Partner Portal
+**Consumers:** Website, Mobile, Partner Portal  
+
+**Superseding detail docs (2026-07-22 preflight):**  
+`docs/staging-provisioning-plan.md` and siblings (`staging-security-model`, `staging-environment-contract`, `staging-account-and-fixture-plan`, `staging-cross-repository-execution-plan`, `staging-reset-and-recovery`, `staging-ci-gates`, `staging-readiness-checklist`, `staging-backend-gap-register`).
 
 ---
 
