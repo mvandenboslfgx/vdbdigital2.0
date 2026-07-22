@@ -28,7 +28,7 @@ A prior `db dump --dry-run` retained a pooler login in a Cursor agent-tools log.
 ## 2. Local Docker
 
 - `supabase stop` / `start` / `db reset`: all local migrations applied in file order (incl. both enum bridges).
-- Competing project `vdb-digital-mobile-local` binds `54322` — **must be stopped** before apply-day gates.
+- Competing project on `54322`: after port freeze, Mobile must use `54522` and Partner `54422`. **Do not** stop sibling stacks from this repo; treat wrong ports as isolation FAIL.
 
 ## 3. Isolation audit
 
@@ -201,7 +201,7 @@ Most migrations are **not** safely reverse-SQL’d (esp. enums).
 
 Conditions before execution order:
 
-1. Stop all competing local Supabase projects (esp. `vdb-digital-mobile-local`).  
+1. Confirm local port matrix (`docs/local-infrastructure-isolation.md`): only `vdbdigital2` on `54321/54322`. If a sibling still binds those ports, fix the sibling — do **not** stop it from this repo.  
 2. Include **`20260715190000`** history repair (locale).  
 3. Re-run full local audit + Docker verifiers on apply day with stable stack.  
 4. Separate explicit production apply command required — **do not** treat this plan as authorization to mutate.

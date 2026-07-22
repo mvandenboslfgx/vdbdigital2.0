@@ -202,7 +202,9 @@ Then include those three tracked copies in the same freeze-commit.
 ## 6. Stable full-audit end-gate (CLOSED — PASS)
 
 `npm run audit:supabase-full` orchestrates isolation/schema/auth/storage/foreign-data.  
-Local DB access expects Docker container name **`supabase_db_vdbdigital2`** (hardcoded in audit helpers). Competing stacks (`vdb-digital-mobile-local`, `vdb-partners`) on 54321/54322/54327 cause mid-run BLOCKED — that does **not** count.
+Local DB access expects Docker container name **`supabase_db_vdbdigital2`** on ports **54321/54322** (pinned in `supabase/config.toml`).  
+
+**Port freeze (2026-07-22):** Mobile = `54521/54522`, Partner = `54421/54422`. Do **not** stop sibling stacks from this repo. See `docs/local-infrastructure-isolation.md`.
 
 ### Required procedure
 
@@ -212,24 +214,17 @@ Evidence: docs/evidence/STABLE_FULL_AUDIT-2026-07-21.txt
 Tracked note: docs/PRODUCTION_DATABASE_APPLY_MANIFEST_READINESS.md
 Label: SUPABASE ISOLATION AUDIT PASS
 blockers=0 reviews=0 exit=0
-Procedure used (DB-only container supabase_db_vdbdigital2 on host 55433 when full stack contested):
+Historical note: that run used a DB-only container / temporary sibling stops under port contention.
+SUPERSEDED POLICY (2026-07-22): never stop vdb-digital-mobile-local or vdb-partners from this repo.
+Going forward:
 
-1. Stop competing projects:
-   npx supabase stop --project-id vdb-digital-mobile-local
-   # ensure partners/other stacks do not bind 54321/54322/54327 if they collide
-
-2. Verify ports free / owned only by vdbdigital2
-
-3. From repo root:
-   npx supabase start
-   # or: npx supabase start -x analytics  if 54327 is contested — only if audit still can complete
-
-4. Confirm container:
-   docker ps --format "{{.Names}}" | findstr supabase_db_vdbdigital2
-
-5. CHECKOUT_ENABLED=false ; P05_MIGRATION_APPLIED unset
-
-6. npm run audit:supabase-full
+1. Read-only: docker ps — confirm only vdbdigital2 owns 54321/54322
+2. If a sibling still binds 543xx defaults → isolation FAIL on that sibling (fix to 544xx/545xx); do not kill it here
+3. Own stack only: npx supabase stop --project-id vdbdigital2   # if restart needed
+4. npx supabase start   # or -x analytics if 54327 contested within THIS band
+5. Confirm: docker ps | findstr supabase_db_vdbdigital2
+6. CHECKOUT_ENABLED=false ; P05_MIGRATION_APPLIED unset
+7. npm run audit:supabase-full
 ```
 
 ### Pass criteria
