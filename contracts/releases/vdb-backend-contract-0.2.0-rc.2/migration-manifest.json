@@ -1,0 +1,55 @@
+{
+  "partnerMigrationCount": 8,
+  "mobileCompatMigrationCount": 1,
+  "highestVersion": "20260724160000",
+  "outsideProductionBaselineEndingAt": "20260719170000",
+  "partnerMigrations": [
+    {
+      "version": "20260722100000",
+      "filename": "20260722100000_partner_identity_roles.sql",
+      "purpose": "Partner enums + partner_profiles + identity helpers (BCP-001)"
+    },
+    {
+      "version": "20260722110000",
+      "filename": "20260722110000_partner_applications_profiles_codes.sql",
+      "purpose": "Applications + codes (BCP-002..004)"
+    },
+    {
+      "version": "20260722120000",
+      "filename": "20260722120000_partner_leads_and_sales.sql",
+      "purpose": "partner_leads/sales — not marketing leads (BCP-005..006)"
+    },
+    {
+      "version": "20260722130000",
+      "filename": "20260722130000_partner_commissions_and_ledger.sql",
+      "purpose": "Commissions + balanced append-only ledger (BCP-007, 010)"
+    },
+    {
+      "version": "20260722140000",
+      "filename": "20260722140000_partner_payouts.sql",
+      "purpose": "Payout requests + payouts (BCP-008)"
+    },
+    {
+      "version": "20260722150000",
+      "filename": "20260722150000_partner_cash_receipts_adjustments.sql",
+      "purpose": "Cash receipts + adjustments (BCP-010)"
+    },
+    {
+      "version": "20260722160000",
+      "filename": "20260722160000_partner_rls_and_rpcs.sql",
+      "purpose": "RLS + partner mutation RPCs + grants"
+    },
+    {
+      "version": "20260722170000",
+      "filename": "20260722170000_partner_verify_contracts.sql",
+      "purpose": "verify_partner_admin_contracts"
+    }
+  ],
+  "mobileCompatMigrations": [
+    {
+      "version": "20260724160000",
+      "filename": "20260724160000_mobile_compat_rc2.sql",
+      "purpose": "feature_flags + feature_flag_enabled + payout flag gate + verify_mobile_compat_contracts"
+    }
+  ]
+}

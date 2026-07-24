@@ -1,0 +1,15 @@
+{
+  "contractVersion": "vdb-backend-contract@0.2.0-rc.2",
+  "schemaVersion": "2026.07.24.mobile-compat-rc2",
+  "minimumCompatibleClientVersion": ">=0.2.0-rc.2",
+  "partnerSurfaceCompatibleWith": "vdb-backend-contract@0.2.0-rc.1",
+  "generatedAt": "2026-07-24",
+  "sourceHeadHint": "mobile-compat-rc2",
+  "canonicalBackendOwner": "VDB Digital 2.0",
+  "unpublished": true,
+  "notes": [
+    "Additive mobile compatibility on top of partner RC1.",
+    "Does not publish Mobile 0.1.1 or historical owner 0.1.0 as staging contract.",
+    "portal_* and partner_* remain canonical; Mobile maps client names to owner names."
+  ]
+}

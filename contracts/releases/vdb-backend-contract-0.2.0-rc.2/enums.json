@@ -1,0 +1,63 @@
+{
+  "partner_application_status": [
+    "DRAFT",
+    "SUBMITTED",
+    "IN_REVIEW",
+    "APPROVED",
+    "REJECTED",
+    "WITHDRAWN"
+  ],
+  "partner_profile_status": [
+    "PENDING",
+    "ACTIVE",
+    "SUSPENDED",
+    "REVOKED"
+  ],
+  "partner_code_status": [
+    "ACTIVE",
+    "REVOKED",
+    "EXPIRED"
+  ],
+  "partner_lead_status": [
+    "NEW",
+    "IN_REVIEW",
+    "ASSIGNED",
+    "CONVERTED",
+    "REJECTED",
+    "CLOSED"
+  ],
+  "partner_sale_status": [
+    "PENDING",
+    "CONFIRMED",
+    "SETTLED",
+    "CANCELLED",
+    "REVERSED"
+  ],
+  "partner_commission_status": [
+    "PENDING",
+    "ELIGIBLE",
+    "APPROVED",
+    "PAID",
+    "REVERSED",
+    "ADJUSTED"
+  ],
+  "partner_payout_request_status": [
+    "REQUESTED",
+    "APPROVED",
+    "REJECTED",
+    "CANCELLED"
+  ],
+  "partner_payout_status": [
+    "PENDING",
+    "PAID",
+    "FAILED",
+    "CANCELLED"
+  ],
+  "partner_ledger_account": [
+    "COMMISSION_LIABILITY",
+    "PAYOUT_CLEARING",
+    "CASH",
+    "ADJUSTMENT",
+    "REVENUE_CLEARING"
+  ]
+}

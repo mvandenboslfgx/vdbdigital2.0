@@ -1,0 +1,53 @@
+{
+  "partnerTables": [
+    "partner_profiles",
+    "partner_applications",
+    "partner_codes",
+    "partner_leads",
+    "partner_sales",
+    "partner_commissions",
+    "partner_payout_requests",
+    "partner_payouts",
+    "partner_ledger_transactions",
+    "partner_ledger_entries",
+    "partner_cash_receipts",
+    "partner_adjustments"
+  ],
+  "customerPortalTables": [
+    "profiles",
+    "organizations",
+    "organization_members",
+    "portal_projects",
+    "portal_quotes",
+    "portal_quote_items",
+    "portal_quote_versions",
+    "portal_quote_acceptances",
+    "portal_invoices",
+    "portal_invoice_items",
+    "portal_files",
+    "feature_flags"
+  ],
+  "marketingLeadsUntouched": true,
+  "mobileClientTableMapping": {
+    "projects": "portal_projects",
+    "quotes": "portal_quotes",
+    "quote_items": "portal_quote_items",
+    "invoices": "portal_invoices",
+    "invoice_items": "portal_invoice_items",
+    "documents": "portal_files",
+    "commissions": "partner_commissions",
+    "payout_requests": "partner_payout_requests",
+    "sales": "partner_sales",
+    "leads": "DO_NOT_USE_marketing_leads_use_partner_leads",
+    "app_profiles": "profiles",
+    "profiles": "profiles"
+  },
+  "forbiddenParallelBaseTables": [
+    "projects",
+    "quotes",
+    "invoices",
+    "documents",
+    "commissions",
+    "payout_requests"
+  ]
+}

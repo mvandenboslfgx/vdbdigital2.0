@@ -1,20 +1,25 @@
 # Backend Contract — VDB Digital Platform
 
-**Publisher:** VDB Digital 2.0 (`CANONICAL_BACKEND_OWNER`)  
-**Contract version (freeze baseline):** `vdb-backend-contract@0.1.0` / `schemaVersion` `2026.07.22.freeze`  
-**Partner RC (this branch only):** `vdb-backend-contract@0.2.0-rc.1` / `schemaVersion` `2026.07.22.partner-rc1`  
-**Git freeze baseline:** `93ab6cc4e61c19da072fe41bba7361397bd8bed0`  
+**Publisher:** VDB Digital 2.0 (`CANONICAL_BACKEND_OWNER`)
+**Historical freeze (not staging target):** `vdb-backend-contract@0.1.0` / `schemaVersion` `2026.07.22.freeze`
+**Partner RC1 (embedded, non-breaking):** `vdb-backend-contract@0.2.0-rc.1` / `schemaVersion` `2026.07.22.partner-rc1`
+**Current shared local target:** `vdb-backend-contract@0.2.0-rc.2` / `schemaVersion` `2026.07.24.mobile-compat-rc2`
+**Bundle:** `contracts/releases/vdb-backend-contract-0.2.0-rc.2/`
+**Convergence notes:** `docs/contract-convergence-rc2.md`
+**Git freeze baseline:** `93ab6cc4e61c19da072fe41bba7361397bd8bed0`
 **Partner work branch:** `phase/shared-partner-backend` (additive; not in exact-17 production apply)
 
 This document defines the **versioned surface** clients must pin. A full generated `Database` types package is **planned**; until published as an artifact, clients treat this repo’s migrations + this file as the contract source. Checksums for partner RC: `docs/artifacts/partner-backend-contract-checksums.json`.
+
+**Mobile local proposal `0.1.1` is not canonical and must not be published to staging.**
 
 ---
 
 ## Versioning rules
 
-1. Every breaking schema/RPC/enum change bumps `schemaVersion` and contract semver.  
-2. Mobile and Partner record the pinned `schemaVersion` in their repo (env or config).  
-3. **Drift check (required target):** client CI fails if pinned `schemaVersion` ≠ intended staging/production contract tag.  
+1. Every breaking schema/RPC/enum change bumps `schemaVersion` and contract semver.
+2. Mobile and Partner record the pinned `schemaVersion` in their repo (env or config).
+3. **Drift check (required target):** client CI fails if pinned `schemaVersion` ≠ intended staging/production contract tag.
 4. Additive non-breaking changes may be minor bumps; removals/renames are major.
 
 ---

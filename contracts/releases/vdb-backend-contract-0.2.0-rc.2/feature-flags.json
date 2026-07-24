@@ -1,0 +1,43 @@
+{
+  "CHECKOUT_ENABLED": {
+    "default": false,
+    "scope": "website-env",
+    "notes": "Fail-closed web checkout. Owner website authority."
+  },
+  "P05_MIGRATION_APPLIED": {
+    "default": "unset",
+    "scope": "website-env",
+    "notes": "Operator hint only"
+  },
+  "mollie_checkout": {
+    "default": false,
+    "scope": "db.feature_flags",
+    "notes": "FAIL-CLOSED — Mobile/shared Mollie checkout"
+  },
+  "digital_product_checkout": {
+    "default": false,
+    "scope": "db.feature_flags",
+    "notes": "FAIL-CLOSED — digital goods / Play gate"
+  },
+  "partner_payouts": {
+    "default": false,
+    "scope": "db.feature_flags",
+    "notes": "FAIL-CLOSED — partner payout requests; gates request_partner_payout"
+  },
+  "push_notifications": {
+    "default": false,
+    "scope": "db.feature_flags",
+    "notes": "Remote push off until provider"
+  },
+  "documents_virus_scan": {
+    "default": false,
+    "scope": "db.feature_flags",
+    "notes": "AV provider off until configured"
+  },
+  "featureFlagKeyAliases": {
+    "payments.mollie_checkout": "mollie_checkout",
+    "payments.digital_goods_checkout": "digital_product_checkout",
+    "partner.payouts": "partner_payouts",
+    "CHECKOUT_ENABLED": "mollie_checkout"
+  }
+}
