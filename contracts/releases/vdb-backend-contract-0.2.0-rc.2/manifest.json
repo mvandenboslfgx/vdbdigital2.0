@@ -10,6 +10,8 @@
   "notes": [
     "Additive mobile compatibility on top of partner RC1.",
     "Does not publish Mobile 0.1.1 or historical owner 0.1.0 as staging contract.",
-    "portal_* and partner_* remain canonical; Mobile maps client names to owner names."
+    "portal_* and partner_* remain canonical; Mobile maps client names to owner names.",
+    "KEEP_RC2_VERSION: three staging grant migrations (20260723140000, 20260723150000, 20260724103105) reconciled into the same unpublished 0.2.0-rc.2 line — privilege-only, no schemaVersion bump.",
+    "RC3 messaging migrations remain outside this contract."
   ]
 }

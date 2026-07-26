@@ -1,6 +1,8 @@
 {
   "partnerMigrationCount": 8,
   "mobileCompatMigrationCount": 1,
+  "grantMigrationCount": 3,
+  "trackedMigrationCountAtRc2Head": 39,
   "highestVersion": "20260724160000",
   "outsideProductionBaselineEndingAt": "20260719170000",
   "partnerMigrations": [
@@ -45,11 +47,42 @@
       "purpose": "verify_partner_admin_contracts"
     }
   ],
+  "grantMigrations": [
+    {
+      "version": "20260723140000",
+      "filename": "20260723140000_invoice_rpc_grant_hardening.sql",
+      "sha256": "5af3a7f42fd3d3f2603ace8c1d2a790ba8e698c79c7ce4b890d1860f871a37b5",
+      "purpose": "Invoice financial RPC EXECUTE → service_role only (revoke authenticated/PUBLIC)"
+    },
+    {
+      "version": "20260723150000",
+      "filename": "20260723150000_invoice_rpc_grant_verify_alignment.sql",
+      "sha256": "3bd483591ac4539353070b3527184b85c8bcfae5c576af631192b379a8c601e2",
+      "purpose": "Align verify_invoices_financial_contracts with service_role-only RPC grants"
+    },
+    {
+      "version": "20260724103105",
+      "filename": "20260724103105_staging_cloud_grant_hardening.sql",
+      "sha256": "d345803ba5b120796f24d3063eb7f81029fa4f75bba8f0ba7b0877c9499e346c",
+      "purpose": "Hosted/local privilege alignment: anon revoke, authenticated portal DML for RLS, verifier/invoice RPCs service_role-only"
+    }
+  ],
   "mobileCompatMigrations": [
     {
       "version": "20260724160000",
       "filename": "20260724160000_mobile_compat_rc2.sql",
       "purpose": "feature_flags + feature_flag_enabled + payout flag gate + verify_mobile_compat_contracts"
     }
+  ],
+  "excludedFromRc2": [
+    "20260725120000_messaging_support_appointments_rc3.sql",
+    "20260725120100_messaging_support_appointments_rc3_rpcs.sql",
+    "20260725120200_fix_appointment_rls_recursion.sql",
+    "20260725120300_rc3_table_grants.sql"
+  ],
+  "notes": [
+    "Grant migrations were already applied on staging (qzekuvmgfekzsowdecyk) before Git reconciliation.",
+    "This manifest update is source-control reconciliation only — not a remote apply authorization.",
+    "Production exact-17 baseline does not authorize these migrations."
   ]
 }
