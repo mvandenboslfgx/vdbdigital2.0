@@ -1,0 +1,46 @@
+{
+  "id": "PERF-GATE-001",
+  "effectiveDate": "2026-07-26",
+  "replaces": "36x Lighthouse Performance exact 1.00",
+  "prospectiveOnly": true,
+  "routes": [
+    { "id": "home", "path": "/" },
+    { "id": "packages", "path": "/packages" },
+    { "id": "services-websites", "path": "/solutions/websites" },
+    { "id": "shop", "path": "/shop" },
+    { "id": "shop-windows", "path": "/shop?group=windows" },
+    { "id": "product-win11-pro", "path": "/shop/windows-11-pro-retail-1" }
+  ],
+  "profiles": ["mobile", "desktop"],
+  "runsPerRouteProfile": 3,
+  "expectedAudits": 36,
+  "budgets": {
+    "accessibilityExact": 1,
+    "bestPracticesExact": 1,
+    "seoExact": 1,
+    "desktopPerformanceMin": 0.99,
+    "mobilePerformanceMin": 0.8,
+    "observedLcpMaxMs": 2000,
+    "mobileSimLcpMedianMaxMs": 3500,
+    "mobileSimLcpRunMaxMs": 4000,
+    "desktopSimLcpMaxMs": 1500,
+    "clsMedianMax": 0.02,
+    "clsRunMax": 0.05,
+    "tbtMedianMaxMs": 200,
+    "tbtRunMaxMs": 300,
+    "ttfbMedianMaxMs": 200,
+    "ttfbRunMaxMs": 300,
+    "scriptTransferRunMaxBytes": 200000,
+    "jsRegressionPctMax": 0.05,
+    "jsRegressionAbsMaxBytes": 8000,
+    "nonNextScriptTransferMaxBytes": 10000,
+    "mobileScriptEvaluationMedianMaxMs": 600,
+    "mobileScriptEvaluationRunMaxMs": 750,
+    "consoleErrorsExact": 0
+  },
+  "baselinePath": "config/performance/perf-gate-001.baseline.json",
+  "notes": [
+    "Simulated LCP is a local regression bound, not production Core Web Vitals proof.",
+    "Budgets are frozen before fresh matrix execution and must not be tuned to results."
+  ]
+}

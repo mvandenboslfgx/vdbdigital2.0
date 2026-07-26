@@ -1,0 +1,55 @@
+{
+  "generatedFrom": "docs/artifacts/lighthouse-catalog-matrix/remediation/final",
+  "generatedAt": "2026-07-26T01:01:25.533Z",
+  "note": "Frozen JS transfer medians for PERF-GATE-001 regression budgets. Do not retune after fresh matrix start.",
+  "routes": {
+    "home__mobile": {
+      "scriptTransferMedian": 173547,
+      "scriptTransferValues": [173549, 173547, 173547]
+    },
+    "home__desktop": {
+      "scriptTransferMedian": 173547,
+      "scriptTransferValues": [173547, 173547, 173547]
+    },
+    "packages__mobile": {
+      "scriptTransferMedian": 167657,
+      "scriptTransferValues": [167657, 167657, 167657]
+    },
+    "packages__desktop": {
+      "scriptTransferMedian": 167657,
+      "scriptTransferValues": [167657, 167657, 167657]
+    },
+    "services-websites__mobile": {
+      "scriptTransferMedian": 167657,
+      "scriptTransferValues": [167657, 167657, 167657]
+    },
+    "services-websites__desktop": {
+      "scriptTransferMedian": 167657,
+      "scriptTransferValues": [167657, 167657, 167657]
+    },
+    "shop__mobile": {
+      "scriptTransferMedian": 167657,
+      "scriptTransferValues": [167657, 167657, 167657]
+    },
+    "shop__desktop": {
+      "scriptTransferMedian": 167657,
+      "scriptTransferValues": [167657, 167657, 167657]
+    },
+    "shop-windows__mobile": {
+      "scriptTransferMedian": 167657,
+      "scriptTransferValues": [167657, 167657, 167657]
+    },
+    "shop-windows__desktop": {
+      "scriptTransferMedian": 167657,
+      "scriptTransferValues": [167657, 167657, 167657]
+    },
+    "product-win11-pro__mobile": {
+      "scriptTransferMedian": 167657,
+      "scriptTransferValues": [167657, 167657, 167657]
+    },
+    "product-win11-pro__desktop": {
+      "scriptTransferMedian": 167657,
+      "scriptTransferValues": [167657, 167657, 167657]
+    }
+  }
+}
