@@ -2,7 +2,11 @@ import "server-only";
 import { createServiceRoleClient } from "@/lib/database/server";
 import { requireAdmin } from "@/server/auth/require-admin";
 import { requirePermission } from "@/server/auth/require-permission";
-import { hasPermission } from "@/lib/auth/permissions";
+import {
+  intersectCallerOrganizationFilter,
+  listManagedOrganizationIds,
+  resolveDocumentScopeMode,
+} from "@/server/auth/admin-resource-scope";
 
 export type AdminDocumentRow = {
   id: string;
@@ -34,9 +38,8 @@ export async function listAdminDocuments(filters: {
   pageSize?: number;
 }) {
   const ctx = await requireAdmin();
-  const canAll = hasPermission(ctx.role, "documents.view_all");
-  const canOrg = hasPermission(ctx.role, "documents.view_organization");
-  if (!canAll && !canOrg && !hasPermission(ctx.role, "files.manage")) {
+  const mode = resolveDocumentScopeMode(ctx.role);
+  if (mode === "deny") {
     await requirePermission(ctx, "documents.view_all");
   }
 
@@ -50,6 +53,20 @@ export async function listAdminDocuments(filters: {
     return { documents: [] as AdminDocumentRow[], total: 0, page, pageSize };
   }
 
+  let allowedOrgs: string[] | "all" | "none" = "all";
+  if (mode === "organization") {
+    const managed = await listManagedOrganizationIds(supabase, ctx.user.id);
+    allowedOrgs = intersectCallerOrganizationFilter(
+      managed,
+      filters.organizationId,
+    );
+    if (allowedOrgs === "none" || (Array.isArray(allowedOrgs) && allowedOrgs.length === 0)) {
+      return { documents: [], total: 0, page, pageSize };
+    }
+  } else if (filters.organizationId) {
+    allowedOrgs = [filters.organizationId];
+  }
+
   let query = supabase
     .from("portal_files")
     .select(
@@ -58,6 +75,10 @@ export async function listAdminDocuments(filters: {
     )
     .order("updated_at", { ascending: false })
     .range(from, to);
+
+  if (allowedOrgs !== "all") {
+    query = query.in("organization_id", allowedOrgs);
+  }
 
   if (filters.status && filters.status !== "ALL") {
     query = query.eq("status", filters.status);
@@ -69,9 +90,6 @@ export async function listAdminDocuments(filters: {
   }
   if (filters.category && filters.category !== "ALL") {
     query = query.eq("category", filters.category);
-  }
-  if (filters.organizationId) {
-    query = query.eq("organization_id", filters.organizationId);
   }
   if (filters.projectId) {
     query = query.eq("project_id", filters.projectId);
@@ -103,11 +121,8 @@ export async function listAdminDocuments(filters: {
 
 export async function getAdminDocument(id: string) {
   const ctx = await requireAdmin();
-  if (
-    !hasPermission(ctx.role, "documents.view_all") &&
-    !hasPermission(ctx.role, "documents.view_organization") &&
-    !hasPermission(ctx.role, "files.manage")
-  ) {
+  const mode = resolveDocumentScopeMode(ctx.role);
+  if (mode === "deny") {
     await requirePermission(ctx, "documents.view_all");
   }
 
@@ -123,6 +138,14 @@ export async function getAdminDocument(id: string) {
     .maybeSingle();
 
   if (!doc) return null;
+
+  if (mode === "organization") {
+    const managed = await listManagedOrganizationIds(supabase, ctx.user.id);
+    const orgId = (doc as { organization_id?: string }).organization_id;
+    if (!orgId || !managed.includes(orgId)) {
+      return null;
+    }
+  }
 
   const rootId = doc.parent_document_id ?? doc.id;
   const { data: versions } = await supabase

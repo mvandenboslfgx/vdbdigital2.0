@@ -48,20 +48,29 @@ export function buildMollieWebhookUrl(): WebhookUrlResult {
   return { ok: true, url };
 }
 
-/** Valideert optioneel applicatiewebhooktoken uit query (niet Mollie signature). */
+/**
+ * Valideert applicatiewebhooktoken uit query (niet Mollie signature).
+ * Fail-closed: ontbrekende serverconfiguratie is nooit geldig.
+ */
 export function verifyMollieWebhookToken(
   providedToken: string | null,
-): { valid: true } | { valid: false; reason: "missing" | "invalid" } {
+): {
+  valid: true;
+} | {
+  valid: false;
+  reason: "missing" | "invalid" | "unconfigured";
+} {
   const expected = getMollieWebhookToken();
   if (!expected) {
-    return { valid: true };
+    return { valid: false, reason: "unconfigured" };
   }
 
-  if (!providedToken) {
+  const provided = providedToken?.trim() || null;
+  if (!provided) {
     return { valid: false, reason: "missing" };
   }
 
-  if (!timingSafeCompare(providedToken, expected)) {
+  if (!timingSafeCompare(provided, expected)) {
     return { valid: false, reason: "invalid" };
   }
 

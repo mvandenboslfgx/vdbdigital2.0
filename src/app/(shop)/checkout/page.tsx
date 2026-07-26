@@ -6,7 +6,8 @@ import { CheckoutForm } from "@/components/forms/checkout-form";
 import { isMollieConfigured } from "@/lib/payments/mollie";
 import { LocaleLinkButton } from "@/components/ui/locale-link-button";
 import { redirect } from "next/navigation";
-import { getDictionary } from "@/i18n/get-dictionary";
+import { getDictionary, getLocale, getMessages } from "@/i18n/get-dictionary";
+import { MessagesProvider } from "@/i18n/messages-provider";
 import { paths } from "@/i18n/config";
 import { isDirectCheckoutEnabled } from "@/config/features";
 
@@ -19,7 +20,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function CheckoutPage() {
-  const { t } = await getDictionary();
+  const locale = await getLocale();
+  const { t } = await getDictionary(locale);
+  const messages = await getMessages(locale);
 
   if (!isDirectCheckoutEnabled()) {
     redirect(paths.shop);
@@ -45,7 +48,9 @@ export default async function CheckoutPage() {
       <Container className="max-w-2xl">
         <h1 className="text-h1 mb-8">{t("checkout.title")}</h1>
         <Card>
-          <CheckoutForm totals={totals} mollieConfigured={isMollieConfigured()} />
+          <MessagesProvider locale={locale} messages={messages}>
+            <CheckoutForm totals={totals} mollieConfigured={isMollieConfigured()} />
+          </MessagesProvider>
         </Card>
         <p className="text-center mt-4">
           <LocaleLinkButton href={paths.cart} variant="ghost" size="sm">

@@ -1,7 +1,7 @@
 import { Container, Section, Card } from "@/components/ui/container";
 import { getLocale } from "@/i18n/get-dictionary";
 import { getCommercialContent } from "@/i18n/content/commercial";
-import { LocaleLink } from "@/i18n/locale-link";
+import { ServerLocaleLink } from "@/i18n/server-locale-link";
 import { paths } from "@/i18n/config";
 
 const solutionLinks = [
@@ -26,11 +26,11 @@ export async function SolutionsGridSection() {
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {solutionLinks.map(({ key, href }) => (
-            <LocaleLink key={key} href={href}>
+            <ServerLocaleLink key={key} href={href}>
               <Card className="h-full hover:border-primary/40 transition-colors">
                 <p className="font-medium">{s[key]}</p>
               </Card>
-            </LocaleLink>
+            </ServerLocaleLink>
           ))}
         </div>
       </Container>

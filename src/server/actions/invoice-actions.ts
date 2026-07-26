@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { createServiceRoleClient, createServerSupabaseClient } from "@/lib/database/server";
+import { createServiceRoleClient } from "@/lib/database/server";
 import { writeAuditLog } from "@/lib/security/audit-log";
 import { verifyOrigin } from "@/lib/security/origin";
 import { invoiceHeaderTotals, lineTotals } from "@/lib/commerce/invoice-money";
@@ -446,19 +446,15 @@ export async function issueInvoiceAction(formData: FormData) {
     redirect(`/admin/invoices/${invoiceId}?fout=versie`);
   }
 
-  // Prefer user-JWT RPC; fallback service-role after same checks
-  const userClient = await createServerSupabaseClient();
   let ok = false;
   let detail = "";
-  if (userClient) {
-    const { data } = await userClient.rpc("issue_portal_invoice", {
-      p_invoice_id: invoiceId,
-      p_expected_version: expectedVersion,
-    });
-    const row = Array.isArray(data) ? data[0] : data;
-    ok = Boolean(row?.ok);
-    detail = String(row?.detail ?? "");
-  }
+  const { data: rpcData } = await supabase.rpc("issue_portal_invoice", {
+    p_invoice_id: invoiceId,
+    p_expected_version: expectedVersion,
+  });
+  const rpcRow = Array.isArray(rpcData) ? rpcData[0] : rpcData;
+  ok = Boolean(rpcRow?.ok);
+  detail = String(rpcRow?.detail ?? "");
 
   if (!ok && detail !== "ALREADY_ISSUED") {
     // Service-role atomic fallback mirroring RPC (local staff sessions)
@@ -598,28 +594,23 @@ export async function recordInvoicePaymentAction(formData: FormData) {
     redirect(`/admin/invoices/${invoiceId}?fout=bedrag`);
   }
 
-  const userClient = await createServerSupabaseClient();
   const supabase = createServiceRoleClient();
   if (!supabase) redirect("/admin/invoices");
 
-  let ok = false;
-  let detail = "";
-  if (userClient) {
-    const { data } = await userClient.rpc("record_portal_invoice_payment", {
-      p_invoice_id: invoiceId,
-      p_expected_version: expectedVersion,
-      p_amount_cents: amountCents,
-      p_currency: "EUR",
-      p_payment_date: paymentDate || new Date().toISOString().slice(0, 10),
-      p_payment_method: method,
-      p_external_reference: externalRef || null,
-      p_internal_note: note || null,
-      p_idempotency_key: idempotencyKey,
-    });
-    const row = Array.isArray(data) ? data[0] : data;
-    ok = Boolean(row?.ok);
-    detail = String(row?.detail ?? "");
-  }
+  const { data: rpcData } = await supabase.rpc("record_portal_invoice_payment", {
+    p_invoice_id: invoiceId,
+    p_expected_version: expectedVersion,
+    p_amount_cents: amountCents,
+    p_currency: "EUR",
+    p_payment_date: paymentDate || new Date().toISOString().slice(0, 10),
+    p_payment_method: method,
+    p_external_reference: externalRef || null,
+    p_internal_note: note || null,
+    p_idempotency_key: idempotencyKey,
+  });
+  const rpcRow = Array.isArray(rpcData) ? rpcData[0] : rpcData;
+  const ok = Boolean(rpcRow?.ok);
+  const detail = String(rpcRow?.detail ?? "");
 
   if (!ok && detail !== "ALREADY_RECORDED") {
     redirect(`/admin/invoices/${invoiceId}?fout=betaling`);
@@ -680,13 +671,12 @@ export async function reverseInvoicePaymentAction(formData: FormData) {
     redirect(`/admin/invoices/${invoiceId}?fout=reden`);
   }
 
-  const userClient = await createServerSupabaseClient();
   const supabase = createServiceRoleClient();
-  if (!userClient || !supabase) {
+  if (!supabase) {
     redirect(`/admin/invoices/${invoiceId}?fout=reversal`);
   }
 
-  const { data } = await userClient.rpc("reverse_portal_invoice_payment", {
+  const { data } = await supabase.rpc("reverse_portal_invoice_payment", {
     p_invoice_id: invoiceId,
     p_payment_record_id: paymentRecordId,
     p_expected_version: expectedVersion,

@@ -2,7 +2,7 @@
 
 import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utilities/cn";
-import { useI18n } from "@/i18n/provider";
+import { useLocale } from "@/i18n/locale-provider";
 import {
   locales,
   localeLabels,
@@ -15,21 +15,29 @@ import {
   filterSearchParams,
 } from "@/i18n/locale-query";
 
-export function LanguageSwitcher({ className }: { className?: string }) {
-  const { locale, t } = useI18n();
+export function LanguageSwitcher({
+  className,
+  compact = false,
+}: {
+  className?: string;
+  /** Header-sized segment; keeps EN/NL on one horizontal row */
+  compact?: boolean;
+}) {
+  const locale = useLocale();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { pathname: bare } = stripLocalePrefix(pathname);
   const safeQuery = filterSearchParams(searchParams);
+  const groupLabel = locale === "nl" ? "Taal" : "Language";
 
   return (
     <div
       className={cn(
-        "inline-flex items-center gap-1 rounded-lg border border-border p-1",
+        "inline-flex shrink-0 flex-nowrap items-center gap-0.5 rounded-md border border-border/80 p-0.5",
         className,
       )}
       role="group"
-      aria-label={t("language.label")}
+      aria-label={groupLabel}
     >
       {locales.map((code) => {
         const href = appendFilteredSearch(withLocale(bare, code), safeQuery);
@@ -40,7 +48,6 @@ export function LanguageSwitcher({ className }: { className?: string }) {
             href={href}
             hrefLang={code}
             lang={code}
-            // Full navigation so root layout + middleware re-apply `lang` / cookies.
             onClick={(event) => {
               if (active) {
                 event.preventDefault();
@@ -50,13 +57,14 @@ export function LanguageSwitcher({ className }: { className?: string }) {
               window.location.assign(href);
             }}
             className={cn(
-              "inline-flex min-h-11 min-w-11 items-center justify-center rounded-md px-3 text-small transition-colors touch-manipulation",
+              "text-nowrap-safe inline-flex items-center justify-center rounded px-2.5 font-medium transition-colors touch-manipulation",
+              compact ? "min-h-9 min-w-[2.25rem] text-xs" : "min-h-10 min-w-[2.5rem] text-small",
               active
-                ? "bg-primary-soft text-primary font-medium"
-                : "text-muted hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+                ? "bg-primary text-primary-fg"
+                : "text-muted hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
             )}
             aria-current={active ? "true" : undefined}
-            aria-label={localeLabels[code as Locale]}
+            aria-label={`${code.toUpperCase()} — ${localeLabels[code as Locale]}`}
           >
             {code.toUpperCase()}
           </a>

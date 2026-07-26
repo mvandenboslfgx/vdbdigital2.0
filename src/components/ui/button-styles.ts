@@ -12,7 +12,7 @@ const sizeClasses: Record<ButtonSize, string> = {
 };
 
 const primaryClasses =
-  "bg-primary text-white hover:bg-primary-hover border border-transparent";
+  "bg-primary text-primary-fg hover:bg-primary-hover border border-transparent";
 const dangerClasses =
   "bg-danger text-white hover:opacity-90 border border-transparent";
 

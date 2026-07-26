@@ -41,12 +41,93 @@ const accountRequestSchema = z.object({
 
 export type AuthActionState = {
   error?: string;
+  errorCode?:
+    | "denied"
+    | "session"
+    | "invalid_code"
+    | "existing_factor"
+    | "rate_limit"
+    | "network"
+    | "aal2_pending"
+    | "unknown";
   success?: boolean;
   message?: string;
   qrCode?: string;
+  /** TOTP manual secret — never log or render in audit trails */
+  secret?: string;
   factorId?: string;
   challengeId?: string;
+  aal2?: boolean;
+  correlationId?: string;
+  status?: {
+    currentLevel: "aal1" | "aal2";
+    hasVerifiedFactor: boolean;
+    hasUnverifiedFactor: boolean;
+    verifiedFactorId: string | null;
+    unverifiedFactorId: string | null;
+  };
 };
+
+function newCorrelationId(): string {
+  return crypto.randomUUID();
+}
+
+function mapMfaError(
+  raw: string | undefined,
+  fallback: AuthActionState["errorCode"] = "unknown",
+): Pick<AuthActionState, "error" | "errorCode"> {
+  const lower = (raw ?? "").toLowerCase();
+  if (
+    lower.includes("session") ||
+    lower.includes("jwt") ||
+    lower.includes("not authenticated") ||
+    lower.includes("auth session missing")
+  ) {
+    return {
+      errorCode: "session",
+      error: "Je sessie is verlopen. Log opnieuw in om verder te gaan.",
+    };
+  }
+  if (
+    lower.includes("already") ||
+    lower.includes("exists") ||
+    lower.includes("factor_name") ||
+    lower.includes("enrolled")
+  ) {
+    return {
+      errorCode: "existing_factor",
+      error: "Er is al een verificatiemethode gekoppeld. Gebruik je bestaande code.",
+    };
+  }
+  if (lower.includes("rate") || lower.includes("too many")) {
+    return {
+      errorCode: "rate_limit",
+      error: "Er zijn te veel pogingen gedaan. Wacht even en probeer het opnieuw.",
+    };
+  }
+  if (
+    lower.includes("invalid") ||
+    lower.includes("expired") ||
+    lower.includes("code")
+  ) {
+    return {
+      errorCode: "invalid_code",
+      error:
+        "De code klopt niet of is verlopen. Open je authenticator-app en probeer het opnieuw.",
+    };
+  }
+  if (fallback === "network") {
+    return {
+      errorCode: "network",
+      error:
+        "Instellen lukt momenteel niet. Probeer het opnieuw of log uit en opnieuw in.",
+    };
+  }
+  return {
+    errorCode: fallback,
+    error: "Er ging iets mis. Probeer het opnieuw of log uit en opnieuw in.",
+  };
+}
 
 function genericAuthError(): AuthActionState {
   return {
@@ -453,15 +534,90 @@ async function attachMembership(
     .eq("id", invite.id);
 }
 
-export async function mfaEnrollAction(): Promise<AuthActionState> {
+export async function mfaGetStatusAction(): Promise<AuthActionState> {
+  const correlationId = newCorrelationId();
   try {
     await requireAdminWithoutMfa();
   } catch {
-    return { error: "Toegang geweigerd." };
+    return {
+      errorCode: "denied",
+      error: "Toegang geweigerd.",
+      correlationId,
+    };
+  }
+
+  const { getMfaStatus } = await import("@/server/auth/mfa-status");
+  const status = await getMfaStatus();
+  if (!status) {
+    return {
+      errorCode: "session",
+      error: "Je sessie is verlopen. Log opnieuw in om verder te gaan.",
+      correlationId,
+    };
+  }
+
+  return {
+    success: true,
+    correlationId,
+    status: {
+      currentLevel: status.currentLevel,
+      hasVerifiedFactor: status.hasVerifiedFactor,
+      hasUnverifiedFactor: status.hasUnverifiedFactor,
+      verifiedFactorId: status.verifiedFactorId,
+      unverifiedFactorId: status.unverifiedFactorId,
+    },
+    aal2: status.currentLevel === "aal2",
+  };
+}
+
+export async function mfaEnrollAction(): Promise<AuthActionState> {
+  const correlationId = newCorrelationId();
+  let adminUserId: string;
+  try {
+    const ctx = await requireAdminWithoutMfa();
+    adminUserId = ctx.user.id;
+  } catch {
+    return {
+      errorCode: "denied",
+      error: "Toegang geweigerd.",
+      correlationId,
+    };
   }
 
   const supabase = await createServerSupabaseClient();
-  if (!supabase) return { error: "Authenticatie is niet geconfigureerd." };
+  if (!supabase) {
+    return {
+      errorCode: "network",
+      error:
+        "Instellen lukt momenteel niet. Probeer het opnieuw of log uit en opnieuw in.",
+      correlationId,
+    };
+  }
+
+  const { getMfaStatus } = await import("@/server/auth/mfa-status");
+  const status = await getMfaStatus();
+  if (status?.hasVerifiedFactor) {
+    await writeAuditLog({
+      userId: adminUserId,
+      action: "auth.mfa_enroll_blocked",
+      metadata: { phase: "enroll", code: "existing_factor", correlationId },
+    });
+    return {
+      ...mapMfaError("already enrolled", "existing_factor"),
+      correlationId,
+      status: {
+        currentLevel: status.currentLevel,
+        hasVerifiedFactor: true,
+        hasUnverifiedFactor: status.hasUnverifiedFactor,
+        verifiedFactorId: status.verifiedFactorId,
+        unverifiedFactorId: status.unverifiedFactorId,
+      },
+    };
+  }
+
+  if (status?.unverifiedFactorId) {
+    await supabase.auth.mfa.unenroll({ factorId: status.unverifiedFactorId });
+  }
 
   const { data, error } = await supabase.auth.mfa.enroll({
     factorType: "totp",
@@ -469,41 +625,134 @@ export async function mfaEnrollAction(): Promise<AuthActionState> {
   });
 
   if (error || !data) {
-    return { error: "MFA-inschrijving mislukt." };
+    await writeAuditLog({
+      userId: adminUserId,
+      action: "auth.mfa_enroll_failed",
+      metadata: {
+        phase: "enroll",
+        code: error?.code ?? "unknown",
+        status: error?.status,
+        correlationId,
+      },
+    });
+    return { ...mapMfaError(error?.message, "unknown"), correlationId };
   }
 
   await writeAuditLog({
+    userId: adminUserId,
     action: "auth.mfa_enroll_started",
-    metadata: { factorId: data.id },
+    metadata: { phase: "enroll", code: "ok", correlationId },
   });
 
   return {
     factorId: data.id,
     qrCode: data.totp.qr_code,
+    secret: data.totp.secret,
+    correlationId,
   };
+}
+
+export async function mfaUnenrollUnverifiedAction(): Promise<AuthActionState> {
+  const correlationId = newCorrelationId();
+  let adminUserId: string;
+  try {
+    const ctx = await requireAdminWithoutMfa();
+    adminUserId = ctx.user.id;
+  } catch {
+    return {
+      errorCode: "denied",
+      error: "Toegang geweigerd.",
+      correlationId,
+    };
+  }
+
+  const supabase = await createServerSupabaseClient();
+  if (!supabase) {
+    return {
+      errorCode: "network",
+      error:
+        "Instellen lukt momenteel niet. Probeer het opnieuw of log uit en opnieuw in.",
+      correlationId,
+    };
+  }
+
+  const { getMfaStatus } = await import("@/server/auth/mfa-status");
+  const status = await getMfaStatus();
+  if (!status?.unverifiedFactorId) {
+    return { success: true, correlationId };
+  }
+
+  const { error } = await supabase.auth.mfa.unenroll({
+    factorId: status.unverifiedFactorId,
+  });
+
+  if (error) {
+    await writeAuditLog({
+      userId: adminUserId,
+      action: "auth.mfa_unenroll_failed",
+      metadata: {
+        phase: "unenroll_unverified",
+        code: error.code ?? "unknown",
+        correlationId,
+      },
+    });
+    return { ...mapMfaError(error.message, "unknown"), correlationId };
+  }
+
+  await writeAuditLog({
+    userId: adminUserId,
+    action: "auth.mfa_unenroll_unverified",
+    metadata: { phase: "unenroll_unverified", code: "ok", correlationId },
+  });
+
+  return { success: true, correlationId };
+}
+
+async function assertAal2AfterVerify(
+  supabase: NonNullable<Awaited<ReturnType<typeof createServerSupabaseClient>>>,
+): Promise<boolean> {
+  const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  return data?.currentLevel === "aal2";
 }
 
 export async function mfaVerifyEnrollAction(
   _prev: AuthActionState,
   formData: FormData,
 ): Promise<AuthActionState> {
+  const correlationId = newCorrelationId();
   let adminUserId: string;
   try {
     const ctx = await requireAdminWithoutMfa();
     adminUserId = ctx.user.id;
   } catch {
-    return { error: "Toegang geweigerd." };
+    return {
+      errorCode: "denied",
+      error: "Toegang geweigerd.",
+      correlationId,
+    };
   }
 
   const factorId = formData.get("factorId") as string;
   const parsed = mfaCodeSchema.safeParse({ code: formData.get("code") });
 
   if (!factorId || !parsed.success) {
-    return { error: "Ongeldige verificatiecode." };
+    return {
+      errorCode: "invalid_code",
+      error:
+        "De code klopt niet of is verlopen. Open je authenticator-app en probeer het opnieuw.",
+      correlationId,
+    };
   }
 
   const supabase = await createServerSupabaseClient();
-  if (!supabase) return { error: "Authenticatie is niet geconfigureerd." };
+  if (!supabase) {
+    return {
+      errorCode: "network",
+      error:
+        "Instellen lukt momenteel niet. Probeer het opnieuw of log uit en opnieuw in.",
+      correlationId,
+    };
+  }
 
   const { data: challenge, error: challengeError } =
     await supabase.auth.mfa.challenge({ factorId });
@@ -512,9 +761,13 @@ export async function mfaVerifyEnrollAction(
     await writeAuditLog({
       userId: adminUserId,
       action: "auth.mfa_verify_failed",
-      metadata: { step: "challenge" },
+      metadata: {
+        phase: "enroll_challenge",
+        code: challengeError?.code ?? "challenge_failed",
+        correlationId,
+      },
     });
-    return { error: "Verificatie mislukt." };
+    return { ...mapMfaError(challengeError?.message, "unknown"), correlationId };
   }
 
   const { error: verifyError } = await supabase.auth.mfa.verify({
@@ -527,56 +780,102 @@ export async function mfaVerifyEnrollAction(
     await writeAuditLog({
       userId: adminUserId,
       action: "auth.mfa_verify_failed",
-      metadata: { step: "enroll_verify" },
+      metadata: {
+        phase: "enroll_verify",
+        code: verifyError.code ?? "invalid_code",
+        correlationId,
+      },
     });
-    return { error: "Ongeldige verificatiecode." };
+    return { ...mapMfaError(verifyError.message, "invalid_code"), correlationId };
+  }
+
+  const aal2 = await assertAal2AfterVerify(supabase);
+  if (!aal2) {
+    await writeAuditLog({
+      userId: adminUserId,
+      action: "auth.mfa_verify_failed",
+      metadata: { phase: "enroll_aal2", code: "aal2_pending", correlationId },
+    });
+    return {
+      errorCode: "aal2_pending",
+      error:
+        "Er ging iets mis. Probeer het opnieuw of log uit en opnieuw in.",
+      aal2: false,
+      correlationId,
+    };
   }
 
   await writeAuditLog({
     userId: adminUserId,
     action: "auth.mfa_enroll_completed",
+    metadata: { phase: "enroll_verify", code: "ok", correlationId },
   });
 
   revalidatePath("/admin");
-  redirect("/admin");
+  return { success: true, aal2: true, correlationId };
 }
 
 export async function mfaVerifyLoginAction(
   _prev: AuthActionState,
   formData: FormData,
 ): Promise<AuthActionState> {
+  const correlationId = newCorrelationId();
   let adminUserId: string;
   try {
     const ctx = await requireAdminWithoutMfa();
     adminUserId = ctx.user.id;
   } catch {
-    return { error: "Toegang geweigerd." };
+    return {
+      errorCode: "denied",
+      error: "Toegang geweigerd.",
+      correlationId,
+    };
   }
 
   const parsed = mfaCodeSchema.safeParse({ code: formData.get("code") });
   if (!parsed.success) {
-    return { error: "Ongeldige verificatiecode." };
+    return {
+      errorCode: "invalid_code",
+      error:
+        "De code klopt niet of is verlopen. Open je authenticator-app en probeer het opnieuw.",
+      correlationId,
+    };
   }
 
   const supabase = await createServerSupabaseClient();
-  if (!supabase) return { error: "Authenticatie is niet geconfigureerd." };
+  if (!supabase) {
+    return {
+      errorCode: "network",
+      error:
+        "Instellen lukt momenteel niet. Probeer het opnieuw of log uit en opnieuw in.",
+      correlationId,
+    };
+  }
 
-  const { data: factors } = await supabase.auth.mfa.listFactors();
-  const factor = factors?.totp?.find((f) => f.status === "verified");
-
-  if (!factor) {
+  const { getMfaStatus } = await import("@/server/auth/mfa-status");
+  const status = await getMfaStatus();
+  if (!status?.verifiedFactorId) {
     redirect("/admin/mfa/setup");
   }
 
   const { data: challenge, error: challengeError } =
-    await supabase.auth.mfa.challenge({ factorId: factor!.id });
+    await supabase.auth.mfa.challenge({ factorId: status.verifiedFactorId });
 
   if (challengeError || !challenge) {
-    return { error: "Verificatie mislukt." };
+    await writeAuditLog({
+      userId: adminUserId,
+      action: "auth.mfa_verify_failed",
+      metadata: {
+        phase: "login_challenge",
+        code: challengeError?.code ?? "challenge_failed",
+        correlationId,
+      },
+    });
+    return { ...mapMfaError(challengeError?.message, "unknown"), correlationId };
   }
 
   const { error: verifyError } = await supabase.auth.mfa.verify({
-    factorId: factor!.id,
+    factorId: status.verifiedFactorId,
     challengeId: challenge.id,
     code: parsed.data.code,
   });
@@ -585,17 +884,39 @@ export async function mfaVerifyLoginAction(
     await writeAuditLog({
       userId: adminUserId,
       action: "auth.mfa_verify_failed",
-      metadata: { step: "login_verify" },
+      metadata: {
+        phase: "login_verify",
+        code: verifyError.code ?? "invalid_code",
+        correlationId,
+      },
     });
-    return { error: "Ongeldige verificatiecode." };
+    return { ...mapMfaError(verifyError.message, "invalid_code"), correlationId };
+  }
+
+  const aal2 = await assertAal2AfterVerify(supabase);
+  if (!aal2) {
+    await writeAuditLog({
+      userId: adminUserId,
+      action: "auth.mfa_verify_failed",
+      metadata: { phase: "login_aal2", code: "aal2_pending", correlationId },
+    });
+    return {
+      errorCode: "aal2_pending",
+      error:
+        "Er ging iets mis. Probeer het opnieuw of log uit en opnieuw in.",
+      aal2: false,
+      correlationId,
+    };
   }
 
   await writeAuditLog({
     userId: adminUserId,
     action: "auth.mfa_verify_success",
+    metadata: { phase: "login_verify", code: "ok", correlationId },
   });
 
-  redirect("/admin");
+  revalidatePath("/admin");
+  return { success: true, aal2: true, correlationId };
 }
 
 /** Guarded admin noop — gebruikt in bypass-tests */

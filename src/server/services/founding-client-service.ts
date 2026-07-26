@@ -32,10 +32,22 @@ async function readUsedSlotsFromDb(): Promise<number> {
 /** Server-side campaign state — never trust client counters */
 export async function getFoundingClientState(): Promise<FoundingClientState> {
   const { enabled, maxClients } = foundingClientOfferConfig;
+
+  // Public marketing TTFB: skip DB when the campaign cannot show.
+  if (!enabled || !isFoundingCampaignWithinDates()) {
+    return {
+      enabled,
+      maxClients,
+      usedSlots: 0,
+      remainingSlots: maxClients,
+      canAccept: false,
+      showCampaign: false,
+    };
+  }
+
   const usedSlots = await readUsedSlotsFromDb();
   const remainingSlots = Math.max(0, maxClients - usedSlots);
-  const withinDates = isFoundingCampaignWithinDates();
-  const canAccept = enabled && withinDates && remainingSlots > 0;
+  const canAccept = remainingSlots > 0;
 
   return {
     enabled,

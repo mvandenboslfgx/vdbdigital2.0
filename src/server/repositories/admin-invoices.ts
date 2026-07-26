@@ -2,11 +2,27 @@ import "server-only";
 import { createServiceRoleClient } from "@/lib/database/server";
 import { requireAdmin } from "@/server/auth/require-admin";
 import { requirePermission } from "@/server/auth/require-permission";
-import { hasPermission } from "@/lib/auth/permissions";
 import {
   customerFacingInvoiceStatus,
   isInvoiceOperationallyOverdue,
 } from "@/lib/commerce/invoice-status";
+import {
+  buildAssignedRecordOrFilter,
+  listManagedProjectIds,
+  resolveQuoteInvoiceScopeMode,
+} from "@/server/auth/admin-resource-scope";
+
+async function assertCanAccessAssignedInvoice(
+  userId: string,
+  invoice: { created_by?: string | null; project_id?: string | null },
+  managedProjectIds: string[],
+): Promise<boolean> {
+  if (invoice.created_by === userId) return true;
+  if (invoice.project_id && managedProjectIds.includes(invoice.project_id)) {
+    return true;
+  }
+  return false;
+}
 
 export async function listAdminInvoices(filters: {
   q?: string;
@@ -15,11 +31,8 @@ export async function listAdminInvoices(filters: {
   pageSize?: number;
 }) {
   const ctx = await requireAdmin();
-  if (
-    !hasPermission(ctx.role, "invoices.view_all") &&
-    !hasPermission(ctx.role, "invoices.manage") &&
-    !hasPermission(ctx.role, "invoices.view_assigned")
-  ) {
+  const mode = resolveQuoteInvoiceScopeMode(ctx.role, "invoices");
+  if (mode === "deny") {
     await requirePermission(ctx, "invoices.view_assigned");
   }
 
@@ -36,12 +49,19 @@ export async function listAdminInvoices(filters: {
   let query = supabase
     .from("portal_invoices")
     .select(
-      "id, invoice_number, invoice_type, title, status, total_cents, amount_paid_cents, amount_due_cents, currency, issue_date, due_date, paid_at, updated_at, organization:organizations(id, legal_name, trade_name), project:portal_projects(id, name), quote:portal_quotes(id, quote_number)",
+      "id, invoice_number, invoice_type, title, status, total_cents, amount_paid_cents, amount_due_cents, currency, issue_date, due_date, paid_at, updated_at, created_by, project_id, organization:organizations(id, legal_name, trade_name), project:portal_projects(id, name), quote:portal_quotes(id, quote_number)",
       { count: "exact" },
     )
     .is("archived_at", null)
     .order("updated_at", { ascending: false })
     .range(from, to);
+
+  if (mode === "assigned") {
+    const managedProjectIds = await listManagedProjectIds(supabase, ctx.user.id);
+    query = query.or(
+      buildAssignedRecordOrFilter(ctx.user.id, managedProjectIds),
+    );
+  }
 
   if (filters.status && filters.status !== "ALL") {
     query = query.eq("status", filters.status);
@@ -87,11 +107,8 @@ export async function listAdminInvoices(filters: {
 
 export async function getAdminInvoice(id: string) {
   const ctx = await requireAdmin();
-  if (
-    !hasPermission(ctx.role, "invoices.view_all") &&
-    !hasPermission(ctx.role, "invoices.manage") &&
-    !hasPermission(ctx.role, "invoices.view_assigned")
-  ) {
+  const mode = resolveQuoteInvoiceScopeMode(ctx.role, "invoices");
+  if (mode === "deny") {
     await requirePermission(ctx, "invoices.view_assigned");
   }
 
@@ -106,6 +123,16 @@ export async function getAdminInvoice(id: string) {
     .eq("id", id)
     .maybeSingle();
   if (!invoice) return null;
+
+  if (mode === "assigned") {
+    const managedProjectIds = await listManagedProjectIds(supabase, ctx.user.id);
+    const allowed = await assertCanAccessAssignedInvoice(
+      ctx.user.id,
+      invoice as { created_by?: string | null; project_id?: string | null },
+      managedProjectIds,
+    );
+    if (!allowed) return null;
+  }
 
   const [{ data: items }, { data: versions }, { data: payments }, { data: credits }] =
     await Promise.all([

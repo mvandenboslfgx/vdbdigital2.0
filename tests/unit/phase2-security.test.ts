@@ -42,6 +42,22 @@ describe("CSP policy", () => {
     expect(middleware).toContain("form-action 'self'");
     expect(middleware).not.toMatch(/tawk\.to/i);
   });
+
+  it("sets enforcing CSP with unsafe-inline and Report-Only without it", async () => {
+    const fs = await import("node:fs");
+    const middleware = fs.readFileSync("src/middleware.ts", "utf8");
+    expect(middleware).toContain('response.headers.set("Content-Security-Policy"');
+    expect(middleware).toContain(
+      'response.headers.set("Content-Security-Policy-Report-Only"',
+    );
+    expect(middleware).toContain("isPreviewDeployment()");
+    expect(middleware).toContain('CSP_REPORT_ONLY === "1"');
+    expect(middleware).toContain("cspEnforcing");
+    expect(middleware).toContain("cspReportOnly");
+    expect(middleware).toMatch(/script-src 'self' 'unsafe-inline'/);
+    expect(middleware).toMatch(/cspReportOnly[\s\S]*script-src 'self'/);
+    expect(middleware).not.toMatch(/cspReportOnly[\s\S]*unsafe-inline/);
+  });
 });
 
 describe("Product RLS policy", () => {

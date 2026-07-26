@@ -1,7 +1,7 @@
 import { Container, Section } from "@/components/ui/container";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { paths } from "@/i18n/config";
-import { LocaleLinkButton } from "@/components/ui/locale-link-button";
+import { ServerLocaleLinkButton } from "@/components/ui/server-locale-link-button";
 
 export async function CtaSection() {
   const { t } = await getDictionary();
@@ -28,25 +28,25 @@ export async function CtaSection() {
               {t("cta.body")}
             </p>
             <div className="flex flex-wrap justify-center gap-3">
-              <LocaleLinkButton href={`${paths.contact}?intent=introduction`} size="lg">
+              <ServerLocaleLinkButton href={`${paths.contact}?intent=introduction`} size="lg">
                 {t("cta.intro")}
-              </LocaleLinkButton>
-              <LocaleLinkButton
+              </ServerLocaleLinkButton>
+              <ServerLocaleLinkButton
                 href={paths.quote}
                 variant="outline"
                 tone="light"
                 size="lg"
               >
                 {t("cta.quote")}
-              </LocaleLinkButton>
-              <LocaleLinkButton
+              </ServerLocaleLinkButton>
+              <ServerLocaleLinkButton
                 href={paths.cases}
                 variant="ghost"
                 tone="light"
                 size="lg"
               >
                 {t("cta.cases")}
-              </LocaleLinkButton>
+              </ServerLocaleLinkButton>
             </div>
           </div>
         </div>

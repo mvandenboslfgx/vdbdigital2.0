@@ -61,3 +61,10 @@ next-env.d.ts
 
 # Local Supabase branch metadata
 /supabase/.branches/
+
+# Local MFA evidence credentials (never commit)
+.local-mfa-evidence/
+
+
+.local-catalog-source/
+

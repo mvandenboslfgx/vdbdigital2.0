@@ -174,6 +174,25 @@ describe("payment reversal — migration & action contracts", () => {
     expect(sql).toContain("idx:reversal_idempotency_unique");
   });
 
+  it("grant hardening denies authenticated EXECUTE on reverse RPC", () => {
+    const hardening = readFileSync(
+      "supabase/migrations/20260723140000_invoice_rpc_grant_hardening.sql",
+      "utf8",
+    );
+    const alignment = readFileSync(
+      "supabase/migrations/20260723150000_invoice_rpc_grant_verify_alignment.sql",
+      "utf8",
+    );
+    expect(hardening).toContain("REVOKE ALL ON FUNCTION public.reverse_portal_invoice_payment");
+    expect(hardening).toContain("FROM authenticated");
+    expect(hardening).toContain("GRANT EXECUTE ON FUNCTION public.reverse_portal_invoice_payment");
+    expect(hardening).toContain("TO service_role");
+    expect(alignment).toContain("anon+authenticated denied; service_role only");
+    expect(alignment).toContain(
+      "NOT has_function_privilege('authenticated'",
+    );
+  });
+
   it("server action gates permission and calls reverse RPC", () => {
     const src = readFileSync("src/server/actions/invoice-actions.ts", "utf8");
     expect(src).toContain("reverseInvoicePaymentAction");

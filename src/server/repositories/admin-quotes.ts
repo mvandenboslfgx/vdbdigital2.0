@@ -2,7 +2,21 @@ import "server-only";
 import { createServiceRoleClient } from "@/lib/database/server";
 import { requireAdmin } from "@/server/auth/require-admin";
 import { requirePermission } from "@/server/auth/require-permission";
-import { hasPermission } from "@/lib/auth/permissions";
+import {
+  buildAssignedRecordOrFilter,
+  listManagedProjectIds,
+  resolveQuoteInvoiceScopeMode,
+} from "@/server/auth/admin-resource-scope";
+
+async function assertCanAccessAssignedQuote(
+  userId: string,
+  quote: { created_by?: string | null; project_id?: string | null },
+  managedProjectIds: string[],
+): Promise<boolean> {
+  if (quote.created_by === userId) return true;
+  if (quote.project_id && managedProjectIds.includes(quote.project_id)) return true;
+  return false;
+}
 
 export async function listAdminQuotes(filters: {
   q?: string;
@@ -11,11 +25,8 @@ export async function listAdminQuotes(filters: {
   pageSize?: number;
 }) {
   const ctx = await requireAdmin();
-  if (
-    !hasPermission(ctx.role, "quotes.view_all") &&
-    !hasPermission(ctx.role, "quotes.manage") &&
-    !hasPermission(ctx.role, "quotes.view_assigned")
-  ) {
+  const mode = resolveQuoteInvoiceScopeMode(ctx.role, "quotes");
+  if (mode === "deny") {
     await requirePermission(ctx, "quotes.view_assigned");
   }
 
@@ -32,11 +43,18 @@ export async function listAdminQuotes(filters: {
   let query = supabase
     .from("portal_quotes")
     .select(
-      "id, quote_number, title, status, total_cents, currency, valid_until, sent_at, first_viewed_at, updated_at, organization:organizations(id, legal_name, trade_name), project:portal_projects(id, name)",
+      "id, quote_number, title, status, total_cents, currency, valid_until, sent_at, first_viewed_at, updated_at, created_by, project_id, organization:organizations(id, legal_name, trade_name), project:portal_projects(id, name)",
       { count: "exact" },
     )
     .order("updated_at", { ascending: false })
     .range(from, to);
+
+  if (mode === "assigned") {
+    const managedProjectIds = await listManagedProjectIds(supabase, ctx.user.id);
+    query = query.or(
+      buildAssignedRecordOrFilter(ctx.user.id, managedProjectIds),
+    );
+  }
 
   if (filters.status && filters.status !== "ALL") {
     query = query.eq("status", filters.status);
@@ -66,11 +84,8 @@ export async function listAdminQuotes(filters: {
 
 export async function getAdminQuote(id: string) {
   const ctx = await requireAdmin();
-  if (
-    !hasPermission(ctx.role, "quotes.view_all") &&
-    !hasPermission(ctx.role, "quotes.manage") &&
-    !hasPermission(ctx.role, "quotes.view_assigned")
-  ) {
+  const mode = resolveQuoteInvoiceScopeMode(ctx.role, "quotes");
+  if (mode === "deny") {
     await requirePermission(ctx, "quotes.view_assigned");
   }
 
@@ -85,6 +100,16 @@ export async function getAdminQuote(id: string) {
     .eq("id", id)
     .maybeSingle();
   if (!quote) return null;
+
+  if (mode === "assigned") {
+    const managedProjectIds = await listManagedProjectIds(supabase, ctx.user.id);
+    const allowed = await assertCanAccessAssignedQuote(
+      ctx.user.id,
+      quote as { created_by?: string | null; project_id?: string | null },
+      managedProjectIds,
+    );
+    if (!allowed) return null;
+  }
 
   const [{ data: items }, { data: versions }, { data: acceptance }] =
     await Promise.all([

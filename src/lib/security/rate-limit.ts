@@ -37,8 +37,37 @@ const BUCKET_LIMITS: Record<string, number> = {
   "portal-documents-download": 40,
 };
 
-/** Buckets that must fail closed without a working app limiter */
-const FAIL_CLOSED_BUCKETS = new Set(["checkout", "payment"]);
+/** Buckets that must not fail-open without a working durable limiter */
+const FAIL_CLOSED_BUCKETS = new Set([
+  "checkout",
+  "payment",
+  "contact",
+  "quote",
+  "support",
+]);
+
+/** Process-local degraded fallback for public forms when durable backends fail */
+const degradedBuckets = new Map<string, { count: number; resetAt: number }>();
+const DEGRADED_WINDOW_MS = 60_000;
+
+function degradedRateLimit(bucket: string, identifier: string): RateLimitResult {
+  const limit = windowLimit(bucket);
+  const key = buildRateLimitStorageKey(`degraded:${bucket}`, identifier);
+  const now = Date.now();
+  const entry = degradedBuckets.get(key);
+  if (!entry || now > entry.resetAt) {
+    degradedBuckets.set(key, { count: 1, resetAt: now + DEGRADED_WINDOW_MS });
+    return { success: true };
+  }
+  entry.count += 1;
+  if (entry.count > limit) {
+    return {
+      success: false,
+      retryAfterSeconds: Math.ceil((entry.resetAt - now) / 1000),
+    };
+  }
+  return { success: true };
+}
 
 function windowLimit(bucket: string): number {
   return BUCKET_LIMITS[bucket] ?? 10;
@@ -168,9 +197,14 @@ export async function checkRateLimit(
 
   if (FAIL_CLOSED_BUCKETS.has(bucket)) {
     logCheckoutEvent("limiter.unavailable", {
-      meta: { bucket, backend: "none" },
+      meta: { bucket, backend: "degraded-memory" },
     });
-    return { success: false, retryAfterSeconds: 60 };
+    // Public forms: bounded in-process fallback (residual multi-instance risk).
+    // Checkout/payment: still hard fail-closed.
+    if (bucket === "checkout" || bucket === "payment") {
+      return { success: false, retryAfterSeconds: 60 };
+    }
+    return degradedRateLimit(bucket, id);
   }
 
   return { success: true };
@@ -220,4 +254,5 @@ export function isWafExcludedPath(path: string): boolean {
 /** Test helper — clear in-memory buckets */
 export function __resetDevRateLimitBucketsForTests(): void {
   devBuckets.clear();
+  degradedBuckets.clear();
 }

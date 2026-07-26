@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import type { ConsentCategory } from "@/types";
 
 const CONSENT_KEY = "vdb_consent";
@@ -112,6 +112,12 @@ export function ConsentProvider({ children }: { children: React.ReactNode }) {
 
   const openPreferences = useCallback(() => {
     setShowBanner(true);
+  }, []);
+
+  useEffect(() => {
+    const onOpen = () => setShowBanner(true);
+    window.addEventListener("vdb:open-consent", onOpen);
+    return () => window.removeEventListener("vdb:open-consent", onOpen);
   }, []);
 
   return (

@@ -7,7 +7,7 @@ import { AdminShell } from "@/components/admin/admin-shell";
 export const dynamic = "force-dynamic";
 
 const adminNav = [
-  { label: "Dashboard", href: "/admin", permission: null },
+  { label: "Overzicht", href: "/admin", permission: null },
   { label: "Klanten", href: "/admin/customers", permission: "customers.view" as const },
   { label: "Projecten", href: "/admin/projects", permission: "projects.view_all" as const },
   { label: "Offertes", href: "/admin/quotes", permission: "quotes.view_assigned" as const },
@@ -18,9 +18,9 @@ const adminNav = [
   { label: "Producten", href: "/admin/products", permission: "products.read" as const },
   { label: "Categorieën", href: "/admin/categories", permission: "products.read" as const },
   { label: "Add-ons", href: "/admin/addons", permission: "products.read" as const },
-  { label: "Orders", href: "/admin/orders", permission: "orders.read" as const },
+  { label: "Bestellingen", href: "/admin/orders", permission: "orders.read" as const },
   { label: "Leads", href: "/admin/leads", permission: "leads.read" as const },
-  { label: "Content", href: "/admin/content", permission: "content.manage" as const },
+  { label: "Inhoud", href: "/admin/content", permission: "content.manage" as const },
   { label: "Gebruikers", href: "/admin/users", permission: "roles.read" as const },
   { label: "Rollen", href: "/admin/roles", permission: "roles.read" as const },
   { label: "Instellingen", href: "/admin/settings", permission: "settings.read" as const },

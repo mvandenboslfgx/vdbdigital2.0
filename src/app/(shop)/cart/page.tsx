@@ -7,7 +7,8 @@ import { LocaleLinkButton } from "@/components/ui/locale-link-button";
 import { LocaleLink } from "@/i18n/locale-link";
 import { RemoveFromCartButton } from "@/components/shop/remove-from-cart-button";
 import { CartQuantityControls } from "@/components/shop/cart-quantity-controls";
-import { getDictionary } from "@/i18n/get-dictionary";
+import { getDictionary, getLocale, getMessages } from "@/i18n/get-dictionary";
+import { MessagesProvider } from "@/i18n/messages-provider";
 import { paths } from "@/i18n/config";
 import { isDirectCheckoutEnabled } from "@/config/features";
 
@@ -20,7 +21,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function CartPage() {
-  const { t } = await getDictionary();
+  const locale = await getLocale();
+  const { t } = await getDictionary(locale);
+  const messages = await getMessages(locale);
   const checkoutOn = isDirectCheckoutEnabled();
   const cart = await getCart();
   const { items, errors } = await validateCartItems(cart);
@@ -84,13 +87,17 @@ export default async function CartPage() {
                     <p className="text-small text-muted mt-1">
                       {formatCents(item.validatedPriceCents)} {t("cart.perItem")}
                     </p>
-                    <CartQuantityControls productId={item.productId} quantity={item.quantity} />
+                    <MessagesProvider locale={locale} messages={messages}>
+                      <CartQuantityControls productId={item.productId} quantity={item.quantity} />
+                    </MessagesProvider>
                   </div>
                   <div className="text-right">
                     <p className="font-semibold">
                       {formatCents(item.validatedPriceCents * item.quantity)}
                     </p>
-                    <RemoveFromCartButton productId={item.productId} />
+                    <MessagesProvider locale={locale} messages={messages}>
+                      <RemoveFromCartButton productId={item.productId} />
+                    </MessagesProvider>
                   </div>
                 </Card>
               ))}

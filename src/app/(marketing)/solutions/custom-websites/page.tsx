@@ -1,31 +1,9 @@
-import {
-  SolutionPageContent,
-  createSolutionMetadata,
-} from "@/components/sections/solution-page";
-import { WebsitePreviewVisual } from "@/components/visuals/website-preview-visual";
-import { paths } from "@/i18n/config";
-import { getSolutionContent } from "@/i18n/content/solutions";
+import { permanentRedirect } from "next/navigation";
+import { paths, withLocale } from "@/i18n/config";
 import { getLocale } from "@/i18n/get-dictionary";
 
-/** Alias of /solutions/websites */
-export async function generateMetadata() {
-  const locale = await getLocale();
-  const content = getSolutionContent("websites", locale);
-  return createSolutionMetadata(
-    content.metaTitle,
-    content.metaDescription,
-    paths.customWebsites,
-  );
-}
-
+/** Permanent alias → canonical /solutions/websites */
 export default async function CustomWebsitesAliasPage() {
   const locale = await getLocale();
-  const page = getSolutionContent("websites", locale);
-
-  return (
-    <SolutionPageContent
-      {...page}
-      visual={<WebsitePreviewVisual />}
-    />
-  );
+  permanentRedirect(withLocale(paths.websites, locale));
 }

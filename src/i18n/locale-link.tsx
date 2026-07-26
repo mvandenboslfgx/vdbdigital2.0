@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ComponentProps } from "react";
-import { useI18n } from "@/i18n/provider";
+import { useLocale } from "@/i18n/locale-provider";
 import { withLocale, stripLocalePrefix } from "@/i18n/config";
 
 type LocaleLinkProps = Omit<ComponentProps<typeof Link>, "href"> & {
@@ -12,13 +12,13 @@ type LocaleLinkProps = Omit<ComponentProps<typeof Link>, "href"> & {
 
 /** Locale-aware Link: prefixes `/nl` when the active locale is Dutch. */
 export function LocaleLink({ href, ...props }: LocaleLinkProps) {
-  const { locale } = useI18n();
+  const locale = useLocale();
   const localized = withLocale(href, locale);
   return <Link href={localized} {...props} />;
 }
 
 export function useLocalizedPath(href: string): string {
-  const { locale } = useI18n();
+  const locale = useLocale();
   return withLocale(href, locale);
 }
 

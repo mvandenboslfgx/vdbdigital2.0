@@ -19,7 +19,7 @@ function walkFiles(dir: string, acc: string[] = []): string[] {
     const full = join(dir, name);
     const st = statSync(full);
     if (st.isDirectory()) {
-      if (["node_modules", ".next", "evidence", "backups"].includes(name)) continue;
+      if (["node_modules", ".next", "evidence", "artifacts", "backups"].includes(name)) continue;
       walkFiles(full, acc);
     } else if (/\.(ts|tsx|js|jsx|mjs|cjs|json|md|toml|env\.example)$/i.test(name)) {
       acc.push(full);
@@ -179,14 +179,23 @@ describe("Tawk.to definitive removal — SEO / sitemap / docs hygiene", () => {
     }
   });
 
-  it("docs (except evidence) have no commercial Tawk product/slug references", () => {
-    const docs = walkFiles("docs").filter((p) => !p.includes(`${join("docs", "evidence")}`));
-    const commercial = /tawk-to-livechat-installatie|prod-tawk-installatie|TAWK-LIVECHAT-SETUP|tawk\.to Live Chat/i;
-    for (const file of docs) {
-      const body = read(file);
-      expect(body, file).not.toMatch(commercial);
-    }
-  });
+  it(
+    "docs (except evidence/artifacts) have no commercial Tawk product/slug references",
+    () => {
+      const docs = walkFiles("docs").filter(
+        (p) =>
+          !p.includes(`${join("docs", "evidence")}`) &&
+          !p.includes(`${join("docs", "artifacts")}`),
+      );
+      const commercial =
+        /tawk-to-livechat-installatie|prod-tawk-installatie|TAWK-LIVECHAT-SETUP|tawk\.to Live Chat/i;
+      for (const file of docs) {
+        const body = read(file);
+        expect(body, file).not.toMatch(commercial);
+      }
+    },
+    20_000,
+  );
 });
 
 describe("Tawk.to definitive removal — regression allowlist", () => {

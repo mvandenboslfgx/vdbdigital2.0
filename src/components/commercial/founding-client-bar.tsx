@@ -30,7 +30,7 @@ interface FoundingClientBarProps {
 
 /** Dismissible announcement bar — no fake scarcity or urgency timers */
 export function FoundingClientBar({ message, ctaLabel, dismissLabel }: FoundingClientBarProps) {
-  const dismissed = useSyncExternalStore(subscribe, isDismissed, () => true);
+  const dismissed = useSyncExternalStore(subscribe, isDismissed, () => false);
 
   if (dismissed) return null;
 

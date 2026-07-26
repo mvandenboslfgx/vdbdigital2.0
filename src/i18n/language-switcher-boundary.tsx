@@ -6,8 +6,10 @@ import { LanguageSwitcher } from "@/i18n/language-switcher";
 /** `useSearchParams` requires a Suspense boundary in the App Router. */
 export function LanguageSwitcherBoundary({
   className,
+  compact = false,
 }: {
   className?: string;
+  compact?: boolean;
 }) {
   return (
     <Suspense
@@ -15,11 +17,14 @@ export function LanguageSwitcherBoundary({
         <div
           className={className}
           aria-hidden="true"
-          style={{ minHeight: "2.75rem", minWidth: "5.5rem" }}
+          style={{
+            minHeight: compact ? "2.25rem" : "2.5rem",
+            minWidth: compact ? "4.5rem" : "5rem",
+          }}
         />
       }
     >
-      <LanguageSwitcher className={className} />
+      <LanguageSwitcher className={className} compact={compact} />
     </Suspense>
   );
 }
