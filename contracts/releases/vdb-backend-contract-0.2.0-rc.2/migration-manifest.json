@@ -63,7 +63,8 @@
     {
       "version": "20260724103105",
       "filename": "20260724103105_staging_cloud_grant_hardening.sql",
-      "sha256": "d345803ba5b120796f24d3063eb7f81029fa4f75bba8f0ba7b0877c9499e346c",
+      "sha256": "87892eacd373907e9ae0df6a972a3b0d0e9e997f7eb2e68b112cdb529588c517",
+      "sha256Note": "Git text-normalized LF blob; byte-identical to primary dirty source after CRLF→LF. Primary Windows working-tree hash was d345803ba5b120796f24d3063eb7f81029fa4f75bba8f0ba7b0877c9499e346c.",
       "purpose": "Hosted/local privilege alignment: anon revoke, authenticated portal DML for RLS, verifier/invoice RPCs service_role-only"
     }
   ],

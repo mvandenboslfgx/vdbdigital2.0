@@ -14,9 +14,9 @@ Bring Git in line with staging privilege state for three **already-applied** gra
 | --- | --- | --- |
 | `20260723140000` | `20260723140000_invoice_rpc_grant_hardening.sql` | `5af3a7f42fd3d3f2603ace8c1d2a790ba8e698c79c7ce4b890d1860f871a37b5` |
 | `20260723150000` | `20260723150000_invoice_rpc_grant_verify_alignment.sql` | `3bd483591ac4539353070b3527184b85c8bcfae5c576af631192b379a8c601e2` |
-| `20260724103105` | `20260724103105_staging_cloud_grant_hardening.sql` | `d345803ba5b120796f24d3063eb7f81029fa4f75bba8f0ba7b0877c9499e346c` |
+| `20260724103105` | `20260724103105_staging_cloud_grant_hardening.sql` | Git LF blob `87892eac…588c517` (primary Windows CRLF tree `d345803b…1a37b5`; SQL identical after CRLF→LF) |
 
-Source: primary dirty worktree untracked files (byte-for-byte copy). Source/target hash match: **3/3**.
+Source: primary dirty worktree untracked files. Content match: **3/3** (two byte-identical; one CRLF-normalized by Git text handling, SQL unchanged).
 
 ## SQL / privilege effect (summary)
 
