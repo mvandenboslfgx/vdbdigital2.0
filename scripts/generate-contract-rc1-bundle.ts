@@ -14,7 +14,6 @@ import {
 import { resolve, join } from "node:path";
 import { execFileSync } from "node:child_process";
 
-const ROOT = resolve(".");
 const BUNDLE_DIR = resolve(
   "contracts/releases/vdb-backend-contract-0.2.0-rc.1",
 );

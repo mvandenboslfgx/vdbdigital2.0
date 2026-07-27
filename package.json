@@ -42,7 +42,9 @@
     "audit:supabase-full": "tsx scripts/audit-supabase-full.ts",
     "catalog:verify-alignment": "tsx scripts/verify-catalog-alignment.ts",
     "catalog:verify-no-tawk": "tsx scripts/verify-catalog-no-tawk.ts",
-    "checkout:release-gate": "tsx scripts/checkout-release-gate.ts"
+    "checkout:release-gate": "tsx scripts/checkout-release-gate.ts",
+    "db:verify-messaging-support-appointments": "tsx scripts/verify-messaging-support-appointments-contract.ts",
+    "test:messaging-support-appointments-rls": "tsx scripts/test-messaging-support-appointments-rls.ts"
   },
   "dependencies": {
     "@mollie/api-client": "^4.6.0",

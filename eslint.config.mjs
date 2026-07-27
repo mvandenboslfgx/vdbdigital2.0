@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated live-readiness operator evidence + one-shot scratch scripts
+    // (logs/JSON/_*.js under docs/artifacts only — not app/source).
+    "docs/artifacts/live-readiness/**",
   ]),
 ]);
 

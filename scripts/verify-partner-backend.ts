@@ -185,7 +185,12 @@ SELECT COUNT(*)::text FROM (
 `);
   assert(unbalanced === "0", "ledger unbalanced");
 
-  // Scenario 9: payout
+  // Scenario 9: payout — rc.2 fail-closed flags default OFF; enable only for synthetic fixtures.
+  psql(`
+UPDATE public.feature_flags
+SET enabled = true, updated_at = now()
+WHERE key IN ('partner_payouts', 'partner.payouts');
+`);
   const avail = Number(psql(`SELECT public.partner_available_liability_cents('${partnerAId}'::uuid);`));
   assert(avail === 10000, `expected 10000 commission got ${avail}`);
   const reqId = psql(`
@@ -224,6 +229,12 @@ FROM (SELECT set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaa
 `);
   const stillPaid = psql(`SELECT status::text FROM public.partner_payouts WHERE id = '${payoutId}'::uuid;`);
   assert(stillPaid === "PAID", "paid payout immutable");
+  // Restore fail-closed defaults after synthetic payout fixtures
+  psql(`
+UPDATE public.feature_flags
+SET enabled = false, updated_at = now()
+WHERE key IN ('partner_payouts', 'partner.payouts');
+`);
   console.log("SCENARIO 9: PASS");
 
   // Cash receipt

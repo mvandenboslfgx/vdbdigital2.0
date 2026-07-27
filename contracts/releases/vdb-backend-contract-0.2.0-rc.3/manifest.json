@@ -1,0 +1,18 @@
+{
+  "contractVersion": "vdb-backend-contract@0.2.0-rc.3",
+  "schemaVersion": "2026.07.25.messaging-support-appointments-rc3",
+  "minimumCompatibleClientVersion": ">=0.2.0-rc.3",
+  "partnerSurfaceCompatibleWith": "vdb-backend-contract@0.2.0-rc.1",
+  "mobileCompatCompatibleWith": "vdb-backend-contract@0.2.0-rc.2",
+  "generatedAt": "2026-07-25",
+  "sourceHeadHint": "messaging-support-appointments-rc3",
+  "canonicalBackendOwner": "VDB Digital 2.0",
+  "unpublished": true,
+  "notes": [
+    "Additive messaging/support/appointments on top of mobile-compat rc.2.",
+    "Reuses portal_conversations, portal_messages, portal_support_tickets, portal_support_replies.",
+    "Mobile support_messages maps to portal_support_replies — no parallel support_messages table.",
+    "Participant-hardened conversation RLS is a behavioural tighten vs org-wide select.",
+    "Does not authorize staging or production apply."
+  ]
+}

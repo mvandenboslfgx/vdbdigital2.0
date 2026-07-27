@@ -1,0 +1,15 @@
+{
+  "CONSUMER_VERIFICATION.md": "6ec2b655348fad8ed0a495533945b796b2b50238cadcd1efe81298e5a76384a0",
+  "RELEASE_NOTES.md": "6c1ed42d14f6f5c82ee2509f7bc7c34631398b6d99e0d4cded1fb398208f72b5",
+  "database.types.ts": "1aadb19a517de90f1c330c803f0a334047124749860c7848f48d64d5355e269f",
+  "enums.json": "275691dab4b58d359068332ee23dfb16ef51f0dca86c3ec379edb5795e00fd44",
+  "error-codes.json": "41ab12d4117bf557618cca964499fd3b88d1820a2fe76f877dbd7361ac556196",
+  "feature-flags.json": "d8da94cebd62ecbb173f85405370f3e0f25e68f72bccdc0a05f6062e0e5e3d3e",
+  "financial-invariants.json": "d7e3f7716458119822eda86cd9b1dbed514662f45961a6abd8829745da996f51",
+  "manifest.json": "dd262e4083809a213eb33023639de456a63e4598f2b3fff25cf5649d28d55679",
+  "migration-manifest.json": "a82762cbaf851b51c8ee4192b316a821392943b983f8f057a26c7f3ff41ce216",
+  "roles.json": "98097501d6fc41445c36b7294b306d60141f46c5b747b8c290001c6bbeddf8fb",
+  "rpcs.json": "5f7dc3a844fcd8671a1e2c73b8e102a6f024daba8072c9c5f5b18582f9a2f311",
+  "storage-buckets.json": "33503f8cc1c013925055e03dab3347f5dd226ef3d1589c2e35b04a7f5c4d7ccb",
+  "tables.json": "b33714a6363c9ad6495504eb88f5ace7862fea8de9cac5c8d35bf49dee036c0f"
+}

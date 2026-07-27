@@ -2,23 +2,13 @@
  * Finalize RC2 freeze SHA256SUMS + bundle checksums (local only).
  */
 import { createHash } from "node:crypto";
-import { readdirSync, readFileSync, writeFileSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
+import { readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
 const relDir = "contracts/releases/vdb-backend-contract-0.2.0-rc.2";
 
 function sha(p: string) {
   return createHash("sha256").update(readFileSync(p)).digest("hex");
-}
-
-function listFiles(dir: string): string[] {
-  const out: string[] = [];
-  for (const name of readdirSync(dir).sort()) {
-    const p = join(dir, name);
-    if (statSync(p).isDirectory()) out.push(...listFiles(p));
-    else out.push(p);
-  }
-  return out;
 }
 
 // Refresh checksums.json (exclude self + BUNDLE + SHA256SUMS while hashing content files)

@@ -1,0 +1,105 @@
+{
+  "count": 26,
+  "partnerRpcs": [
+    { "name": "submit_partner_application" },
+    { "name": "review_partner_application" },
+    { "name": "create_partner_lead" },
+    { "name": "review_partner_lead" },
+    { "name": "confirm_partner_sale" },
+    { "name": "request_partner_payout" },
+    { "name": "approve_partner_payout_request" },
+    { "name": "record_partner_payout_paid" },
+    { "name": "record_partner_cash_receipt" },
+    { "name": "process_partner_refund_adjustment" },
+    { "name": "partner_financial_summary" },
+    { "name": "partner_available_liability_cents" },
+    { "name": "verify_partner_admin_contracts" }
+  ],
+  "customerPortalRpcs": [
+    { "name": "accept_portal_quote" },
+    { "name": "decline_portal_quote" },
+    { "name": "create_portal_conversation" },
+    { "name": "manage_portal_conversation_participant" },
+    { "name": "send_portal_message" },
+    { "name": "mark_portal_conversation_read" },
+    { "name": "assign_portal_support_ticket" },
+    { "name": "reply_portal_support_ticket" },
+    { "name": "add_portal_support_internal_note" },
+    { "name": "transition_portal_support_ticket_status" },
+    { "name": "book_portal_appointment" },
+    { "name": "reschedule_portal_appointment" },
+    { "name": "cancel_portal_appointment" },
+    { "name": "verify_messaging_support_appointments_contracts" }
+  ],
+  "compatRpcs": [
+    { "name": "feature_flag_enabled" },
+    { "name": "verify_mobile_compat_contracts" }
+  ],
+  "mobileClientRpcMapping": {
+    "accept_quote": {
+      "canonical": "accept_portal_quote",
+      "status": "client-adapter-required",
+      "note": "Signatures differ; Mobile must call accept_portal_quote(p_quote_id, p_expected_version, p_selected_optional_item_ids)."
+    },
+    "reject_quote": {
+      "canonical": "decline_portal_quote",
+      "status": "client-adapter-required"
+    },
+    "register_partner_lead": {
+      "canonical": "create_partner_lead",
+      "status": "client-adapter-required",
+      "note": "Param names differ (dedupe_key vs campaign); map in Mobile client."
+    },
+    "approve_partner_application": {
+      "canonical": "review_partner_application",
+      "status": "client-adapter-required",
+      "note": "Owner uses review_partner_application(id, approve, reason, notes)."
+    },
+    "reject_partner_application": {
+      "canonical": "review_partner_application",
+      "status": "client-adapter-required"
+    },
+    "request_commission_payout": {
+      "canonical": "request_partner_payout",
+      "status": "client-adapter-required",
+      "note": "Owner model is amount_cents + idempotency_key (ledger liability), not commission uuid[]."
+    },
+    "admin_qualify_lead": {
+      "canonical": "review_partner_lead",
+      "status": "client-adapter-required"
+    },
+    "admin_convert_lead": {
+      "canonical": "confirm_partner_sale",
+      "status": "client-adapter-required"
+    },
+    "book_appointment_slot": {
+      "canonical": "book_portal_appointment",
+      "status": "implemented-owner",
+      "note": "Gated by appointments_booking feature flag (fail-closed)."
+    },
+    "cancel_appointment": {
+      "canonical": "cancel_portal_appointment",
+      "status": "implemented-owner"
+    },
+    "admin_reply_support_ticket": {
+      "canonical": "reply_portal_support_ticket",
+      "status": "implemented-owner",
+      "note": "Public replies. Internal notes use add_portal_support_internal_note (staff + flag)."
+    },
+    "admin_assign_ticket": {
+      "canonical": "assign_portal_support_ticket",
+      "status": "implemented-owner"
+    },
+    "admin_update_ticket_status": {
+      "canonical": "transition_portal_support_ticket_status",
+      "status": "implemented-owner"
+    }
+  },
+  "deferredMobileOnlyRpcs": [
+    "register_document_upload",
+    "mark_document_scan_clean",
+    "create_project_from_request",
+    "admin_dashboard_stats",
+    "admin_work_queue"
+  ]
+}
