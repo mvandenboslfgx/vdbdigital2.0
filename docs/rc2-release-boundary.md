@@ -6,8 +6,9 @@
 - Invoice/portal grant hardening (`20260723140000`, `20260723150000`)
 - Staging cloud grant hardening (`20260724103105`)
 - Mobile compat (`20260724160000`)
-- Tracked migration count: **39**
-- Final migration version: **20260724160000**
+- Catalog ACL remediation (`20260724173000`)
+- Tracked migration count: **40**
+- Final migration version: **20260724173000**
 - Storage: six private buckets
 
 ## Outside RC2 (reserved / deferred)

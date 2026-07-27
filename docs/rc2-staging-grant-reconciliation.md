@@ -1,4 +1,4 @@
-# RC2 staging grant reconciliation
+# RC2 staging grant reconciliation (incl. catalog ACL remediation)
 
 **Date:** 2026-07-26  
 **Branch:** `fix/rc2-staging-grant-reconciliation`  
@@ -6,7 +6,7 @@
 
 ## Purpose
 
-Bring Git in line with staging privilege state for three **already-applied** grant migrations. This is **source-control reconciliation only** — not a remote apply, repair, push, or production authorization.
+Bring Git in line with staging privilege state for the RC2 grant migrations (plus an explicit catalog ACL remediation). This is **source-control reconciliation only** — not a remote apply, repair, push, or production authorization.
 
 ## Versions
 
@@ -15,6 +15,7 @@ Bring Git in line with staging privilege state for three **already-applied** gra
 | `20260723140000` | `20260723140000_invoice_rpc_grant_hardening.sql` | `5af3a7f42fd3d3f2603ace8c1d2a790ba8e698c79c7ce4b890d1860f871a37b5` |
 | `20260723150000` | `20260723150000_invoice_rpc_grant_verify_alignment.sql` | `3bd483591ac4539353070b3527184b85c8bcfae5c576af631192b379a8c601e2` |
 | `20260724103105` | `20260724103105_staging_cloud_grant_hardening.sql` | Git LF blob `87892eac…588c517` (primary Windows CRLF tree `d345803b…1a37b5`; SQL identical after CRLF→LF) |
+| `20260724173000` | `20260724173000_catalog_role_acl_privileges_contract.sql` | `e38869bb1e06f86f11672d3eab115a85e1db3ed30663ac5e1dc05718538f71d8` |
 
 Source: primary dirty worktree untracked files. Content match: **3/3** (two byte-identical; one CRLF-normalized by Git text handling, SQL unchanged).
 
@@ -30,9 +31,9 @@ Source: primary dirty worktree untracked files. Content match: **3/3** (two byte
 
 | Env | Status |
 | --- | --- |
-| Staging `qzekuvmgfekzsowdecyk` | All three versions applied (read-only inventory) |
+| Staging `qzekuvmgfekzsowdecyk` | 3 RC2 grant versions applied (read-only inventory). Catalog ACL migration version `20260724173000` is not part of staging migration history (provided there via hosted defaults / existing ACL). |
 | Production `nhsrdnjfsxfikfbdmdfj` | Does **not** contain these versions |
-| Local Git after reconciliation | 39 migrations; final still `20260724160000` |
+| Local Git after reconciliation | 40 migrations; final `20260724173000` |
 
 ## Version decision
 
@@ -41,7 +42,7 @@ Bundle remains `unpublished: true`; no RC2 tag existed; grants are privilege-onl
 
 ## Contract impact
 
-- Updated `migration-manifest.json` (`grantMigrationCount: 3`)
+- Updated `migration-manifest.json` (`grantMigrationCount: 4`, tracked migration count `40`)
 - Updated release notes + manifest notes
 - Recalculated checksums for edited artefacts only; `database.types.ts` hash unchanged
 - Exact-17 production apply manifest **not** modified and does **not** authorize these migrations
@@ -52,7 +53,10 @@ Four messaging migrations `2026072512*` remain **outside** RC2 (not copied, not 
 
 ## Catalog RLS follow-up (not part of these three files)
 
-Pure Git 39-migration reset still leaves local `service_role` without catalog table DML (`categories`/`products`). That blocks `db:seed` / `db:test-rls`. Fix requires a **separate authorized** privilege migration (or documented local↔hosted bootstrap parity) — do not invent SQL in this reconciliation.
+Resolved by adding `20260724173000_catalog_role_acl_privileges_contract.sql`:
+- local `service_role` now has required catalog DML for `db:seed`
+- `anon`/`authenticated` now have required catalog SELECT for `catalog db:test-rls`
+- all changes are explicit SQL privileges; existing RLS policies are unchanged
 
 ## Rollback limitation
 
