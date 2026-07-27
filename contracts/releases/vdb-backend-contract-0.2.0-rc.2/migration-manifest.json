@@ -1,9 +1,9 @@
 {
   "partnerMigrationCount": 8,
   "mobileCompatMigrationCount": 1,
-  "grantMigrationCount": 3,
-  "trackedMigrationCountAtRc2Head": 39,
-  "highestVersion": "20260724160000",
+  "grantMigrationCount": 4,
+  "trackedMigrationCountAtRc2Head": 40,
+  "highestVersion": "20260724173000",
   "outsideProductionBaselineEndingAt": "20260719170000",
   "partnerMigrations": [
     {
@@ -66,6 +66,12 @@
       "sha256": "87892eacd373907e9ae0df6a972a3b0d0e9e997f7eb2e68b112cdb529588c517",
       "sha256Note": "Git text-normalized LF blob; byte-identical to primary dirty source after CRLF→LF. Primary Windows working-tree hash was d345803ba5b120796f24d3063eb7f81029fa4f75bba8f0ba7b0877c9499e346c.",
       "purpose": "Hosted/local privilege alignment: anon revoke, authenticated portal DML for RLS, verifier/invoice RPCs service_role-only"
+    },
+    {
+      "version": "20260724173000",
+      "filename": "20260724173000_catalog_role_acl_privileges_contract.sql",
+      "sha256": "e38869bb1e06f86f11672d3eab115a85e1db3ed30663ac5e1dc05718538f71d8",
+      "purpose": "Catalog least-privilege ACL: restore service_role DML + anon/authenticated SELECT on public.categories/public.products so db:seed + catalog db:test-rls are reproducible from a pure 40-migration reset"
     }
   ],
   "mobileCompatMigrations": [

@@ -7,7 +7,7 @@
   "feature-flags.json": "9c4adedc9d9966f1dcd0cab2047574eed6f08eb304e1886348c73799729216a0",
   "financial-invariants.json": "d7e3f7716458119822eda86cd9b1dbed514662f45961a6abd8829745da996f51",
   "manifest.json": "513000381bd8a79a38612cfe97a24c014239afb6ae1c4791c77dc202ea8065e2",
-  "migration-manifest.json": "55329cc9e84a9e4896f2a031eaddf0eec901180f1f2782515f09ef771661dd12",
+  "migration-manifest.json": "e3bcebf588f15ee5c2894f74dc7dbbf44d6ac91eaf945a5141aea120f29b42b3",
   "roles.json": "98097501d6fc41445c36b7294b306d60141f46c5b747b8c290001c6bbeddf8fb",
   "rpcs.json": "d90cfc46a35224ec8dd9db3361e0958ec6a9443105403525cf199f29f71dce81",
   "storage-buckets.json": "33503f8cc1c013925055e03dab3347f5dd226ef3d1589c2e35b04a7f5c4d7ccb",
