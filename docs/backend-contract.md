@@ -3,10 +3,12 @@
 **Publisher:** VDB Digital 2.0 (`CANONICAL_BACKEND_OWNER`)
 **Historical freeze (not staging target):** `vdb-backend-contract@0.1.0` / `schemaVersion` `2026.07.22.freeze`
 **Partner RC1 (embedded, non-breaking):** `vdb-backend-contract@0.2.0-rc.1` / `schemaVersion` `2026.07.22.partner-rc1`
-**Current shared local target:** `vdb-backend-contract@0.2.0-rc.2` / `schemaVersion` `2026.07.24.mobile-compat-rc2`
-**Bundle:** `contracts/releases/vdb-backend-contract-0.2.0-rc.2/`
-**Convergence notes:** `docs/contract-convergence-rc2.md`
-**Git freeze baseline:** `93ab6cc4e61c19da072fe41bba7361397bd8bed0`
+**Staging shared baseline (applied):** `vdb-backend-contract@0.2.0-rc.2` / `schemaVersion` `2026.07.27.financial-concurrency-rc2`
+**RC2 bundle:** `contracts/releases/vdb-backend-contract-0.2.0-rc.2/`
+**Local RC3 freeze (messaging/support/appointments — staging apply not authorized):** `vdb-backend-contract@0.2.0-rc.3` / `schemaVersion` `2026.07.25.messaging-support-appointments-rc3`
+**RC3 bundle:** `contracts/releases/vdb-backend-contract-0.2.0-rc.3/`
+**Convergence notes:** `docs/contract-convergence-rc2.md`, `docs/messaging-support-appointments-map.md`
+**RC2 Git freeze:** `shared-backend-rc2-local-freeze` → `2c8bd3aa51c2046b984ac5dbeaa44ccb14301b12`
 **Partner work branch:** `phase/shared-partner-backend` (additive; not in exact-17 production apply)
 
 This document defines the **versioned surface** clients must pin. A full generated `Database` types package is **planned**; until published as an artifact, clients treat this repo’s migrations + this file as the contract source. Checksums for partner RC: `docs/artifacts/partner-backend-contract-checksums.json`.
