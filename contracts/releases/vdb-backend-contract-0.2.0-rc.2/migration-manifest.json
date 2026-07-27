@@ -2,8 +2,9 @@
   "partnerMigrationCount": 8,
   "mobileCompatMigrationCount": 1,
   "grantMigrationCount": 4,
-  "trackedMigrationCountAtRc2Head": 40,
-  "highestVersion": "20260724173000",
+  "concurrencyMigrationCount": 2,
+  "trackedMigrationCountAtRc2Head": 42,
+  "highestVersion": "20260724190000",
   "outsideProductionBaselineEndingAt": "20260719170000",
   "partnerMigrations": [
     {
@@ -79,6 +80,20 @@
       "version": "20260724160000",
       "filename": "20260724160000_mobile_compat_rc2.sql",
       "purpose": "feature_flags + feature_flag_enabled + payout flag gate + verify_mobile_compat_contracts"
+    }
+  ],
+  "concurrencyMigrations": [
+    {
+      "version": "20260724180000",
+      "filename": "20260724180000_partner_sale_single_conversion_concurrency.sql",
+      "sha256": "f2a630755eb751c2ea52be32abfefca7cc133af7e89d109916bf9281004a4e9a",
+      "purpose": "UNIQUE(partner_lead_id) + confirm_partner_sale FOR UPDATE/idempotent/PARTNER_LEAD_ALREADY_CONVERTED"
+    },
+    {
+      "version": "20260724190000",
+      "filename": "20260724190000_partner_payout_liability_concurrency.sql",
+      "sha256": "b380d9fe768effa326e67b63ed001604dc19ef5f6e4fcc783151557f65e7fe46",
+      "purpose": "request_partner_payout: partner_profiles FOR UPDATE + PARTNER_INSUFFICIENT_LIABILITY"
     }
   ],
   "excludedFromRc2": [

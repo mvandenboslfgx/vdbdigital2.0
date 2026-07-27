@@ -1,0 +1,75 @@
+{
+  "generatedAt": "2026-07-27T18:22:00.000Z",
+  "verdict": "RC2 FINANCIAL CONCURRENCY REMEDIATION PASS",
+  "rc2Readiness": "RC2_READY_FOR_LOCAL_FREEZE",
+  "branch": "fix/rc2-financial-concurrency-remediation",
+  "baseHead": "89721b9c2edfcabe4f2f89af22a2cee6791b2afa",
+  "contractVersion": "vdb-backend-contract@0.2.0-rc.2",
+  "schemaVersion": "2026.07.27.financial-concurrency-rc2",
+  "migrationsAdded": [
+    {
+      "version": "20260724180000",
+      "file": "supabase/migrations/20260724180000_partner_sale_single_conversion_concurrency.sql",
+      "sha256": "f2a630755eb751c2ea52be32abfefca7cc133af7e89d109916bf9281004a4e9a",
+      "constraint": "partner_sales_one_per_lead UNIQUE (partner_lead_id)"
+    },
+    {
+      "version": "20260724190000",
+      "file": "supabase/migrations/20260724190000_partner_payout_liability_concurrency.sql",
+      "sha256": "b380d9fe768effa326e67b63ed001604dc19ef5f6e4fcc783151557f65e7fe46",
+      "serialization": "partner_profiles FOR UPDATE"
+    }
+  ],
+  "migrationCount": 42,
+  "finalMigrationVersion": "20260724190000",
+  "errorCodes": [
+    "PARTNER_LEAD_ALREADY_CONVERTED",
+    "PARTNER_INSUFFICIENT_LIABILITY"
+  ],
+  "liabilityReservingStatuses": ["REQUESTED"],
+  "originalP0Reproduction": {
+    "duplicateSale": "PASS",
+    "payoutOverspend": "PASS"
+  },
+  "concurrencyRemediation": {
+    "run1": "PASS",
+    "run2": "PASS",
+    "totalIterations": 594,
+    "totalConcurrentCalls": 1582,
+    "unexpectedErrors": 0,
+    "invariantFailures": 0,
+    "duplicateSales": 0,
+    "duplicateCommissions": 0,
+    "payoutOverspends": 0,
+    "ledgerImbalances": 0,
+    "scenarios": 19,
+    "evidenceLog": "docs/evidence/rc2-concurrency-validation/full-after-fix-with-negatives.log",
+    "resultsJson": "docs/audits/VDB_RC2_CONCURRENCY_RESULTS.json"
+  },
+  "stagingPreflight": {
+    "classification": "STAGING_PREFLIGHT_BLOCKED",
+    "reason": "Staging project qzekuvmgfekzsowdecyk not accessible via current Supabase MCP credentials; production ref denylisted for mutation and not queried for this preflight.",
+    "mutations": "NONE"
+  },
+  "remoteActions": "NONE",
+  "gitPush": "NOT_EXECUTED",
+  "tag": "NOT_CREATED",
+  "secretScan": {
+    "realSecretMatches": 0
+  },
+  "storage": {
+    "private": 6,
+    "public": 0
+  },
+  "rc3Messaging": "OUTSIDE_RC2",
+  "productionNpmAudit": {
+    "critical": 0,
+    "high": 0
+  },
+  "fullLocalIsolation": {
+    "remoteLinkedAudit": "BLOCKED_NO_ENV_LOCAL",
+    "localDockerProofs": "PASS",
+    "blockers": 0,
+    "reviews": 0
+  }
+}

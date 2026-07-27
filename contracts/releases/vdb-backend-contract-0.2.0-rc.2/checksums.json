@@ -1,15 +1,15 @@
 {
-  "CONSUMER_VERIFICATION.md": "1ccbd9854dbc45a7afd65138937524536438acb56c2dbc47c1e41041eddaa13e",
-  "RELEASE_NOTES.md": "b4d7e9e62bc8d37d2541a46bd1515b2d43e0437178863db5e39fc0d86f016e9f",
-  "database.types.ts": "1aadb19a517de90f1c330c803f0a334047124749860c7848f48d64d5355e269f",
-  "enums.json": "4ce220b685c714afa1fc40b9e9ebc5b3961e7cd8586a7f636e3464aafb70a46b",
-  "error-codes.json": "2f996c51f5094bfac4c4b5e50e89ca37f5079755cea265128c1b5ac1f552d29b",
-  "feature-flags.json": "9c4adedc9d9966f1dcd0cab2047574eed6f08eb304e1886348c73799729216a0",
-  "financial-invariants.json": "d7e3f7716458119822eda86cd9b1dbed514662f45961a6abd8829745da996f51",
-  "manifest.json": "513000381bd8a79a38612cfe97a24c014239afb6ae1c4791c77dc202ea8065e2",
-  "migration-manifest.json": "e3bcebf588f15ee5c2894f74dc7dbbf44d6ac91eaf945a5141aea120f29b42b3",
-  "roles.json": "98097501d6fc41445c36b7294b306d60141f46c5b747b8c290001c6bbeddf8fb",
-  "rpcs.json": "d90cfc46a35224ec8dd9db3361e0958ec6a9443105403525cf199f29f71dce81",
-  "storage-buckets.json": "33503f8cc1c013925055e03dab3347f5dd226ef3d1589c2e35b04a7f5c4d7ccb",
-  "tables.json": "51c7e7b9df3902f5989046103c04e4929c6c7ab7171650dc072fc0870ea5ed90"
+  "CONSUMER_VERIFICATION.md": "c5fa0e4bc80daf5d4f1383a73295a4172b952122eff3f531a5cc165523684985",
+  "RELEASE_NOTES.md": "e2828582723da2fd2a1ebeefc91c12ce505fe590aa5f5d23e58724e0f34df09b",
+  "database.types.ts": "ae6029feaf8f0b9081725db1773d71a88ae13b6cc564c6288d295793bfd568d7",
+  "enums.json": "d186cdfb8ffd5f1470bd9d520959b050f97bffd0518f2ebf1d122341947b1985",
+  "error-codes.json": "1e53f7824317620e63161f60f2831d4f22a9491373de345db310ad765b3ab8bf",
+  "feature-flags.json": "bd2e21916efd7123a45ada65f92ebfcf84977c907abf1e146dbd92d082fc2fce",
+  "financial-invariants.json": "c59c66d5c0c845bb3c97155a7b32d60e71f52144a77306df56570a36d9bb1fb8",
+  "manifest.json": "0b9b655325b6635dda044812a5f3073a1b1bbaf291f7c855bd2ac8181884a04f",
+  "migration-manifest.json": "b9e01d529bc46b665a4875ed145efcc6172d71a9c705a2961bbcd3a55d312f3a",
+  "roles.json": "e7980daaa2b739f989ce47a88ee3c390d8ca8ea5924447742a8bf4a8b7bee473",
+  "rpcs.json": "19fa67fce4491eca8e8bde4337508aaa3cc98f470988e7f95f91aaa03d1374af",
+  "storage-buckets.json": "e4b2db04c6ab5a7ea2a3447150f9f6db1608de333d13cbf83ee28909ca664b89",
+  "tables.json": "8a373e6a2487e4b76ffe61f9651cd073273c9adc1b245fe21a2469e2d86d484d"
 }

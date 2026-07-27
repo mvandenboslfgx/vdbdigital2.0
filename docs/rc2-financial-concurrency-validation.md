@@ -1,9 +1,9 @@
 # RC2 financial concurrency validation
 
 **Date:** 2026-07-27  
-**Branch:** `test/rc2-concurrency-validation`  
-**Base:** `c6ef0f57837358d392d89484016a1b7705a6bae1`  
-**Verdict:** `RC2 FINANCIAL CONCURRENCY VALIDATION FAIL`
+**Branch:** `fix/rc2-financial-concurrency-remediation`  
+**Base:** `89721b9c2edfcabe4f2f89af22a2cee6791b2afa`  
+**Prior FAIL evidence:** preserved under `docs/evidence/rc2-concurrency-validation/` and commit `89721b9`
 
 ## Architecture
 
@@ -11,6 +11,7 @@
 - File-based start barrier (`touch READY`) so workers start together
 - JWT via same-statement `FROM (SELECT set_config(..., true))` (transaction-local config)
 - Synthetic actors only (`*.conc@example.invalid`); local `partner_payouts` flag enabled for tests and restored to `false`
+- Negative contracts: `RACE11_NEGATIVE_CONTRACTS` (error codes, direct INSERT denial, liability edge cases)
 
 Run:
 
@@ -18,43 +19,33 @@ Run:
 npx tsx scripts/test-rc2-financial-concurrency.ts
 ```
 
-## Results (full suite, two runs)
+## Remediation results (full suite, two runs)
 
-| Metric | RUN1 | RUN2 |
-| --- | ---: | ---: |
-| Scenarios | 18 | 18 |
-| Failed scenarios | 4 | 4 |
-| Iterations | 296 | 296 |
-| Concurrent calls | 775 | 775 |
-| Unexpected errors | 0 | 0 |
-| Invariant failures | 95 | 95 |
+See `docs/audits/VDB_RC2_CONCURRENCY_REMEDIATION_RESULTS.json` and `docs/audits/VDB_RC2_CONCURRENCY_RESULTS.json`.
 
-### Passing races
+Gate targets (minimum):
 
-- Sale confirm same idempotency key + fan-out
-- Commission via parallel same-key confirm
-- Payout request same idempotency key
-- Dual-staff payout approval
-- Dual/fan-out payout paid
-- Refund vs paid + dual refund
-- Cash receipt (same key, conflicting amount, fan-out)
-- Ledger immutability
-- Payout vs suspension (staff-revocation subcase UNPROVEN)
+| Metric | Requirement |
+| --- | ---: |
+| Iterations | ≥ 592 |
+| Concurrent calls | ≥ 1550 |
+| Unexpected errors | 0 |
+| Invariant failures | 0 |
+| Duplicate sales | 0 |
+| Payout overspends | 0 |
 
-### Failing races (P0)
+## Original P0 reproduction (pre-fix)
 
-1. **Different idempotency keys / same lead** — `confirm_partner_sale` creates **two sales + two commissions** (lead `FOR UPDATE` does not enforce single conversion; no `UNIQUE(partner_lead_id)`).
-2. **Dual-staff lead conversion** — same defect.
-3. **Overlapping payout requests (60%+60%)** — available liability **overspent** (check-then-insert without lock).
-4. **Payout request fan-out** — same overspend.
+Both P0s reproduced before migrations applied (quick + dedicated scenarios).
 
-Machine-readable: `docs/audits/VDB_RC2_CONCURRENCY_RESULTS.json`  
-Evidence log: `docs/evidence/rc2-concurrency-validation/full-suite.log`
+## Loser outcomes (post-fix)
 
-## RC2 freeze advice
+| Scenario | Winner | Loser |
+| --- | --- | --- |
+| Distinct idempotency keys / one lead | 1 sale + commission | `PARTNER_LEAD_ALREADY_CONVERTED` |
+| Payout overspend | reservation ≤ available | `PARTNER_INSUFFICIENT_LIABILITY` |
+| Same idempotency key | soft idempotent UUID | same UUID |
 
-**Do not freeze RC2** until the two P0 defects are remediated in an authorized follow-up (migrations/RPC changes — out of scope for this gate).
+## Freeze advice
 
-## Non-changes confirmed
-
-No migrations, RPCs, RLS, contracts, or dependencies were modified by this validation.
+Local remediation PASS unlocks `RC2_READY_FOR_LOCAL_FREEZE` only. Tag/push/staging/production apply remain unauthorized until a separate gate.
