@@ -1,0 +1,136 @@
+{
+  "at": "2026-07-27T20:59:59.921Z",
+  "passed": 32,
+  "failed": 0,
+  "total": 32,
+  "results": [
+    {
+      "name": "rpc:create_portal_conversation",
+      "ok": true
+    },
+    {
+      "name": "rpc:send_portal_message",
+      "ok": true
+    },
+    {
+      "name": "rpc:send_portal_message_idempotent",
+      "ok": true
+    },
+    {
+      "name": "rpc:mark_portal_conversation_read",
+      "ok": true
+    },
+    {
+      "name": "rls:non_participant_org_member_denied",
+      "ok": true
+    },
+    {
+      "name": "rls:participant_can_select",
+      "ok": true
+    },
+    {
+      "name": "rls:removed_participant_denied",
+      "ok": true
+    },
+    {
+      "name": "rpc:send_not_participant",
+      "ok": true
+    },
+    {
+      "name": "rpc:create_internal_forbidden",
+      "ok": true
+    },
+    {
+      "name": "rls:internal_conversation_staff_only",
+      "ok": true
+    },
+    {
+      "name": "rpc:internal_message_leak_denied",
+      "ok": true
+    },
+    {
+      "name": "rls:partner_b_denied_org_a_conversation",
+      "ok": true
+    },
+    {
+      "name": "fixture:support_ticket_default_new",
+      "ok": true
+    },
+    {
+      "name": "rpc:assign_non_staff_forbidden",
+      "ok": true
+    },
+    {
+      "name": "rpc:assign_portal_support_ticket",
+      "ok": true
+    },
+    {
+      "name": "rpc:reply_portal_support_ticket",
+      "ok": true
+    },
+    {
+      "name": "rpc:internal_note_flag_disabled",
+      "ok": true
+    },
+    {
+      "name": "rpc:add_portal_support_internal_note",
+      "ok": true
+    },
+    {
+      "name": "rls:internal_support_note_hidden_from_customer",
+      "ok": true
+    },
+    {
+      "name": "rls:internal_support_note_visible_to_staff",
+      "ok": true
+    },
+    {
+      "name": "rpc:transition_portal_support_ticket_status",
+      "ok": true
+    },
+    {
+      "name": "rpc:invalid_transition",
+      "ok": true
+    },
+    {
+      "name": "rls:partner_denied_support_ticket",
+      "ok": true
+    },
+    {
+      "name": "rpc:book_flag_disabled",
+      "ok": true
+    },
+    {
+      "name": "rpc:book_portal_appointment",
+      "ok": true
+    },
+    {
+      "name": "rpc:double_booking",
+      "ok": true
+    },
+    {
+      "name": "rpc:reschedule_portal_appointment",
+      "ok": true
+    },
+    {
+      "name": "rpc:cancel_wrong_role",
+      "ok": true
+    },
+    {
+      "name": "rpc:cancel_portal_appointment",
+      "ok": true
+    },
+    {
+      "name": "rls:partner_b_denied_appointment",
+      "ok": true
+    },
+    {
+      "name": "verify_messaging_support_appointments_contracts",
+      "ok": true
+    },
+    {
+      "name": "rc2_surfaces_intact",
+      "ok": true
+    }
+  ]
+}

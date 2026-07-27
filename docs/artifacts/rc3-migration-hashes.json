@@ -1,0 +1,25 @@
+{
+  "at": "2026-07-27T21:00:19.388Z",
+  "migrations": [
+    {
+      "version": "20260725120000",
+      "filename": "20260725120000_messaging_support_appointments_rc3.sql",
+      "sha256": "2a7bda8f49310bf1a24a73d227e984fe12d701f4c6b6394171d10ec91de88fc9"
+    },
+    {
+      "version": "20260725120100",
+      "filename": "20260725120100_messaging_support_appointments_rc3_rpcs.sql",
+      "sha256": "364f4c4e27674e4052aa092b260b05f872cfc962a46bf072326d4aabd10cab65"
+    },
+    {
+      "version": "20260725120200",
+      "filename": "20260725120200_fix_appointment_rls_recursion.sql",
+      "sha256": "37aa246f07bf4100ece20d12b425c85dd1ddb96cf76d720be2e96a52bd47968b"
+    },
+    {
+      "version": "20260725120300",
+      "filename": "20260725120300_rc3_table_grants.sql",
+      "sha256": "786919a0b3267c5eb8ed2ef1073e7c9916063593c168d77ba933891fd727ed00"
+    }
+  ]
+}

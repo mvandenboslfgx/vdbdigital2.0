@@ -1,0 +1,30 @@
+﻿[
+    {
+        "name":  "messaging_verify",
+        "exit":  0
+    },
+    {
+        "name":  "messaging_rls",
+        "exit":  0
+    },
+    {
+        "name":  "partner",
+        "exit":  1
+    },
+    {
+        "name":  "portal",
+        "exit":  -1073740791
+    },
+    {
+        "name":  "invoices",
+        "exit":  0
+    },
+    {
+        "name":  "quotes",
+        "exit":  0
+    },
+    {
+        "name":  "checkout",
+        "exit":  2
+    }
+]

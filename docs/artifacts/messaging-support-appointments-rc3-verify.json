@@ -1,0 +1,9 @@
+{
+  "at": "2026-07-27T21:01:01.695Z",
+  "contractVersion": "vdb-backend-contract@0.2.0-rc.3",
+  "schemaVersion": "2026.07.25.messaging-support-appointments-rc3",
+  "dbVerifier": "PASS",
+  "rc2Surfaces": "PASS",
+  "bundleSha256": "62bb1c31240f5eb7e16968a6a03d425e52f2c2ef8b09c38c6cbd549ed331973f",
+  "container": "supabase_db_vdbdigital2"
+}
