@@ -1,0 +1,12 @@
+{
+  "contractVersion": "vdb-backend-contract@0.2.0-rc.2",
+  "schemaVersion": "2026.07.27.financial-concurrency-rc2",
+  "partnerSurfaceCompatibleWith": "vdb-backend-contract@0.2.0-rc.1",
+  "minimumCompatibleClientVersion": ">=0.2.0-rc.2",
+  "mobileCompat": "included additive",
+  "rc3Messaging": "OUTSIDE_RC2",
+  "breakingForClients": [
+    "PARTNER_LEAD_ALREADY_CONVERTED on distinct-key same-lead conversion",
+    "PARTNER_INSUFFICIENT_LIABILITY on overspend payout request"
+  ]
+}

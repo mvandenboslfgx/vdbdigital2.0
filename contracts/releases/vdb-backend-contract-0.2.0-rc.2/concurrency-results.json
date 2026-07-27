@@ -1,0 +1,140 @@
+{
+  "contractVersion": "vdb-backend-contract@0.2.0-rc.2",
+  "schemaVersion": "2026.07.27.financial-concurrency-rc2",
+  "harnessCommit": "084c3fb",
+  "failureEvidenceCommit": "89721b9c2edfcabe4f2f89af22a2cee6791b2afa",
+  "remediationCommits": [
+    "ed7a115",
+    "2f5c733",
+    "a15d7ae",
+    "34c0a78"
+  ],
+  "preFreezeHead": "34c0a788086f2c29768da0d15a787f54c49f4d45",
+  "runCount": 2,
+  "run1": "PASS",
+  "run2": "PASS",
+  "totals": {
+    "iterations": 594,
+    "concurrentCalls": 1582,
+    "unexpectedErrors": 0,
+    "invariantFailures": 0,
+    "duplicateSales": 0,
+    "duplicateCommissions": 0,
+    "payoutOverspends": 0,
+    "ledgerImbalances": 0
+  },
+  "loserOutcomes": {
+    "distinctIdempotencySameLead": "PARTNER_LEAD_ALREADY_CONVERTED",
+    "payoutOverspend": "PARTNER_INSUFFICIENT_LIABILITY",
+    "sameKeyRetry": "idempotent UUID return"
+  },
+  "roleChange": {
+    "payoutVsSuspension": "PASS",
+    "staffAuthorityRevocationDuringMutation": "STAFF_REVOCATION_CONCURRENCY_NON_BLOCKING_LIMITATION",
+    "rationale": "No temporal admin-grant model inside payout RPCs; staff auth checked at call start. Core financial races proven; staff-revocation concurrency is not claimed as proven."
+  },
+  "sourceResults": {
+    "raceCases": 19,
+    "iterations": 594,
+    "concurrentCalls": 1582,
+    "unexpectedErrors": 0,
+    "invariantFailures": 0
+  },
+  "scenarios": [
+    {
+      "race": "RACE1_SALE_CONFIRM",
+      "variant": "same_idempotency_key",
+      "pass": true
+    },
+    {
+      "race": "RACE1_SALE_CONFIRM",
+      "variant": "different_idempotency_same_event",
+      "pass": true
+    },
+    {
+      "race": "RACE1_SALE_CONFIRM",
+      "variant": "fanout_10",
+      "pass": true
+    },
+    {
+      "race": "RACE2_LEAD_CONVERSION",
+      "variant": "dual_staff",
+      "pass": true
+    },
+    {
+      "race": "RACE3_COMMISSION",
+      "variant": "via_confirm_parallel",
+      "pass": true
+    },
+    {
+      "race": "RACE4_PAYOUT_REQUEST",
+      "variant": "overspend_pairwise",
+      "pass": true
+    },
+    {
+      "race": "RACE4_PAYOUT_REQUEST",
+      "variant": "same_idempotency",
+      "pass": true
+    },
+    {
+      "race": "RACE4_PAYOUT_REQUEST",
+      "variant": "fanout",
+      "pass": true
+    },
+    {
+      "race": "RACE5_PAYOUT_APPROVAL",
+      "variant": "dual_staff",
+      "pass": true
+    },
+    {
+      "race": "RACE6_PAYOUT_PAID",
+      "variant": "dual_staff_diff_external_ref",
+      "pass": true
+    },
+    {
+      "race": "RACE6_PAYOUT_PAID",
+      "variant": "fanout",
+      "pass": true
+    },
+    {
+      "race": "RACE7_REFUND_VS_PAYOUT",
+      "variant": "paid_vs_refund_parallel",
+      "pass": true
+    },
+    {
+      "race": "RACE7_REFUND_VS_PAYOUT",
+      "variant": "dual_refund_same_key",
+      "pass": true
+    },
+    {
+      "race": "RACE8_CASH_RECEIPT",
+      "variant": "same_key_pairwise",
+      "pass": true
+    },
+    {
+      "race": "RACE8_CASH_RECEIPT",
+      "variant": "conflicting_amount_same_key",
+      "pass": true
+    },
+    {
+      "race": "RACE8_CASH_RECEIPT",
+      "variant": "fanout",
+      "pass": true
+    },
+    {
+      "race": "RACE9_LEDGER_IMMUTABILITY",
+      "variant": "update_delete_denied_balanced",
+      "pass": true
+    },
+    {
+      "race": "RACE10_ROLE_CHANGE",
+      "variant": "payout_vs_suspension",
+      "pass": true
+    },
+    {
+      "race": "RACE11_NEGATIVE_CONTRACTS",
+      "variant": "sale_and_payout_error_codes",
+      "pass": true
+    }
+  ]
+}

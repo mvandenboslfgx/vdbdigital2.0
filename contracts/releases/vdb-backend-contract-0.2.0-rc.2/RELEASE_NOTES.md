@@ -43,6 +43,12 @@ Mobile compatibility delta on top of partner `0.2.0-rc.1`, plus financial concur
 - Mollie / payouts enablement
 - Checkout / P05 activation
 
+## Local freeze
+
+Local annotated freeze tag: `shared-backend-rc2-local-freeze` (not pushed).
+
+Role-change: payout-vs-suspension PASS; staff-authority revocation during mutation is `STAFF_REVOCATION_CONCURRENCY_NON_BLOCKING_LIMITATION` (not claimed as proven).
+
 ## Consumers must pin
 
 ```text

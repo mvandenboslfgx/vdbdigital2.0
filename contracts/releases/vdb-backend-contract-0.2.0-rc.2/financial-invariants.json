@@ -8,7 +8,24 @@
     "paid_payout_immutable",
     "refund_after_payout_via_adjustment",
     "no_client_financial_authority",
-    "cash_receipt_staff_only_idempotent"
+    "cash_receipt_staff_only_idempotent",
+    "one_partner_sale_per_partner_lead",
+    "partner_sales_one_per_lead_unique",
+    "confirm_partner_sale_same_key_idempotent",
+    "confirm_partner_sale_different_key_conflict",
+    "sale_commission_ledger_atomic",
+    "payout_request_serialized_on_partner_profile",
+    "requested_status_reserves_liability",
+    "total_reservation_never_exceeds_available_liability"
   ],
-  "calculationRuleVersion": "v1_flat_bps"
+  "calculationRuleVersion": "v1_flat_bps",
+  "saleConcurrency": {
+    "constraint": "partner_sales_one_per_lead",
+    "errorCode": "PARTNER_LEAD_ALREADY_CONVERTED"
+  },
+  "payoutConcurrency": {
+    "lock": "partner_profiles FOR UPDATE",
+    "reservingStatus": "REQUESTED",
+    "errorCode": "PARTNER_INSUFFICIENT_LIABILITY"
+  }
 }

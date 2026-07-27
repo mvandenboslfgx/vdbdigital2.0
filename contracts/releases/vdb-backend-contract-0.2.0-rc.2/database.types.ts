@@ -358,6 +358,30 @@ export type Database = {
         }
         Relationships: []
       }
+      feature_flags: {
+        Row: {
+          created_at: string
+          description: string | null
+          enabled: boolean
+          key: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          key: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           created_at: string
@@ -1456,7 +1480,7 @@ export type Database = {
           {
             foreignKeyName: "partner_sales_partner_lead_id_fkey"
             columns: ["partner_lead_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "partner_leads"
             referencedColumns: ["id"]
           },
@@ -4038,6 +4062,7 @@ export type Database = {
           ok: boolean
         }[]
       }
+      feature_flag_enabled: { Args: { p_keys: string[] }; Returns: boolean }
       generate_portal_document_number: { Args: never; Returns: string }
       generate_portal_invoice_number: {
         Args: { p_type?: Database["public"]["Enums"]["portal_invoice_type"] }
@@ -4240,6 +4265,14 @@ export type Database = {
         }[]
       }
       verify_invoices_financial_contracts: {
+        Args: never
+        Returns: {
+          check_name: string
+          detail: string
+          ok: boolean
+        }[]
+      }
+      verify_mobile_compat_contracts: {
         Args: never
         Returns: {
           check_name: string
@@ -4843,3 +4876,4 @@ export const Constants = {
     },
   },
 } as const
+
