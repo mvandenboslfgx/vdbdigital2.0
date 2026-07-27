@@ -1,0 +1,385 @@
+{
+  "generatedAt": "2026-07-27T11:42:43.776Z",
+  "quick": false,
+  "run1": {
+    "pass": false,
+    "results": [
+      {
+        "race": "RACE1_SALE_CONFIRM",
+        "variant": "same_idempotency_key",
+        "pass": true,
+        "iterations": 20,
+        "concurrentCalls": 40,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
+      },
+      {
+        "race": "RACE1_SALE_CONFIRM",
+        "variant": "different_idempotency_same_event",
+        "pass": false,
+        "iterations": 20,
+        "concurrentCalls": 40,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 20,
+        "detail": "duplicate sale/commission for one lead under distinct idempotency keys"
+      },
+      {
+        "race": "RACE1_SALE_CONFIRM",
+        "variant": "fanout_10",
+        "pass": true,
+        "iterations": 5,
+        "concurrentCalls": 50,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
+      },
+      {
+        "race": "RACE2_LEAD_CONVERSION",
+        "variant": "dual_staff",
+        "pass": false,
+        "iterations": 20,
+        "concurrentCalls": 40,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 20
+      },
+      {
+        "race": "RACE3_COMMISSION",
+        "variant": "via_confirm_parallel",
+        "pass": true,
+        "iterations": 25,
+        "concurrentCalls": 75,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
+      },
+      {
+        "race": "RACE4_PAYOUT_REQUEST",
+        "variant": "overspend_pairwise",
+        "pass": false,
+        "iterations": 25,
+        "concurrentCalls": 50,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 50
+      },
+      {
+        "race": "RACE4_PAYOUT_REQUEST",
+        "variant": "same_idempotency",
+        "pass": true,
+        "iterations": 20,
+        "concurrentCalls": 40,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
+      },
+      {
+        "race": "RACE4_PAYOUT_REQUEST",
+        "variant": "fanout",
+        "pass": false,
+        "iterations": 5,
+        "concurrentCalls": 50,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 5
+      },
+      {
+        "race": "RACE5_PAYOUT_APPROVAL",
+        "variant": "dual_staff",
+        "pass": true,
+        "iterations": 20,
+        "concurrentCalls": 40,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
+      },
+      {
+        "race": "RACE6_PAYOUT_PAID",
+        "variant": "dual_staff_diff_external_ref",
+        "pass": true,
+        "iterations": 20,
+        "concurrentCalls": 40,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
+      },
+      {
+        "race": "RACE6_PAYOUT_PAID",
+        "variant": "fanout",
+        "pass": true,
+        "iterations": 5,
+        "concurrentCalls": 50,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
+      },
+      {
+        "race": "RACE7_REFUND_VS_PAYOUT",
+        "variant": "paid_vs_refund_parallel",
+        "pass": true,
+        "iterations": 25,
+        "concurrentCalls": 50,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
+      },
+      {
+        "race": "RACE7_REFUND_VS_PAYOUT",
+        "variant": "dual_refund_same_key",
+        "pass": true,
+        "iterations": 20,
+        "concurrentCalls": 40,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
+      },
+      {
+        "race": "RACE8_CASH_RECEIPT",
+        "variant": "same_key_pairwise",
+        "pass": true,
+        "iterations": 20,
+        "concurrentCalls": 40,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
+      },
+      {
+        "race": "RACE8_CASH_RECEIPT",
+        "variant": "conflicting_amount_same_key",
+        "pass": true,
+        "iterations": 20,
+        "concurrentCalls": 40,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
+      },
+      {
+        "race": "RACE8_CASH_RECEIPT",
+        "variant": "fanout",
+        "pass": true,
+        "iterations": 5,
+        "concurrentCalls": 50,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
+      },
+      {
+        "race": "RACE9_LEDGER_IMMUTABILITY",
+        "variant": "update_delete_denied_balanced",
+        "pass": true,
+        "iterations": 1,
+        "concurrentCalls": 0,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
+      },
+      {
+        "race": "RACE10_ROLE_CHANGE",
+        "variant": "payout_vs_suspension",
+        "pass": true,
+        "iterations": 20,
+        "concurrentCalls": 40,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0,
+        "detail": "staff-authority-revocation-during-mutation left UNPROVEN (no temporal admin grant model)"
+      }
+    ]
+  },
+  "run2": {
+    "pass": false,
+    "results": [
+      {
+        "race": "RACE1_SALE_CONFIRM",
+        "variant": "same_idempotency_key",
+        "pass": true,
+        "iterations": 20,
+        "concurrentCalls": 40,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
+      },
+      {
+        "race": "RACE1_SALE_CONFIRM",
+        "variant": "different_idempotency_same_event",
+        "pass": false,
+        "iterations": 20,
+        "concurrentCalls": 40,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 20,
+        "detail": "duplicate sale/commission for one lead under distinct idempotency keys"
+      },
+      {
+        "race": "RACE1_SALE_CONFIRM",
+        "variant": "fanout_10",
+        "pass": true,
+        "iterations": 5,
+        "concurrentCalls": 50,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
+      },
+      {
+        "race": "RACE2_LEAD_CONVERSION",
+        "variant": "dual_staff",
+        "pass": false,
+        "iterations": 20,
+        "concurrentCalls": 40,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 20
+      },
+      {
+        "race": "RACE3_COMMISSION",
+        "variant": "via_confirm_parallel",
+        "pass": true,
+        "iterations": 25,
+        "concurrentCalls": 75,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
+      },
+      {
+        "race": "RACE4_PAYOUT_REQUEST",
+        "variant": "overspend_pairwise",
+        "pass": false,
+        "iterations": 25,
+        "concurrentCalls": 50,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 50
+      },
+      {
+        "race": "RACE4_PAYOUT_REQUEST",
+        "variant": "same_idempotency",
+        "pass": true,
+        "iterations": 20,
+        "concurrentCalls": 40,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
+      },
+      {
+        "race": "RACE4_PAYOUT_REQUEST",
+        "variant": "fanout",
+        "pass": false,
+        "iterations": 5,
+        "concurrentCalls": 50,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 5
+      },
+      {
+        "race": "RACE5_PAYOUT_APPROVAL",
+        "variant": "dual_staff",
+        "pass": true,
+        "iterations": 20,
+        "concurrentCalls": 40,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
+      },
+      {
+        "race": "RACE6_PAYOUT_PAID",
+        "variant": "dual_staff_diff_external_ref",
+        "pass": true,
+        "iterations": 20,
+        "concurrentCalls": 40,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
+      },
+      {
+        "race": "RACE6_PAYOUT_PAID",
+        "variant": "fanout",
+        "pass": true,
+        "iterations": 5,
+        "concurrentCalls": 50,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
+      },
+      {
+        "race": "RACE7_REFUND_VS_PAYOUT",
+        "variant": "paid_vs_refund_parallel",
+        "pass": true,
+        "iterations": 25,
+        "concurrentCalls": 50,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
+      },
+      {
+        "race": "RACE7_REFUND_VS_PAYOUT",
+        "variant": "dual_refund_same_key",
+        "pass": true,
+        "iterations": 20,
+        "concurrentCalls": 40,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
+      },
+      {
+        "race": "RACE8_CASH_RECEIPT",
+        "variant": "same_key_pairwise",
+        "pass": true,
+        "iterations": 20,
+        "concurrentCalls": 40,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
+      },
+      {
+        "race": "RACE8_CASH_RECEIPT",
+        "variant": "conflicting_amount_same_key",
+        "pass": true,
+        "iterations": 20,
+        "concurrentCalls": 40,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
+      },
+      {
+        "race": "RACE8_CASH_RECEIPT",
+        "variant": "fanout",
+        "pass": true,
+        "iterations": 5,
+        "concurrentCalls": 50,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
+      },
+      {
+        "race": "RACE9_LEDGER_IMMUTABILITY",
+        "variant": "update_delete_denied_balanced",
+        "pass": true,
+        "iterations": 1,
+        "concurrentCalls": 0,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
+      },
+      {
+        "race": "RACE10_ROLE_CHANGE",
+        "variant": "payout_vs_suspension",
+        "pass": true,
+        "iterations": 20,
+        "concurrentCalls": 40,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0,
+        "detail": "staff-authority-revocation-during-mutation left UNPROVEN (no temporal admin grant model)"
+      }
+    ]
+  },
+  "totals": {
+    "raceCases": 18,
+    "iterations": 592,
+    "concurrentCalls": 1550,
+    "unexpectedErrors": 0,
+    "invariantFailures": 190
+  }
+}
