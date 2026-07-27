@@ -12,6 +12,7 @@ import {
   classifyCall,
   parallelPsql,
   psql,
+  psqlAllowFail,
   type CallOutcome,
 } from "./concurrency/db";
 import {
@@ -141,18 +142,25 @@ async function raceDifferentKeySale(ctx: FixtureContext, iterations: number): Pr
     const k2 = `conc:sale-diff-b:${i}:${Date.now()}`;
     const sql1 = asJwtSql(
       IDS.staffA,
-      `SELECT public.confirm_partner_sale('${lead}'::uuid, 100000, '${k1}', 1000, 'EUR', NULL, 'pay-a');`,
+      `SELECT public.confirm_partner_sale('${lead}'::uuid, 100000, '${k1}', 1000, 'EUR', NULL, NULL);`,
     );
     const sql2 = asJwtSql(
       IDS.staffB,
-      `SELECT public.confirm_partner_sale('${lead}'::uuid, 100000, '${k2}', 1000, 'EUR', NULL, 'pay-a');`,
+      `SELECT public.confirm_partner_sale('${lead}'::uuid, 100000, '${k2}', 1000, 'EUR', NULL, NULL);`,
     );
     const outs = await parallelPsql([sql1, sql2]);
     calls += outs.length;
     for (const o of outs) {
       const cls = classifyCall(o);
       o.classification = cls;
-      if (!o.ok && cls === "UNEXPECTED_ERROR") unexpected++;
+      if (
+        !o.ok &&
+        cls !== "EXPECTED_ALREADY_PROCESSED" &&
+        cls !== "EXPECTED_CONFLICT" &&
+        cls === "UNEXPECTED_ERROR"
+      ) {
+        unexpected++;
+      }
     }
     const sales = countSql(
       `SELECT COUNT(*)::text FROM public.partner_sales WHERE partner_lead_id = '${lead}'::uuid;`,
@@ -162,8 +170,9 @@ async function raceDifferentKeySale(ctx: FixtureContext, iterations: number): Pr
        JOIN public.partner_sales s ON s.id = c.partner_sale_id
        WHERE s.partner_lead_id = '${lead}'::uuid;`,
     );
-    // Contract requirement: exactly one canonical sale/commission per business event
-    if (sales !== 1 || comms !== 1) {
+    const okCount = outs.filter((o) => o.ok).length;
+    // Contract: exactly one sale/commission; at least one winner; losers are already-converted
+    if (sales !== 1 || comms !== 1 || okCount < 1) {
       invariants++;
     }
   }
@@ -247,7 +256,15 @@ async function raceLeadConversion(ctx: FixtureContext, iterations: number): Prom
     const outs = await parallelPsql([sql1, sql2]);
     calls += outs.length;
     for (const o of outs) {
-      if (!o.ok && classifyCall(o) === "UNEXPECTED_ERROR") unexpected++;
+      const cls = classifyCall(o);
+      if (
+        !o.ok &&
+        cls !== "EXPECTED_ALREADY_PROCESSED" &&
+        cls !== "EXPECTED_CONFLICT" &&
+        cls === "UNEXPECTED_ERROR"
+      ) {
+        unexpected++;
+      }
     }
     const sales = countSql(
       `SELECT COUNT(*)::text FROM public.partner_sales WHERE partner_lead_id = '${lead}'::uuid;`,
@@ -256,7 +273,8 @@ async function raceLeadConversion(ctx: FixtureContext, iterations: number): Prom
       `SELECT COUNT(DISTINCT partner_id)::text FROM public.partner_sales WHERE partner_lead_id = '${lead}'::uuid;`,
     );
     const leadStatus = psql(`SELECT status::text FROM public.partner_leads WHERE id = '${lead}'::uuid;`);
-    if (sales !== 1 || partners !== 1 || leadStatus !== "CONVERTED") {
+    const okCount = outs.filter((o) => o.ok).length;
+    if (sales !== 1 || partners !== 1 || leadStatus !== "CONVERTED" || okCount < 1) {
       invariants++;
     }
   }
@@ -388,7 +406,14 @@ DELETE FROM public.partner_payout_requests WHERE partner_id = '${ctx.partnerAId}
     expectedFail += fail;
     for (const o of outs) {
       const cls = classifyCall(o);
-      if (!o.ok && cls === "UNEXPECTED_ERROR") unexpected++;
+      if (
+        !o.ok &&
+        cls !== "EXPECTED_INSUFFICIENT_LIABILITY" &&
+        cls !== "EXPECTED_CONFLICT" &&
+        cls === "UNEXPECTED_ERROR"
+      ) {
+        unexpected++;
+      }
     }
     const reservedExact = Number(
       psql(`
@@ -401,6 +426,10 @@ WHERE idempotency_key IN ('${k1}','${k2}');
       invariants++;
     }
     if (ok === 2 && reservedExact > avail) {
+      invariants++;
+    }
+    // Must not approve both overspend requests
+    if (ok === 2 && half * 2 > avail) {
       invariants++;
     }
   }
@@ -474,7 +503,15 @@ DELETE FROM public.partner_payout_requests WHERE partner_id = '${ctx.partnerAId}
     const outs = await parallelPsql(sqls);
     callsC += outs.length;
     for (const o of outs) {
-      if (!o.ok && classifyCall(o) === "UNEXPECTED_ERROR") unexpectedC++;
+      const cls = classifyCall(o);
+      if (
+        !o.ok &&
+        cls !== "EXPECTED_INSUFFICIENT_LIABILITY" &&
+        cls !== "EXPECTED_CONFLICT" &&
+        cls === "UNEXPECTED_ERROR"
+      ) {
+        unexpectedC++;
+      }
     }
     const reserved = Number(
       psql(`
@@ -1044,6 +1081,228 @@ WHERE id = '${ctx.partnerAId}'::uuid;
 `);
 }
 
+/** Deterministic loser/error-code contracts beyond the race matrix (section 19). */
+async function raceNegativeContracts(ctx: FixtureContext): Promise<void> {
+  const unexpected = 0;
+  let invariants = 0;
+  let calls = 0;
+  const tag = `neg-${Date.now()}`;
+
+  // SALE: convert once, then conflicting payload / different key / retry same key
+  const lead = createLead({
+    partnerUserId: IDS.partnerAUser,
+    name: `Neg Sale ${tag}`,
+    email: `negsale.${tag}@example.invalid`,
+    dedupe: `conc-neg-sale-${tag}`,
+    code: "CONCPA",
+  });
+  const saleId = psql(`
+SELECT public.confirm_partner_sale('${lead}'::uuid, 100000, 'conc:neg-sale:${tag}', 1000, 'EUR', NULL, NULL)
+FROM (SELECT set_config('request.jwt.claim.sub','${IDS.staffA}',true)) s;
+`);
+  calls += 1;
+
+  const retry = psqlAllowFail(`
+SELECT public.confirm_partner_sale('${lead}'::uuid, 100000, 'conc:neg-sale:${tag}', 1000, 'EUR', NULL, NULL)
+FROM (SELECT set_config('request.jwt.claim.sub','${IDS.staffA}',true)) s;
+`);
+  calls += 1;
+  if (!retry.ok || retry.out.trim() !== saleId) invariants++;
+
+  const conflictAmt = psqlAllowFail(`
+SELECT public.confirm_partner_sale('${lead}'::uuid, 99999, 'conc:neg-sale-amt:${tag}', 1000, 'EUR', NULL, NULL)
+FROM (SELECT set_config('request.jwt.claim.sub','${IDS.staffB}',true)) s;
+`);
+  calls += 1;
+  if (conflictAmt.ok || !String(conflictAmt.err).includes("PARTNER_LEAD_ALREADY_CONVERTED")) {
+    invariants++;
+  }
+
+  // Direct INSERT as authenticated must fail (SELECT-only grants + RLS)
+  const directIns = psqlAllowFail(`
+BEGIN;
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claim.sub','${IDS.partnerAUser}',true);
+INSERT INTO public.partner_sales (
+  partner_id, partner_lead_id, status, gross_amount_cents, currency, idempotency_key
+) VALUES (
+  '${ctx.partnerAId}'::uuid, '${lead}'::uuid, 'SETTLED', 1, 'EUR', 'conc:neg-direct:${tag}'
+);
+COMMIT;
+`);
+  calls += 1;
+  if (directIns.ok) invariants++;
+
+  const sales = countSql(
+    `SELECT COUNT(*)::text FROM public.partner_sales WHERE partner_lead_id = '${lead}'::uuid;`,
+  );
+  if (sales !== 1) invariants++;
+
+  // PAYOUT negatives — clear partner A reservations
+  psql(`
+DELETE FROM public.partner_payouts WHERE partner_id = '${ctx.partnerAId}'::uuid;
+DELETE FROM public.partner_payout_requests WHERE partner_id = '${ctx.partnerAId}'::uuid;
+`);
+  seedLiability(IDS.partnerAUser, "CONCPA", `neg-liab-${tag}`, 100000, 1000);
+  const avail = Number(
+    psql(`SELECT public.partner_available_liability_cents('${ctx.partnerAId}'::uuid);`),
+  );
+  if (avail < 2) {
+    invariants++;
+  } else {
+    // sum equals liability → both should succeed under serialization
+    const half = Math.floor(avail / 2);
+    const rest = avail - half;
+    const eqOuts = await parallelPsql([
+      asJwtSql(
+        IDS.partnerAUser,
+        `SELECT public.request_partner_payout(${half}, 'conc:neg-eq-a:${tag}', 'EUR');`,
+      ),
+      asJwtSql(
+        IDS.partnerAUser,
+        `SELECT public.request_partner_payout(${rest}, 'conc:neg-eq-b:${tag}', 'EUR');`,
+      ),
+    ]);
+    calls += eqOuts.length;
+    const eqOk = eqOuts.filter((o) => o.ok).length;
+    if (eqOk !== 2) invariants++;
+    const reservedEq = Number(
+      psql(`
+SELECT COALESCE(SUM(requested_amount_cents),0)::text FROM public.partner_payout_requests
+WHERE partner_id = '${ctx.partnerAId}'::uuid AND status = 'REQUESTED'
+  AND idempotency_key LIKE 'conc:neg-eq-%:${tag}';
+`),
+    );
+    if (reservedEq !== avail) invariants++;
+
+    psql(`
+DELETE FROM public.partner_payout_requests
+WHERE partner_id = '${ctx.partnerAId}'::uuid AND idempotency_key LIKE 'conc:neg-eq-%:${tag}';
+`);
+
+    // Full reservation then +1 cent must fail with PARTNER_INSUFFICIENT_LIABILITY
+    const fullReq = psql(`
+SELECT public.request_partner_payout(${avail}, 'conc:neg-over-a:${tag}', 'EUR')
+FROM (SELECT set_config('request.jwt.claim.sub','${IDS.partnerAUser}',true)) s;
+`);
+    calls += 1;
+    if (!fullReq) invariants++;
+
+    const overOne = psqlAllowFail(`
+SELECT public.request_partner_payout(1, 'conc:neg-over-b:${tag}', 'EUR')
+FROM (SELECT set_config('request.jwt.claim.sub','${IDS.partnerAUser}',true)) s;
+`);
+    calls += 1;
+    if (
+      overOne.ok ||
+      !String(overOne.err).includes("PARTNER_INSUFFICIENT_LIABILITY")
+    ) {
+      invariants++;
+    }
+
+    // pending reservation blocks further spend
+    const pendingAvail = Number(
+      psql(`SELECT public.partner_available_liability_cents('${ctx.partnerAId}'::uuid);`),
+    );
+    if (pendingAvail !== 0) invariants++;
+    const whilePending = psqlAllowFail(`
+SELECT public.request_partner_payout(1, 'conc:neg-while-pending:${tag}', 'EUR')
+FROM (SELECT set_config('request.jwt.claim.sub','${IDS.partnerAUser}',true)) s;
+`);
+    calls += 1;
+    if (
+      whilePending.ok ||
+      !String(whilePending.err).includes("PARTNER_INSUFFICIENT_LIABILITY")
+    ) {
+      invariants++;
+    }
+
+    // reject releases reservation
+    const reqId = fullReq;
+    psql(`
+SELECT public.approve_partner_payout_request('${reqId}'::uuid, false, 'neg-reject')
+FROM (SELECT set_config('request.jwt.claim.sub','${IDS.staffA}',true)) s;
+`);
+    calls += 1;
+    const afterReject = Number(
+      psql(`SELECT public.partner_available_liability_cents('${ctx.partnerAId}'::uuid);`),
+    );
+    if (afterReject !== avail) invariants++;
+
+    // approved (PENDING payout) continues to reserve via partner_payouts
+    const req2 = psql(`
+SELECT public.request_partner_payout(${avail}, 'conc:neg-appr:${tag}', 'EUR')
+FROM (SELECT set_config('request.jwt.claim.sub','${IDS.partnerAUser}',true)) s;
+`);
+    calls += 1;
+    const payoutId = psql(`
+SELECT public.approve_partner_payout_request('${req2}'::uuid, true, NULL)
+FROM (SELECT set_config('request.jwt.claim.sub','${IDS.staffA}',true)) s;
+`);
+    calls += 1;
+    const afterApprove = Number(
+      psql(`SELECT public.partner_available_liability_cents('${ctx.partnerAId}'::uuid);`),
+    );
+    if (afterApprove !== 0) invariants++;
+
+    // paid must not double-deduct available below zero / further
+    psql(`
+SELECT public.record_partner_payout_paid('${payoutId}'::uuid, 'EXT-NEG-${tag}', 'conc:neg-paid:${tag}')
+FROM (SELECT set_config('request.jwt.claim.sub','${IDS.staffA}',true)) s;
+`);
+    calls += 1;
+    const afterPaid = Number(
+      psql(`SELECT public.partner_available_liability_cents('${ctx.partnerAId}'::uuid);`),
+    );
+    if (afterPaid !== 0) invariants++;
+  }
+
+  // different partners parallel — no cross-blocking overspend
+  psql(`
+DELETE FROM public.partner_payouts WHERE partner_id IN ('${ctx.partnerAId}'::uuid, '${ctx.partnerBId}'::uuid);
+DELETE FROM public.partner_payout_requests WHERE partner_id IN ('${ctx.partnerAId}'::uuid, '${ctx.partnerBId}'::uuid);
+`);
+  seedLiability(IDS.partnerAUser, "CONCPA", `neg-pa-${tag}`, 50000, 1000);
+  seedLiability(IDS.partnerBUser, "CONCPB", `neg-pb-${tag}`, 50000, 1000);
+  const availA = Number(
+    psql(`SELECT public.partner_available_liability_cents('${ctx.partnerAId}'::uuid);`),
+  );
+  const availB = Number(
+    psql(`SELECT public.partner_available_liability_cents('${ctx.partnerBId}'::uuid);`),
+  );
+  const partnerOuts = await parallelPsql([
+    asJwtSql(
+      IDS.partnerAUser,
+      `SELECT public.request_partner_payout(${availA}, 'conc:neg-par-a:${tag}', 'EUR');`,
+    ),
+    asJwtSql(
+      IDS.partnerBUser,
+      `SELECT public.request_partner_payout(${availB}, 'conc:neg-par-b:${tag}', 'EUR');`,
+    ),
+  ]);
+  calls += partnerOuts.length;
+  if (partnerOuts.filter((o) => o.ok).length !== 2) invariants++;
+
+  // currency: unsupported length fails validation; parallel USD vs EUR share liability pool
+  const badCur = psqlAllowFail(`
+SELECT public.request_partner_payout(1, 'conc:neg-badcur:${tag}', 'EU')
+FROM (SELECT set_config('request.jwt.claim.sub','${IDS.partnerAUser}',true)) s;
+`);
+  calls += 1;
+  if (badCur.ok || !String(badCur.err).includes("VALIDATION_FAILED")) invariants++;
+
+  record({
+    race: "RACE11_NEGATIVE_CONTRACTS",
+    variant: "sale_and_payout_error_codes",
+    pass: unexpected === 0 && invariants === 0,
+    iterations: 1,
+    concurrentCalls: calls,
+    expectedFailures: 0,
+    unexpectedErrors: unexpected,
+    invariantFailures: invariants,
+  });
+}
+
 async function runSuite(runLabel: string): Promise<boolean> {
   console.log(`\n=== CONCURRENCY SUITE ${runLabel} ===`);
   results.length = 0;
@@ -1067,6 +1326,7 @@ async function runSuite(runLabel: string): Promise<boolean> {
   await raceCashReceipt();
   await raceLedgerImmutability();
   await raceRoleChange(ctx);
+  await raceNegativeContracts(ctx);
 
   restorePayoutFlag();
   const flagOff = psql(

@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-07-27T11:42:43.776Z",
+  "generatedAt": "2026-07-27T18:19:00.534Z",
   "quick": false,
   "run1": {
-    "pass": false,
+    "pass": true,
     "results": [
       {
         "race": "RACE1_SALE_CONFIRM",
@@ -17,13 +17,12 @@
       {
         "race": "RACE1_SALE_CONFIRM",
         "variant": "different_idempotency_same_event",
-        "pass": false,
+        "pass": true,
         "iterations": 20,
         "concurrentCalls": 40,
         "expectedFailures": 0,
         "unexpectedErrors": 0,
-        "invariantFailures": 20,
-        "detail": "duplicate sale/commission for one lead under distinct idempotency keys"
+        "invariantFailures": 0
       },
       {
         "race": "RACE1_SALE_CONFIRM",
@@ -38,12 +37,12 @@
       {
         "race": "RACE2_LEAD_CONVERSION",
         "variant": "dual_staff",
-        "pass": false,
+        "pass": true,
         "iterations": 20,
         "concurrentCalls": 40,
         "expectedFailures": 0,
         "unexpectedErrors": 0,
-        "invariantFailures": 20
+        "invariantFailures": 0
       },
       {
         "race": "RACE3_COMMISSION",
@@ -58,12 +57,12 @@
       {
         "race": "RACE4_PAYOUT_REQUEST",
         "variant": "overspend_pairwise",
-        "pass": false,
+        "pass": true,
         "iterations": 25,
         "concurrentCalls": 50,
-        "expectedFailures": 0,
+        "expectedFailures": 25,
         "unexpectedErrors": 0,
-        "invariantFailures": 50
+        "invariantFailures": 0
       },
       {
         "race": "RACE4_PAYOUT_REQUEST",
@@ -78,12 +77,12 @@
       {
         "race": "RACE4_PAYOUT_REQUEST",
         "variant": "fanout",
-        "pass": false,
+        "pass": true,
         "iterations": 5,
         "concurrentCalls": 50,
         "expectedFailures": 0,
         "unexpectedErrors": 0,
-        "invariantFailures": 5
+        "invariantFailures": 0
       },
       {
         "race": "RACE5_PAYOUT_APPROVAL",
@@ -185,11 +184,21 @@
         "unexpectedErrors": 0,
         "invariantFailures": 0,
         "detail": "staff-authority-revocation-during-mutation left UNPROVEN (no temporal admin grant model)"
+      },
+      {
+        "race": "RACE11_NEGATIVE_CONTRACTS",
+        "variant": "sale_and_payout_error_codes",
+        "pass": true,
+        "iterations": 1,
+        "concurrentCalls": 16,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
       }
     ]
   },
   "run2": {
-    "pass": false,
+    "pass": true,
     "results": [
       {
         "race": "RACE1_SALE_CONFIRM",
@@ -204,13 +213,12 @@
       {
         "race": "RACE1_SALE_CONFIRM",
         "variant": "different_idempotency_same_event",
-        "pass": false,
+        "pass": true,
         "iterations": 20,
         "concurrentCalls": 40,
         "expectedFailures": 0,
         "unexpectedErrors": 0,
-        "invariantFailures": 20,
-        "detail": "duplicate sale/commission for one lead under distinct idempotency keys"
+        "invariantFailures": 0
       },
       {
         "race": "RACE1_SALE_CONFIRM",
@@ -225,12 +233,12 @@
       {
         "race": "RACE2_LEAD_CONVERSION",
         "variant": "dual_staff",
-        "pass": false,
+        "pass": true,
         "iterations": 20,
         "concurrentCalls": 40,
         "expectedFailures": 0,
         "unexpectedErrors": 0,
-        "invariantFailures": 20
+        "invariantFailures": 0
       },
       {
         "race": "RACE3_COMMISSION",
@@ -245,12 +253,12 @@
       {
         "race": "RACE4_PAYOUT_REQUEST",
         "variant": "overspend_pairwise",
-        "pass": false,
+        "pass": true,
         "iterations": 25,
         "concurrentCalls": 50,
-        "expectedFailures": 0,
+        "expectedFailures": 25,
         "unexpectedErrors": 0,
-        "invariantFailures": 50
+        "invariantFailures": 0
       },
       {
         "race": "RACE4_PAYOUT_REQUEST",
@@ -265,12 +273,12 @@
       {
         "race": "RACE4_PAYOUT_REQUEST",
         "variant": "fanout",
-        "pass": false,
+        "pass": true,
         "iterations": 5,
         "concurrentCalls": 50,
         "expectedFailures": 0,
         "unexpectedErrors": 0,
-        "invariantFailures": 5
+        "invariantFailures": 0
       },
       {
         "race": "RACE5_PAYOUT_APPROVAL",
@@ -372,14 +380,24 @@
         "unexpectedErrors": 0,
         "invariantFailures": 0,
         "detail": "staff-authority-revocation-during-mutation left UNPROVEN (no temporal admin grant model)"
+      },
+      {
+        "race": "RACE11_NEGATIVE_CONTRACTS",
+        "variant": "sale_and_payout_error_codes",
+        "pass": true,
+        "iterations": 1,
+        "concurrentCalls": 16,
+        "expectedFailures": 0,
+        "unexpectedErrors": 0,
+        "invariantFailures": 0
       }
     ]
   },
   "totals": {
-    "raceCases": 18,
-    "iterations": 592,
-    "concurrentCalls": 1550,
+    "raceCases": 19,
+    "iterations": 594,
+    "concurrentCalls": 1582,
     "unexpectedErrors": 0,
-    "invariantFailures": 190
+    "invariantFailures": 0
   }
 }

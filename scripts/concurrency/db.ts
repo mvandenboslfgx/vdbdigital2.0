@@ -168,11 +168,14 @@ function sliceBlock(raw: string, start: string, end: string | null): string {
 export function extractErrorCode(text: string): string | undefined {
   const t = text.replace(/\s+/g, " ");
   const known = [
+    "PARTNER_LEAD_ALREADY_CONVERTED",
+    "PARTNER_INSUFFICIENT_LIABILITY",
     "FEATURE_NOT_CONFIGURED",
     "VALIDATION_FAILED",
     "FORBIDDEN",
     "AUTH_REQUIRED",
     "NOT_FOUND",
+    "CONFLICT",
     "partner_payout_paid_immutable",
     "partner_ledger_immutable",
     "partner_ledger_unbalanced",
@@ -206,7 +209,12 @@ export function classifyCall(
     return "SUCCESS_WINNER";
   }
   const code = outcome.errorCode ?? "";
-  if (code === "VALIDATION_FAILED") return "EXPECTED_INSUFFICIENT_LIABILITY";
+  if (code === "PARTNER_INSUFFICIENT_LIABILITY" || code === "VALIDATION_FAILED") {
+    return "EXPECTED_INSUFFICIENT_LIABILITY";
+  }
+  if (code === "PARTNER_LEAD_ALREADY_CONVERTED" || code === "CONFLICT") {
+    return "EXPECTED_ALREADY_PROCESSED";
+  }
   if (code === "FORBIDDEN" || code === "AUTH_REQUIRED") return "EXPECTED_AUTHORIZATION_DENIAL";
   if (code === "unique_violation" || /duplicate key|unique constraint/i.test(outcome.stderr)) {
     return "EXPECTED_CONFLICT";
