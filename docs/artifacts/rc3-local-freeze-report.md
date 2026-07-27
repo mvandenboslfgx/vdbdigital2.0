@@ -1,4 +1,4 @@
-# OWNER CONTRACT RC.3 — Local freeze report
+﻿# OWNER CONTRACT RC.3 — Local freeze report
 
 **Date:** 2026-07-27  
 **Worktree:** `C:\Users\XXX\vdbdigital-rc3-freeze`  
@@ -11,14 +11,12 @@
 OWNER CONTRACT RC3 LOCAL FREEZE PASS — STAGING APPLY NOT AUTHORIZED
 ```
 
-(Filled after tag creation; if tag missing, treat as BLOCKED.)
-
 ## A. Git
 
 | Item | Value |
 | --- | --- |
 | Before HEAD | `2c8bd3aa51c2046b984ac5dbeaa44ccb14301b12` |
-| After HEAD | _(filled post-commit)_ |
+| After HEAD | resolve with `git rev-parse shared-backend-rc3-local-freeze^{}` |
 | Tag | `shared-backend-rc3-local-freeze` (local annotated) |
 | Push | **not pushed** |
 
@@ -56,20 +54,32 @@ OWNER CONTRACT RC3 LOCAL FREEZE PASS — STAGING APPLY NOT AUTHORIZED
 | `db:verify-quotes-acceptance` | 0 | PASS |
 | `db:verify-documents-storage` | 0 | PASS |
 | `db:verify-catalog-admin` | logic PASS | same UV caveat after PASS |
-| `checkout:release-gate` | **2** | Expected fail-closed (`CHECKOUT_ENABLED` remains OFF) |
+| `checkout:release-gate` | **2** | Expected fail-closed (`CHECKOUT_ENABLED` remains OFF; gate never enables checkout) |
 
 ## E. Lint fix
 
-**Cause:** 16 errors in dirty primary under `docs/artifacts/live-readiness/**/_*.js` (`no-require-imports`) — generated live-readiness operator scratch + evidence, not app source.
+**Cause:** dirty primary had 16 errors under `docs/artifacts/live-readiness/**/_*.js` (`no-require-imports`) — generated live-readiness operator scratch/evidence, not app source.
 
-**Solution:** targeted `globalIgnores(["docs/artifacts/live-readiness/**"])` in `eslint.config.mjs` + unused-var cleanup in two RC2 freeze helper scripts so freeze tree is **0 warnings**.
+**Solution:** targeted `globalIgnores(["docs/artifacts/live-readiness/**"])` in `eslint.config.mjs` + unused-var cleanup in two RC2 helper scripts so freeze lint is **0 warnings**.
 
-**Not done:** broad `docs/` ignore; source/app ignore; severity downgrade.
+**Not done:** broad `docs/` ignore; source/app ignore; severity downgrade; `|| true`.
 
-## F–H
+## F. Stagingdiff
 
-See `docs/artifacts/rc3-staging-diff.md`, `docs/artifacts/rc3-client-handoff.md`.  
-Staging/production **not** applied; Mobile/Partner **not** edited; no APK; no push.
+See `docs/artifacts/rc3-staging-diff.md` and `docs/artifacts/rc3-apply-manifest.md`.
+
+## G. Handoff
+
+See `docs/artifacts/rc3-client-handoff.md`.
+
+## H. Remote status
+
+- staging not applied
+- production not applied
+- Git not pushed
+- Mobile not modified
+- Partner not modified
+- no APK/build
 
 ## I. Status
 
