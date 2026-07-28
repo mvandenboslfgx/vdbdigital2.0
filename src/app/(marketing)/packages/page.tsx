@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { Container, Section, Card } from "@/components/ui/container";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import { buildLocaleAlternates, openGraphLocale } from "@/i18n/seo";
@@ -15,6 +16,10 @@ import {
   getBundleCatalogItem,
 } from "@/config/commercial/bundles";
 import { formatDualPrice } from "@/lib/utilities/commercial-price";
+import {
+  COMMERCIAL_VISUAL,
+  commercialVisualForSlug,
+} from "@/config/product-visuals";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -58,13 +63,27 @@ export default async function PackagesPage() {
                 const copy = commercial.packages[pkg.i18nKey];
                 const catalog = getPackageCatalogItem(pkg);
                 const price = catalog ? formatDualPrice(catalog, locale) : null;
+                const visualKey = commercialVisualForSlug(pkg.slug);
+                const visual = COMMERCIAL_VISUAL[visualKey];
                 return (
                   <Card
                     key={pkg.id}
                     variant="light"
-                    className="flex h-full min-w-0 flex-col"
+                    className="flex h-full min-w-0 flex-col overflow-hidden p-0"
                   >
-                    <div className="flex min-h-0 flex-1 flex-col">
+                    <div className="relative aspect-[16/10] bg-background">
+                      <Image
+                        src={visual.src}
+                        alt={locale === "nl" ? visual.altNl : visual.altEn}
+                        width={visual.width}
+                        height={visual.height}
+                        className="h-full w-full object-cover"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                        loading="lazy"
+                        unoptimized
+                      />
+                    </div>
+                    <div className="flex min-h-0 flex-1 flex-col p-5">
                       <h3 className="text-h3 text-light-foreground mb-2">
                         {copy.name}
                       </h3>
@@ -89,7 +108,7 @@ export default async function PackagesPage() {
                         </div>
                       ) : null}
                     </div>
-                    <div className="mt-auto pt-6">
+                    <div className="mt-auto px-5 pb-5 pt-2">
                       <ServerLocaleLinkButton
                         href={`${paths.quote}?package=${pkg.slug}`}
                         variant="outline"
@@ -115,13 +134,27 @@ export default async function PackagesPage() {
                 const copy = commercial.bundles[bundle.i18nKey];
                 const catalog = getBundleCatalogItem(bundle);
                 const price = catalog ? formatDualPrice(catalog, locale) : null;
+                const visualKey = commercialVisualForSlug(bundle.slug);
+                const visual = COMMERCIAL_VISUAL[visualKey];
                 return (
                   <Card
                     key={bundle.id}
                     variant="light"
-                    className="flex h-full min-w-0 flex-col"
+                    className="flex h-full min-w-0 flex-col overflow-hidden p-0"
                   >
-                    <div className="flex min-h-0 flex-1 flex-col">
+                    <div className="relative aspect-[16/10] bg-background">
+                      <Image
+                        src={visual.src}
+                        alt={locale === "nl" ? visual.altNl : visual.altEn}
+                        width={visual.width}
+                        height={visual.height}
+                        className="h-full w-full object-cover"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        loading="lazy"
+                        unoptimized
+                      />
+                    </div>
+                    <div className="flex min-h-0 flex-1 flex-col p-5">
                       <h3 className="text-h3 text-light-foreground mb-2">
                         {copy.name}
                       </h3>
@@ -134,7 +167,7 @@ export default async function PackagesPage() {
                         </p>
                       ) : null}
                     </div>
-                    <div className="mt-auto pt-6">
+                    <div className="mt-auto px-5 pb-5 pt-2">
                       <ServerLocaleLinkButton
                         href={`${paths.quote}?package=${bundle.slug}`}
                         variant="outline"

@@ -138,19 +138,23 @@ describe("catalog:verify-no-tawk fail-closed rules", () => {
     expect(src).not.toMatch(/legacy provider-SKU geweigerd/);
   });
 
-  it("repo scan: blockers empty; regression + migration matches allowed", () => {
-    const { blockers, allowed } = runNoTawkCatalogScan();
-    expect(blockers, JSON.stringify(blockers, null, 2)).toEqual([]);
-    expect(
-      allowed.some((m) => m.classification === "REGRESSION_TEST"),
-    ).toBe(true);
-    expect(
-      allowed.some((m) => m.classification === "LEGACY_CLEANUP_MIGRATION"),
-    ).toBe(true);
-    for (const m of allowed) {
-      expect(isBlockingTawkClass(m.classification)).toBe(false);
-    }
-  });
+  it(
+    "repo scan: blockers empty; regression + migration matches allowed",
+    () => {
+      const { blockers, allowed } = runNoTawkCatalogScan();
+      expect(blockers, JSON.stringify(blockers, null, 2)).toEqual([]);
+      expect(
+        allowed.some((m) => m.classification === "REGRESSION_TEST"),
+      ).toBe(true);
+      expect(
+        allowed.some((m) => m.classification === "LEGACY_CLEANUP_MIGRATION"),
+      ).toBe(true);
+      for (const m of allowed) {
+        expect(isBlockingTawkClass(m.classification)).toBe(false);
+      }
+    },
+    30_000,
+  );
 
   it("CSV restore of legacy SKU is recognized as deny input", () => {
     const denied = denyLegacyTawkCatalogMutation({

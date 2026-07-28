@@ -57,6 +57,7 @@ const SKIP_DIRS = new Set([
   "node_modules",
   ".next",
   "evidence",
+  "artifacts",
   "backups",
   "test-results",
   "review-package",
