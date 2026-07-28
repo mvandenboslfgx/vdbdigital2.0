@@ -24,6 +24,7 @@ describe("SEO-002 sitemap", () => {
       paths.reviewflows,
       paths.websites,
       paths.webshops,
+      paths.packages,
     ]) {
       expect(urls.some((url) => url.endsWith(route))).toBe(true);
       expect(urls.some((url) => url.endsWith(`/nl${route}`))).toBe(true);

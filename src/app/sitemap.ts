@@ -16,6 +16,7 @@ const staticRoutes = [
   "/solutions/technical-support",
   "/solutions/conversion-optimisation",
   "/solutions/custom-software",
+  "/packages",
   "/shop",
   "/cases",
   "/process",
