@@ -1,34 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans, Sora, JetBrains_Mono } from "next/font/google";
 import "@/styles/globals.css";
 import { siteConfig } from "@/config/site";
-import { ConsentProvider } from "@/components/consent/consent-provider";
 import { OrganizationJsonLd } from "@/components/seo/organization-json-ld";
-import { getDictionary, getLocale, getMessages } from "@/i18n/get-dictionary";
-import { I18nProvider } from "@/i18n/provider";
+import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 
 export const viewport: Viewport = {
   themeColor: siteConfig.brand.themeColor,
   colorScheme: "dark light",
 };
-
-const bodyFont = Plus_Jakarta_Sans({
-  variable: "--font-body",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const displayFont = Sora({
-  variable: "--font-display",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const monoFont = JetBrains_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-  display: "swap",
-});
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -99,18 +78,12 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const locale = await getLocale();
-  const messages = await getMessages(locale);
 
   return (
-    <html
-      lang={locale}
-      className={`${bodyFont.variable} ${displayFont.variable} ${monoFont.variable} h-full`}
-    >
-      <body className="min-h-full flex flex-col antialiased">
+    <html lang={locale} className="h-full">
+      <body className="min-h-full flex flex-col antialiased font-sans">
         <OrganizationJsonLd />
-        <I18nProvider locale={locale} messages={messages}>
-          <ConsentProvider>{children}</ConsentProvider>
-        </I18nProvider>
+        {children}
       </body>
     </html>
   );

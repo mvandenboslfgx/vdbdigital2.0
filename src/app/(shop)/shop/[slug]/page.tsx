@@ -146,7 +146,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   >
                     {t("shop.requestQuote")}
                   </LocaleLinkButton>
-                  <WhatsAppButton message={whatsappMessage} className="w-full justify-center" />
+                  <WhatsAppButton
+                    message={whatsappMessage}
+                    label={t("forms.whatsapp")}
+                    className="w-full justify-center"
+                  />
                 </div>
               </Card>
             </div>

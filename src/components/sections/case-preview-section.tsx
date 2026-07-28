@@ -1,5 +1,3 @@
-import Image from "next/image";
-import { ExternalLink } from "lucide-react";
 import { Container, Section, Card, Badge } from "@/components/ui/container";
 import { getLocale } from "@/i18n/get-dictionary";
 import { getCommercialContent } from "@/i18n/content/commercial";
@@ -7,11 +5,30 @@ import {
   getCaseLiveUrl,
   getPublicCases,
 } from "@/config/commercial/cases";
-import { LocaleLinkButton } from "@/components/ui/locale-link-button";
+import { ServerLocaleLinkButton } from "@/components/ui/server-locale-link-button";
 import { LinkButton } from "@/components/ui/link-button";
 import { paths } from "@/i18n/config";
 import { WhatsAppAiChatVisual } from "@/components/visuals/whatsapp-ai-chat-visual";
 import { cn } from "@/lib/utilities/cn";
+
+function ExternalLinkIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      <polyline points="15 3 21 3 21 9" />
+      <line x1="10" y1="14" x2="21" y2="3" />
+    </svg>
+  );
+}
 
 const PORTFOLIO_SLUGS = new Set([
   "vermeulen-bouwservice",
@@ -64,16 +81,19 @@ export async function CasePreviewSection() {
                 className="group flex flex-col overflow-hidden p-0"
               >
                 <div className="relative aspect-[16/10] overflow-hidden bg-surface-elevated">
-                  <Image
+                  {/* Native lazy img avoids home-only next/image client chunk on critical path. */}
+                  {/* eslint-disable-next-line @next/next/no-img-element -- below-fold; next/image client runtime delayed home mobile LCP */}
+                  <img
                     src={image}
                     alt={copy.desktopAlt}
                     width={1440}
                     height={900}
+                    loading="lazy"
+                    decoding="async"
                     className={cn(
                       "h-full w-full object-cover object-top transition-transform duration-500",
                       "motion-safe:group-hover:scale-[1.02]",
                     )}
-                    sizes="(max-width: 768px) 100vw, 33vw"
                   />
                 </div>
                 <div className="flex flex-1 flex-col p-5">
@@ -88,14 +108,14 @@ export async function CasePreviewSection() {
                     {copy.summary}
                   </p>
                   <div className="flex flex-wrap items-center gap-3">
-                    <LocaleLinkButton
+                    <ServerLocaleLinkButton
                       href={`${paths.cases}/${item.slug}`}
                       variant="outline"
                       tone="light"
                       size="sm"
                     >
                       {copy.viewCase}
-                    </LocaleLinkButton>
+                    </ServerLocaleLinkButton>
                     {isLive && liveUrl ? (
                       <LinkButton
                         href={liveUrl}
@@ -107,10 +127,7 @@ export async function CasePreviewSection() {
                         aria-label={`${copy.openLive}: ${item.domainLabel}`}
                       >
                         Live
-                        <ExternalLink
-                          className="h-3.5 w-3.5"
-                          aria-hidden="true"
-                        />
+                        <ExternalLinkIcon className="h-3.5 w-3.5" />
                       </LinkButton>
                     ) : null}
                   </div>
@@ -155,14 +172,16 @@ export async function CasePreviewSection() {
                     className="mb-4"
                   />
                 ) : null}
-                <LocaleLinkButton
+                <ServerLocaleLinkButton
                   href={`${paths.cases}/${item.slug}`}
                   variant="outline"
                   tone="light"
                   size="sm"
                 >
-                  {locale === "nl" ? "Meer info" : "Learn more"}
-                </LocaleLinkButton>
+                  {locale === "nl"
+                    ? `Meer over ${copy.title}`
+                    : `More about ${copy.title}`}
+                </ServerLocaleLinkButton>
               </Card>
             );
           })}

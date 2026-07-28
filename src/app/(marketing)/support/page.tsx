@@ -4,7 +4,8 @@ import { SupportForm } from "@/components/forms/support-form";
 import { WhatsAppButton } from "@/components/chat/whatsapp-button";
 import { CarePackagesSection } from "@/components/sections/care-packages-section";
 import { siteConfig } from "@/config/site";
-import { getDictionary } from "@/i18n/get-dictionary";
+import { getDictionary, getLocale, getMessages } from "@/i18n/get-dictionary";
+import { MessagesProvider } from "@/i18n/messages-provider";
 import { paths } from "@/i18n/config";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -17,7 +18,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function SupportPage() {
-  const { t } = await getDictionary();
+  const locale = await getLocale();
+  const { t } = await getDictionary(locale);
+  const messages = await getMessages(locale);
 
   return (
     <>
@@ -31,14 +34,19 @@ export default async function SupportPage() {
         <Container>
           <div className="grid lg:grid-cols-2 gap-10">
             <Card variant="light">
-              <SupportForm />
+              <MessagesProvider locale={locale} messages={messages}>
+                <SupportForm />
+              </MessagesProvider>
             </Card>
             <div className="space-y-6">
               <Card variant="light">
                 <h2 className="text-h3 text-light-foreground mb-2">{t("forms.supportEmail")}</h2>
                 <p className="text-light-muted">{siteConfig.supportEmail}</p>
               </Card>
-              <WhatsAppButton message={t("forms.whatsappMessageSupport")} />
+              <WhatsAppButton
+                message={t("forms.whatsappMessageSupport")}
+                label={t("forms.whatsapp")}
+              />
             </div>
           </div>
         </Container>

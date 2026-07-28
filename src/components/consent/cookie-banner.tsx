@@ -1,37 +1,89 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useConsent } from "./consent-provider";
-import { useI18n } from "@/i18n/provider";
 import { LocaleLink } from "@/i18n/locale-link";
 import { Button } from "@/components/ui/button";
 import { paths } from "@/i18n/config";
 
-export function CookieBanner() {
+export type CookieBannerLabels = {
+  title: string;
+  shortBody: string;
+  more: string;
+  necessary: string;
+  necessaryBody: string;
+  analytics: string;
+  marketing: string;
+  acceptAll: string;
+  rejectAll: string;
+  customize: string;
+  save: string;
+};
+
+export function CookieBanner(labels: CookieBannerLabels) {
   const { showBanner, acceptAll, rejectAll, savePreferences, setShowBanner } =
     useConsent();
-  const { t } = useI18n();
   const [showDetails, setShowDetails] = useState(false);
   const [analytics, setAnalytics] = useState(false);
   const [marketing, setMarketing] = useState(false);
+  // Defer paint until after hero LCP — banner must not become LCP or shift layout.
+  const [readyToPaint, setReadyToPaint] = useState(false);
 
-  if (!showBanner) return null;
+  useEffect(() => {
+    if (!showBanner) return;
+    let cancelled = false;
+    let timeoutId = 0;
+    let idleId = 0;
+
+    const reveal = () => {
+      if (!cancelled) setReadyToPaint(true);
+    };
+
+    const schedule = () => {
+      if (typeof window.requestIdleCallback === "function") {
+        idleId = window.requestIdleCallback(reveal, { timeout: 8000 });
+      } else {
+        timeoutId = window.setTimeout(reveal, 8000);
+      }
+    };
+
+    if (document.readyState === "complete") {
+      schedule();
+    } else {
+      window.addEventListener("load", schedule, { once: true });
+      timeoutId = window.setTimeout(schedule, 8500);
+    }
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("load", schedule);
+      window.clearTimeout(timeoutId);
+      if (idleId && typeof window.cancelIdleCallback === "function") {
+        window.cancelIdleCallback(idleId);
+      }
+    };
+  }, [showBanner]);
+
+  if (!showBanner || !readyToPaint) return null;
 
   return (
     <div
       role="dialog"
       aria-labelledby="cookie-title"
       aria-describedby="cookie-desc"
-      className="fixed inset-x-0 bottom-0 z-50 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-6"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-50 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-4"
     >
-      <div data-surface="dark" className="mx-auto max-w-2xl surface-card p-5 sm:p-6 shadow-2xl">
-        <h2 id="cookie-title" className="text-h3 mb-2">
-          {t("cookies.title")}
+      <div
+        data-surface="dark"
+        className="pointer-events-auto mx-auto max-w-sm border border-border bg-surface p-3 shadow-lg"
+      >
+        <h2 id="cookie-title" className="text-sm font-semibold mb-1">
+          {labels.title}
         </h2>
-        <p id="cookie-desc" className="text-small text-muted mb-4">
-          {t("cookies.body")}{" "}
+        <p id="cookie-desc" className="text-xs text-muted mb-3 leading-snug">
+          {labels.shortBody}{" "}
           <LocaleLink href={paths.cookies} className="text-primary underline">
-            {t("cookies.more")}
+            {labels.more}
           </LocaleLink>
         </p>
 
@@ -40,7 +92,7 @@ export function CookieBanner() {
             <label className="flex items-center gap-3 text-small">
               <input type="checkbox" checked disabled className="rounded" />
               <span>
-                <strong>{t("cookies.necessary")}</strong> — {t("cookies.necessaryBody")}
+                <strong>{labels.necessary}</strong> — {labels.necessaryBody}
               </span>
             </label>
             <label className="flex items-center gap-3 text-small">
@@ -51,7 +103,7 @@ export function CookieBanner() {
                 className="rounded"
               />
               <span>
-                <strong>{t("cookies.analytics")}</strong>
+                <strong>{labels.analytics}</strong>
               </span>
             </label>
             <label className="flex items-center gap-3 text-small">
@@ -62,26 +114,26 @@ export function CookieBanner() {
                 className="rounded"
               />
               <span>
-                <strong>{t("cookies.marketing")}</strong>
+                <strong>{labels.marketing}</strong>
               </span>
             </label>
           </div>
         )}
 
-        <div className="flex flex-col sm:flex-row gap-2">
-          <Button onClick={acceptAll} className="flex-1">
-            {t("cookies.acceptAll")}
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button onClick={acceptAll} className="flex-1 min-h-11">
+            {labels.acceptAll}
           </Button>
-          <Button variant="outline" onClick={rejectAll} className="flex-1">
-            {t("cookies.rejectAll")}
+          <Button variant="outline" onClick={rejectAll} className="flex-1 min-h-11">
+            {labels.rejectAll}
           </Button>
           {!showDetails ? (
             <Button
               variant="ghost"
               onClick={() => setShowDetails(true)}
-              className="flex-1"
+              className="flex-1 min-h-11"
             >
-              {t("cookies.customize")}
+              {labels.customize}
             </Button>
           ) : (
             <Button
@@ -90,9 +142,9 @@ export function CookieBanner() {
                 savePreferences({ functional: false, analytics, marketing });
                 setShowBanner(false);
               }}
-              className="flex-1"
+              className="flex-1 min-h-11"
             >
-              {t("cookies.save")}
+              {labels.save}
             </Button>
           )}
         </div>

@@ -1,25 +1,9 @@
-import {
-  SolutionPageContent,
-  createSolutionMetadata,
-} from "@/components/sections/solution-page";
-import { paths } from "@/i18n/config";
-import { getSolutionContent } from "@/i18n/content/solutions";
+import { permanentRedirect } from "next/navigation";
+import { paths, withLocale } from "@/i18n/config";
 import { getLocale } from "@/i18n/get-dictionary";
 
-/** Alias of /solutions/reviewflows */
-export async function generateMetadata() {
-  const locale = await getLocale();
-  const content = getSolutionContent("reviewflows", locale);
-  return createSolutionMetadata(
-    content.metaTitle,
-    content.metaDescription,
-    paths.reviewFlows,
-  );
-}
-
+/** Permanent alias → canonical /solutions/reviewflows */
 export default async function ReviewFlowsAliasPage() {
   const locale = await getLocale();
-  const page = getSolutionContent("reviewflows", locale);
-
-  return <SolutionPageContent {...page} />;
+  permanentRedirect(withLocale(paths.reviewflows, locale));
 }

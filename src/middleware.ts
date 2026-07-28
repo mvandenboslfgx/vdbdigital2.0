@@ -29,10 +29,8 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
     );
   }
 
-  const csp = [
+  const cspShared = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline'",
-    "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https:",
     "font-src 'self'",
     "connect-src 'self' https://*.supabase.co https://api.mollie.com",
@@ -40,9 +38,28 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
+  ];
+
+  const cspEnforcing = [
+    ...cspShared,
+    "script-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline'",
   ].join("; ");
 
-  response.headers.set("Content-Security-Policy", csp);
+  // Report-Only: stricter candidate (no unsafe-inline) for staging/preview telemetry only.
+  // Does not block; enforcing policy above remains unchanged until nonce/hashes proven.
+  // Must not ship always-on RO in production/local prod — it floods Issues (inline
+  // script/style) and fails Lighthouse best-practices without changing enforcement.
+  const cspReportOnly = [
+    ...cspShared,
+    "script-src 'self'",
+    "style-src 'self'",
+  ].join("; ");
+
+  response.headers.set("Content-Security-Policy", cspEnforcing);
+  if (isPreviewDeployment() || process.env.CSP_REPORT_ONLY === "1") {
+    response.headers.set("Content-Security-Policy-Report-Only", cspReportOnly);
+  }
 
   return response;
 }
@@ -67,9 +84,31 @@ function attachLocale(response: NextResponse, locale: Locale): NextResponse {
   return response;
 }
 
+function attachPathname(response: NextResponse, barePath: string): NextResponse {
+  response.headers.set("x-pathname", barePath);
+  return response;
+}
+
 function prefersDutchBrowser(request: NextRequest): boolean {
   const accept = request.headers.get("accept-language") ?? "";
   return /^nl(-|$)/i.test(accept.trim()) || /,nl(-|;|$)/i.test(accept);
+}
+
+function needsSupabaseSession(barePath: string): boolean {
+  return (
+    barePath.startsWith("/admin") ||
+    barePath.startsWith("/portal") ||
+    barePath.startsWith("/account") ||
+    barePath.startsWith("/inloggen") ||
+    barePath.startsWith("/uitloggen") ||
+    barePath.startsWith("/login") ||
+    barePath.startsWith("/auth") ||
+    barePath.startsWith("/cart") ||
+    barePath.startsWith("/checkout") ||
+    barePath.startsWith("/wachtwoord") ||
+    barePath.startsWith("/uitnodiging") ||
+    barePath.startsWith("/invite")
+  );
 }
 
 export async function middleware(request: NextRequest) {
@@ -121,19 +160,35 @@ export async function middleware(request: NextRequest) {
   const locale: Locale = pathLocale;
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-locale", locale);
+  requestHeaders.set("x-pathname", barePath);
 
-  if (locale === "nl") {
-    const rewriteUrl = request.nextUrl.clone();
-    rewriteUrl.pathname = barePath;
-    const response = await updateSupabaseSession(request, {
-      requestHeaders,
-      rewriteUrl,
-    });
-    return applySecurityHeaders(attachLocale(response, locale));
-  }
+  const sessionOptions =
+    locale === "nl"
+      ? {
+          requestHeaders,
+          rewriteUrl: (() => {
+            const rewriteUrl = request.nextUrl.clone();
+            rewriteUrl.pathname = barePath;
+            return rewriteUrl;
+          })(),
+        }
+      : { requestHeaders };
 
-  const response = await updateSupabaseSession(request, { requestHeaders });
-  return applySecurityHeaders(attachLocale(response, locale));
+  // Public marketing/legal/shop: skip remote auth refresh (major TTFB / LCP win).
+  // Auth-bearing surfaces still refresh the Supabase session.
+  const response = needsSupabaseSession(barePath)
+    ? await updateSupabaseSession(request, sessionOptions)
+    : sessionOptions.rewriteUrl
+      ? NextResponse.rewrite(sessionOptions.rewriteUrl, {
+          request: { headers: requestHeaders },
+        })
+      : NextResponse.next({
+          request: { headers: requestHeaders },
+        });
+
+  return applySecurityHeaders(
+    attachPathname(attachLocale(response, locale), barePath),
+  );
 }
 
 export const config = {
