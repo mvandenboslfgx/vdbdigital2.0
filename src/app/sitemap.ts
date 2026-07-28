@@ -33,7 +33,10 @@ const staticRoutes = [
 
 function bilingualEntries(
   path: string,
-  opts: { changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]; priority: number },
+  opts: {
+    changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"];
+    priority: number;
+  },
 ): MetadataRoute.Sitemap {
   const base = siteConfig.url.replace(/\/$/, "");
   const enPath = withLocale(path, "en");
@@ -72,12 +75,12 @@ function bilingualEntries(
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const { getAllProducts } = await import("@/server/repositories/products");
-  const products = await getAllProducts();
+  const { listPublicShopProducts } =
+    await import("@/server/repositories/public-shop-catalog");
+  const products = await listPublicShopProducts();
 
-  const { getPublicCases, isCaseSearchIndexable } = await import(
-    "@/config/commercial/cases"
-  );
+  const { getPublicCases, isCaseSearchIndexable } =
+    await import("@/config/commercial/cases");
 
   const caseSlugs = [
     "conversie-website",

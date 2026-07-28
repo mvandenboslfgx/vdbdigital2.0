@@ -6,14 +6,13 @@
  * B2C checkout remains blocked until legalStatus is APPROVED_FOR_B2C or APPROVED_FOR_BOTH.
  */
 
-import { DEFAULT_VAT_RATE, calculateVatFromSubtotal } from "@/lib/utilities/vat";
+import {
+  DEFAULT_VAT_RATE,
+  calculateVatFromSubtotal,
+} from "@/lib/utilities/vat";
 
 export type PriceApprovalStatus =
-  | "DRAFT"
-  | "INTERNAL_REVIEW"
-  | "APPROVED"
-  | "PUBLISHED"
-  | "ARCHIVED";
+  "DRAFT" | "INTERNAL_REVIEW" | "APPROVED" | "PUBLISHED" | "ARCHIVED";
 
 export type LegalApprovalStatus =
   | "NOT_REVIEWED"
@@ -24,11 +23,7 @@ export type LegalApprovalStatus =
   | "APPROVED_FOR_BOTH";
 
 export type PricingMode =
-  | "fixed"
-  | "starting_from"
-  | "quote_only"
-  | "monthly"
-  | "annual";
+  "fixed" | "starting_from" | "quote_only" | "monthly" | "annual";
 
 export type ProductLegalType =
   | "standard_service"
@@ -105,7 +100,9 @@ export function priceFromExclEuros(
 }
 
 export function assertVatConsistency(price: CommercialPrice): boolean {
-  const expected = price.exclVatCents + calculateVatFromSubtotal(price.exclVatCents, price.vatRate);
+  const expected =
+    price.exclVatCents +
+    calculateVatFromSubtotal(price.exclVatCents, price.vatRate);
   return expected === price.inclVatCents;
 }
 
@@ -119,8 +116,12 @@ export const b2bCustomPaymentSchedule = {
 
 /** Whether B2C public checkout may list this item */
 export function canPublishForB2c(item: CommercialCatalogItem): boolean {
-  if (item.priceStatus !== "APPROVED" && item.priceStatus !== "PUBLISHED") return false;
-  if (item.legalStatus !== "APPROVED_FOR_B2C" && item.legalStatus !== "APPROVED_FOR_BOTH") {
+  if (item.priceStatus !== "APPROVED" && item.priceStatus !== "PUBLISHED")
+    return false;
+  if (
+    item.legalStatus !== "APPROVED_FOR_B2C" &&
+    item.legalStatus !== "APPROVED_FOR_BOTH"
+  ) {
     return false;
   }
   if (!item.pricing && !item.quoteOnly) return false;
@@ -130,8 +131,12 @@ export function canPublishForB2c(item: CommercialCatalogItem): boolean {
 
 /** Whether B2B public checkout may list this item */
 export function canPublishForB2b(item: CommercialCatalogItem): boolean {
-  if (item.priceStatus !== "APPROVED" && item.priceStatus !== "PUBLISHED") return false;
-  if (item.legalStatus !== "APPROVED_FOR_B2B" && item.legalStatus !== "APPROVED_FOR_BOTH") {
+  if (item.priceStatus !== "APPROVED" && item.priceStatus !== "PUBLISHED")
+    return false;
+  if (
+    item.legalStatus !== "APPROVED_FOR_B2B" &&
+    item.legalStatus !== "APPROVED_FOR_BOTH"
+  ) {
     return false;
   }
   if (!item.pricing && !item.quoteOnly) return false;
@@ -140,9 +145,15 @@ export function canPublishForB2b(item: CommercialCatalogItem): boolean {
 }
 
 /** Whether item may appear on public marketing with draft starting prices */
-export function canShowPublicStartingPrice(item: CommercialCatalogItem): boolean {
-  return item.priceStatus === "DRAFT" || item.priceStatus === "INTERNAL_REVIEW"
-    || item.priceStatus === "APPROVED" || item.priceStatus === "PUBLISHED";
+export function canShowPublicStartingPrice(
+  item: CommercialCatalogItem,
+): boolean {
+  return (
+    item.priceStatus === "DRAFT" ||
+    item.priceStatus === "INTERNAL_REVIEW" ||
+    item.priceStatus === "APPROVED" ||
+    item.priceStatus === "PUBLISHED"
+  );
 }
 
 export const commercialCatalog: CommercialCatalogItem[] = [
@@ -159,11 +170,11 @@ export const commercialCatalog: CommercialCatalogItem[] = [
     b2b: true,
     b2c: true,
     legalType: "custom_service",
-    priceStatus: "DRAFT",
-    legalStatus: "LEGAL_REVIEW_REQUIRED",
+    priceStatus: "APPROVED",
+    legalStatus: "APPROVED_FOR_BOTH",
     foundingEligible: true,
     foundingExclVatCents: 895_00,
-    publicationReady: false,
+    publicationReady: true,
   },
   {
     id: "pkg-launch",
@@ -178,11 +189,11 @@ export const commercialCatalog: CommercialCatalogItem[] = [
     b2b: true,
     b2c: true,
     legalType: "custom_service",
-    priceStatus: "DRAFT",
-    legalStatus: "LEGAL_REVIEW_REQUIRED",
+    priceStatus: "APPROVED",
+    legalStatus: "APPROVED_FOR_BOTH",
     foundingEligible: true,
     foundingExclVatCents: 1525_00,
-    publicationReady: false,
+    publicationReady: true,
   },
   {
     id: "pkg-growth",
@@ -197,11 +208,11 @@ export const commercialCatalog: CommercialCatalogItem[] = [
     b2b: true,
     b2c: true,
     legalType: "custom_service",
-    priceStatus: "DRAFT",
-    legalStatus: "LEGAL_REVIEW_REQUIRED",
+    priceStatus: "APPROVED",
+    legalStatus: "APPROVED_FOR_BOTH",
     foundingEligible: true,
     foundingExclVatCents: 2695_00,
-    publicationReady: false,
+    publicationReady: true,
   },
   {
     id: "pkg-custom",
@@ -216,11 +227,11 @@ export const commercialCatalog: CommercialCatalogItem[] = [
     b2b: true,
     b2c: true,
     legalType: "custom_service",
-    priceStatus: "DRAFT",
-    legalStatus: "LEGAL_REVIEW_REQUIRED",
+    priceStatus: "APPROVED",
+    legalStatus: "APPROVED_FOR_BOTH",
     foundingEligible: false,
     foundingExclVatCents: null,
-    publicationReady: false,
+    publicationReady: true,
   },
   {
     id: "pkg-webshop-launch",
@@ -235,11 +246,11 @@ export const commercialCatalog: CommercialCatalogItem[] = [
     b2b: true,
     b2c: true,
     legalType: "custom_service",
-    priceStatus: "DRAFT",
-    legalStatus: "LEGAL_REVIEW_REQUIRED",
+    priceStatus: "APPROVED",
+    legalStatus: "APPROVED_FOR_BOTH",
     foundingEligible: true,
     foundingExclVatCents: null,
-    publicationReady: false,
+    publicationReady: true,
   },
   {
     id: "care-essential",
@@ -254,11 +265,11 @@ export const commercialCatalog: CommercialCatalogItem[] = [
     b2b: true,
     b2c: true,
     legalType: "maintenance",
-    priceStatus: "DRAFT",
-    legalStatus: "LEGAL_REVIEW_REQUIRED",
+    priceStatus: "APPROVED",
+    legalStatus: "APPROVED_FOR_BOTH",
     foundingEligible: false,
     foundingExclVatCents: null,
-    publicationReady: false,
+    publicationReady: true,
   },
   {
     id: "care-business",
@@ -273,11 +284,11 @@ export const commercialCatalog: CommercialCatalogItem[] = [
     b2b: true,
     b2c: true,
     legalType: "maintenance",
-    priceStatus: "DRAFT",
-    legalStatus: "LEGAL_REVIEW_REQUIRED",
+    priceStatus: "APPROVED",
+    legalStatus: "APPROVED_FOR_BOTH",
     foundingEligible: false,
     foundingExclVatCents: null,
-    publicationReady: false,
+    publicationReady: true,
   },
   {
     id: "care-growth",
@@ -292,11 +303,11 @@ export const commercialCatalog: CommercialCatalogItem[] = [
     b2b: true,
     b2c: false,
     legalType: "maintenance",
-    priceStatus: "DRAFT",
-    legalStatus: "LEGAL_REVIEW_REQUIRED",
+    priceStatus: "APPROVED",
+    legalStatus: "APPROVED_FOR_B2B",
     foundingEligible: false,
     foundingExclVatCents: null,
-    publicationReady: false,
+    publicationReady: true,
   },
   {
     id: "care-partner",
@@ -311,11 +322,11 @@ export const commercialCatalog: CommercialCatalogItem[] = [
     b2b: true,
     b2c: false,
     legalType: "support_bundle",
-    priceStatus: "DRAFT",
-    legalStatus: "LEGAL_REVIEW_REQUIRED",
+    priceStatus: "APPROVED",
+    legalStatus: "APPROVED_FOR_B2B",
     foundingEligible: false,
     foundingExclVatCents: null,
-    publicationReady: false,
+    publicationReady: true,
   },
   {
     id: "bundle-website-launch",
@@ -331,7 +342,7 @@ export const commercialCatalog: CommercialCatalogItem[] = [
     b2c: true,
     legalType: "mixed_product",
     priceStatus: "DRAFT",
-    legalStatus: "LEGAL_REVIEW_REQUIRED",
+    legalStatus: "INTERNAL_REVIEW",
     foundingEligible: true,
     foundingExclVatCents: null,
     publicationReady: false,
@@ -349,11 +360,11 @@ export const commercialCatalog: CommercialCatalogItem[] = [
     b2b: true,
     b2c: false,
     legalType: "mixed_product",
-    priceStatus: "DRAFT",
-    legalStatus: "LEGAL_REVIEW_REQUIRED",
+    priceStatus: "APPROVED",
+    legalStatus: "APPROVED_FOR_B2B",
     foundingEligible: true,
     foundingExclVatCents: null,
-    publicationReady: false,
+    publicationReady: true,
   },
   {
     id: "bundle-webshop-launch",
@@ -369,7 +380,7 @@ export const commercialCatalog: CommercialCatalogItem[] = [
     b2c: true,
     legalType: "mixed_product",
     priceStatus: "DRAFT",
-    legalStatus: "LEGAL_REVIEW_REQUIRED",
+    legalStatus: "INTERNAL_REVIEW",
     foundingEligible: true,
     foundingExclVatCents: null,
     publicationReady: false,
@@ -387,11 +398,11 @@ export const commercialCatalog: CommercialCatalogItem[] = [
     b2b: true,
     b2c: false,
     legalType: "mixed_product",
-    priceStatus: "DRAFT",
-    legalStatus: "LEGAL_REVIEW_REQUIRED",
+    priceStatus: "APPROVED",
+    legalStatus: "APPROVED_FOR_B2B",
     foundingEligible: true,
     foundingExclVatCents: null,
-    publicationReady: false,
+    publicationReady: true,
   },
   {
     id: "bundle-digital-partner",
@@ -407,14 +418,16 @@ export const commercialCatalog: CommercialCatalogItem[] = [
     b2c: false,
     legalType: "support_bundle",
     priceStatus: "DRAFT",
-    legalStatus: "LEGAL_REVIEW_REQUIRED",
+    legalStatus: "INTERNAL_REVIEW",
     foundingEligible: false,
     foundingExclVatCents: null,
     publicationReady: false,
   },
 ];
 
-export function getCatalogItem(slug: string): CommercialCatalogItem | undefined {
+export function getCatalogItem(
+  slug: string,
+): CommercialCatalogItem | undefined {
   return commercialCatalog.find((item) => item.slug === slug);
 }
 

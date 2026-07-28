@@ -28,10 +28,14 @@ describe("software catalog route isolation", () => {
     expect(layout).not.toMatch(/software-catalog/);
   });
 
-  it("shop routes do import software-catalog", () => {
+  it("shop routes use Owner public-shop-catalog SSOT — not software-catalog runtime", () => {
     const shop = read("src/app/(shop)/shop/page.tsx");
     const detail = read("src/app/(shop)/shop/[slug]/page.tsx");
-    expect(shop).toMatch(/software-catalog/);
-    expect(detail).toMatch(/software-catalog/);
+    expect(shop).toMatch(/public-shop-catalog/);
+    expect(detail).toMatch(/public-shop-catalog/);
+    expect(shop).not.toMatch(/software-catalog/);
+    expect(detail).not.toMatch(/software-catalog/);
+    expect(shop).not.toMatch(/querySoftwareCatalog|getSoftwareBySlug/);
+    expect(detail).not.toMatch(/querySoftwareCatalog|getSoftwareBySlug/);
   });
 });

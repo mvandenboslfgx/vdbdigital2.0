@@ -36,6 +36,12 @@ export interface AdminProductListFilters {
   priceMode?: PriceMode | "ALL";
   billingType?: BillingType | "ALL";
   audience?: "B2B" | "B2C" | "BOTH" | "ALL";
+  partnerHealth?:
+    | "ALL"
+    | "COMMISSION_CONFIGURATION_REQUIRED"
+    | "LEGAL_REVIEW_REQUIRED"
+    | "OWN_SERVICES_READY"
+    | "HIDDEN_BLOCKED";
   sort?: "updated_at" | "name" | "sort_order" | "price";
   order?: "asc" | "desc";
   page?: number;
@@ -104,6 +110,31 @@ export async function getAdminProductList(
     query = query.eq("audience_b2c", true);
   } else if (filters.audience === "BOTH") {
     query = query.eq("audience_b2b", true).eq("audience_b2c", true);
+  }
+  if (filters.partnerHealth === "COMMISSION_CONFIGURATION_REQUIRED") {
+    query = query
+      .eq("partner_enabled", true)
+      .or(
+        "partner_commission_status.neq.active,partner_commission_value.is.null",
+      );
+  } else if (filters.partnerHealth === "LEGAL_REVIEW_REQUIRED") {
+    query = query.in("legal_status", [
+      "NOT_REVIEWED",
+      "INTERNAL_REVIEW",
+      "LEGAL_REVIEW_REQUIRED",
+    ]);
+  } else if (filters.partnerHealth === "OWN_SERVICES_READY") {
+    query = query
+      .eq("status", "PUBLISHED")
+      .eq("publication_ready", true)
+      .in("legal_status", [
+        "APPROVED_FOR_B2B",
+        "APPROVED_FOR_B2C",
+        "APPROVED_FOR_BOTH",
+      ])
+      .in("price_status", ["APPROVED", "PUBLISHED"]);
+  } else if (filters.partnerHealth === "HIDDEN_BLOCKED") {
+    query = query.in("status", ["HIDDEN", "ARCHIVED"]);
   }
 
   const sort = filters.sort ?? "sort_order";

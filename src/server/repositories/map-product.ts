@@ -75,6 +75,31 @@ export function mapDbProductRow(row: Record<string, unknown>): Product {
     createdAt: row.created_at as string | undefined,
     primaryImagePath: (row.primary_image_path as string | null | undefined) ?? null,
     isConcept: (row.is_concept as boolean | undefined) ?? false,
+    partnerEnabled: (row.partner_enabled as boolean | undefined) ?? false,
+    partnerVisibility: (row.partner_visibility as string | undefined) ?? "none",
+    partnerCommissionType:
+      (row.partner_commission_type as string | undefined) ?? "bps",
+    partnerCommissionValue:
+      row.partner_commission_value == null
+        ? null
+        : Number(row.partner_commission_value),
+    partnerCommissionCurrency:
+      (row.partner_commission_currency as string | undefined) ?? "EUR",
+    partnerCommissionStatus:
+      (row.partner_commission_status as string | undefined) ?? "draft",
+    partnerMinimumPriceCents:
+      (row.partner_minimum_price_cents as number | null | undefined) ?? null,
+    partnerMaximumDiscountBps:
+      (row.partner_maximum_discount_bps as number | null | undefined) ?? null,
+    partnerRequiresApproval:
+      (row.partner_requires_approval as boolean | undefined) ?? true,
+    partnerTerms: (row.partner_terms as string | null | undefined) ?? null,
+    partnerSalesCopy:
+      (row.partner_sales_copy as string | null | undefined) ?? null,
+    partnerAvailability:
+      (row.partner_availability as string | undefined) ?? "available",
+    partnerPriority: (row.partner_priority as number | undefined) ?? 100,
+    partnerFeatured: (row.partner_featured as boolean | undefined) ?? false,
   };
 }
 

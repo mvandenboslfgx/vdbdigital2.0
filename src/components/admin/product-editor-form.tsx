@@ -195,6 +195,30 @@ export function ProductEditorForm({
         priceLabel: String(fd.get("priceLabel") ?? "") || null,
         costCents: canChangePrice ? toCents(String(fd.get("costEuros") ?? "")) : null,
       },
+      partnerEnabled: fd.get("partnerEnabled") === "on",
+      partnerVisibility: String(fd.get("partnerVisibility") ?? "none"),
+      partnerCommissionType: String(fd.get("partnerCommissionType") ?? "bps"),
+      partnerCommissionValue: (() => {
+        const raw = String(fd.get("partnerCommissionValue") ?? "").trim();
+        if (!raw) return null;
+        const n = Number(raw.replace(",", "."));
+        return Number.isFinite(n) ? n : null;
+      })(),
+      partnerCommissionCurrency: String(fd.get("partnerCommissionCurrency") ?? "EUR") || "EUR",
+      partnerCommissionStatus: String(fd.get("partnerCommissionStatus") ?? "draft"),
+      partnerMinimumPriceCents: toCents(String(fd.get("partnerMinimumPriceEuros") ?? "")),
+      partnerMaximumDiscountBps: (() => {
+        const raw = String(fd.get("partnerMaximumDiscountBps") ?? "").trim();
+        if (!raw) return null;
+        const n = Number.parseInt(raw, 10);
+        return Number.isFinite(n) ? n : null;
+      })(),
+      partnerRequiresApproval: fd.get("partnerRequiresApproval") === "on",
+      partnerTerms: String(fd.get("partnerTerms") ?? "") || null,
+      partnerSalesCopy: String(fd.get("partnerSalesCopy") ?? "") || null,
+      partnerAvailability: String(fd.get("partnerAvailability") ?? "available"),
+      partnerPriority: Number(fd.get("partnerPriority") ?? 100),
+      partnerFeatured: fd.get("partnerFeatured") === "on",
     };
   }
 
@@ -555,6 +579,150 @@ export function ProductEditorForm({
                 ))}
               </div>
             )}
+          </section>
+
+          <section className="space-y-4 rounded-lg border border-border p-4">
+            <h2 className="text-lg font-semibold font-display">VDB Partners</h2>
+            <p className="text-small text-muted">
+              Centrale catalogus blijft SSOT. Partners zien uitsluitend eligible
+              producten via Owner RPC; geen parallelle catalogus of eigen prijzen.
+            </p>
+            <div className="grid gap-3 md:grid-cols-2">
+              <label className="flex items-center gap-2 text-small mt-2">
+                <input
+                  type="checkbox"
+                  name="partnerEnabled"
+                  defaultChecked={product?.partnerEnabled ?? false}
+                />
+                Partner-enabled
+              </label>
+              <label className="flex items-center gap-2 text-small mt-2">
+                <input
+                  type="checkbox"
+                  name="partnerFeatured"
+                  defaultChecked={product?.partnerFeatured ?? false}
+                />
+                Featured voor Partners
+              </label>
+              <label className="flex items-center gap-2 text-small mt-2">
+                <input
+                  type="checkbox"
+                  name="partnerRequiresApproval"
+                  defaultChecked={product?.partnerRequiresApproval ?? true}
+                />
+                Lead/offerte vereist goedkeuring
+              </label>
+              <label className="space-y-1.5 text-small font-medium">
+                Visibility
+                <select
+                  name="partnerVisibility"
+                  defaultValue={product?.partnerVisibility ?? "none"}
+                  className="w-full min-h-11 rounded-lg border border-border bg-surface px-3"
+                >
+                  <option value="none">none</option>
+                  <option value="all_active">all_active</option>
+                  <option value="approval_required">approval_required</option>
+                  <option value="selected_group">selected_group</option>
+                  <option value="paused">paused</option>
+                  <option value="campaign">campaign</option>
+                  <option value="quote_only">quote_only</option>
+                  <option value="requestable">requestable</option>
+                </select>
+              </label>
+              <label className="space-y-1.5 text-small font-medium">
+                Availability
+                <select
+                  name="partnerAvailability"
+                  defaultValue={product?.partnerAvailability ?? "available"}
+                  className="w-full min-h-11 rounded-lg border border-border bg-surface px-3"
+                >
+                  <option value="available">available</option>
+                  <option value="limited">limited</option>
+                  <option value="paused">paused</option>
+                  <option value="out_of_stock">out_of_stock</option>
+                </select>
+              </label>
+              <label className="space-y-1.5 text-small font-medium">
+                Commissie type
+                <select
+                  name="partnerCommissionType"
+                  defaultValue={product?.partnerCommissionType ?? "bps"}
+                  className="w-full min-h-11 rounded-lg border border-border bg-surface px-3"
+                >
+                  <option value="bps">bps (percentage)</option>
+                  <option value="fixed_cents">fixed_cents</option>
+                  <option value="tiered">tiered</option>
+                  <option value="manual_quote">manual_quote</option>
+                </select>
+              </label>
+              <Input
+                name="partnerCommissionValue"
+                label="Commissiewaarde (bps of centen)"
+                defaultValue={
+                  product?.partnerCommissionValue != null
+                    ? String(product.partnerCommissionValue)
+                    : ""
+                }
+              />
+              <Input
+                name="partnerCommissionCurrency"
+                label="Commissievaluta"
+                defaultValue={product?.partnerCommissionCurrency ?? "EUR"}
+              />
+              <label className="space-y-1.5 text-small font-medium">
+                Commissiestatus
+                <select
+                  name="partnerCommissionStatus"
+                  defaultValue={product?.partnerCommissionStatus ?? "draft"}
+                  className="w-full min-h-11 rounded-lg border border-border bg-surface px-3"
+                >
+                  <option value="draft">draft</option>
+                  <option value="active">active</option>
+                  <option value="paused">paused</option>
+                  <option value="retired">retired</option>
+                </select>
+              </label>
+              <Input
+                name="partnerMinimumPriceEuros"
+                label="Minimale Partner-verkoopprijs (€)"
+                defaultValue={
+                  product?.partnerMinimumPriceCents != null
+                    ? (product.partnerMinimumPriceCents / 100).toFixed(2)
+                    : ""
+                }
+              />
+              <Input
+                name="partnerMaximumDiscountBps"
+                label="Max. korting (bps)"
+                defaultValue={
+                  product?.partnerMaximumDiscountBps != null
+                    ? String(product.partnerMaximumDiscountBps)
+                    : ""
+                }
+              />
+              <Input
+                name="partnerPriority"
+                label="Partner prioriteit"
+                type="number"
+                defaultValue={String(product?.partnerPriority ?? 100)}
+              />
+              <div className="md:col-span-2">
+                <Textarea
+                  name="partnerSalesCopy"
+                  label="Partner verkooptekst"
+                  rows={3}
+                  defaultValue={product?.partnerSalesCopy ?? ""}
+                />
+              </div>
+              <div className="md:col-span-2">
+                <Textarea
+                  name="partnerTerms"
+                  label="Partner voorwaarden"
+                  rows={3}
+                  defaultValue={product?.partnerTerms ?? ""}
+                />
+              </div>
+            </div>
           </section>
 
           <section className="space-y-4 rounded-lg border border-border p-4">

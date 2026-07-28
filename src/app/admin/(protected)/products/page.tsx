@@ -47,6 +47,14 @@ export default async function AdminProductsPage({
       | "B2C"
       | "BOTH"
       | "ALL",
+    partnerHealth: (typeof params.partnerHealth === "string"
+      ? params.partnerHealth
+      : "ALL") as
+      | "ALL"
+      | "COMMISSION_CONFIGURATION_REQUIRED"
+      | "LEGAL_REVIEW_REQUIRED"
+      | "OWN_SERVICES_READY"
+      | "HIDDEN_BLOCKED",
     sort: (typeof params.sort === "string" ? params.sort : "sort_order") as
       | "updated_at"
       | "name"

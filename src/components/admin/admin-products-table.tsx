@@ -66,6 +66,7 @@ export function AdminProductsTable({
       billingType: searchParams.get("billingType") ?? "ALL",
       audience: searchParams.get("audience") ?? "ALL",
       categoryId: searchParams.get("categoryId") ?? "",
+      partnerHealth: searchParams.get("partnerHealth") ?? "ALL",
       sort: searchParams.get("sort") ?? "sort_order",
     }),
     [searchParams],
@@ -182,6 +183,7 @@ export function AdminProductsTable({
             billingType: String(fd.get("billingType") ?? "ALL"),
             audience: String(fd.get("audience") ?? "ALL"),
             categoryId: String(fd.get("categoryId") ?? ""),
+            partnerHealth: String(fd.get("partnerHealth") ?? "ALL"),
             sort: String(fd.get("sort") ?? "sort_order"),
           });
         }}
@@ -224,6 +226,22 @@ export function AdminProductsTable({
             <option value="B2B">B2B</option>
             <option value="B2C">B2C</option>
             <option value="BOTH">Beide</option>
+          </select>
+        </label>
+        <label className="space-y-1.5 text-small font-medium">
+          Partner health
+          <select
+            name="partnerHealth"
+            defaultValue={queryDefaults.partnerHealth}
+            className="w-full min-h-11 rounded-lg border border-border bg-surface px-3"
+          >
+            <option value="ALL">Alle</option>
+            <option value="COMMISSION_CONFIGURATION_REQUIRED">
+              COMMISSION_CONFIGURATION_REQUIRED
+            </option>
+            <option value="LEGAL_REVIEW_REQUIRED">LEGAL_REVIEW_REQUIRED</option>
+            <option value="OWN_SERVICES_READY">OWN_SERVICES_READY</option>
+            <option value="HIDDEN_BLOCKED">HIDDEN / BLOCKED</option>
           </select>
         </label>
         <label className="space-y-1.5 text-small font-medium">

@@ -74,6 +74,37 @@ export const productContentSchema = z.object({
   audienceB2b: z.boolean().default(true),
   audienceB2c: z.boolean().default(false),
   translations: z.array(productTranslationSchema).max(2).optional(),
+  partnerEnabled: z.boolean().optional(),
+  partnerVisibility: z
+    .enum([
+      "none",
+      "all_active",
+      "approval_required",
+      "selected_group",
+      "paused",
+      "campaign",
+      "quote_only",
+      "requestable",
+    ])
+    .optional(),
+  partnerCommissionType: z
+    .enum(["bps", "fixed_cents", "tiered", "manual_quote"])
+    .optional(),
+  partnerCommissionValue: z.number().nullable().optional(),
+  partnerCommissionCurrency: z.string().max(8).optional(),
+  partnerCommissionStatus: z
+    .enum(["draft", "active", "paused", "retired"])
+    .optional(),
+  partnerMinimumPriceCents: z.number().int().min(0).nullable().optional(),
+  partnerMaximumDiscountBps: z.number().int().min(0).max(10000).nullable().optional(),
+  partnerRequiresApproval: z.boolean().optional(),
+  partnerTerms: z.string().max(10000).nullable().optional(),
+  partnerSalesCopy: z.string().max(5000).nullable().optional(),
+  partnerAvailability: z
+    .enum(["available", "limited", "paused", "out_of_stock"])
+    .optional(),
+  partnerPriority: z.number().int().min(0).max(99999).optional(),
+  partnerFeatured: z.boolean().optional(),
 });
 
 export const productPricingSchema = z

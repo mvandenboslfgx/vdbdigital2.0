@@ -1,6 +1,7 @@
 /**
- * Software catalog public surface.
- * Import ONLY from `(shop)` routes — never from marketing layouts/homepage.
+ * Software catalog — SEED/IMPORT ONLY.
+ * Must NOT be imported by public shop runtime routes.
+ * Owner `products` via `public-shop-catalog` is the sole public SSOT.
  */
 export type {
   SoftwareCatalogBlockedRef,
@@ -10,10 +11,7 @@ export type {
   SoftwarePublicDto,
   SoftwarePublicationStatus,
 } from "./types";
-export {
-  SOFTWARE_GROUP_LABELS,
-  SOFTWARE_GROUP_ORDER,
-} from "./types";
+export { SOFTWARE_GROUP_LABELS, SOFTWARE_GROUP_ORDER } from "./types";
 export {
   SOFTWARE_CATALOG_SOURCE_SHA256,
   SOFTWARE_CATALOG_STATS,

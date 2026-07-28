@@ -3,8 +3,11 @@
 **Generated:** 2026-07-28  
 **Policy:** No Google Images, no hotlinks, no competitor scrapes. Prefer self-made brand abstracts until stock rights are verified.
 
+## Per-product / group assets (Owner `primary_image_path`)
+
 | Product / surface | Local path | Source | Maker | Original URL | License | Obtained | Attribution required | Restrictions |
 |---|---|---|---|---|---|---|---|---|
+| Owner published products (86) | path stored on `products.primary_image_path` | First-party SVG groups/packages below | VDB Digital | n/a | Proprietary / owned | 2026-07-28 | No | Must match DB path; no hotlinks |
 | Software group: Windows | `public/products/groups/windows.svg` | Self-made brand abstract | VDB Digital | n/a (first-party) | Proprietary / owned | 2026-07-28 | No | Digital product visual only — not a Microsoft retail box shot |
 | Software group: Security | `public/products/groups/security.svg` | Self-made brand abstract | VDB Digital | n/a | Proprietary / owned | 2026-07-28 | No | Same |
 | Software group: Tools | `public/products/groups/tools.svg` | Self-made brand abstract | VDB Digital | n/a | Proprietary / owned | 2026-07-28 | No | Same |
