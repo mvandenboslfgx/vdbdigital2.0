@@ -143,7 +143,10 @@ BEGIN
     AND p.partner_visibility IN ('all_active', 'campaign', 'quote_only', 'requestable')
     AND p.partner_availability IN ('available', 'limited')
     AND coalesce(p.is_concept, false) = false
-    AND p.status::text IN ('PUBLISHED', 'DRAFT')
+    AND p.status::text = 'PUBLISHED'
+    AND coalesce(p.publication_ready, false) = true
+    AND p.legal_status::text IN ('APPROVED_FOR_B2B', 'APPROVED_FOR_B2C', 'APPROVED_FOR_BOTH')
+    AND p.price_status::text IN ('APPROVED', 'PUBLISHED')
   ORDER BY p.partner_featured DESC, p.partner_priority ASC, p.name ASC;
 END;
 $$;
@@ -187,7 +190,11 @@ BEGIN
     IF v_product.partner_enabled IS NOT TRUE
        OR v_product.partner_visibility NOT IN ('all_active', 'campaign', 'quote_only', 'requestable')
        OR v_product.partner_availability NOT IN ('available', 'limited')
-       OR coalesce(v_product.is_concept, false) = true THEN
+       OR coalesce(v_product.is_concept, false) = true
+       OR v_product.status::text IS DISTINCT FROM 'PUBLISHED'
+       OR coalesce(v_product.publication_ready, false) IS NOT TRUE
+       OR v_product.legal_status::text NOT IN ('APPROVED_FOR_B2B', 'APPROVED_FOR_B2C', 'APPROVED_FOR_BOTH')
+       OR v_product.price_status::text NOT IN ('APPROVED', 'PUBLISHED') THEN
       RAISE EXCEPTION 'PRODUCT_NOT_PARTNER_ELIGIBLE';
     END IF;
     v_snapshot := jsonb_build_object(
@@ -201,6 +208,8 @@ BEGIN
       'partner_commission_type', v_product.partner_commission_type,
       'partner_commission_value', v_product.partner_commission_value,
       'partner_commission_currency', v_product.partner_commission_currency,
+      'legal_status', v_product.legal_status::text,
+      'price_status', v_product.price_status::text,
       'captured_at', NOW()
     );
   END IF;
