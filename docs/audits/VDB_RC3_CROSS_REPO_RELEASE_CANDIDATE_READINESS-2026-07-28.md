@@ -10,7 +10,7 @@
 
 | Repo | Path | Role | Branch | HEAD (full) | Tag peel | Working tree | Upstream |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Owner (RC freeze) | `C:\Users\XXX\vdbdigital-rc3-freeze` | CANONICAL_BACKEND_OWNER | `freeze/shared-backend-rc3-local` | `76dcfe3f2760c3b4ea2f59b6d2e7895c269c52dc` | `rc3-cross-repository-release-candidate` → same | clean after RC commit | no upstream on freeze branch |
+| Owner (RC freeze) | `C:\Users\XXX\vdbdigital-rc3-freeze` | CANONICAL_BACKEND_OWNER | `freeze/shared-backend-rc3-local` | `5e33d249d7754ffa27e605306814dfbac8c6e7c8` | `rc3-cross-repository-release-candidate` → same | clean after RC commit | no upstream on freeze branch |
 | Owner (primary) | `C:\Users\XXX\vdbdigital2.0` | same remote, dirty WIP | `phase/shared-partner-backend` | `a593e5d395fc7b90994c5cb2e8554cd241c48706` | N/A for this RC | **heavily dirty** — EXCLUDE from RC | not RC candidate |
 | Partners | `C:\Users\XXX\vdb-partners` | PARTNER_CLIENT | `main` | `a380db26d6fb4426e2a8bc46e9c8d94388766690` | `rc3-cross-repository-release-candidate` → same | clean | `origin/main` gone locally |
 | Mobile | `C:\Users\XXX\vdb-app` | MOBILE_CLIENT | `fix/a5-owner-contract-runtime` | `db182e795295dc4f841540241cf98a69ecb2da05` | `rc3-cross-repository-release-candidate` → same | tracked clean; `artifacts/` local evidence (gitignored) | no upstream tracking |
@@ -46,8 +46,8 @@
 
 | Repo | Action | Result |
 | --- | --- | --- |
-| Owner | Commit financial-summary migrations + staging scripts | `76dcfe3` |
-| Owner | Annotated tag `rc3-cross-repository-release-candidate` | peels to `76dcfe3` |
+| Owner | Commit financial-summary migrations + staging scripts + readiness report | `5e33d24` (includes `76dcfe3`) |
+| Owner | Annotated tag `rc3-cross-repository-release-candidate` | peels to `5e33d24` |
 | Partners | Tag at validated HEAD | peels to `a380db2` |
 | Mobile | Tag at validated HEAD | peels to `db182e7` |
 
