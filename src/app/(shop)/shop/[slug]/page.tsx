@@ -8,7 +8,6 @@ import { buildLocaleAlternates } from "@/i18n/seo";
 import { paths } from "@/i18n/config";
 import { LocaleLink } from "@/i18n/locale-link";
 import {
-  getAllPublicShopSlugs,
   getPublicShopProductBySlug,
   publicShopCtaLabel,
   publicShopPriceDisplay,
@@ -18,10 +17,8 @@ interface ProductPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateStaticParams() {
-  const slugs = await getAllPublicShopSlugs();
-  return slugs.map((slug) => ({ slug }));
-}
+/** Locale cookies make this route request-dynamic; do not SSG at build time. */
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
