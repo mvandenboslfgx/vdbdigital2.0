@@ -1,0 +1,481 @@
+{
+  "contractVersion": "vdb-backend-contract@0.2.0-rc.5",
+  "schemaVersion": "2026.07.29.partner-identity-directory-rc5",
+  "container": "supabase_db_vdbdigital2",
+  "passed": 118,
+  "failed": 0,
+  "results": [
+    {
+      "name": "verify:rc5_all_pass",
+      "ok": true
+    },
+    {
+      "name": "verify:rc4_still_pass",
+      "ok": true
+    },
+    {
+      "name": "verify:rc3_still_pass",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_product_staff_success",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_customer_staff_success",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_project_staff_success",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_quote_staff_success",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_invoice_staff_success",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_appointment_staff_success",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_partner_staff_success",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_product_admin_success",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_customer_admin_success",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_project_admin_success",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_quote_admin_success",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_invoice_admin_success",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_appointment_admin_success",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_partner_admin_success",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_product_owner_success",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_customer_owner_success",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_project_owner_success",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_quote_owner_success",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_invoice_owner_success",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_appointment_owner_success",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_partner_owner_success",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_product_customer_deny",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_customer_customer_deny",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_project_customer_deny",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_quote_customer_deny",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_invoice_customer_deny",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_appointment_customer_deny",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_partner_customer_deny",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_product_partner_deny",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_customer_partner_deny",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_project_partner_deny",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_quote_partner_deny",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_invoice_partner_deny",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_appointment_partner_deny",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_partner_partner_deny",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_product_anon_deny",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_product_unknown_not_found",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_product_malformed_rejected",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_customer_anon_deny",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_customer_unknown_not_found",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_customer_malformed_rejected",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_project_anon_deny",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_project_unknown_not_found",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_project_malformed_rejected",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_quote_anon_deny",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_quote_unknown_not_found",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_quote_malformed_rejected",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_invoice_anon_deny",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_invoice_unknown_not_found",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_invoice_malformed_rejected",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_appointment_anon_deny",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_appointment_unknown_not_found",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_appointment_malformed_rejected",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_partner_anon_deny",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_partner_unknown_not_found",
+      "ok": true
+    },
+    {
+      "name": "detail:admin_get_partner_malformed_rejected",
+      "ok": true
+    },
+    {
+      "name": "detail:product_no_cost",
+      "ok": true
+    },
+    {
+      "name": "detail:customer_no_contact",
+      "ok": true
+    },
+    {
+      "name": "detail:appointment_no_meeting_link",
+      "ok": true
+    },
+    {
+      "name": "detail:partner_has_checklist",
+      "ok": true
+    },
+    {
+      "name": "notes:flag_off_feature_disabled",
+      "ok": true
+    },
+    {
+      "name": "notes:flag_off_wrote_nothing",
+      "ok": true
+    },
+    {
+      "name": "notes:staff_create_success",
+      "ok": true
+    },
+    {
+      "name": "notes:customer_create_deny",
+      "ok": true
+    },
+    {
+      "name": "replies:staff_sees_internal",
+      "ok": true
+    },
+    {
+      "name": "replies:customer_excludes_internal",
+      "ok": true
+    },
+    {
+      "name": "replies:partner_deny",
+      "ok": true
+    },
+    {
+      "name": "replies:anon_deny",
+      "ok": true
+    },
+    {
+      "name": "replies:unknown_ticket_not_found",
+      "ok": true
+    },
+    {
+      "name": "intake:individual_submitted",
+      "ok": true
+    },
+    {
+      "name": "intake:individual_profile_pending",
+      "ok": true
+    },
+    {
+      "name": "intake:individual_type_known",
+      "ok": true
+    },
+    {
+      "name": "intake:individual_with_kvk_deny",
+      "ok": true
+    },
+    {
+      "name": "intake:business_without_kvk_deny",
+      "ok": true
+    },
+    {
+      "name": "intake:business_invalid_kvk_deny",
+      "ok": true
+    },
+    {
+      "name": "intake:unknown_type_deny",
+      "ok": true
+    },
+    {
+      "name": "intake:anon_deny",
+      "ok": true
+    },
+    {
+      "name": "intake:business_submitted",
+      "ok": true
+    },
+    {
+      "name": "approval:review_returns_partner",
+      "ok": true
+    },
+    {
+      "name": "approval:application_approved",
+      "ok": true
+    },
+    {
+      "name": "approval:partner_not_active",
+      "ok": true
+    },
+    {
+      "name": "approval:block_codes_recorded",
+      "ok": true
+    },
+    {
+      "name": "approval:checklist_cannot_activate",
+      "ok": true
+    },
+    {
+      "name": "checklist:partner_reads_own",
+      "ok": true
+    },
+    {
+      "name": "checklist:partner_denied_other",
+      "ok": true
+    },
+    {
+      "name": "fixtures:flag_off_feature_disabled",
+      "ok": true
+    },
+    {
+      "name": "fixtures:partner_self_deny",
+      "ok": true
+    },
+    {
+      "name": "fixtures:invalid_label_deny",
+      "ok": true
+    },
+    {
+      "name": "fixtures:never_changes_status",
+      "ok": true
+    },
+    {
+      "name": "activate:payout_profile_denies",
+      "ok": true
+    },
+    {
+      "name": "activate:denied_leaves_pending",
+      "ok": true
+    },
+    {
+      "name": "activate:partner_self_deny",
+      "ok": true
+    },
+    {
+      "name": "activate:partner_try_activate_deny",
+      "ok": true
+    },
+    {
+      "name": "activate:staff_deny",
+      "ok": true
+    },
+    {
+      "name": "activate:aal1_deny",
+      "ok": true
+    },
+    {
+      "name": "activate:anon_deny",
+      "ok": true
+    },
+    {
+      "name": "activate:unknown_partner_not_found",
+      "ok": true
+    },
+    {
+      "name": "agreement:anon_deny",
+      "ok": true
+    },
+    {
+      "name": "agreement:individual_accepted",
+      "ok": true
+    },
+    {
+      "name": "agreement:acceptance_idempotent",
+      "ok": true
+    },
+    {
+      "name": "activate:individual_success",
+      "ok": true
+    },
+    {
+      "name": "activate:individual_active",
+      "ok": true
+    },
+    {
+      "name": "activate:individual_payout_eligible",
+      "ok": true
+    },
+    {
+      "name": "activate:individual_business_untouched",
+      "ok": true
+    },
+    {
+      "name": "activate:business_needs_business_verification",
+      "ok": true
+    },
+    {
+      "name": "activate:business_success",
+      "ok": true
+    },
+    {
+      "name": "activate:business_active",
+      "ok": true
+    },
+    {
+      "name": "directory:business_partner_typed",
+      "ok": true
+    },
+    {
+      "name": "directory:list_partners_has_identity_keys",
+      "ok": true
+    },
+    {
+      "name": "lead:suspended_deny",
+      "ok": true
+    },
+    {
+      "name": "activate:suspended_denied",
+      "ok": true
+    },
+    {
+      "name": "reactivate:checklist_enforced",
+      "ok": true
+    },
+    {
+      "name": "reactivate:still_suspended",
+      "ok": true
+    },
+    {
+      "name": "legacy:grandfathered_still_active",
+      "ok": true
+    },
+    {
+      "name": "legacy:checklist_reports_incomplete",
+      "ok": true
+    }
+  ]
+}

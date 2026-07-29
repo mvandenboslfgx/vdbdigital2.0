@@ -1,0 +1,27 @@
+{
+  "contractVersion": "vdb-backend-contract@0.2.0-rc.5",
+  "schemaVersion": "2026.07.29.partner-identity-directory-rc5",
+  "minimumCompatibleClientVersion": ">=0.2.0-rc.5",
+  "partnerSurfaceCompatibleWith": "vdb-backend-contract@0.2.0-rc.1",
+  "mobileCompatCompatibleWith": "vdb-backend-contract@0.2.0-rc.2",
+  "messagingSupportCompatibleWith": "vdb-backend-contract@0.2.0-rc.3",
+  "adminControlSurfaceCompatibleWith": "vdb-backend-contract@0.2.0-rc.4",
+  "generatedAt": "2026-07-29",
+  "sourceHeadHint": "partner-identity-directory-rc5",
+  "canonicalBackendOwner": "VDB Digital 2.0",
+  "unpublished": true,
+  "notes": [
+    "Additive admin directory detail RPCs (admin_get_product/partner/customer/project/quote/invoice/appointment) and list_portal_support_ticket_replies.",
+    "Partner type is now explicit: submit_partner_application takes p_partner_type as its first argument. INDIVIDUAL (particulier) may not supply a KvK; BUSINESS requires a company name and an 8-digit KvK.",
+    "Partner type is never inferred from the presence of a KvK number.",
+    "Safe activation: ACTIVE is reachable only through partner_try_activate when partner_activation_checklist.can_activate is true. Staff approval alone never activates a partner.",
+    "Activation checklist requires partner type, staff approval, 18+ verification, identity verification, type-bound business verification and company details, acceptance of the current agreement version, and an APPROVED payout profile.",
+    "payout_eligible is set only while payout_profile_status = APPROVED; activation never infers payout eligibility.",
+    "Partners that were ACTIVE before rc.5 are marked legacy_activation_grandfathered and keep the rc.4 reactivation behaviour.",
+    "Partner agreement bodies are placeholders with legal_review_status = REQUIRED. They are not binding legal texts and must not be presented as final.",
+    "staff_set_partner_compliance_fixture is staging-only synthetic data behind the fail-closed partner_compliance_fixtures flag.",
+    "support_internal_notes_rpc remains fail-closed by default; staging may enable it after the ACL matrix is proven.",
+    "The rc.1 verifier verify_partner_admin_contracts was retargeted to the typed 7-argument submit signature.",
+    "Does not authorize production apply."
+  ]
+}
