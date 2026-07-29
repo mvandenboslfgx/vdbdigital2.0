@@ -1,13 +1,20 @@
 # Backend Contract — VDB Digital Platform
 
-**Publisher:** VDB Digital 2.0 (`CANONICAL_BACKEND_OWNER`)
-**Historical freeze (not staging target):** `vdb-backend-contract@0.1.0` / `schemaVersion` `2026.07.22.freeze`
-**Partner RC1 (embedded, non-breaking):** `vdb-backend-contract@0.2.0-rc.1` / `schemaVersion` `2026.07.22.partner-rc1`
-**Current shared local target:** `vdb-backend-contract@0.2.0-rc.2` / `schemaVersion` `2026.07.24.mobile-compat-rc2`
-**Bundle:** `contracts/releases/vdb-backend-contract-0.2.0-rc.2/`
+**Current shared local+staging target:** `vdb-backend-contract@0.2.0-rc.4` / `schemaVersion` `2026.07.29.admin-control-surface-rc4`
+**Bundle:** `contracts/releases/vdb-backend-contract-0.2.0-rc.4/`
+**Previous shared target:** `vdb-backend-contract@0.2.0-rc.3` / `schemaVersion` `2026.07.25.messaging-support-appointments-rc3`
+**Local status:** `OWNER ADMIN RPC LOCAL PASS — STAGING APPLY IN GATE`
+**Staging operator readiness:** `docs/evidence/admin-rpc-staging-gate-2026-07-29/`
+**Surface audit:** `docs/owner-contract-surface-audit.md`
+**Messaging map:** `docs/messaging-support-appointments-map.md`
 **Convergence notes:** `docs/contract-convergence-rc2.md`
 **Git freeze baseline:** `93ab6cc4e61c19da072fe41bba7361397bd8bed0`
 **Partner work branch:** `phase/shared-partner-backend` (additive; not in exact-17 production apply)
+
+**Publisher:** VDB Digital 2.0 (`CANONICAL_BACKEND_OWNER`)
+**Historical freeze (not staging target):** `vdb-backend-contract@0.1.0` / `schemaVersion` `2026.07.22.freeze`
+**Partner RC1 (embedded, non-breaking):** `vdb-backend-contract@0.2.0-rc.1` / `schemaVersion` `2026.07.22.partner-rc1`
+**Previous shared local target:** `vdb-backend-contract@0.2.0-rc.2` / `schemaVersion` `2026.07.24.mobile-compat-rc2`
 
 This document defines the **versioned surface** clients must pin. A full generated `Database` types package is **planned**; until published as an artifact, clients treat this repo’s migrations + this file as the contract source. Checksums for partner RC: `docs/artifacts/partner-backend-contract-checksums.json`.
 
@@ -54,8 +61,9 @@ Clients must not invent parallel role systems.
 | Identity | `auth.users`, profiles / membership |
 | Orgs | `organizations`, `organization_members`, invitations |
 | Projects | `portal_projects`, members, milestones, deliverables, actions, activity, feedback |
-| Messaging | conversations, participants, messages |
-| Support | tickets, replies, notifications |
+| Messaging | `portal_conversations`, `portal_conversation_participants`, `portal_messages`, `portal_message_attachments` |
+| Support | `portal_support_tickets`, `portal_support_replies` (Mobile: `support_messages` → replies) |
+| Appointments | `portal_appointments`, `portal_appointment_participants` |
 | Documents | `portal_files`, download events, private Storage buckets |
 | Quotes | `portal_quotes`, items, versions, acceptances + RPCs |
 | Invoices | `portal_invoices`, items, versions, payment records + RPCs |
@@ -82,9 +90,10 @@ Clients call only documented, granted RPCs. Examples already in canonical migrat
 
 - Payment integrity / rate-limit helpers (service-role oriented)
 - `accept_portal_quote` / `decline_portal_quote`
+- Messaging/support/appointments RPCs (`create_portal_conversation`, `send_portal_message`, `reply_portal_support_ticket`, `book_portal_appointment`, …) — see `docs/messaging-support-appointments-map.md`
 - `issue_portal_invoice` / `record_portal_invoice_payment` / `reverse_portal_invoice_payment`
 - `verify_partner_admin_contracts` + partner mutation RPCs (see shared-partner-rpc-contract)
-- Contract verifiers (`verify_*_contracts`, `catalog_verify_admin_contracts`, `p05_verify_payment_contracts`)
+- Contract verifiers (`verify_*_contracts`, `verify_messaging_support_appointments_contracts`, `catalog_verify_admin_contracts`, `p05_verify_payment_contracts`)
 
 **Contract rule:** privilege checks belong in RPC + RLS, not only in one client’s UI. Known hardening items from forensic audit (staff scope / invoice grants) must be fixed in **this** repo before partner/mobile rely on them in staging.
 

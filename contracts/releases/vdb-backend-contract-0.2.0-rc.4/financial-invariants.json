@@ -1,0 +1,14 @@
+{
+  "invariants": [
+    "one_commission_per_partner_sale",
+    "ledger_append_only",
+    "ledger_balanced_debit_eq_credit",
+    "available_liability_non_negative_floor",
+    "payout_capped_by_available_liability",
+    "paid_payout_immutable",
+    "refund_after_payout_via_adjustment",
+    "no_client_financial_authority",
+    "cash_receipt_staff_only_idempotent"
+  ],
+  "calculationRuleVersion": "v1_flat_bps"
+}
