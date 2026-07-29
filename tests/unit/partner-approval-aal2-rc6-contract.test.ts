@@ -44,11 +44,15 @@ describe("vdb-backend-contract@0.2.0-rc.6 bundle", () => {
     expect(errors.rc6Notes.AAL2_REQUIRED).toMatch(/review_partner_application/);
   });
 
-  it("lists the forward RC6 migration", () => {
+  it("lists the forward RC6 migrations", () => {
     const mm = readJson("migration-manifest.json");
     expect(mm.partnerApprovalAal2Migrations[0].version).toBe("20260729141024");
-    expect(mm.applyOrder.at(-1)).toBe(
+    expect(mm.adminRpcSchemaStampMigrations[0].version).toBe("20260729145145");
+    expect(mm.applyOrder).toContain(
       "20260729141024_review_partner_application_aal2_rc6.sql",
+    );
+    expect(mm.applyOrder.at(-1)).toBe(
+      "20260729145145_admin_rpc_schema_stamps_rc6.sql",
     );
   });
 

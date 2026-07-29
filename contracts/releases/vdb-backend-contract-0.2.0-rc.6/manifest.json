@@ -18,6 +18,7 @@
     "Staff approval alone still never activates a partner; ACTIVE remains exclusive to partner_try_activate when the activation checklist passes.",
     "admin_get_security_status schema_version stamp bumped to 2026.07.29.partner-approval-aal2-rc6.",
     "verify_partner_approval_aal2_rc6_contracts proves AAL2 presence/order on review and sibling privileged RPCs.",
-    "Does not authorize production apply."
+    "Does not authorize production apply.",
+    "admin/directory/checklist read RPC schema_version stamps formally bumped to 2026.07.29.partner-approval-aal2-rc6 via migration 20260729145145."
   ]
 }

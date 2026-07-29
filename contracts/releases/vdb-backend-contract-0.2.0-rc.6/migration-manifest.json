@@ -145,7 +145,8 @@
     "20260729140200_admin_directory_detail_rc5_rpcs.sql",
     "20260729140300_partner_identity_directory_rc5_verify.sql",
     "20260729140400_rc5_verifier_fixture_flag_exists_only.sql",
-    "20260729141024_review_partner_application_aal2_rc6.sql"
+    "20260729141024_review_partner_application_aal2_rc6.sql",
+    "20260729145145_admin_rpc_schema_stamps_rc6.sql"
   ],
   "applyPolicy": {
     "local": "verified",
@@ -157,6 +158,13 @@
       "version": "20260729141024",
       "filename": "20260729141024_review_partner_application_aal2_rc6.sql",
       "purpose": "require_aal2 on review_partner_application; admin_get_security_status rc.6 stamp; verify_partner_approval_aal2_rc6_contracts"
+    }
+  ],
+  "adminRpcSchemaStampMigrations": [
+    {
+      "version": "20260729145145",
+      "filename": "20260729145145_admin_rpc_schema_stamps_rc6.sql",
+      "purpose": "Formal RC6 schema_version stamp bump for admin/directory/checklist read RPCs; verify_admin_rpc_schema_stamps_rc6"
     }
   ]
 }

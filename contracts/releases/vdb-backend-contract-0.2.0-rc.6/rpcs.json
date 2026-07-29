@@ -1,5 +1,5 @@
 {
-  "count": 59,
+  "count": 60,
   "partnerRpcs": [
     {
       "name": "submit_partner_application",
@@ -94,6 +94,10 @@
     {
       "name": "verify_partner_approval_aal2_rc6_contracts",
       "note": "rc.6 NEW — AAL2 presence/order checks for review_partner_application plus sibling privileged RPC AAL2 audit."
+    },
+    {
+      "name": "verify_admin_rpc_schema_stamps_rc6",
+      "note": "rc.6 — proves admin/directory/checklist schema_version stamps equal 2026.07.29.partner-approval-aal2-rc6."
     }
   ],
   "customerPortalRpcs": [
@@ -147,74 +151,83 @@
   ],
   "adminControlSurfaceRpcs": [
     {
-      "name": "admin_dashboard_stats"
+      "name": "admin_dashboard_stats",
+      "note": "rc.6 stamp: schema_version 2026.07.29.partner-approval-aal2-rc6."
     },
     {
-      "name": "admin_work_queue"
+      "name": "admin_work_queue",
+      "note": "rc.6 stamp: schema_version 2026.07.29.partner-approval-aal2-rc6."
     },
     {
-      "name": "admin_list_products"
+      "name": "admin_list_products",
+      "note": "rc.6 stamp: schema_version 2026.07.29.partner-approval-aal2-rc6."
     },
     {
       "name": "admin_list_partners",
-      "note": "rc.5 — additive keys: partner_type, type_classification_status, verification and payout-profile statuses, legacy_activation_grandfathered. Still no contact details and no balances."
+      "note": "rc.5 — additive keys: partner_type, type_classification_status, verification and payout-profile statuses, legacy_activation_grandfathered. Still no contact details and no balances. rc.6 stamp: schema_version 2026.07.29.partner-approval-aal2-rc6."
     },
     {
-      "name": "admin_list_customers"
+      "name": "admin_list_customers",
+      "note": "rc.6 stamp: schema_version 2026.07.29.partner-approval-aal2-rc6."
     },
     {
-      "name": "admin_list_projects"
+      "name": "admin_list_projects",
+      "note": "rc.6 stamp: schema_version 2026.07.29.partner-approval-aal2-rc6."
     },
     {
-      "name": "admin_list_quotes"
+      "name": "admin_list_quotes",
+      "note": "rc.6 stamp: schema_version 2026.07.29.partner-approval-aal2-rc6."
     },
     {
-      "name": "admin_list_invoices"
+      "name": "admin_list_invoices",
+      "note": "rc.6 stamp: schema_version 2026.07.29.partner-approval-aal2-rc6."
     },
     {
-      "name": "admin_list_appointments"
+      "name": "admin_list_appointments",
+      "note": "rc.6 stamp: schema_version 2026.07.29.partner-approval-aal2-rc6."
     },
     {
-      "name": "admin_get_settings_summary"
+      "name": "admin_get_settings_summary",
+      "note": "rc.6 stamp: schema_version 2026.07.29.partner-approval-aal2-rc6."
     },
     {
       "name": "admin_get_security_status",
-      "note": "rc.6 — unchanged rc.4/rc.5 shape with schema_version bumped to 2026.07.29.partner-approval-aal2-rc6."
+      "note": "rc.6 — unchanged rc.4/rc.5 shape with schema_version bumped to 2026.07.29.partner-approval-aal2-rc6. rc.6 stamp: schema_version 2026.07.29.partner-approval-aal2-rc6."
     },
     {
       "name": "admin_get_product",
       "signature": "(p_product_id uuid)",
-      "note": "rc.5 NEW — staff product detail. cost_cents, margins and supplier data are never returned."
+      "note": "rc.5 NEW — staff product detail. cost_cents, margins and supplier data are never returned. rc.6 stamp: schema_version 2026.07.29.partner-approval-aal2-rc6."
     },
     {
       "name": "admin_get_partner",
       "signature": "(p_partner_id uuid)",
-      "note": "rc.5 NEW — staff partner detail including the live activation_checklist. No email address and no balances."
+      "note": "rc.5 NEW — staff partner detail including the live activation_checklist. No email address and no balances. rc.6 stamp: schema_version 2026.07.29.partner-approval-aal2-rc6."
     },
     {
       "name": "admin_get_customer",
       "signature": "(p_organization_id uuid)",
-      "note": "rc.5 NEW — staff customer detail with counters only. No email, phone, VAT/KvK or address."
+      "note": "rc.5 NEW — staff customer detail with counters only. No email, phone, VAT/KvK or address. rc.6 stamp: schema_version 2026.07.29.partner-approval-aal2-rc6."
     },
     {
       "name": "admin_get_project",
       "signature": "(p_project_id uuid)",
-      "note": "rc.5 NEW — staff project detail. Related records are exposed as counts only."
+      "note": "rc.5 NEW — staff project detail. Related records are exposed as counts only. rc.6 stamp: schema_version 2026.07.29.partner-approval-aal2-rc6."
     },
     {
       "name": "admin_get_quote",
       "signature": "(p_quote_id uuid)",
-      "note": "rc.5 NEW — staff quote detail with at most 50 line items. customer_note is never returned."
+      "note": "rc.5 NEW — staff quote detail with at most 50 line items. customer_note is never returned. rc.6 stamp: schema_version 2026.07.29.partner-approval-aal2-rc6."
     },
     {
       "name": "admin_get_invoice",
       "signature": "(p_invoice_id uuid)",
-      "note": "rc.5 NEW — staff invoice detail. Read-only; no payment or provider fields are exposed or mutated."
+      "note": "rc.5 NEW — staff invoice detail. Read-only; no payment or provider fields are exposed or mutated. rc.6 stamp: schema_version 2026.07.29.partner-approval-aal2-rc6."
     },
     {
       "name": "admin_get_appointment",
       "signature": "(p_appointment_id uuid)",
-      "note": "rc.5 NEW — staff appointment detail. Never returns meeting_link, attendee identities or internal notes. Reads are not gated by appointments_booking (that flag gates mutations)."
+      "note": "rc.5 NEW — staff appointment detail. Never returns meeting_link, attendee identities or internal notes. Reads are not gated by appointments_booking (that flag gates mutations). rc.6 stamp: schema_version 2026.07.29.partner-approval-aal2-rc6."
     },
     {
       "name": "verify_admin_control_surface_contracts"
