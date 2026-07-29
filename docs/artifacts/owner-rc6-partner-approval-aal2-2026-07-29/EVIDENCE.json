@@ -1,0 +1,210 @@
+{
+  "at": "2026-07-29T14:33:42.758Z",
+  "stagingRef": "qzekuvmgfekzsowdecyk",
+  "productionRef": "nhsrdnjfsxfikfbdmdfj",
+  "contractVersion": "vdb-backend-contract@0.2.0-rc.6",
+  "schemaVersion": "2026.07.29.partner-approval-aal2-rc6",
+  "migrationTip": "20260729141024",
+  "incidentPrefix": "9dae6417…",
+  "doNotTouchPrefix": "4b8bd7f1…",
+  "synthetic": {
+    "approveAppPrefix": "01142a9e…",
+    "rejectAppPrefix": "00d22849…",
+    "marker": "RC6_REVIEW_AAL2_SYNTHETIC"
+  },
+  "operatorFingerprints": {
+    "admin": "196dcfbf55ee",
+    "owner": "d8258820f1f6"
+  },
+  "sibling": [
+    {
+      "has_aal2": true,
+      "overload_count": 1,
+      "proname": "activate_partner_profile"
+    },
+    {
+      "has_aal2": true,
+      "overload_count": 1,
+      "proname": "approve_partner_commission"
+    },
+    {
+      "has_aal2": true,
+      "overload_count": 1,
+      "proname": "reactivate_partner"
+    },
+    {
+      "has_aal2": true,
+      "overload_count": 1,
+      "proname": "reject_partner_commission"
+    },
+    {
+      "has_aal2": true,
+      "overload_count": 1,
+      "proname": "review_partner_application"
+    },
+    {
+      "has_aal2": false,
+      "overload_count": 1,
+      "proname": "staff_set_partner_compliance_fixture"
+    },
+    {
+      "has_aal2": true,
+      "overload_count": 1,
+      "proname": "suspend_partner"
+    }
+  ],
+  "verifyRows": [
+    {
+      "check_name": "review_aal2_before_update",
+      "detail": "AAL2 gate precedes mutation",
+      "ok": true
+    },
+    {
+      "check_name": "review_authenticated_execute",
+      "detail": "authenticated execute granted",
+      "ok": true
+    },
+    {
+      "check_name": "review_no_anon_execute",
+      "detail": "anon execute revoked",
+      "ok": true
+    },
+    {
+      "check_name": "review_overload_count",
+      "detail": "single public overload",
+      "ok": true
+    },
+    {
+      "check_name": "review_requires_aal2",
+      "detail": "require_aal2 present in body",
+      "ok": true
+    },
+    {
+      "check_name": "schema_version:admin_get_security_status",
+      "detail": "rc.6 security stamp",
+      "ok": true
+    },
+    {
+      "check_name": "sibling:activate_partner_profile_aal2",
+      "detail": "ok",
+      "ok": true
+    },
+    {
+      "check_name": "sibling:approve_partner_commission_aal2",
+      "detail": "ok",
+      "ok": true
+    },
+    {
+      "check_name": "sibling:reactivate_partner_aal2",
+      "detail": "ok",
+      "ok": true
+    },
+    {
+      "check_name": "sibling:reject_partner_commission_aal2",
+      "detail": "ok",
+      "ok": true
+    },
+    {
+      "check_name": "sibling:suspend_partner_aal2",
+      "detail": "ok",
+      "ok": true
+    }
+  ],
+  "results": [
+    {
+      "name": "staging_target_guard",
+      "status": "PASS",
+      "note": "qzekuvmgfekzsowdecyk"
+    },
+    {
+      "name": "production_untouched_guard",
+      "status": "PASS",
+      "note": "nhsrdnjfsxfikfbdmdfj"
+    },
+    {
+      "name": "migration_tip_rc6",
+      "status": "PASS",
+      "note": "20260729141024"
+    },
+    {
+      "name": "verify_partner_approval_aal2_rc6_contracts",
+      "status": "PASS",
+      "note": "11 checks"
+    },
+    {
+      "name": "sibling_aal2_audit",
+      "status": "PASS",
+      "note": "activate_partner_profile:aal2;approve_partner_commission:aal2;reactivate_partner:aal2;reject_partner_commission:aal2;review_partner_application:aal2;staff_set_partner_compliance_fixture:no-aal2;suspend_partner:aal2"
+    },
+    {
+      "name": "incident_rollback_9dae6417",
+      "status": "PASS",
+      "note": "after=SUBMITTED; partner=PENDING; payout=false"
+    },
+    {
+      "name": "incident_rollback_audit_reason",
+      "status": "PASS",
+      "note": "INCIDENT_ROLLBACK_AAL2_GATE_PROBE"
+    },
+    {
+      "name": "synthetic_fixtures",
+      "status": "PASS",
+      "note": "approve=01142a9e…; reject=00d22849…"
+    },
+    {
+      "name": "ADMIN_AAL1_approve_denied",
+      "status": "PASS",
+      "note": "aal=aal1; code=AAL2_REQUIRED; audits=0"
+    },
+    {
+      "name": "ADMIN_AAL1_reject_denied",
+      "status": "PASS",
+      "note": "aal=aal1; code=AAL2_REQUIRED; audits=0"
+    },
+    {
+      "name": "OWNER_AAL1_approve_denied",
+      "status": "PASS",
+      "note": "aal=aal1; code=AAL2_REQUIRED; audits=0"
+    },
+    {
+      "name": "OWNER_AAL1_reject_denied",
+      "status": "PASS",
+      "note": "aal=aal1; code=AAL2_REQUIRED; audits=0"
+    },
+    {
+      "name": "wrong_totp_deny",
+      "status": "PASS",
+      "note": "aalAfter=aal1"
+    },
+    {
+      "name": "correct_aal2_step_up",
+      "status": "PASS"
+    },
+    {
+      "name": "aal2_synthetic_approve_once",
+      "status": "PASS",
+      "note": "data=c9b7abde…; audits=1; audits2=1; partner=PENDING"
+    },
+    {
+      "name": "approval_not_auto_active",
+      "status": "PASS",
+      "note": "partner=PENDING; payout=false"
+    },
+    {
+      "name": "new_session_starts_aal1",
+      "status": "PASS",
+      "note": "aal=aal1"
+    },
+    {
+      "name": "aal2_synthetic_reject_once",
+      "status": "PASS",
+      "note": "status=REJECTED; audits=1; err=none"
+    },
+    {
+      "name": "protected_prefixes_untouched_by_probes",
+      "status": "PASS",
+      "note": "incident=SUBMITTED; other=SUBMITTED"
+    }
+  ],
+  "verdict": "PARTNER APPROVAL SERVER AAL2 REMEDIATION PASS — MOBILE V4 READINESS MAY RESUME — PRODUCTION UNTOUCHED"
+}
