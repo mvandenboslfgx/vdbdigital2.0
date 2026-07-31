@@ -49,6 +49,26 @@ export function assertMollieKeySafeForRuntime(
       mode,
     };
   }
+  const appEnv = (env.APP_ENV ?? "").trim().toLowerCase();
+  if (mode === "live" && appEnv === "staging") {
+    return {
+      ok: false,
+      reason: "Live Mollie key is not allowed when APP_ENV=staging",
+      mode,
+    };
+  }
+  // Production must not silently run test-mode checkout unless explicitly allowed.
+  if (
+    mode === "test" &&
+    (isProductionDeployment(env) || appEnv === "production") &&
+    env.ALLOW_MOLLIE_TEST_IN_PRODUCTION !== "true"
+  ) {
+    return {
+      ok: false,
+      reason: "Test Mollie key is not allowed in production runtime",
+      mode,
+    };
+  }
   return { ok: true, mode };
 }
 

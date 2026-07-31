@@ -50,6 +50,19 @@ describe("P0.5 env + Mollie mode + harness", () => {
         NEXT_PUBLIC_APP_URL: "http://localhost:3000",
       }).ok,
     ).toBe(true);
+    expect(
+      assertMollieKeySafeForRuntime("live_abc", {
+        APP_ENV: "staging",
+        NEXT_PUBLIC_APP_URL: "https://vdb-digital-staging.vercel.app",
+      }).ok,
+    ).toBe(false);
+    expect(
+      assertMollieKeySafeForRuntime("test_abc", {
+        VERCEL_ENV: "production",
+        NODE_ENV: "production",
+        NEXT_PUBLIC_APP_URL: "https://vdbdigital.nl",
+      }).ok,
+    ).toBe(false);
   });
 
   it("covers harness statuses and amount/currency checks", () => {
