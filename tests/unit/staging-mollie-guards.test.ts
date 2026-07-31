@@ -10,7 +10,7 @@ import {
 describe("staging Mollie E2E guards", () => {
   const base = {
     allowFlag: "true",
-    mollieApiKey: "test_abcdefghijklmnopqrstuvwxyz",
+    mollieApiKey: "test_dummy",
     checkoutEnabled: undefined,
     stagingAppUrl:
       "https://vdb-digital-staging-r9qi6l84p-matthijs-projects-301cd812.vercel.app",

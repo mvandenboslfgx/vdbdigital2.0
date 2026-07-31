@@ -6,6 +6,7 @@ import {
   markOrderConfirmationSent,
   getOrderById,
 } from "@/server/services/order-service";
+import { applyPortalInvoiceMolliePayment } from "@/server/services/invoice-mollie-webhook";
 import { sendPaymentSuccess, sendPaymentFailed } from "@/lib/email/resend";
 import { writeAuditLog } from "@/lib/security/audit-log";
 import { sanitizeUrlForLog } from "@/lib/security/sanitize-url";
@@ -57,7 +58,47 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Payment not found" }, { status: 400 });
   }
 
-  const orderId = (payment.metadata as { orderId?: string })?.orderId;
+  const metadata = (payment.metadata ?? {}) as {
+    orderId?: string;
+    invoiceId?: string;
+    kind?: string;
+    userIdPrefix?: string;
+  };
+
+  const mollieAmountCents = Math.round(parseFloat(payment.amount.value) * 100);
+
+  // Portal invoice checkout branch (staging test payments).
+  if (metadata.invoiceId && metadata.kind === "portal_invoice") {
+    if (payment.amount.currency !== "EUR") {
+      return NextResponse.json({ error: "Amount mismatch" }, { status: 400 });
+    }
+    const applied = await applyPortalInvoiceMolliePayment({
+      invoiceId: metadata.invoiceId,
+      paymentId,
+      providerStatus: payment.status,
+      amountCents: mollieAmountCents,
+      currency: payment.amount.currency,
+    });
+    await writeAuditLog({
+      action: applied.alreadyProcessed
+        ? "webhook.mollie_invoice_duplicate"
+        : "webhook.mollie_invoice_processed",
+      resourceType: "portal_invoice",
+      resourceId: metadata.invoiceId,
+      metadata: {
+        paymentIdPrefix: paymentId.slice(0, 8),
+        status: payment.status,
+        detail: applied.detail,
+        requestPath: sanitizedRequestUrl,
+      },
+    });
+    if (!applied.ok) {
+      return NextResponse.json({ error: "Invoice apply failed" }, { status: 400 });
+    }
+    return NextResponse.json({ received: true });
+  }
+
+  const orderId = metadata.orderId;
   if (!orderId) {
     await writeAuditLog({
       action: "webhook.mollie_no_order",
@@ -77,7 +118,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Order not found" }, { status: 400 });
   }
 
-  const mollieAmountCents = Math.round(parseFloat(payment.amount.value) * 100);
   if (payment.amount.currency !== "EUR" || mollieAmountCents !== order.total_cents) {
     await writeAuditLog({
       action: "webhook.mollie_amount_mismatch",
