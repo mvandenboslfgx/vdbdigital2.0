@@ -165,7 +165,7 @@ export async function createPortalInvoiceCheckout(params: {
       action: "checkout.invoice_payment_created",
       resourceType: "portal_invoice",
       resourceId: invoice.id,
-      actorId: params.userId,
+      userId: params.userId,
       metadata: {
         paymentIdPrefix: payment.id.slice(0, 8),
         amountCents: decision.dueCents,
