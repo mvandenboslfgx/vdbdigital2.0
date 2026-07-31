@@ -4,6 +4,11 @@
 
 export type MollieKeyMode = "test" | "live" | "unknown" | "missing";
 
+/** Read-only env view: `process.env` or an explicit record (tests / harness). */
+export type MollieRuntimeEnv =
+  | NodeJS.ProcessEnv
+  | Readonly<Record<string, string | undefined>>;
+
 export function detectMollieKeyMode(apiKey: string | undefined | null): MollieKeyMode {
   if (!apiKey) return "missing";
   if (apiKey.startsWith("test_")) return "test";
@@ -12,7 +17,7 @@ export function detectMollieKeyMode(apiKey: string | undefined | null): MollieKe
 }
 
 export function isLocalOrPreviewRuntime(
-  env: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env,
+  env: MollieRuntimeEnv = process.env,
 ): boolean {
   const appUrl = env.NEXT_PUBLIC_APP_URL ?? "";
   if (/localhost|127\.0\.0\.1/i.test(appUrl)) return true;
@@ -21,7 +26,7 @@ export function isLocalOrPreviewRuntime(
   return false;
 }
 
-export function isProductionDeployment(env: NodeJS.ProcessEnv = process.env): boolean {
+export function isProductionDeployment(env: MollieRuntimeEnv = process.env): boolean {
   return env.VERCEL_ENV === "production" || (
     env.NODE_ENV === "production" && env.VERCEL_ENV !== "preview" && !isLocalOrPreviewRuntime(env)
   );
@@ -33,7 +38,7 @@ export function isProductionDeployment(env: NodeJS.ProcessEnv = process.env): bo
  */
 export function assertMollieKeySafeForRuntime(
   apiKey: string | undefined | null,
-  env: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env,
+  env: MollieRuntimeEnv = process.env,
 ): { ok: true; mode: MollieKeyMode } | { ok: false; reason: string; mode: MollieKeyMode } {
   const mode = detectMollieKeyMode(apiKey);
   if (mode === "missing") {
@@ -76,7 +81,7 @@ export function assertMollieKeySafeForRuntime(
  * until then test mode is the verification mode. */
 export function describeMollieModeForGate(
   apiKey: string | undefined | null,
-  env: NodeJS.ProcessEnv = process.env,
+  env: MollieRuntimeEnv = process.env,
 ): string {
   const check = assertMollieKeySafeForRuntime(apiKey, env);
   if (!check.ok) return `NOT SAFE: ${check.reason}`;

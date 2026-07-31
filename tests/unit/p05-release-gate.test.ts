@@ -8,6 +8,7 @@ import { evaluateCheckoutReleaseGate } from "@/lib/checkout/release-gate";
 import {
   assertMollieKeySafeForRuntime,
   detectMollieKeyMode,
+  isProductionDeployment,
 } from "@/lib/payments/mollie-mode";
 import {
   amountMatchesOrder,
@@ -37,9 +38,29 @@ describe("P0.5 env + Mollie mode + harness", () => {
     expect(result.issues.some((i) => i.code === "checkout_flag_on")).toBe(true);
   });
 
+  it("classifies production vs staging preview via MollieRuntimeEnv records", () => {
+    expect(
+      isProductionDeployment({
+        APP_ENV: "staging",
+        VERCEL_ENV: "preview",
+        NODE_ENV: "production",
+        NEXT_PUBLIC_APP_URL: "https://vdb-digital-staging.vercel.app",
+      }),
+    ).toBe(false);
+    expect(
+      isProductionDeployment({
+        VERCEL_ENV: "production",
+        NODE_ENV: "production",
+        NEXT_PUBLIC_APP_URL: "https://vdbdigital.nl",
+      }),
+    ).toBe(true);
+  });
+
   it("separates Mollie test/live keys", () => {
     expect(detectMollieKeyMode("test_abc")).toBe("test");
     expect(detectMollieKeyMode("live_abc")).toBe("live");
+    expect(detectMollieKeyMode(undefined)).toBe("missing");
+    expect(detectMollieKeyMode("weird")).toBe("unknown");
     expect(
       assertMollieKeySafeForRuntime("live_abc", {
         NEXT_PUBLIC_APP_URL: "http://localhost:3000",
@@ -53,9 +74,19 @@ describe("P0.5 env + Mollie mode + harness", () => {
     expect(
       assertMollieKeySafeForRuntime("live_abc", {
         APP_ENV: "staging",
+        VERCEL_ENV: "preview",
         NEXT_PUBLIC_APP_URL: "https://vdb-digital-staging.vercel.app",
       }).ok,
     ).toBe(false);
+    expect(
+      assertMollieKeySafeForRuntime("test_abc", {
+        APP_ENV: "staging",
+        VERCEL_ENV: "preview",
+        CHECKOUT_ENABLED: "false",
+        MOLLIE_TEST_CHECKOUT_ENABLED: "true",
+        NEXT_PUBLIC_APP_URL: "https://vdb-digital-staging.vercel.app",
+      }).ok,
+    ).toBe(true);
     expect(
       assertMollieKeySafeForRuntime("test_abc", {
         VERCEL_ENV: "production",
@@ -63,6 +94,8 @@ describe("P0.5 env + Mollie mode + harness", () => {
         NEXT_PUBLIC_APP_URL: "https://vdbdigital.nl",
       }).ok,
     ).toBe(false);
+    expect(assertMollieKeySafeForRuntime(null, {}).ok).toBe(false);
+    expect(assertMollieKeySafeForRuntime("not_a_key", {}).ok).toBe(false);
   });
 
   it("covers harness statuses and amount/currency checks", () => {
