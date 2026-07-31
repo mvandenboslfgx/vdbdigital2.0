@@ -42,7 +42,7 @@ describe("Application webhook token", () => {
     delete process.env.MOLLIE_WEBHOOK_SECRET;
     delete process.env.APP_ENV;
     delete process.env.VERCEL_ENV;
-    process.env.NODE_ENV = "test";
+    (process.env as { NODE_ENV?: string }).NODE_ENV = "test";
     expect(verifyMollieWebhookToken(null).valid).toBe(true);
   });
 
@@ -50,7 +50,7 @@ describe("Application webhook token", () => {
     delete process.env.MOLLIE_WEBHOOK_TOKEN;
     delete process.env.MOLLIE_WEBHOOK_SECRET;
     process.env.APP_ENV = "staging";
-    process.env.NODE_ENV = "production";
+    (process.env as { NODE_ENV?: string }).NODE_ENV = "production";
     expect(verifyMollieWebhookToken(null).valid).toBe(false);
   });
 
@@ -58,7 +58,7 @@ describe("Application webhook token", () => {
     delete process.env.MOLLIE_WEBHOOK_TOKEN;
     delete process.env.MOLLIE_WEBHOOK_SECRET;
     process.env.VERCEL_ENV = "preview";
-    process.env.NODE_ENV = "production";
+    (process.env as { NODE_ENV?: string }).NODE_ENV = "production";
     expect(verifyMollieWebhookToken(null, process.env).valid).toBe(false);
   });
 
