@@ -97,4 +97,6 @@ Files added by this gate, all uncommitted:
 
 Applying rc.5 to `nhsrdnjfsxfikfbdmdfj` requires a separate owner decision that
 this gate does not grant, and is in any case gated on the open legal, fiscal and
-KYC items in `LEGAL_FISCAL_PROVIDER_DECISIONS.md`.
+KYC items in `LEGAL_FISCAL_PROVIDER_DECISIONS.md` (external IDV de-scoped for v1;
+age/identity-gate semantics and payout/bank criteria remain OPEN — see
+`DECISION_A_AGE_GATE.md`, `DECISION_B_IDENTITY_GATE.md`, `DECISION_C_PAYOUT_BANK.md`).

@@ -42,9 +42,14 @@ provenance label and currently only ever holds `staging_fixture`.
 enforced, but no cadence has been set.
 
 ### L3 — Identity verification (KYC) provider
-**OPEN.** No provider selected. `identity_verification_provider_ref` is an opaque
-reference field. The schema comment forbids storing document contents or numbers
-there; that constraint is documentary, not enforced by the database.
+**DE-SCOPED FOR V1 (external provider).** No Veriff/Sumsub/Onfido or other external
+IDV provider will be used for Partners v1. Camera IDV, document upload, selfie and
+liveness are out of scope. UI/docs must describe **administrative partner review** only.
+
+`identity_verification_status` / `identity_verification_provider_ref` columns **remain**
+(fail-closed checklist + future optional IDV). Whether the gate is re-interpreted as
+manual attestation, replaced by staff approval, or left blocking is **OPEN** — see
+`DECISION_B_IDENTITY_GATE.md`. No automatic ID-check is live.
 
 ### L4 — Business verification / KvK source of truth
 **OPEN.** `partner_is_valid_kvk` is format-only (exactly 8 digits). Nothing

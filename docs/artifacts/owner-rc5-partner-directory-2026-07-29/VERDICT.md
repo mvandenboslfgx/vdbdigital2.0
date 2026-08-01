@@ -67,19 +67,20 @@ all unchanged. Details in `PRODUCTION_SAFETY_CHECK.md`.
 
 **PASS means the technical foundation only.**
 
-**Public partner onboarding is NOT authorized.** Every KYC, legal and fiscal
-question remains open and is documented as such in
-`LEGAL_FISCAL_PROVIDER_DECISIONS.md`:
+**Public partner onboarding is NOT authorized.** Legal and fiscal questions remain
+open (`LEGAL_FISCAL_PROVIDER_DECISIONS.md`). External automatic IDV/KYC is
+**de-scoped for Partners v1** (administrative review copy only; checklist semantics
+unchanged until a separate decision — see `DECISION_B_IDENTITY_GATE.md`):
 
 - Partner agreement text is a self-labelling non-binding placeholder
   (`legal_review_status = 'REQUIRED'`).
-- No age (18+) verification provider chosen.
-- No identity verification (KYC) provider chosen.
+- Age (18+) method remains **OPEN** (`DECISION_A_AGE_GATE.md`) — do not invent a requirement.
+- No external identity verification (KYC) provider in v1.
 - No KvK register verification; the KvK check is format-only.
-- No payout profile review criteria.
+- No payout profile review criteria (`DECISION_C_PAYOUT_BANK.md`); payouts stay disabled.
 - Partner fiscal classification, VAT treatment, individual income reporting,
   invoicing direction and withholding all undecided.
-- No DPA or sub-processor register, because no provider is selected.
+- No DPA or sub-processor register for IDV, because no IDV provider is selected.
 
 On staging, four of the five compliance gates were satisfied by
 `staff_set_partner_compliance_fixture`, a flag-gated synthetic staging tool. The

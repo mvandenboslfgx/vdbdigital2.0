@@ -102,9 +102,11 @@ rather than a failure.
 - **No payout surface.** `partner_payouts` is `false` everywhere. Do not build
   payout request or approval flows against rc.5.
 - **No production deployment.** Every RPC here is absent on production.
-- **No public partner onboarding.** The intake RPC exists and works, but KYC,
-  legal and fiscal questions are all open (`LEGAL_FISCAL_PROVIDER_DECISIONS.md`).
-  Do not ship a consumer-facing "become a partner" flow.
+- **No public partner onboarding.** The intake RPC exists and works, but legal and
+  fiscal questions remain open (`LEGAL_FISCAL_PROVIDER_DECISIONS.md`). External
+  IDV/KYC is **de-scoped for v1** (administrative review only; no camera/document
+  provider). Do not ship a consumer-facing "become a partner" flow as publicly
+  authorized.
 - **No compliance fixtures outside staging.** `staff_set_partner_compliance_fixture`
   raises `FEATURE_DISABLED` wherever the flag is off, and the flag row does not
   exist on production. Never call it from a shipped build.
