@@ -8,10 +8,12 @@ import {
 } from "@/server/actions/auth-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useT } from "@/i18n/provider";
 
 const initialState: AuthActionState = {};
 
 export function MfaSetupForm() {
+  const t = useT();
   const [enrollState, setEnrollState] = useState<AuthActionState>({});
   const [verifyState, verifyAction, pending] = useActionState(
     mfaVerifyEnrollAction,
@@ -23,7 +25,7 @@ export function MfaSetupForm() {
   }, []);
 
   if (!enrollState.qrCode && !enrollState.error) {
-    return <p className="text-muted text-small">Preparing MFA…</p>;
+    return <p className="text-muted text-small">{t("mfa.enrolling")}</p>;
   }
 
   if (enrollState.error) {
@@ -37,11 +39,13 @@ export function MfaSetupForm() {
   return (
     <div className="space-y-4">
       <p className="text-small text-muted">
-        Scan the QR code with your authenticator app, then enter the 6-digit code.
+        {t("mfa.setupStepScan")} {t("mfa.setupStepCode")}
       </p>
       {enrollState.qrCode && (
         <div
           className="bg-white p-4 rounded-lg inline-block"
+          role="img"
+          aria-label={t("mfa.qrAlt")}
           dangerouslySetInnerHTML={{ __html: enrollState.qrCode }}
         />
       )}
@@ -49,7 +53,7 @@ export function MfaSetupForm() {
         <input type="hidden" name="factorId" value={enrollState.factorId ?? ""} />
         <div>
           <label htmlFor="code" className="block text-small font-medium mb-1">
-            Verification code
+            {t("mfa.codeLabel")}
           </label>
           <Input
             id="code"
@@ -67,7 +71,7 @@ export function MfaSetupForm() {
           </p>
         )}
         <Button type="submit" disabled={pending} className="w-full">
-          {pending ? "Enabling…" : "Enable MFA"}
+          {pending ? t("mfa.verifying") : t("mfa.enable")}
         </Button>
       </form>
     </div>

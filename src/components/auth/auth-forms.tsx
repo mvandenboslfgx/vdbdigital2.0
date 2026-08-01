@@ -12,10 +12,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useT } from "@/i18n/provider";
 
 const initialState: AuthActionState = {};
 
 export function PasswordResetRequestForm() {
+  const t = useT();
   const [state, formAction, pending] = useActionState(
     requestPasswordResetAction,
     initialState,
@@ -25,7 +27,7 @@ export function PasswordResetRequestForm() {
     <form action={formAction} className="space-y-4">
       <div>
         <label htmlFor="email" className="block text-small font-medium mb-1">
-          E-mailadres
+          {t("auth.emailLabel")}
         </label>
         <Input id="email" name="email" type="email" required maxLength={254} />
       </div>
@@ -40,13 +42,14 @@ export function PasswordResetRequestForm() {
         </p>
       )}
       <Button type="submit" disabled={pending} className="w-full">
-        {pending ? "Versturen…" : "Resetlink versturen"}
+        {pending ? t("auth.forgotPending") : t("auth.forgotSubmit")}
       </Button>
     </form>
   );
 }
 
 export function PasswordUpdateForm() {
+  const t = useT();
   const [state, formAction, pending] = useActionState(
     updatePasswordAction,
     initialState,
@@ -56,7 +59,7 @@ export function PasswordUpdateForm() {
     <form action={formAction} className="space-y-4">
       <div>
         <label htmlFor="password" className="block text-small font-medium mb-1">
-          Nieuw wachtwoord
+          {t("auth.resetPasswordLabel")}
         </label>
         <Input
           id="password"
@@ -74,13 +77,14 @@ export function PasswordUpdateForm() {
         </p>
       )}
       <Button type="submit" disabled={pending} className="w-full">
-        {pending ? "Opslaan…" : "Wachtwoord opslaan"}
+        {pending ? t("auth.resetPending") : t("auth.resetSubmit")}
       </Button>
     </form>
   );
 }
 
 export function MagicLinkForm() {
+  const t = useT();
   const [state, formAction, pending] = useActionState(
     requestMagicLinkAction,
     initialState,
@@ -90,7 +94,7 @@ export function MagicLinkForm() {
     <form action={formAction} className="space-y-4">
       <div>
         <label htmlFor="magic-email" className="block text-small font-medium mb-1">
-          E-mailadres
+          {t("auth.magicLinkLabel")}
         </label>
         <Input
           id="magic-email"
@@ -111,13 +115,14 @@ export function MagicLinkForm() {
         </p>
       )}
       <Button type="submit" disabled={pending} className="w-full" variant="secondary">
-        {pending ? "Versturen…" : "Stuur inloglink"}
+        {pending ? t("auth.magicLinkPending") : t("auth.magicLinkButton")}
       </Button>
     </form>
   );
 }
 
 export function AccountRequestForm() {
+  const t = useT();
   const [state, formAction, pending] = useActionState(
     requestAccountAction,
     initialState,
@@ -127,25 +132,25 @@ export function AccountRequestForm() {
     <form action={formAction} className="space-y-4">
       <div>
         <label htmlFor="fullName" className="block text-small font-medium mb-1">
-          Naam
+          {t("auth.registerNameLabel")}
         </label>
         <Input id="fullName" name="fullName" required maxLength={120} />
       </div>
       <div>
         <label htmlFor="email" className="block text-small font-medium mb-1">
-          E-mailadres
+          {t("auth.registerEmailLabel")}
         </label>
         <Input id="email" name="email" type="email" required maxLength={254} />
       </div>
       <div>
         <label htmlFor="company" className="block text-small font-medium mb-1">
-          Bedrijf (optioneel)
+          {t("auth.registerCompanyLabel")}
         </label>
         <Input id="company" name="company" maxLength={200} />
       </div>
       <div>
         <label htmlFor="message" className="block text-small font-medium mb-1">
-          Toelichting (optioneel)
+          {t("auth.registerMessageLabel")}
         </label>
         <Textarea id="message" name="message" maxLength={2000} rows={4} />
       </div>
@@ -160,17 +165,15 @@ export function AccountRequestForm() {
         </p>
       )}
       <Button type="submit" disabled={pending} className="w-full">
-        {pending ? "Versturen…" : "Aanvraag versturen"}
+        {pending ? t("auth.registerPending") : t("auth.registerSubmit")}
       </Button>
-      <p className="text-small text-muted">
-        Een aanvraag geeft geen automatische toegang tot projecten of documenten.
-        Toegang volgt via uitnodiging of goedkeuring.
-      </p>
+      <p className="text-small text-muted">{t("auth.registerNote")}</p>
     </form>
   );
 }
 
 export function AcceptInvitationForm({ token }: { token: string }) {
+  const t = useT();
   const [state, formAction, pending] = useActionState(
     acceptInvitationAction,
     initialState,
@@ -181,13 +184,13 @@ export function AcceptInvitationForm({ token }: { token: string }) {
       <input type="hidden" name="token" value={token} />
       <div>
         <label htmlFor="fullName" className="block text-small font-medium mb-1">
-          Je naam
+          {t("auth.inviteNameLabel")}
         </label>
         <Input id="fullName" name="fullName" required maxLength={120} />
       </div>
       <div>
         <label htmlFor="password" className="block text-small font-medium mb-1">
-          Kies een wachtwoord
+          {t("auth.invitePasswordLabel")}
         </label>
         <Input
           id="password"
@@ -205,7 +208,7 @@ export function AcceptInvitationForm({ token }: { token: string }) {
         </p>
       )}
       <Button type="submit" disabled={pending} className="w-full">
-        {pending ? "Activeren…" : "Uitnodiging accepteren"}
+        {pending ? t("auth.invitePending") : t("auth.inviteSubmit")}
       </Button>
     </form>
   );

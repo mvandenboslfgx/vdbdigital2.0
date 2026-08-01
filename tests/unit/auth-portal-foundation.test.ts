@@ -54,9 +54,11 @@ describe("Auth portal foundation — customer org roles", () => {
 describe("Auth portal foundation — login copy + routes", () => {
   it("uses generic non-enumerating login error", () => {
     const src = readFileSync("src/server/actions/auth-actions.ts", "utf8");
-    expect(src).toContain(
-      "Inloggen is niet gelukt. Controleer je gegevens en probeer het opnieuw.",
-    );
+    // Both invalid-input and invalid-credential paths must return the same
+    // translated, non-enumerating error via the shared helper.
+    const genericErrorUses = src.match(/genericAuthError\(t\)/g) ?? [];
+    expect(genericErrorUses.length).toBeGreaterThanOrEqual(2);
+    expect(src).toContain('t("errors.genericLoginFailed")');
   });
 
   it("ships canonical Dutch auth routes", () => {

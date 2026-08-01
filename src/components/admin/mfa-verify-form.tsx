@@ -7,10 +7,12 @@ import {
 } from "@/server/actions/auth-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useT } from "@/i18n/provider";
 
 const initialState: AuthActionState = {};
 
 export function MfaVerifyForm() {
+  const t = useT();
   const [state, formAction, pending] = useActionState(
     mfaVerifyLoginAction,
     initialState,
@@ -18,12 +20,10 @@ export function MfaVerifyForm() {
 
   return (
     <form action={formAction} className="space-y-4">
-      <p className="text-small text-muted">
-        Enter the code from your authenticator app to continue.
-      </p>
+      <p className="text-small text-muted">{t("mfa.challengeBody")}</p>
       <div>
         <label htmlFor="code" className="block text-small font-medium mb-1">
-          Verification code
+          {t("mfa.codeLabel")}
         </label>
         <Input
           id="code"
@@ -41,7 +41,7 @@ export function MfaVerifyForm() {
         </p>
       )}
       <Button type="submit" disabled={pending} className="w-full">
-        {pending ? "Verifying…" : "Verify"}
+        {pending ? t("mfa.verifying") : t("mfa.verify")}
       </Button>
     </form>
   );
