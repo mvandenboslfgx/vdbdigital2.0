@@ -891,6 +891,15 @@ const en = {
         newBreadcrumb: "New",
         newSubtitle:
           "Invitation-first: organisation + invitation. No open portal access without acceptance.",
+        createHeading: "Create & invite customer",
+        legalName: "Legal name",
+        tradeName: "Trade name",
+        typeBusiness: "Business",
+        typeConsumer: "Consumer",
+        contactEmail: "Contact email",
+        inviteEmail: "Invitation to",
+        creating: "Creating…",
+        submitCreate: "Create and invite",
       },
       organizations: {
         title: "Organisations",
@@ -990,6 +999,23 @@ const en = {
         emptyTitle: "No tickets yet",
         emptyDescription:
           "Customer support tickets appear here. Nothing disappears silently.",
+        currentStatus: "Current: {status}",
+        newStatus: "New status",
+        updatingStatus: "Updating…",
+        saveStatus: "Save status",
+        internalNoteHeading: "Internal note",
+        internalNoteDisabled:
+          "Internal notes are disabled. No external reply is used as a fallback.",
+        internalNoteVisibility:
+          "Only visible to Staff/Admin/Owner. Never to Customer/Partner.",
+        internalNoteField: "Note",
+        saveInternalNote: "Save internal note",
+        ticketTitle: "Support ticket",
+        externalMessages: "External messages",
+        noExternalMessages: "No external messages yet.",
+        publicTag: "public",
+        internalNotes: "Internal notes",
+        noInternalNotes: "No internal notes.",
       },
       notifications: {
         title: "Notifications",

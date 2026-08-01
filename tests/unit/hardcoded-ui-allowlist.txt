@@ -36,7 +36,6 @@ src/app/admin/(protected)/invoices/[id]/preview/page.tsx
 src/app/admin/(protected)/invoices/[id]/versions/page.tsx
 src/app/admin/(protected)/quotes/[id]/page.tsx
 src/app/admin/(protected)/quotes/[id]/versions/page.tsx
-src/app/admin/(protected)/support/[id]/page.tsx
 src/app/admin/(protected)/projects/[id]/actions/page.tsx
 src/app/admin/(protected)/projects/[id]/activity/page.tsx
 src/app/admin/(protected)/projects/[id]/deliverables/page.tsx
@@ -52,9 +51,6 @@ src/app/admin/(protected)/projects/[id]/overview/page.tsx
 # src/lib/admin/*-labels.ts; the components below still carry Dutch labels and
 # need the same treatment.
 src/components/admin/admin-products-table.tsx
-src/components/admin/admin-ticket-internal-note-form.tsx
-src/components/admin/admin-ticket-status-form.tsx
-src/components/admin/create-customer-form.tsx
 src/components/admin/project-forms.tsx
 src/components/admin/project-settings-form.tsx
 src/components/admin/reverse-payment-controls.tsx

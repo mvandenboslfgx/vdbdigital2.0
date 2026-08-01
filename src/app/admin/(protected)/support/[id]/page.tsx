@@ -13,11 +13,16 @@ import {
 } from "@/lib/database/server";
 import { TICKET_STATUS_KEYS, labelFor } from "@/lib/portal/labels";
 import { getDictionary } from "@/i18n/get-dictionary";
+import { formatDateTime } from "@/i18n/format-date";
+import {
+  buildTicketInternalNoteFormLabels,
+  buildTicketStatusFormLabels,
+} from "@/lib/admin/support-form-labels";
 
-export const metadata: Metadata = {
-  title: "Supportticket",
-  robots: { index: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getDictionary();
+  return { title: t("admin.page.support.ticketTitle"), robots: { index: false } };
+}
 
 type ReplyRow = {
   id: string;
@@ -59,7 +64,7 @@ export default async function AdminSupportDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { t } = await getDictionary();
+  const { t, locale } = await getDictionary();
   const { id } = await params;
   const ctx = await requireAdmin();
   await requirePermission(ctx, "support.manage");
@@ -107,7 +112,7 @@ export default async function AdminSupportDetailPage({
           href="/admin/support"
           className="text-small text-primary hover:underline"
         >
-          ← Support
+          ← {t("admin.support")}
         </Link>
         <h1 className="text-h1 mt-2">{ticket.subject}</h1>
         <p className="text-muted text-small">
@@ -119,9 +124,11 @@ export default async function AdminSupportDetailPage({
       </div>
 
       <Card>
-        <h2 className="text-h3 mb-3">Externe berichten</h2>
+        <h2 className="text-h3 mb-3">{t("admin.page.support.externalMessages")}</h2>
         {publicReplies.length === 0 ? (
-          <p className="text-small text-muted">Nog geen externe berichten.</p>
+          <p className="text-small text-muted">
+            {t("admin.page.support.noExternalMessages")}
+          </p>
         ) : (
           <ul className="space-y-3">
             {publicReplies.map((r) => (
@@ -132,7 +139,8 @@ export default async function AdminSupportDetailPage({
               >
                 <p className="whitespace-pre-wrap">{r.body}</p>
                 <p className="text-muted mt-1 text-xs">
-                  {new Date(r.created_at).toLocaleString("nl-NL")} · publiek
+                  {formatDateTime(r.created_at, locale)} ·{" "}
+                  {t("admin.page.support.publicTag")}
                 </p>
               </li>
             ))}
@@ -141,9 +149,11 @@ export default async function AdminSupportDetailPage({
       </Card>
 
       <Card>
-        <h2 className="text-h3 mb-3">Interne notities</h2>
+        <h2 className="text-h3 mb-3">{t("admin.page.support.internalNotes")}</h2>
         {internalReplies.length === 0 ? (
-          <p className="text-small text-muted">Geen interne notities.</p>
+          <p className="text-small text-muted">
+            {t("admin.page.support.noInternalNotes")}
+          </p>
         ) : (
           <ul className="space-y-3">
             {internalReplies.map((r) => (
@@ -153,11 +163,11 @@ export default async function AdminSupportDetailPage({
                 data-testid={`admin-support-internal-reply-${r.id.slice(0, 8)}`}
               >
                 <p className="text-xs font-medium text-amber-200 mb-1">
-                  Interne notitie
+                  {t("admin.page.support.internalNoteHeading")}
                 </p>
                 <p className="whitespace-pre-wrap">{r.body}</p>
                 <p className="text-muted mt-1 text-xs">
-                  {new Date(r.created_at).toLocaleString("nl-NL")}
+                  {formatDateTime(r.created_at, locale)}
                 </p>
               </li>
             ))}
@@ -170,12 +180,14 @@ export default async function AdminSupportDetailPage({
         <AdminTicketInternalNoteForm
           ticketId={ticket.id}
           enabled={internalNotesEnabled}
+          labels={buildTicketInternalNoteFormLabels(t)}
         />
       </div>
 
       <AdminTicketStatusForm
         ticketId={ticket.id}
         currentStatus={String(ticket.status).toUpperCase()}
+        labels={buildTicketStatusFormLabels(t)}
       />
     </div>
   );

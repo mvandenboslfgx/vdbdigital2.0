@@ -901,6 +901,15 @@ const nl: Messages = {
         newBreadcrumb: "Nieuw",
         newSubtitle:
           "Invitation-first: organisatie + uitnodiging. Geen open portaltoegang zonder acceptatie.",
+        createHeading: "Klant aanmaken & uitnodigen",
+        legalName: "Officiële naam",
+        tradeName: "Handelsnaam",
+        typeBusiness: "Zakelijk",
+        typeConsumer: "Particulier",
+        contactEmail: "Contact e-mail",
+        inviteEmail: "Uitnodiging naar",
+        creating: "Aanmaken…",
+        submitCreate: "Aanmaken en uitnodigen",
       },
       organizations: {
         title: "Organisaties",
@@ -1001,6 +1010,23 @@ const nl: Messages = {
         emptyTitle: "Nog geen tickets",
         emptyDescription:
           "Supporttickets van klanten verschijnen hier. Niets verdwijnt stil.",
+        currentStatus: "Huidig: {status}",
+        newStatus: "Nieuwe status",
+        updatingStatus: "Bijwerken…",
+        saveStatus: "Status opslaan",
+        internalNoteHeading: "Interne notitie",
+        internalNoteDisabled:
+          "Interne notities zijn uitgeschakeld. Er wordt geen externe reactie als fallback gebruikt.",
+        internalNoteVisibility:
+          "Alleen zichtbaar voor Staff/Admin/Owner. Nooit voor Customer/Partner.",
+        internalNoteField: "Notitie",
+        saveInternalNote: "Interne notitie opslaan",
+        ticketTitle: "Supportticket",
+        externalMessages: "Externe berichten",
+        noExternalMessages: "Nog geen externe berichten.",
+        publicTag: "publiek",
+        internalNotes: "Interne notities",
+        noInternalNotes: "Geen interne notities.",
       },
       notifications: {
         title: "Notificaties",

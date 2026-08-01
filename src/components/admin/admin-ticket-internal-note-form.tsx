@@ -7,15 +7,19 @@ import {
 } from "@/server/actions/admin-support-actions";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import type { TicketInternalNoteFormLabels } from "@/lib/admin/support-form-labels";
 
 const initial: AdminSupportActionState = {};
 
 export function AdminTicketInternalNoteForm({
   ticketId,
   enabled,
+  labels,
 }: {
   ticketId: string;
   enabled: boolean;
+  /** Resolved server-side; this form does no dictionary lookups. */
+  labels: TicketInternalNoteFormLabels;
 }) {
   const [state, formAction, pending] = useActionState(
     adminInternalNoteSupportTicketAction,
@@ -28,11 +32,9 @@ export function AdminTicketInternalNoteForm({
         className="rounded-xl border border-dashed border-border p-5"
         data-testid="admin-support-internal-note-disabled"
       >
-        <h3 className="text-h3">Interne notitie</h3>
+        <h3 className="text-h3">{labels.heading}</h3>
         <p className="text-small text-muted mt-2">
-          Interne notities zijn uitgeschakeld (
-          <code>support_internal_notes_rpc=false</code>). Er wordt geen externe
-          reactie als fallback gebruikt.
+          <code>support_internal_notes_rpc=false</code> — {labels.disabled}
         </p>
       </div>
     );
@@ -45,12 +47,10 @@ export function AdminTicketInternalNoteForm({
       data-testid="admin-support-internal-note-form"
     >
       <input type="hidden" name="ticketId" value={ticketId} />
-      <h3 className="text-h3">Interne notitie</h3>
-      <p className="text-small text-muted">
-        Alleen zichtbaar voor Staff/Admin/Owner. Nooit voor Customer/Partner.
-      </p>
+      <h3 className="text-h3">{labels.heading}</h3>
+      <p className="text-small text-muted">{labels.visibility}</p>
       <label htmlFor="internal-body" className="block text-small font-medium mb-1">
-        Notitie
+        {labels.field}
       </label>
       <Textarea
         id="internal-body"
@@ -71,7 +71,7 @@ export function AdminTicketInternalNoteForm({
         </p>
       ) : null}
       <Button type="submit" disabled={pending} data-testid="btn-admin-support-internal-note">
-        {pending ? "Opslaan…" : "Interne notitie opslaan"}
+        {pending ? labels.saving : labels.submit}
       </Button>
     </form>
   );

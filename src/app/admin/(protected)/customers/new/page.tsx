@@ -6,6 +6,7 @@ import { hasPermission } from "@/lib/auth/permissions";
 import { redirect } from "next/navigation";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { withLocale } from "@/i18n/config";
+import { buildCreateCustomerFormLabels } from "@/lib/admin/support-form-labels";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getDictionary();
@@ -39,7 +40,7 @@ export default async function AdminNewCustomerPage() {
           {t("admin.page.customers.newSubtitle")}
         </p>
       </div>
-      <CreateCustomerForm />
+      <CreateCustomerForm labels={buildCreateCustomerFormLabels(t)} />
     </div>
   );
 }

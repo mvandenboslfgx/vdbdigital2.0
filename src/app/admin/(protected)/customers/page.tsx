@@ -5,6 +5,7 @@ import { listAdminOrganizations } from "@/server/repositories/admin-portal";
 import { CreateCustomerForm } from "@/components/admin/create-customer-form";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { withLocale } from "@/i18n/config";
+import { buildCreateCustomerFormLabels } from "@/lib/admin/support-form-labels";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getDictionary();
@@ -47,7 +48,7 @@ export default async function AdminCustomersPage({
         </div>
       </div>
 
-      <CreateCustomerForm />
+      <CreateCustomerForm labels={buildCreateCustomerFormLabels(t)} />
 
       <form className="flex flex-wrap gap-3" method="get">
         <input
