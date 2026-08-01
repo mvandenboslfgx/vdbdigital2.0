@@ -2,11 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { EmptyState } from "@/components/portal/empty-state";
 import { PortalUploadForm } from "@/components/documents/document-forms";
+import { documentUploadLabels } from "@/lib/portal/form-labels";
 import { listPortalFiles } from "@/server/repositories/portal";
 import { hasCustomerPermission } from "@/lib/auth/customer-permissions";
 import { formatBytes } from "@/lib/validation/documents";
 import { DOCUMENT_CATEGORY_KEYS, labelFor } from "@/lib/portal/labels";
 import { getDictionary } from "@/i18n/get-dictionary";
+import { formatDate } from "@/i18n/format-date";
+import { withLocale } from "@/i18n/config";
 
 export const metadata: Metadata = {
   title: "Documenten",
@@ -14,7 +17,7 @@ export const metadata: Metadata = {
 };
 
 export default async function PortalDocumentsPage() {
-  const { t } = await getDictionary();
+  const { t, locale } = await getDictionary();
   const { files, ctx } = await listPortalFiles();
   const canUpload = hasCustomerPermission(
     ctx.customerRole,
@@ -23,21 +26,21 @@ export default async function PortalDocumentsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-h1">Documenten</h1>
+      <h1 className="text-h1">{t("portal.documentsPage.title")}</h1>
 
-      {canUpload ? <PortalUploadForm /> : null}
+      {canUpload ? <PortalUploadForm labels={documentUploadLabels(t)} /> : null}
 
       {files.length === 0 ? (
         <EmptyState
-          title="Geen documenten"
-          description="Er zijn momenteel geen documenten beschikbaar."
+          title={t("portal.documentsPage.emptyTitle")}
+          description={t("portal.documentsPage.emptyBody")}
         />
       ) : (
         <ul className="space-y-2">
           {files.map((f) => (
             <li key={f.id}>
               <Link
-                href={`/portal/documenten/${f.id}`}
+                href={withLocale(`/portal/documenten/${f.id}`, locale)}
                 className="block rounded-xl border border-border p-4 hover:border-primary"
               >
                 <div className="flex flex-wrap justify-between gap-2">
@@ -45,7 +48,7 @@ export default async function PortalDocumentsPage() {
                     {f.title || f.file_name}
                   </span>
                   <span className="text-muted text-small shrink-0">
-                    {new Date(f.created_at).toLocaleDateString("nl-NL")}
+                    {formatDate(f.created_at, locale)}
                   </span>
                 </div>
                 <p className="text-small text-muted mt-1">
@@ -53,8 +56,8 @@ export default async function PortalDocumentsPage() {
                   {f.size_bytes != null ? ` · ${formatBytes(f.size_bytes)}` : ""}
                   {f.version_number ? ` · v${f.version_number}` : ""}
                   {f.visibility === "CUSTOMER_UPLOAD"
-                    ? " · Door jou aangeleverd"
-                    : " · VDB Digital"}
+                    ? t("portal.documentsPage.sourceCustomerSuffix")
+                    : t("portal.documentsPage.sourceVdbSuffix")}
                 </p>
               </Link>
             </li>

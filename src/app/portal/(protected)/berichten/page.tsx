@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { EmptyState } from "@/components/portal/empty-state";
 import { listPortalConversations } from "@/server/repositories/portal";
 import { getDictionary } from "@/i18n/get-dictionary";
+import { formatDateTime } from "@/i18n/format-date";
+import { withLocale } from "@/i18n/config";
 
 export const metadata: Metadata = {
   title: "Berichten",
@@ -20,7 +22,7 @@ export default async function PortalMessagesPage() {
         <EmptyState
           title={t("portal.messagesPage.emptyTitle")}
           description={t("portal.messagesPage.emptyBody")}
-          actionHref="/portal/support"
+          actionHref={withLocale("/portal/support", locale)}
           actionLabel={t("portal.messagesPage.openTicket")}
         />
       ) : (
@@ -33,9 +35,7 @@ export default async function PortalMessagesPage() {
               <p className="font-medium">{c.subject}</p>
               <p className="text-small text-muted mt-1">
                 {c.last_message_at
-                  ? new Date(c.last_message_at).toLocaleString(
-                      locale === "nl" ? "nl-NL" : "en-US",
-                    )
+                  ? formatDateTime(c.last_message_at, locale)
                   : t("portal.messagesPage.noMessagesYet")}
               </p>
             </li>

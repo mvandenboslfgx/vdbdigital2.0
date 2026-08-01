@@ -3,13 +3,14 @@ import { PortalProjectTabShell } from "@/components/portal/project-tabs";
 import { getPortalProject } from "@/server/repositories/portal";
 import { MILESTONE_STATUS_KEYS, labelFor } from "@/lib/portal/labels";
 import { getDictionary } from "@/i18n/get-dictionary";
+import { formatDate } from "@/i18n/format-date";
 
 export default async function PortalProjectMilestonesPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { t } = await getDictionary();
+  const { t, locale } = await getDictionary();
   const { id } = await params;
   const { project, milestones } = await getPortalProject(id);
   if (!project) notFound();
@@ -17,7 +18,9 @@ export default async function PortalProjectMilestonesPage({
   return (
     <PortalProjectTabShell projectId={id} active="milestones">
       {milestones.length === 0 ? (
-        <p className="text-muted text-small">Nog geen zichtbare mijlpalen.</p>
+        <p className="text-muted text-small">
+          {t("portal.projectDetail.noMilestones")}
+        </p>
       ) : (
         <ol className="space-y-3">
           {milestones.map(
@@ -39,10 +42,14 @@ export default async function PortalProjectMilestonesPage({
                 ) : null}
                 <p className="text-small text-muted mt-2">
                   {m.completed_at
-                    ? `Afgerond op ${new Date(m.completed_at).toLocaleDateString("nl-NL")}`
+                    ? t("portal.projectDetail.milestoneCompleted", {
+                        date: formatDate(m.completed_at, locale),
+                      })
                     : m.due_date
-                      ? `Gepland: ${new Date(m.due_date).toLocaleDateString("nl-NL")}`
-                      : "Nog geen datum"}
+                      ? t("portal.projectDetail.milestoneDue", {
+                          date: formatDate(m.due_date, locale),
+                        })
+                      : t("portal.projectDetail.milestoneNoDate")}
                 </p>
               </li>
             ),

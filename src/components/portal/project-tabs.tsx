@@ -1,18 +1,14 @@
 import Link from "next/link";
+import { getDictionary } from "@/i18n/get-dictionary";
+import { withLocale } from "@/i18n/config";
 
-export function PortalProjectTabShell({
+export async function PortalProjectTabShell({
   projectId,
   active,
   children,
 }: {
   projectId: string;
-  active:
-    | "overview"
-    | "milestones"
-    | "deliverables"
-    | "documents"
-    | "feedback"
-    | "activity";
+  active: ProjectTabId;
   children: React.ReactNode;
 }) {
   return (
@@ -23,41 +19,47 @@ export function PortalProjectTabShell({
   );
 }
 
-const TABS = [
-  { href: "overview", label: "Overzicht" },
-  { href: "milestones", label: "Mijlpalen" },
-  { href: "deliverables", label: "Opleveringen" },
-  { href: "documents", label: "Documenten" },
-  { href: "feedback", label: "Feedback" },
-  { href: "activity", label: "Activiteit" },
+/** Segment doubles as the dictionary key under `portal.projectDetail.tabs`. */
+const TAB_IDS = [
+  "overview",
+  "milestones",
+  "deliverables",
+  "documents",
+  "feedback",
+  "activity",
 ] as const;
 
-export function PortalProjectTabs({
+export type ProjectTabId = (typeof TAB_IDS)[number];
+
+export async function PortalProjectTabs({
   projectId,
   active,
 }: {
   projectId: string;
-  active: (typeof TABS)[number]["href"];
+  active: ProjectTabId;
 }) {
+  const { t, locale } = await getDictionary();
+
   return (
     <nav
-      aria-label="Projectsecties"
+      aria-label={t("portal.projectDetail.tabsAria")}
       className="flex gap-1 overflow-x-auto border-b border-border pb-px -mx-1 px-1"
     >
-      {TABS.map((tab) => {
-        const href = `/portal/projecten/${projectId}/${tab.href}`;
-        const isActive = active === tab.href;
+      {TAB_IDS.map((tab) => {
+        const href = withLocale(`/portal/projecten/${projectId}/${tab}`, locale);
+        const isActive = active === tab;
         return (
           <Link
-            key={tab.href}
+            key={tab}
             href={href}
             className={`shrink-0 min-h-11 px-3 inline-flex items-center text-sm rounded-t-lg border-b-2 ${
               isActive
                 ? "border-primary text-primary font-medium"
                 : "border-transparent text-muted hover:text-foreground"
             }`}
+            aria-current={isActive ? "page" : undefined}
           >
-            {tab.label}
+            {t(`portal.projectDetail.tabs.${tab}`)}
           </Link>
         );
       })}

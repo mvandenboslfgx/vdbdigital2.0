@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getPortalQuote } from "@/server/repositories/portal";
 import { QuoteResponseForm } from "@/components/portal/quote-response-form";
+import { quoteResponseLabels } from "@/lib/portal/form-labels";
 import { hasCustomerPermission } from "@/lib/auth/customer-permissions";
 import { isQuoteExpired } from "@/lib/commerce/quote-money";
 import { getDictionary } from "@/i18n/get-dictionary";
@@ -44,7 +45,11 @@ export default async function PortalQuoteDeclinePage({
           {t("portal.quoteDeclinePage.intro", { number: quote.quote_number })}
         </p>
       </div>
-      <QuoteResponseForm quoteId={quote.id} mode="decline" />
+      <QuoteResponseForm
+        quoteId={quote.id}
+        mode="decline"
+        labels={quoteResponseLabels(t)}
+      />
     </div>
   );
 }

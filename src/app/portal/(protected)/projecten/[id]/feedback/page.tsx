@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
 import { PortalProjectTabShell } from "@/components/portal/project-tabs";
 import { ProjectFeedbackForm } from "@/components/portal/project-customer-forms";
+import { projectFormLabels } from "@/lib/portal/form-labels";
 import { getPortalProject } from "@/server/repositories/portal";
 import { hasCustomerPermission } from "@/lib/auth/customer-permissions";
 import { getDictionary } from "@/i18n/get-dictionary";
+import { formatDateTime } from "@/i18n/format-date";
 
 export default async function PortalProjectFeedbackPage({
   params,
@@ -22,7 +24,9 @@ export default async function PortalProjectFeedbackPage({
 
   return (
     <PortalProjectTabShell projectId={id} active="feedback">
-      {canFeedback ? <ProjectFeedbackForm projectId={id} /> : null}
+      {canFeedback ? (
+        <ProjectFeedbackForm projectId={id} labels={projectFormLabels(t)} />
+      ) : null}
       {bundle.feedback.length === 0 ? (
         <p className="text-muted text-small">
           {t("portal.projectFeedbackPage.empty")}
@@ -37,9 +41,7 @@ export default async function PortalProjectFeedbackPage({
               >
                 <p className="whitespace-pre-wrap">{f.body}</p>
                 <p className="text-muted mt-2">
-                  {new Date(f.created_at).toLocaleString(
-                    locale === "nl" ? "nl-NL" : "en-US",
-                  )}
+                  {formatDateTime(f.created_at, locale)}
                 </p>
               </li>
             ),

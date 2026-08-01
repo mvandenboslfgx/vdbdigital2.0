@@ -11,7 +11,19 @@ import { Textarea } from "@/components/ui/textarea";
 
 const initial: PortalActionState = {};
 
-export function CreateTicketForm() {
+export type CreateTicketFormLabels = {
+  heading: string;
+  subjectLabel: string;
+  descriptionLabel: string;
+  submit: string;
+  submitting: string;
+};
+
+export function CreateTicketForm({
+  labels,
+}: {
+  labels: CreateTicketFormLabels;
+}) {
   const [state, formAction, pending] = useActionState(
     createSupportTicketAction,
     initial,
@@ -22,10 +34,10 @@ export function CreateTicketForm() {
       action={formAction}
       className="space-y-4 rounded-xl border border-border p-5 bg-surface"
     >
-      <h2 className="text-h3">Nieuw ticket</h2>
+      <h2 className="text-h3">{labels.heading}</h2>
       <div>
         <label htmlFor="subject" className="block text-small font-medium mb-1">
-          Onderwerp
+          {labels.subjectLabel}
         </label>
         <Input id="subject" name="subject" required maxLength={200} />
       </div>
@@ -34,7 +46,7 @@ export function CreateTicketForm() {
           htmlFor="description"
           className="block text-small font-medium mb-1"
         >
-          Omschrijving
+          {labels.descriptionLabel}
         </label>
         <Textarea
           id="description"
@@ -56,7 +68,7 @@ export function CreateTicketForm() {
         </p>
       )}
       <Button type="submit" disabled={pending}>
-        {pending ? "Versturen…" : "Ticket openen"}
+        {pending ? labels.submitting : labels.submit}
       </Button>
     </form>
   );

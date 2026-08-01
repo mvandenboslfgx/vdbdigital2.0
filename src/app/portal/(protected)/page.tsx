@@ -14,6 +14,8 @@ import {
   labelFor,
 } from "@/lib/portal/labels";
 import { getDictionary } from "@/i18n/get-dictionary";
+import { formatDate } from "@/i18n/format-date";
+import { withLocale } from "@/i18n/config";
 
 export const metadata: Metadata = {
   title: "Klantenportaal",
@@ -21,7 +23,7 @@ export const metadata: Metadata = {
 };
 
 export default async function PortalDashboardPage() {
-  const { t } = await getDictionary();
+  const { t, locale } = await getDictionary();
   const {
     ctx,
     projects,
@@ -40,51 +42,64 @@ export default async function PortalDashboardPage() {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-h1 mb-2">Welkom, {ctx.displayName}</h1>
+        <h1 className="text-h1 mb-2">
+          {t("portal.dashboard.welcome", { name: ctx.displayName })}
+        </h1>
         <p className="text-muted">
-          Overzicht voor {orgName}. Alleen gegevens van jouw organisatie.
+          {t("portal.dashboard.overview", { org: orgName })}
         </p>
       </header>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
-          <p className="text-label text-muted mb-1">Actieve projecten</p>
+          <p className="text-label text-muted mb-1">
+            {t("portal.dashboard.activeProjects")}
+          </p>
           <p className="text-3xl font-semibold">{projects.length}</p>
         </Card>
         <Card>
-          <p className="text-label text-muted mb-1">Open tickets</p>
+          <p className="text-label text-muted mb-1">
+            {t("portal.dashboard.openTickets")}
+          </p>
           <p className="text-3xl font-semibold">{tickets.length}</p>
         </Card>
         <Card>
-          <p className="text-label text-muted mb-1">Offertes</p>
+          <p className="text-label text-muted mb-1">
+            {t("portal.dashboard.quotesCount")}
+          </p>
           <p className="text-3xl font-semibold">{quotes.length}</p>
         </Card>
         <Card>
-          <p className="text-label text-muted mb-1">Ongelezen meldingen</p>
+          <p className="text-label text-muted mb-1">
+            {t("portal.dashboard.unreadNotifications")}
+          </p>
           <p className="text-3xl font-semibold">{unread}</p>
         </Card>
       </div>
 
       <section>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-h3">Projecten</h2>
-          <Link href="/portal/projecten" className="text-small text-primary hover:underline">
-            Alles bekijken
+          <h2 className="text-h3">{t("portal.dashboard.projectsTitle")}</h2>
+          <Link
+            href={withLocale("/portal/projecten", locale)}
+            className="text-small text-primary hover:underline"
+          >
+            {t("portal.dashboard.viewAll")}
           </Link>
         </div>
         {projects.length === 0 ? (
           <EmptyState
-            title="Geen actieve projecten"
-            description="Er zijn momenteel geen actieve projecten gekoppeld aan je account."
-            actionHref="/portal/support"
-            actionLabel="Stel een vraag"
+            title={t("portal.dashboard.noActiveProjectsTitle")}
+            description={t("portal.dashboard.noActiveProjectsBody")}
+            actionHref={withLocale("/portal/support", locale)}
+            actionLabel={t("portal.dashboard.askQuestion")}
           />
         ) : (
           <ul className="space-y-3">
             {projects.map((p) => (
               <li key={p.id}>
                 <Link
-                  href={`/portal/projecten/${p.id}`}
+                  href={withLocale(`/portal/projecten/${p.id}`, locale)}
                   className="block rounded-xl border border-border bg-surface p-4 hover:border-primary transition-colors"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -100,7 +115,9 @@ export default async function PortalDashboardPage() {
                     />
                   </div>
                   <p className="text-small text-muted mt-2">
-                    Voortgang {p.progress_percent}%
+                    {t("portal.dashboard.progress", {
+                      percent: p.progress_percent,
+                    })}
                   </p>
                 </Link>
               </li>
@@ -111,11 +128,13 @@ export default async function PortalDashboardPage() {
 
       <div className="grid lg:grid-cols-2 gap-8">
         <section>
-          <h2 className="text-h3 mb-4">Openstaande acties</h2>
+          <h2 className="text-h3 mb-4">
+            {t("portal.dashboard.pendingActionsTitle")}
+          </h2>
           {tickets.length === 0 && quotes.filter((q) => q.status === "SENT" || q.status === "VIEWED").length === 0 ? (
             <EmptyState
-              title="Geen openstaande acties"
-              description="Zodra er feedback, een offerte of support nodig is, verschijnt dat hier."
+              title={t("portal.dashboard.noPendingActionsTitle")}
+              description={t("portal.dashboard.noPendingActionsBody")}
             />
           ) : (
             <ul className="space-y-2">
@@ -124,22 +143,27 @@ export default async function PortalDashboardPage() {
                 .map((q) => (
                   <li key={q.id}>
                     <Link
-                      href={`/portal/offertes/${q.id}`}
+                      href={withLocale(`/portal/offertes/${q.id}`, locale)}
                       className="block rounded-lg border border-border p-3 text-small hover:border-primary"
                     >
-                      Offerte {q.quote_number} —{" "}
-                      {labelFor(t, QUOTE_STATUS_KEYS, q.status)}
+                      {t("portal.dashboard.quoteLine", {
+                        number: q.quote_number,
+                        status: labelFor(t, QUOTE_STATUS_KEYS, q.status),
+                      })}
                     </Link>
                   </li>
                 ))}
               {tickets.map((ticket) => (
                 <li key={ticket.id}>
                   <Link
-                    href={`/portal/support/${ticket.id}`}
+                    href={withLocale(`/portal/support/${ticket.id}`, locale)}
                     className="block rounded-lg border border-border p-3 text-small hover:border-primary"
                   >
-                    Ticket {ticket.ticket_number}: {ticket.subject} —{" "}
-                    {labelFor(t, TICKET_STATUS_KEYS, ticket.status)}
+                    {t("portal.dashboard.ticketLine", {
+                      number: ticket.ticket_number,
+                      subject: ticket.subject,
+                      status: labelFor(t, TICKET_STATUS_KEYS, ticket.status),
+                    })}
                   </Link>
                 </li>
               ))}
@@ -148,13 +172,15 @@ export default async function PortalDashboardPage() {
         </section>
 
         <section>
-          <h2 className="text-h3 mb-4">Recente bestanden</h2>
+          <h2 className="text-h3 mb-4">
+            {t("portal.dashboard.recentFilesTitle")}
+          </h2>
           {files.length === 0 ? (
             <EmptyState
-              title="Nog geen documenten"
-              description="Zichtbare bestanden van VDB Digital verschijnen hier."
-              actionHref="/portal/documenten"
-              actionLabel="Naar documenten"
+              title={t("portal.dashboard.noDocumentsTitle")}
+              description={t("portal.dashboard.noDocumentsBody")}
+              actionHref={withLocale("/portal/documenten", locale)}
+              actionLabel={t("portal.dashboard.toDocuments")}
             />
           ) : (
             <ul className="space-y-2">
@@ -165,7 +191,7 @@ export default async function PortalDashboardPage() {
                 >
                   <span className="truncate">{f.file_name}</span>
                   <span className="text-muted shrink-0">
-                    {new Date(f.created_at).toLocaleDateString("nl-NL")}
+                    {formatDate(f.created_at, locale)}
                   </span>
                 </li>
               ))}
@@ -176,18 +202,20 @@ export default async function PortalDashboardPage() {
 
       <div className="grid lg:grid-cols-2 gap-8">
         <section>
-          <h2 className="text-h3 mb-4">Offertes & facturen</h2>
+          <h2 className="text-h3 mb-4">
+            {t("portal.dashboard.quotesInvoicesTitle")}
+          </h2>
           {quotes.length === 0 && invoices.length === 0 ? (
             <EmptyState
-              title="Nog geen offertes of facturen"
-              description="Wanneer VDB Digital een offerte of factuur deelt, zie je die hier."
+              title={t("portal.dashboard.noQuotesInvoicesTitle")}
+              description={t("portal.dashboard.noQuotesInvoicesBody")}
             />
           ) : (
             <ul className="space-y-2">
               {quotes.slice(0, 3).map((q) => (
                 <li key={q.id}>
                   <Link
-                    href={`/portal/offertes/${q.id}`}
+                    href={withLocale(`/portal/offertes/${q.id}`, locale)}
                     className="block rounded-lg border border-border p-3 text-small hover:border-primary"
                   >
                     {q.quote_number} · {q.title} ·{" "}
@@ -210,20 +238,22 @@ export default async function PortalDashboardPage() {
         </section>
 
         <section>
-          <h2 className="text-h3 mb-4">Berichten</h2>
+          <h2 className="text-h3 mb-4">
+            {t("portal.dashboard.messagesTitle")}
+          </h2>
           {conversations.length === 0 ? (
             <EmptyState
-              title="Nog geen berichten"
-              description="Beveiligde gesprekken met VDB Digital verschijnen hier. Geen externe chatwidget."
-              actionHref="/portal/berichten"
-              actionLabel="Naar berichten"
+              title={t("portal.dashboard.noMessagesTitle")}
+              description={t("portal.dashboard.noMessagesBody")}
+              actionHref={withLocale("/portal/berichten", locale)}
+              actionLabel={t("portal.dashboard.toMessages")}
             />
           ) : (
             <ul className="space-y-2">
               {conversations.map((c) => (
                 <li key={c.id}>
                   <Link
-                    href="/portal/berichten"
+                    href={withLocale("/portal/berichten", locale)}
                     className="block rounded-lg border border-border p-3 text-small hover:border-primary"
                   >
                     {c.subject}

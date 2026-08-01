@@ -11,6 +11,20 @@ import {
 } from "@/server/actions/portal-project-actions";
 import type { PortalActionState } from "@/server/actions/portal-actions";
 
+/** Mirrors `portal.forms.project.*`; resolved by the server parent. */
+export type ProjectFormLabels = {
+  completeActionPlaceholder: string;
+  completeActionSubmit: string;
+  approveSubmit: string;
+  rejectReasonPlaceholder: string;
+  rejectSubmit: string;
+  feedbackHeading: string;
+  feedbackPlaceholder: string;
+  feedbackSubmit: string;
+  working: string;
+  sending: string;
+};
+
 function Msg({ state }: { state: PortalActionState }) {
   if (state.error) {
     return (
@@ -32,9 +46,11 @@ function Msg({ state }: { state: PortalActionState }) {
 export function CompleteActionForm({
   actionId,
   version,
+  labels,
 }: {
   actionId: string;
   version: number;
+  labels: ProjectFormLabels;
 }) {
   const [state, action, pending] = useActionState(
     completeCustomerActionAction,
@@ -44,9 +60,14 @@ export function CompleteActionForm({
     <form action={action} className="space-y-2 mt-3">
       <input type="hidden" name="actionId" value={actionId} />
       <input type="hidden" name="expectedVersion" value={version} />
-      <Textarea name="note" placeholder="Optionele toelichting" rows={2} maxLength={2000} />
+      <Textarea
+        name="note"
+        placeholder={labels.completeActionPlaceholder}
+        rows={2}
+        maxLength={2000}
+      />
       <Button type="submit" size="sm" disabled={pending}>
-        {pending ? "Bezig…" : "Markeer als afgerond"}
+        {pending ? labels.working : labels.completeActionSubmit}
       </Button>
       <Msg state={state} />
     </form>
@@ -56,9 +77,11 @@ export function CompleteActionForm({
 export function ApproveDeliverableForm({
   deliverableId,
   version,
+  labels,
 }: {
   deliverableId: string;
   version: number;
+  labels: ProjectFormLabels;
 }) {
   const [state, action, pending] = useActionState(approveDeliverableAction, {});
   return (
@@ -67,7 +90,7 @@ export function ApproveDeliverableForm({
       <input type="hidden" name="expectedVersion" value={version} />
       <input type="hidden" name="confirm" value="yes" />
       <Button type="submit" size="sm" disabled={pending}>
-        {pending ? "Bezig…" : "Goedkeuren"}
+        {pending ? labels.working : labels.approveSubmit}
       </Button>
       <Msg state={state} />
     </form>
@@ -77,9 +100,11 @@ export function ApproveDeliverableForm({
 export function RejectDeliverableForm({
   deliverableId,
   version,
+  labels,
 }: {
   deliverableId: string;
   version: number;
+  labels: ProjectFormLabels;
 }) {
   const [state, action, pending] = useActionState(rejectDeliverableAction, {});
   return (
@@ -90,12 +115,12 @@ export function RejectDeliverableForm({
         name="reason"
         required
         minLength={3}
-        placeholder="Reden voor afwijzing"
+        placeholder={labels.rejectReasonPlaceholder}
         rows={2}
         maxLength={2000}
       />
       <Button type="submit" size="sm" variant="outline" disabled={pending}>
-        {pending ? "Bezig…" : "Afwijzen"}
+        {pending ? labels.working : labels.rejectSubmit}
       </Button>
       <Msg state={state} />
     </form>
@@ -105,9 +130,11 @@ export function RejectDeliverableForm({
 export function ProjectFeedbackForm({
   projectId,
   deliverableId,
+  labels,
 }: {
   projectId: string;
   deliverableId?: string;
+  labels: ProjectFormLabels;
 }) {
   const [state, action, pending] = useActionState(
     submitProjectFeedbackAction,
@@ -115,7 +142,7 @@ export function ProjectFeedbackForm({
   );
   return (
     <form action={action} className="space-y-3 rounded-xl border border-border p-4">
-      <h3 className="font-medium">Feedback plaatsen</h3>
+      <h3 className="font-medium">{labels.feedbackHeading}</h3>
       <input type="hidden" name="projectId" value={projectId} />
       {deliverableId ? (
         <input type="hidden" name="deliverableId" value={deliverableId} />
@@ -126,10 +153,10 @@ export function ProjectFeedbackForm({
         minLength={2}
         maxLength={4000}
         rows={4}
-        placeholder="Jouw feedback (platte tekst)"
+        placeholder={labels.feedbackPlaceholder}
       />
       <Button type="submit" disabled={pending}>
-        {pending ? "Versturen…" : "Feedback versturen"}
+        {pending ? labels.sending : labels.feedbackSubmit}
       </Button>
       <Msg state={state} />
     </form>

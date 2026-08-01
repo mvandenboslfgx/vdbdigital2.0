@@ -5,7 +5,10 @@ import { Card } from "@/components/ui/container";
 import { formatEuro, getPortalQuote } from "@/server/repositories/portal";
 import { QUOTE_STATUS_KEYS, labelFor } from "@/lib/portal/labels";
 import { getDictionary } from "@/i18n/get-dictionary";
+import { formatDate } from "@/i18n/format-date";
+import { withLocale } from "@/i18n/config";
 import { QuoteResponseForm } from "@/components/portal/quote-response-form";
+import { quoteResponseLabels } from "@/lib/portal/form-labels";
 import { hasCustomerPermission } from "@/lib/auth/customer-permissions";
 import { isQuoteExpired } from "@/lib/commerce/quote-money";
 
@@ -19,7 +22,7 @@ export default async function PortalQuoteDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { t } = await getDictionary();
+  const { t, locale } = await getDictionary();
   const { id } = await params;
   const { quote, items, ctx } = await getPortalQuote(id);
   if (!quote) notFound();
@@ -35,15 +38,15 @@ export default async function PortalQuoteDetailPage({
     <div className="space-y-6">
       <div>
         <Link
-          href="/portal/offertes"
+          href={withLocale("/portal/offertes", locale)}
           className="text-small text-primary hover:underline"
         >
-          ← Offertes
+          {t("portal.quotesPage.backToQuotes")}
         </Link>
         <h1 className="text-h1 mt-2">{quote.title}</h1>
         <p className="text-muted">
           {quote.quote_number} · {labelFor(t, QUOTE_STATUS_KEYS, quote.status)}
-          {expired ? " · Verlopen" : ""}
+          {expired ? t("portal.quotesPage.expiredSuffix") : ""}
         </p>
       </div>
 
@@ -65,7 +68,9 @@ export default async function PortalQuoteDetailPage({
                 <li key={item.id} className="flex justify-between gap-3">
                   <span>
                     {item.title} ({item.quantity}×)
-                    {item.is_optional ? " · optioneel" : ""}
+                    {item.is_optional
+                      ? t("portal.quotesPage.optionalSuffix")
+                      : ""}
                   </span>
                   <span>{formatEuro(item.total_cents, quote.currency)}</span>
                 </li>
@@ -76,33 +81,34 @@ export default async function PortalQuoteDetailPage({
 
         <dl className="grid sm:grid-cols-2 gap-3 text-small">
           <div>
-            <dt className="text-muted">Subtotaal</dt>
+            <dt className="text-muted">{t("portal.quotesPage.subtotal")}</dt>
             <dd>{formatEuro(quote.subtotal_cents, quote.currency)}</dd>
           </div>
           <div>
-            <dt className="text-muted">BTW</dt>
+            <dt className="text-muted">{t("portal.quotesPage.vat")}</dt>
             <dd>{formatEuro(quote.vat_cents, quote.currency)}</dd>
           </div>
           <div>
-            <dt className="text-muted">Totaal</dt>
+            <dt className="text-muted">{t("portal.quotesPage.total")}</dt>
             <dd className="font-semibold text-lg">
               {formatEuro(quote.total_cents, quote.currency)}
             </dd>
           </div>
           {quote.valid_until ? (
             <div>
-              <dt className="text-muted">Geldig tot</dt>
-              <dd>{new Date(quote.valid_until).toLocaleDateString("nl-NL")}</dd>
+              <dt className="text-muted">
+                {t("portal.quotesPage.validUntil")}
+              </dt>
+              <dd>{formatDate(quote.valid_until, locale)}</dd>
             </div>
           ) : null}
           <div>
-            <dt className="text-muted">Voorwaardenversie</dt>
+            <dt className="text-muted">{t("portal.quotesPage.termsVersion")}</dt>
             <dd>{quote.terms_version || "—"}</dd>
           </div>
         </dl>
         <p className="text-small text-muted border-t border-border pt-3">
-          Digitale offerteacceptatie start geen betaling en maakt geen factuur
-          aan. Checkout blijft uitgeschakeld.
+          {t("portal.quotesPage.acceptanceNote")}
         </p>
       </Card>
 
@@ -110,19 +116,22 @@ export default async function PortalQuoteDetailPage({
         <div className="space-y-3">
           <div className="flex flex-wrap gap-3 text-small">
             <Link
-              href={`/portal/offertes/${id}/accepteren`}
+              href={withLocale(`/portal/offertes/${id}/accepteren`, locale)}
               className="text-primary hover:underline"
             >
-              Naar acceptatiepagina
+              {t("portal.quotesPage.goToAccept")}
             </Link>
             <Link
-              href={`/portal/offertes/${id}/afwijzen`}
+              href={withLocale(`/portal/offertes/${id}/afwijzen`, locale)}
               className="text-primary hover:underline"
             >
-              Naar afwijspagina
+              {t("portal.quotesPage.goToDecline")}
             </Link>
           </div>
-          <QuoteResponseForm quoteId={quote.id} />
+          <QuoteResponseForm
+            quoteId={quote.id}
+            labels={quoteResponseLabels(t)}
+          />
         </div>
       ) : null}
     </div>

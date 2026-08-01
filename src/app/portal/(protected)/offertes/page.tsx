@@ -4,6 +4,7 @@ import { EmptyState } from "@/components/portal/empty-state";
 import { formatEuro, listPortalQuotes } from "@/server/repositories/portal";
 import { QUOTE_STATUS_KEYS, labelFor } from "@/lib/portal/labels";
 import { getDictionary } from "@/i18n/get-dictionary";
+import { withLocale } from "@/i18n/config";
 
 export const metadata: Metadata = {
   title: "Offertes",
@@ -11,23 +12,23 @@ export const metadata: Metadata = {
 };
 
 export default async function PortalQuotesPage() {
-  const { t } = await getDictionary();
+  const { t, locale } = await getDictionary();
   const { quotes } = await listPortalQuotes();
 
   return (
     <div className="space-y-6">
-      <h1 className="text-h1">Offertes</h1>
+      <h1 className="text-h1">{t("portal.quotesPage.title")}</h1>
       {quotes.length === 0 ? (
         <EmptyState
-          title="Geen offertes"
-          description="Er zijn nog geen offertes gedeeld met jouw organisatie."
+          title={t("portal.quotesPage.emptyTitle")}
+          description={t("portal.quotesPage.emptyBody")}
         />
       ) : (
         <ul className="space-y-3">
           {quotes.map((q) => (
             <li key={q.id}>
               <Link
-                href={`/portal/offertes/${q.id}`}
+                href={withLocale(`/portal/offertes/${q.id}`, locale)}
                 className="block rounded-xl border border-border bg-surface p-5 hover:border-primary"
               >
                 <div className="flex flex-wrap justify-between gap-2">

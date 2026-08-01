@@ -185,12 +185,20 @@ export function AdminDocumentUploadForm({
   );
 }
 
+export type DocumentDownloadLabels = {
+  submit: string;
+  working: string;
+  failed: string;
+};
+
 export function DocumentDownloadButton({
   documentId,
   audience,
+  labels,
 }: {
   documentId: string;
   audience: "staff" | "customer";
+  labels: DocumentDownloadLabels;
 }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -209,14 +217,14 @@ export function DocumentDownloadButton({
                 ? await getStaffDocumentDownloadAction(documentId)
                 : await getPortalDocumentDownloadAction(documentId);
             if (result.error || !result.downloadUrl) {
-              setError(result.error ?? "Download mislukt.");
+              setError(result.error ?? labels.failed);
               return;
             }
             window.location.assign(result.downloadUrl);
           });
         }}
       >
-        {pending ? "Bezig…" : "Downloaden"}
+        {pending ? labels.working : labels.submit}
       </Button>
       {error ? (
         <p className="text-sm text-red-600" role="alert">
@@ -271,20 +279,38 @@ export function VisibilityForm({
   );
 }
 
-export function PortalUploadForm({ projectId }: { projectId?: string }) {
+export type PortalUploadLabels = {
+  heading: string;
+  titlePlaceholder: string;
+  submit: string;
+  submitting: string;
+};
+
+export function PortalUploadForm({
+  projectId,
+  labels,
+}: {
+  projectId?: string;
+  labels: PortalUploadLabels;
+}) {
   const [state, action, pending] = useActionState(
     uploadPortalDocumentAction,
     {},
   );
   return (
     <form action={action} className="space-y-3 rounded-xl border border-border p-4">
-      <h3 className="font-medium">Bestand aanleveren</h3>
+      <h3 className="font-medium">{labels.heading}</h3>
       <Msg state={state} />
       {projectId ? <input type="hidden" name="projectId" value={projectId} /> : null}
-      <Input name="title" required maxLength={200} placeholder="Titel" />
+      <Input
+        name="title"
+        required
+        maxLength={200}
+        placeholder={labels.titlePlaceholder}
+      />
       <input name="file" type="file" required className="block w-full text-sm" />
       <Button type="submit" disabled={pending}>
-        {pending ? "Uploaden…" : "Uploaden"}
+        {pending ? labels.submitting : labels.submit}
       </Button>
     </form>
   );

@@ -3,11 +3,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Card } from "@/components/ui/container";
 import { DocumentDownloadButton } from "@/components/documents/document-forms";
+import { documentDownloadLabels } from "@/lib/portal/form-labels";
 import { getPortalDocument } from "@/server/repositories/portal";
 import { hasCustomerPermission } from "@/lib/auth/customer-permissions";
 import { formatBytes } from "@/lib/validation/documents";
 import { DOCUMENT_CATEGORY_KEYS, labelFor } from "@/lib/portal/labels";
 import { getDictionary } from "@/i18n/get-dictionary";
+import { formatDate, formatDateTime } from "@/i18n/format-date";
+import { withLocale } from "@/i18n/config";
 
 export const metadata: Metadata = {
   title: "Document",
@@ -19,7 +22,7 @@ export default async function PortalDocumentDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { t } = await getDictionary();
+  const { t, locale } = await getDictionary();
   const { id } = await params;
   const { document, versions, ctx } = await getPortalDocument(id);
   if (!document) notFound();
@@ -33,10 +36,10 @@ export default async function PortalDocumentDetailPage({
     <div className="space-y-6">
       <div>
         <Link
-          href="/portal/documenten"
+          href={withLocale("/portal/documenten", locale)}
           className="text-small text-primary hover:underline"
         >
-          ← Documenten
+          {t("portal.documentsPage.backToDocuments")}
         </Link>
         <h1 className="text-h1 mt-2">{document.title}</h1>
         <p className="text-muted text-small mt-1">
@@ -48,39 +51,53 @@ export default async function PortalDocumentDetailPage({
       <Card>
         <dl className="text-small space-y-2">
           <div>
-            <dt className="text-muted">Bestand</dt>
+            <dt className="text-muted">
+              {t("portal.documentsPage.fileLabel")}
+            </dt>
             <dd>{document.safe_filename || document.file_name}</dd>
           </div>
           <div>
-            <dt className="text-muted">Grootte</dt>
+            <dt className="text-muted">
+              {t("portal.documentsPage.sizeLabel")}
+            </dt>
             <dd>{formatBytes(document.size_bytes)}</dd>
           </div>
           <div>
-            <dt className="text-muted">Bron</dt>
+            <dt className="text-muted">
+              {t("portal.documentsPage.sourceLabel")}
+            </dt>
             <dd>
               {document.visibility === "CUSTOMER_UPLOAD"
-                ? "Door jou aangeleverd"
-                : "VDB Digital"}
+                ? t("portal.documentsPage.sourceCustomer")
+                : t("portal.documentsPage.sourceVdb")}
             </dd>
           </div>
           <div>
-            <dt className="text-muted">Datum</dt>
-            <dd>
-              {new Date(document.created_at).toLocaleString("nl-NL")}
-            </dd>
+            <dt className="text-muted">
+              {t("portal.documentsPage.dateLabel")}
+            </dt>
+            <dd>{formatDateTime(document.created_at, locale)}</dd>
           </div>
         </dl>
         {canDownload ? (
           <div className="mt-4">
-            <DocumentDownloadButton documentId={document.id} audience="customer" />
+            <DocumentDownloadButton
+              documentId={document.id}
+              audience="customer"
+              labels={documentDownloadLabels(t)}
+            />
           </div>
         ) : null}
       </Card>
 
       <section>
-        <h2 className="text-h3 mb-3">Versiehistorie</h2>
+        <h2 className="text-h3 mb-3">
+          {t("portal.documentsPage.versionHistoryTitle")}
+        </h2>
         {versions.length <= 1 ? (
-          <p className="text-muted text-small">Geen eerdere zichtbare versies.</p>
+          <p className="text-muted text-small">
+            {t("portal.documentsPage.noPreviousVersions")}
+          </p>
         ) : (
           <ul className="space-y-2">
             {versions.map(
@@ -96,15 +113,17 @@ export default async function PortalDocumentDetailPage({
                   className="rounded-lg border border-border px-3 py-2 text-small flex flex-wrap justify-between gap-2"
                 >
                   <Link
-                    href={`/portal/documenten/${v.id}`}
+                    href={withLocale(`/portal/documenten/${v.id}`, locale)}
                     className="text-primary hover:underline"
                   >
                     v{v.version_number}
-                    {v.is_current ? " · huidig" : ""}
+                    {v.is_current
+                      ? t("portal.documentsPage.currentSuffix")
+                      : ""}
                   </Link>
                   <span className="text-muted">
                     {formatBytes(v.size_bytes)} ·{" "}
-                    {new Date(v.created_at).toLocaleDateString("nl-NL")}
+                    {formatDate(v.created_at, locale)}
                   </span>
                 </li>
               ),

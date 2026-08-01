@@ -19,6 +19,7 @@ import {
   labelFor,
   resolveLabelMap,
 } from "@/lib/portal/labels";
+import { documentDownloadLabels } from "@/lib/portal/form-labels";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { Button } from "@/components/ui/button";
 import { hasPermission } from "@/lib/auth/permissions";
@@ -136,7 +137,11 @@ export default async function AdminDocumentDetailPage({
               </dd>
             </div>
             <div className="pt-2">
-              <DocumentDownloadButton documentId={doc.id} audience="staff" />
+              <DocumentDownloadButton
+                documentId={doc.id}
+                audience="staff"
+                labels={documentDownloadLabels(t)}
+              />
             </div>
           </dl>
         </Card>

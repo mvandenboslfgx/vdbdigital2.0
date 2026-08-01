@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { PortalProjectTabShell } from "@/components/portal/project-tabs";
 import { getPortalProject } from "@/server/repositories/portal";
 import { getDictionary } from "@/i18n/get-dictionary";
+import { formatDateTime } from "@/i18n/format-date";
 
 export default async function PortalProjectActivityPage({
   params,
@@ -29,9 +30,7 @@ export default async function PortalProjectActivityPage({
               >
                 <p className="font-medium">{a.summary}</p>
                 <p className="text-muted mt-1">
-                  {new Date(a.created_at).toLocaleString(
-                    locale === "nl" ? "nl-NL" : "en-US",
-                  )}
+                  {formatDateTime(a.created_at, locale)}
                 </p>
               </li>
             ),

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getPortalQuote } from "@/server/repositories/portal";
 import { QuoteResponseForm } from "@/components/portal/quote-response-form";
+import { quoteResponseLabels } from "@/lib/portal/form-labels";
 import { hasCustomerPermission } from "@/lib/auth/customer-permissions";
 import { isQuoteExpired } from "@/lib/commerce/quote-money";
 import { getDictionary } from "@/i18n/get-dictionary";
@@ -54,7 +55,11 @@ export default async function PortalQuoteAcceptPage({
         {t("portal.quoteAcceptPage.confirmLabel", { version: termsVersion })}
       </label>
       <div id="accept-form">
-        <QuoteResponseForm quoteId={quote.id} mode="accept" />
+        <QuoteResponseForm
+          quoteId={quote.id}
+          mode="accept"
+          labels={quoteResponseLabels(t)}
+        />
       </div>
     </div>
   );

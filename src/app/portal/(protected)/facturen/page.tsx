@@ -8,6 +8,8 @@ import {
   labelFor,
 } from "@/lib/portal/labels";
 import { getDictionary } from "@/i18n/get-dictionary";
+import { formatDate } from "@/i18n/format-date";
+import { withLocale } from "@/i18n/config";
 import { customerFacingInvoiceStatus } from "@/lib/commerce/invoice-status";
 
 export const metadata: Metadata = {
@@ -16,24 +18,24 @@ export const metadata: Metadata = {
 };
 
 export default async function PortalInvoicesPage() {
-  const { t } = await getDictionary();
+  const { t, locale } = await getDictionary();
   const { invoices, denied } = await listPortalInvoices();
 
   return (
     <div className="space-y-6">
-      <h1 className="text-h1">Facturen</h1>
+      <h1 className="text-h1">{t("portal.invoicesPage.title")}</h1>
       <p className="text-muted text-small">
-        Alleen ter inzage. Online betalen is niet actief in deze omgeving.
+        {t("portal.invoicesPage.viewOnlyNote")}
       </p>
       {denied ? (
         <EmptyState
-          title="Geen toegang"
-          description="Je hebt geen rechten om facturen te bekijken."
+          title={t("portal.invoicesPage.accessDeniedTitle")}
+          description={t("portal.invoicesPage.accessDeniedBody")}
         />
       ) : invoices.length === 0 ? (
         <EmptyState
-          title="Er zijn momenteel geen facturen beschikbaar."
-          description="Zodra een factuur is uitgegeven, verschijnt deze hier."
+          title={t("portal.invoicesPage.emptyTitle")}
+          description={t("portal.invoicesPage.emptyBody")}
         />
       ) : (
         <ul className="space-y-3">
@@ -46,7 +48,7 @@ export default async function PortalInvoicesPage() {
             return (
               <li key={inv.id}>
                 <Link
-                  href={`/portal/facturen/${inv.id}`}
+                  href={withLocale(`/portal/facturen/${inv.id}`, locale)}
                   className="rounded-xl border border-border bg-surface p-5 flex flex-wrap justify-between gap-3 block hover:border-primary/40"
                 >
                   <div>
@@ -60,11 +62,11 @@ export default async function PortalInvoicesPage() {
                       {inv.title ? ` · ${inv.title}` : ""}
                     </p>
                     <p className="text-small text-muted">
-                      {inv.issue_date
-                        ? new Date(inv.issue_date).toLocaleDateString("nl-NL")
-                        : "—"}
+                      {formatDate(inv.issue_date, locale)}
                       {inv.due_date
-                        ? ` · vervalt ${new Date(inv.due_date).toLocaleDateString("nl-NL")}`
+                        ? t("portal.invoicesPage.dueSuffix", {
+                            date: formatDate(inv.due_date, locale),
+                          })
                         : ""}
                     </p>
                   </div>
@@ -73,7 +75,7 @@ export default async function PortalInvoicesPage() {
                       {formatEuro(inv.total_cents, inv.currency)}
                     </p>
                     <p className="text-small text-muted">
-                      Openstaand{" "}
+                      {t("portal.invoicesPage.outstanding")}{" "}
                       {formatEuro(inv.amount_due_cents ?? 0, inv.currency)}
                     </p>
                     <p className="text-small text-muted">
