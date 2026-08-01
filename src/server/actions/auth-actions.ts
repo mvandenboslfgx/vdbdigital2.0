@@ -12,32 +12,46 @@ import { resolvePostLoginPath } from "@/server/auth/resolve-home";
 import { checkRateLimit } from "@/lib/security/rate-limit";
 import { resolveAppUrl } from "@/lib/url/app-url";
 import { hashInviteToken } from "@/lib/auth/invite-token";
+import { getDictionary } from "@/i18n/get-dictionary";
+import { withLocale } from "@/i18n/config";
+import type { TranslateFn } from "@/i18n/create-t";
 import { z } from "zod";
 
-const loginSchema = z.object({
-  email: z.string().email().max(254),
-  password: z.string().min(8).max(128),
-  next: z.string().max(500).optional(),
-});
+/** Locale-aware Zod schemas — validation messages resolve per-request via `t`. */
+function buildLoginSchema(t: TranslateFn) {
+  return z.object({
+    email: z.string().email(t("validation.emailInvalid")).max(254),
+    password: z.string().min(8, t("validation.passwordMin")).max(128),
+    next: z.string().max(500).optional(),
+  });
+}
 
-const emailSchema = z.object({
-  email: z.string().email().max(254),
-});
+function buildEmailSchema(t: TranslateFn) {
+  return z.object({
+    email: z.string().email(t("validation.emailInvalid")).max(254),
+  });
+}
 
-const resetSchema = z.object({
-  password: z.string().min(8).max(128),
-});
+function buildResetSchema(t: TranslateFn) {
+  return z.object({
+    password: z.string().min(8, t("validation.passwordMin")).max(128),
+  });
+}
 
-const mfaCodeSchema = z.object({
-  code: z.string().regex(/^\d{6}$/),
-});
+function buildMfaCodeSchema(t: TranslateFn) {
+  return z.object({
+    code: z.string().regex(/^\d{6}$/, t("validation.codeInvalid")),
+  });
+}
 
-const accountRequestSchema = z.object({
-  email: z.string().email().max(254),
-  fullName: z.string().min(2).max(120),
-  company: z.string().max(200).optional(),
-  message: z.string().max(2000).optional(),
-});
+function buildAccountRequestSchema(t: TranslateFn) {
+  return z.object({
+    email: z.string().email(t("validation.emailInvalid")).max(254),
+    fullName: z.string().min(2, t("validation.nameMin")).max(120),
+    company: z.string().max(200).optional(),
+    message: z.string().max(2000).optional(),
+  });
+}
 
 export type AuthActionState = {
   error?: string;
@@ -48,36 +62,39 @@ export type AuthActionState = {
   challengeId?: string;
 };
 
-function genericAuthError(): AuthActionState {
-  return {
-    error: "Inloggen is niet gelukt. Controleer je gegevens en probeer het opnieuw.",
-  };
+function genericAuthError(t: TranslateFn): AuthActionState {
+  return { error: t("errors.genericLoginFailed") };
 }
 
-function dutchRateLimitMessage(result: Awaited<ReturnType<typeof checkRateLimit>>): string {
+function rateLimitMessage(
+  t: TranslateFn,
+  result: Awaited<ReturnType<typeof checkRateLimit>>,
+): string {
   if (result.retryAfterSeconds) {
-    return `Te veel pogingen. Probeer het over ${result.retryAfterSeconds} seconden opnieuw.`;
+    return t("errors.rateLimited", { seconds: result.retryAfterSeconds });
   }
-  return "Te veel pogingen. Probeer het later opnieuw.";
+  return t("errors.rateLimitedGeneric");
 }
 
 export async function loginAction(
   _prev: AuthActionState,
   formData: FormData,
 ): Promise<AuthActionState> {
+  const { t, locale } = await getDictionary();
+
   if (!(await verifyOrigin())) {
     await writeAuditLog({ action: "auth.login_failed", metadata: { reason: "origin" } });
-    return { error: "Verzoek geweigerd." };
+    return { error: t("errors.requestDenied") };
   }
 
-  const parsed = loginSchema.safeParse({
+  const parsed = buildLoginSchema(t).safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
     next: formData.get("next") || undefined,
   });
 
   if (!parsed.success) {
-    return genericAuthError();
+    return genericAuthError(t);
   }
 
   const limited = await checkRateLimit(
@@ -85,12 +102,12 @@ export async function loginAction(
     parsed.data.email.toLowerCase(),
   );
   if (!limited.success) {
-    return { error: dutchRateLimitMessage(limited) };
+    return { error: rateLimitMessage(t, limited) };
   }
 
   const supabase = await createServerSupabaseClient();
   if (!supabase) {
-    return { error: "Authenticatie is niet geconfigureerd." };
+    return { error: t("errors.authNotConfigured") };
   }
 
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -103,7 +120,7 @@ export async function loginAction(
       action: "auth.login_failed",
       metadata: { reason: "credentials" },
     });
-    return genericAuthError();
+    return genericAuthError(t);
   }
 
   await writeAuditLog({
@@ -113,10 +130,11 @@ export async function loginAction(
   });
 
   const destination = await resolvePostLoginPath(data.user.id, parsed.data.next);
-  redirect(destination);
+  redirect(withLocale(destination, locale));
 }
 
 export async function logoutAction(): Promise<void> {
+  const { locale } = await getDictionary();
   const supabase = await createServerSupabaseClient();
   if (supabase) {
     const {
@@ -130,21 +148,22 @@ export async function logoutAction(): Promise<void> {
       });
     }
   }
-  redirect("/inloggen");
+  redirect(withLocale("/inloggen", locale));
 }
 
 export async function requestPasswordResetAction(
   _prev: AuthActionState,
   formData: FormData,
 ): Promise<AuthActionState> {
+  const { t } = await getDictionary();
+
   if (!(await verifyOrigin())) {
-    return { error: "Verzoek geweigerd." };
+    return { error: t("errors.requestDenied") };
   }
 
-  const parsed = emailSchema.safeParse({ email: formData.get("email") });
+  const parsed = buildEmailSchema(t).safeParse({ email: formData.get("email") });
   // Anti-enumeration: always same success message
-  const successMessage =
-    "Als dit e-mailadres bij ons bekend is, ontvang je binnen enkele minuten een resetlink.";
+  const successMessage = t("auth.resetLinkSentMessage");
 
   if (!parsed.success) {
     return { success: true, message: successMessage };
@@ -155,12 +174,12 @@ export async function requestPasswordResetAction(
     parsed.data.email.toLowerCase(),
   );
   if (!limited.success) {
-    return { error: dutchRateLimitMessage(limited) };
+    return { error: rateLimitMessage(t, limited) };
   }
 
   const supabase = await createServerSupabaseClient();
   if (!supabase) {
-    return { error: "Authenticatie is niet geconfigureerd." };
+    return { error: t("errors.authNotConfigured") };
   }
 
   const redirectTo = `${resolveAppUrl()}/wachtwoord-herstellen`;
@@ -178,23 +197,25 @@ export async function updatePasswordAction(
   _prev: AuthActionState,
   formData: FormData,
 ): Promise<AuthActionState> {
+  const { t, locale } = await getDictionary();
+
   if (!(await verifyOrigin())) {
-    return { error: "Verzoek geweigerd." };
+    return { error: t("errors.requestDenied") };
   }
 
-  const parsed = resetSchema.safeParse({ password: formData.get("password") });
+  const parsed = buildResetSchema(t).safeParse({ password: formData.get("password") });
   if (!parsed.success) {
-    return { error: "Kies een wachtwoord van minimaal 8 tekens." };
+    return { error: t("errors.passwordTooShort") };
   }
 
   const supabase = await createServerSupabaseClient();
   if (!supabase) {
-    return { error: "Authenticatie is niet geconfigureerd." };
+    return { error: t("errors.authNotConfigured") };
   }
 
   const { data: userData } = await supabase.auth.getUser();
   if (!userData.user) {
-    return { error: "Deze resetlink is ongeldig of verlopen." };
+    return { error: t("errors.invalidResetLink") };
   }
 
   const { error } = await supabase.auth.updateUser({
@@ -202,7 +223,7 @@ export async function updatePasswordAction(
   });
 
   if (error) {
-    return { error: "Wachtwoord kon niet worden bijgewerkt. Probeer opnieuw." };
+    return { error: t("errors.passwordUpdateFailed") };
   }
 
   await writeAuditLog({
@@ -211,20 +232,21 @@ export async function updatePasswordAction(
   });
 
   const destination = await resolvePostLoginPath(userData.user.id);
-  redirect(destination);
+  redirect(withLocale(destination, locale));
 }
 
 export async function requestMagicLinkAction(
   _prev: AuthActionState,
   formData: FormData,
 ): Promise<AuthActionState> {
+  const { t } = await getDictionary();
+
   if (!(await verifyOrigin())) {
-    return { error: "Verzoek geweigerd." };
+    return { error: t("errors.requestDenied") };
   }
 
-  const parsed = emailSchema.safeParse({ email: formData.get("email") });
-  const successMessage =
-    "Als dit e-mailadres bij ons bekend is, ontvang je een inloglink.";
+  const parsed = buildEmailSchema(t).safeParse({ email: formData.get("email") });
+  const successMessage = t("auth.magicLinkSentMessage");
 
   if (!parsed.success) {
     return { success: true, message: successMessage };
@@ -235,12 +257,12 @@ export async function requestMagicLinkAction(
     parsed.data.email.toLowerCase(),
   );
   if (!limited.success) {
-    return { error: dutchRateLimitMessage(limited) };
+    return { error: rateLimitMessage(t, limited) };
   }
 
   const supabase = await createServerSupabaseClient();
   if (!supabase) {
-    return { error: "Authenticatie is niet geconfigureerd." };
+    return { error: t("errors.authNotConfigured") };
   }
 
   const emailRedirectTo = `${resolveAppUrl()}/auth/callback?next=/portal`;
@@ -257,16 +279,18 @@ export async function requestMagicLinkAction(
   return { success: true, message: successMessage };
 }
 
-/** Publieke accountaanvraag — geen automatische toegang tot klantdata. */
+/** Public account request — never grants automatic access to customer data. */
 export async function requestAccountAction(
   _prev: AuthActionState,
   formData: FormData,
 ): Promise<AuthActionState> {
+  const { t } = await getDictionary();
+
   if (!(await verifyOrigin())) {
-    return { error: "Verzoek geweigerd." };
+    return { error: t("errors.requestDenied") };
   }
 
-  const parsed = accountRequestSchema.safeParse({
+  const parsed = buildAccountRequestSchema(t).safeParse({
     email: formData.get("email"),
     fullName: formData.get("fullName"),
     company: formData.get("company") || undefined,
@@ -274,7 +298,7 @@ export async function requestAccountAction(
   });
 
   if (!parsed.success) {
-    return { error: "Controleer je gegevens en probeer het opnieuw." };
+    return { error: t("errors.requestProcessingFailed") };
   }
 
   const limited = await checkRateLimit(
@@ -282,12 +306,12 @@ export async function requestAccountAction(
     parsed.data.email.toLowerCase(),
   );
   if (!limited.success) {
-    return { error: dutchRateLimitMessage(limited) };
+    return { error: rateLimitMessage(t, limited) };
   }
 
   const service = createServiceRoleClient();
   if (!service) {
-    return { error: "Aanvraag kon niet worden opgeslagen." };
+    return { error: t("errors.requestSaveFailed") };
   }
 
   const { error } = await service.from("leads").insert({
@@ -295,10 +319,10 @@ export async function requestAccountAction(
     status: "NEW",
     email: parsed.data.email,
     name: parsed.data.fullName,
-    subject: "Accountaanvraag klantenportaal",
+    subject: "Customer portal account request",
     message: parsed.data.message
-      ? `[Accountaanvraag]\n${parsed.data.message}`
-      : "[Accountaanvraag]",
+      ? `[Account request]\n${parsed.data.message}`
+      : "[Account request]",
     metadata: {
       kind: "account_request",
       company: parsed.data.company ?? null,
@@ -310,7 +334,7 @@ export async function requestAccountAction(
       action: "auth.account_request_failed",
       metadata: { reason: "db" },
     });
-    return { error: "Aanvraag kon niet worden opgeslagen. Probeer later opnieuw." };
+    return { error: t("errors.requestSaveFailed") };
   }
 
   await writeAuditLog({
@@ -320,8 +344,7 @@ export async function requestAccountAction(
 
   return {
     success: true,
-    message:
-      "Je aanvraag is ontvangen. We nemen contact op na controle. Dit geeft nog geen toegang tot klantdata.",
+    message: t("auth.registerSuccessMessage"),
   };
 }
 
@@ -329,8 +352,10 @@ export async function acceptInvitationAction(
   _prev: AuthActionState,
   formData: FormData,
 ): Promise<AuthActionState> {
+  const { t, locale } = await getDictionary();
+
   if (!(await verifyOrigin())) {
-    return { error: "Verzoek geweigerd." };
+    return { error: t("errors.requestDenied") };
   }
 
   const token = String(formData.get("token") ?? "");
@@ -338,20 +363,20 @@ export async function acceptInvitationAction(
   const fullName = String(formData.get("fullName") ?? "").trim();
 
   if (!token || token.length < 32) {
-    return { error: "Deze uitnodiging is ongeldig of verlopen." };
+    return { error: t("errors.invalidInvite") };
   }
   if (password.length < 8 || password.length > 128) {
-    return { error: "Kies een wachtwoord van minimaal 8 tekens." };
+    return { error: t("errors.passwordTooShort") };
   }
 
   const limited = await checkRateLimit("auth-invite", token.slice(0, 16));
   if (!limited.success) {
-    return { error: dutchRateLimitMessage(limited) };
+    return { error: rateLimitMessage(t, limited) };
   }
 
   const service = createServiceRoleClient();
   if (!service) {
-    return { error: "Uitnodiging kon niet worden verwerkt." };
+    return { error: t("errors.inviteProcessingFailed") };
   }
 
   const tokenHash = hashInviteToken(token);
@@ -363,7 +388,7 @@ export async function acceptInvitationAction(
     .maybeSingle();
 
   if (!invite || new Date(invite.expires_at).getTime() < Date.now()) {
-    return { error: "Deze uitnodiging is ongeldig of verlopen." };
+    return { error: t("errors.invalidInvite") };
   }
 
   const { data: created, error: createError } =
@@ -378,7 +403,7 @@ export async function acceptInvitationAction(
     // Existing user path: sign-in then attach
     const supabase = await createServerSupabaseClient();
     if (!supabase) {
-      return { error: "Uitnodiging kon niet worden verwerkt." };
+      return { error: t("errors.inviteProcessingFailed") };
     }
     const { data: signedIn, error: signError } =
       await supabase.auth.signInWithPassword({
@@ -386,14 +411,11 @@ export async function acceptInvitationAction(
         password,
       });
     if (signError || !signedIn.user) {
-      return {
-        error:
-          "Er bestaat al een account met dit e-mailadres. Log in met het juiste wachtwoord om de uitnodiging te accepteren.",
-      };
+      return { error: t("errors.accountExists") };
     }
     await attachMembership(service, invite, signedIn.user.id, fullName);
     const destination = await resolvePostLoginPath(signedIn.user.id);
-    redirect(destination);
+    redirect(withLocale(destination, locale));
   }
 
   await attachMembership(service, invite, created.user.id, fullName);
@@ -412,7 +434,7 @@ export async function acceptInvitationAction(
     metadata: { organizationId: invite.organization_id },
   });
 
-  redirect("/portal");
+  redirect(withLocale("/portal", locale));
 }
 
 async function attachMembership(
@@ -454,22 +476,24 @@ async function attachMembership(
 }
 
 export async function mfaEnrollAction(): Promise<AuthActionState> {
+  const { t } = await getDictionary();
+
   try {
     await requireAdminWithoutMfa();
   } catch {
-    return { error: "Toegang geweigerd." };
+    return { error: t("mfa.errorDenied") };
   }
 
   const supabase = await createServerSupabaseClient();
-  if (!supabase) return { error: "Authenticatie is niet geconfigureerd." };
+  if (!supabase) return { error: t("errors.authNotConfigured") };
 
   const { data, error } = await supabase.auth.mfa.enroll({
     factorType: "totp",
-    friendlyName: "Authenticator-app",
+    friendlyName: "Authenticator app",
   });
 
   if (error || !data) {
-    return { error: "MFA-inschrijving mislukt." };
+    return { error: t("mfa.errorEnrollFailed") };
   }
 
   await writeAuditLog({
@@ -487,23 +511,25 @@ export async function mfaVerifyEnrollAction(
   _prev: AuthActionState,
   formData: FormData,
 ): Promise<AuthActionState> {
+  const { t, locale } = await getDictionary();
+
   let adminUserId: string;
   try {
     const ctx = await requireAdminWithoutMfa();
     adminUserId = ctx.user.id;
   } catch {
-    return { error: "Toegang geweigerd." };
+    return { error: t("mfa.errorDenied") };
   }
 
   const factorId = formData.get("factorId") as string;
-  const parsed = mfaCodeSchema.safeParse({ code: formData.get("code") });
+  const parsed = buildMfaCodeSchema(t).safeParse({ code: formData.get("code") });
 
   if (!factorId || !parsed.success) {
-    return { error: "Ongeldige verificatiecode." };
+    return { error: t("mfa.errorInvalidCode") };
   }
 
   const supabase = await createServerSupabaseClient();
-  if (!supabase) return { error: "Authenticatie is niet geconfigureerd." };
+  if (!supabase) return { error: t("errors.authNotConfigured") };
 
   const { data: challenge, error: challengeError } =
     await supabase.auth.mfa.challenge({ factorId });
@@ -514,7 +540,7 @@ export async function mfaVerifyEnrollAction(
       action: "auth.mfa_verify_failed",
       metadata: { step: "challenge" },
     });
-    return { error: "Verificatie mislukt." };
+    return { error: t("mfa.errorVerifyFailed") };
   }
 
   const { error: verifyError } = await supabase.auth.mfa.verify({
@@ -529,7 +555,7 @@ export async function mfaVerifyEnrollAction(
       action: "auth.mfa_verify_failed",
       metadata: { step: "enroll_verify" },
     });
-    return { error: "Ongeldige verificatiecode." };
+    return { error: t("mfa.errorInvalidCode") };
   }
 
   await writeAuditLog({
@@ -538,41 +564,43 @@ export async function mfaVerifyEnrollAction(
   });
 
   revalidatePath("/admin");
-  redirect("/admin");
+  redirect(withLocale("/admin", locale));
 }
 
 export async function mfaVerifyLoginAction(
   _prev: AuthActionState,
   formData: FormData,
 ): Promise<AuthActionState> {
+  const { t, locale } = await getDictionary();
+
   let adminUserId: string;
   try {
     const ctx = await requireAdminWithoutMfa();
     adminUserId = ctx.user.id;
   } catch {
-    return { error: "Toegang geweigerd." };
+    return { error: t("mfa.errorDenied") };
   }
 
-  const parsed = mfaCodeSchema.safeParse({ code: formData.get("code") });
+  const parsed = buildMfaCodeSchema(t).safeParse({ code: formData.get("code") });
   if (!parsed.success) {
-    return { error: "Ongeldige verificatiecode." };
+    return { error: t("mfa.errorInvalidCode") };
   }
 
   const supabase = await createServerSupabaseClient();
-  if (!supabase) return { error: "Authenticatie is niet geconfigureerd." };
+  if (!supabase) return { error: t("errors.authNotConfigured") };
 
   const { data: factors } = await supabase.auth.mfa.listFactors();
   const factor = factors?.totp?.find((f) => f.status === "verified");
 
   if (!factor) {
-    redirect("/admin/mfa/setup");
+    redirect(withLocale("/admin/mfa/setup", locale));
   }
 
   const { data: challenge, error: challengeError } =
     await supabase.auth.mfa.challenge({ factorId: factor!.id });
 
   if (challengeError || !challenge) {
-    return { error: "Verificatie mislukt." };
+    return { error: t("mfa.errorVerifyFailed") };
   }
 
   const { error: verifyError } = await supabase.auth.mfa.verify({
@@ -587,7 +615,7 @@ export async function mfaVerifyLoginAction(
       action: "auth.mfa_verify_failed",
       metadata: { step: "login_verify" },
     });
-    return { error: "Ongeldige verificatiecode." };
+    return { error: t("mfa.errorInvalidCode") };
   }
 
   await writeAuditLog({
@@ -595,10 +623,10 @@ export async function mfaVerifyLoginAction(
     action: "auth.mfa_verify_success",
   });
 
-  redirect("/admin");
+  redirect(withLocale("/admin", locale));
 }
 
-/** Guarded admin noop — gebruikt in bypass-tests */
+/** Guarded admin noop — used in bypass tests */
 export async function guardedAdminPingAction(): Promise<{ ok: boolean }> {
   const { requireAdmin } = await import("@/server/auth/require-admin");
   await requireAdmin();
@@ -606,8 +634,9 @@ export async function guardedAdminPingAction(): Promise<{ ok: boolean }> {
 }
 
 export async function handleAuthError(error: unknown): Promise<AuthActionState> {
+  const { t } = await getDictionary();
   if (error instanceof AuthError) {
-    return { error: "Toegang geweigerd." };
+    return { error: t("errors.accessDenied") };
   }
-  return { error: "Er is iets misgegaan." };
+  return { error: t("errors.somethingWentWrong") };
 }
