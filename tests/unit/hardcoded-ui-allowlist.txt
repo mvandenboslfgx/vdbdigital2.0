@@ -1,0 +1,13 @@
+# Known hardcoded-UI-string debt, allowlisted by file (not by line).
+# Format: one repo-relative path per line. `#` starts a comment.
+# Read by tests/unit/hardcoded-ui-string-scan.test.ts — do not add new
+# entries casually; prefer fixing the hardcoded copy via the i18n dictionary.
+#
+# Auth flow pages predate the next-intl adoption (0ac3d7a) and are still
+# fully Dutch-hardcoded; not yet migrated to the dictionary.
+src/app/(auth)/geen-toegang/page.tsx
+src/app/(auth)/inloggen/page.tsx
+src/app/(auth)/wachtwoord-vergeten/page.tsx
+src/components/auth/auth-login-form.tsx
+# Customer-facing but still hardcoded Dutch copy — flagged for Phase 7 i18n cleanup.
+src/app/(shop)/cart/page.tsx
