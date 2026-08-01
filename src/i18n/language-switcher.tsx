@@ -3,17 +3,8 @@
 import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utilities/cn";
 import { useLocale } from "@/i18n/locale-provider";
-import {
-  locales,
-  localeLabels,
-  stripLocalePrefix,
-  withLocale,
-  type Locale,
-} from "@/i18n/config";
-import {
-  appendFilteredSearch,
-  filterSearchParams,
-} from "@/i18n/locale-query";
+import { locales, localeLabels, type Locale } from "@/i18n/config";
+import { buildLanguageSwitchHref } from "@/i18n/locale-query";
 
 export function LanguageSwitcher({
   className,
@@ -26,8 +17,6 @@ export function LanguageSwitcher({
   const locale = useLocale();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { pathname: bare } = stripLocalePrefix(pathname);
-  const safeQuery = filterSearchParams(searchParams);
   const groupLabel = locale === "nl" ? "Taal" : "Language";
 
   return (
@@ -40,7 +29,7 @@ export function LanguageSwitcher({
       aria-label={groupLabel}
     >
       {locales.map((code) => {
-        const href = appendFilteredSearch(withLocale(bare, code), safeQuery);
+        const { href } = buildLanguageSwitchHref(pathname, searchParams, code);
         const active = code === locale;
         return (
           <a

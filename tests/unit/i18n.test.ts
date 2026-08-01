@@ -9,6 +9,7 @@ import {
   paths,
 } from "@/i18n/config";
 import {
+  buildLanguageSwitchHref,
   filterSearchParams,
   parseFormLocale,
   SAFE_QUERY_KEYS,
@@ -101,6 +102,54 @@ describe("language switcher query filtering", () => {
     const filtered = filterSearchParams(new URLSearchParams("evil=1&category=websites"));
     expect(filtered.get("evil")).toBeNull();
     expect(filtered.get("category")).toBe("websites");
+  });
+});
+
+describe("buildLanguageSwitchHref (shared switcher href builder)", () => {
+  it("switches locale while preserving the route (every route is served under both locales)", () => {
+    const toNl = buildLanguageSwitchHref("/shop/starter-website", new URLSearchParams(), "nl");
+    expect(toNl).toEqual({ href: "/nl/shop/starter-website", isFallback: false });
+
+    const toEn = buildLanguageSwitchHref(
+      "/nl/shop/starter-website",
+      new URLSearchParams(),
+      "en",
+    );
+    expect(toEn).toEqual({ href: "/shop/starter-website", isFallback: false });
+  });
+
+  it("switches the home route without ever producing a double-slash or /nl/ suffix", () => {
+    expect(buildLanguageSwitchHref("/", new URLSearchParams(), "nl")).toEqual({
+      href: "/nl",
+      isFallback: false,
+    });
+    expect(buildLanguageSwitchHref("/nl", new URLSearchParams(), "en")).toEqual({
+      href: "/",
+      isFallback: false,
+    });
+  });
+
+  it("preserves safe query params and strips sensitive ones across the switch", () => {
+    const { href } = buildLanguageSwitchHref(
+      "/shop",
+      new URLSearchParams("category=websites&token=abc123"),
+      "nl",
+    );
+    expect(href).toBe("/nl/shop?category=websites");
+  });
+
+  it.each([null, undefined, "", "   "])(
+    "falls back safely to the target locale's home page for a missing/blank pathname (%j)",
+    (pathname) => {
+      const result = buildLanguageSwitchHref(pathname, new URLSearchParams(), "nl");
+      expect(result).toEqual({ href: "/nl", isFallback: true });
+    },
+  );
+
+  it("never marks a normal, non-empty route as a fallback", () => {
+    expect(buildLanguageSwitchHref("/contact", new URLSearchParams(), "nl").isFallback).toBe(
+      false,
+    );
   });
 });
 

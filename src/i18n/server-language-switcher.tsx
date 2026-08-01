@@ -4,17 +4,17 @@ import { Globe } from "lucide-react";
 import { headers } from "next/headers";
 import { cn } from "@/lib/utilities/cn";
 import { getLocale } from "@/i18n/get-dictionary";
-import {
-  locales,
-  localeLabels,
-  stripLocalePrefix,
-  withLocale,
-  type Locale,
-} from "@/i18n/config";
+import { locales, localeLabels, type Locale } from "@/i18n/config";
+import { buildLanguageSwitchHref } from "@/i18n/locale-query";
 
 /**
  * Premium server language switcher (ADR-001 Phase 7).
  * Native language names + globe; no flags as sole identifier.
+ *
+ * Server layouts (unlike pages) never receive `searchParams`, so this can
+ * only ever preserve the pathname — never the query string. Use the client
+ * `LanguageSwitcherBoundary` instead wherever a safe query param (e.g.
+ * `?product=`, `?category=`) must survive the language switch.
  */
 export async function ServerLanguageSwitcher({
   className,
@@ -26,7 +26,6 @@ export async function ServerLanguageSwitcher({
   const locale = await getLocale();
   const headerStore = await headers();
   const pathname = headerStore.get("x-pathname") ?? "/";
-  const { pathname: bare } = stripLocalePrefix(pathname);
   const groupLabel = locale === "nl" ? "Taal kiezen" : "Choose language";
 
   return (
@@ -42,7 +41,7 @@ export async function ServerLanguageSwitcher({
         <Globe className="h-4 w-4" strokeWidth={1.75} />
       </span>
       {locales.map((code) => {
-        const href = withLocale(bare, code);
+        const { href } = buildLanguageSwitchHref(pathname, new URLSearchParams(), code);
         const active = code === locale;
         const label = localeLabels[code as Locale];
         return (
