@@ -52,11 +52,9 @@ src/app/admin/(protected)/projects/[id]/overview/page.tsx
 # TranslationWorkflowPanel; its remaining sections (pricing, partner terms,
 # legal approval) and the components below still carry Dutch labels and need
 # the same labels-prop treatment.
-src/components/admin/addons-manager.tsx
 src/components/admin/admin-products-table.tsx
 src/components/admin/admin-ticket-internal-note-form.tsx
 src/components/admin/admin-ticket-status-form.tsx
-src/components/admin/categories-manager.tsx
 src/components/admin/create-customer-form.tsx
 src/components/admin/invoice-editor-form.tsx
 src/components/admin/product-editor-form.tsx

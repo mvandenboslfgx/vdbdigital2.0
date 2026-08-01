@@ -5,6 +5,7 @@ import { getAdminCategories } from "@/server/repositories/admin-categories";
 import { checkAdminAccess } from "@/server/auth/require-admin";
 import { hasPermission } from "@/lib/auth/permissions";
 import { getDictionary } from "@/i18n/get-dictionary";
+import { buildCategoriesManagerLabels } from "@/lib/admin/catalog-manager-labels";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getDictionary();
@@ -12,6 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AdminCategoriesPage() {
+  const { t } = await getDictionary();
   const access = await checkAdminAccess();
   if (!access.authorized || !access.context) redirect("/admin/login");
   if (!hasPermission(access.context.role, "products.read")) redirect("/admin");
@@ -28,6 +30,7 @@ export default async function AdminCategoriesPage() {
       <CategoriesManager
         categories={categories}
         canManage={hasPermission(access.context.role, "categories.manage")}
+        labels={buildCategoriesManagerLabels(t)}
       />
     </div>
   );

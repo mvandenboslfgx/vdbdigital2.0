@@ -5,6 +5,7 @@ import { getAdminAddons } from "@/server/repositories/admin-addons";
 import { checkAdminAccess } from "@/server/auth/require-admin";
 import { hasPermission } from "@/lib/auth/permissions";
 import { getDictionary } from "@/i18n/get-dictionary";
+import { buildAddonsManagerLabels } from "@/lib/admin/catalog-manager-labels";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getDictionary();
@@ -31,6 +32,7 @@ export default async function AdminAddonsPage() {
       <AddonsManager
         addons={addons}
         canManage={hasPermission(access.context.role, "products.manage_addons")}
+        labels={buildAddonsManagerLabels(t)}
       />
     </div>
   );
