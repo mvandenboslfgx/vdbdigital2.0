@@ -6,6 +6,7 @@ import {
   isSupabaseDatabaseReady,
 } from "@/lib/database/server";
 import { sendOrderConfirmation } from "@/lib/email/resend";
+import { getLocale } from "@/i18n/get-dictionary";
 import { allowDevFallback, isProductionRuntime } from "@/lib/runtime/environment";
 import { writeAuditLog } from "@/lib/security/audit-log";
 import {
@@ -155,7 +156,10 @@ export async function createOrder(data: ValidatedCheckout) {
     );
   }
 
-  const emailResult = await sendOrderConfirmation(data.customer.email, orderNumber);
+  // Orders have no persisted locale column yet (see docs/adr/RESEND_LOCALE_HANDOFF.md
+  // "Known gap"). Best-effort: use the buyer's active session locale at submit time.
+  const sessionLocale = await getLocale();
+  const emailResult = await sendOrderConfirmation(data.customer.email, orderNumber, sessionLocale);
   if (!emailResult.sent && isProductionRuntime()) {
     await writeAuditLog({
       action: "order.email_failed",
