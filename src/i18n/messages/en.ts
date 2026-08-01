@@ -867,6 +867,19 @@ const en = {
         emptyTitle: "No customers yet",
         emptyDescription:
           "Create a customer organisation and send an invitation. No fictitious data.",
+        newTitle: "New customer",
+        newBreadcrumb: "New",
+        newSubtitle:
+          "Invitation-first: organisation + invitation. No open portal access without acceptance.",
+      },
+      organizations: {
+        title: "Organisations",
+        countOne: "{count} organisation · managed from the customer detail page",
+        countOther: "{count} organisations · managed from the customer detail page",
+        emptyTitle: "No organisations yet",
+        emptyDescription:
+          "Create a customer organisation from Customers. No fictitious data.",
+        emptyAction: "Go to customers",
       },
       projects: {
         title: "Projects",
@@ -880,6 +893,31 @@ const en = {
         emptyDescription:
           "Create a project for an active customer organisation. No fictitious data.",
         emptyAction: "Create project",
+        newSubtitle:
+          "A draft stays internal by default. No automatic customer email at this stage.",
+        createFailed: "Creating the project failed. Check the details and try again.",
+        noOrganizations:
+          "Create an active customer organisation before starting a project.",
+        form: {
+          organization: "Customer organisation",
+          name: "Project name",
+          type: "Type",
+          priority: "Priority",
+          initialStatus: "Initial status",
+          visibility: "Customer visibility",
+          visibilityInternal: "Internal only (default)",
+          visibilityCustomer: "Visible to the customer",
+          startDate: "Start date",
+          plannedDelivery: "Planned delivery",
+          description: "Description",
+          submit: "Save draft",
+        },
+        priority: {
+          LOW: "Low",
+          NORMAL: "Normal",
+          HIGH: "High",
+          URGENT: "Urgent",
+        },
       },
       quotes: {
         title: "Quotes",
@@ -890,6 +928,9 @@ const en = {
         emptyTitle: "No quotes yet",
         emptyDescription: "Create a draft quote for an active organisation.",
         emptyAction: "Create quote",
+        newSubtitle:
+          "A draft stays internal. Sending creates an immutable version. No payment or Mollie.",
+        noOrganizations: "Create an active organisation first.",
       },
       invoices: {
         title: "Invoices",
@@ -900,6 +941,8 @@ const en = {
         emptyTitle: "No invoices yet",
         emptyDescription:
           "Create a draft, or convert an accepted quote into a draft invoice.",
+        newSubtitle:
+          "Save a draft. Issuing and payment are separate steps — no Mollie.",
       },
       documents: {
         title: "Documents",

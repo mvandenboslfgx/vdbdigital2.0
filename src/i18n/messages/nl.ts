@@ -877,6 +877,19 @@ const nl: Messages = {
         emptyTitle: "Nog geen klanten",
         emptyDescription:
           "Maak een klantorganisatie aan en verstuur een uitnodiging. Geen fictieve data.",
+        newTitle: "Nieuwe klant",
+        newBreadcrumb: "Nieuw",
+        newSubtitle:
+          "Invitation-first: organisatie + uitnodiging. Geen open portaltoegang zonder acceptatie.",
+      },
+      organizations: {
+        title: "Organisaties",
+        countOne: "{count} organisatie · beheer via klantdetail",
+        countOther: "{count} organisaties · beheer via klantdetail",
+        emptyTitle: "Nog geen organisaties",
+        emptyDescription:
+          "Maak een klantorganisatie aan via Klanten. Geen fictieve data.",
+        emptyAction: "Naar klanten",
       },
       projects: {
         title: "Projecten",
@@ -890,6 +903,32 @@ const nl: Messages = {
         emptyDescription:
           "Maak een project aan voor een actieve klantorganisatie. Geen fictieve data.",
         emptyAction: "Project aanmaken",
+        newSubtitle:
+          "Concept blijft standaard intern. Geen automatische klantmail in deze fase.",
+        createFailed:
+          "Project aanmaken is niet gelukt. Controleer de gegevens en probeer opnieuw.",
+        noOrganizations:
+          "Maak eerst een actieve klantorganisatie aan voordat je een project start.",
+        form: {
+          organization: "Klantorganisatie",
+          name: "Projectnaam",
+          type: "Type",
+          priority: "Prioriteit",
+          initialStatus: "Initiële status",
+          visibility: "Klantzichtbaarheid",
+          visibilityInternal: "Alleen intern (standaard)",
+          visibilityCustomer: "Zichtbaar voor klant",
+          startDate: "Startdatum",
+          plannedDelivery: "Geplande oplevering",
+          description: "Omschrijving",
+          submit: "Concept opslaan",
+        },
+        priority: {
+          LOW: "Laag",
+          NORMAL: "Normaal",
+          HIGH: "Hoog",
+          URGENT: "Urgent",
+        },
       },
       quotes: {
         title: "Offertes",
@@ -900,6 +939,9 @@ const nl: Messages = {
         emptyTitle: "Nog geen offertes",
         emptyDescription: "Maak een conceptofferte voor een actieve organisatie.",
         emptyAction: "Offerte aanmaken",
+        newSubtitle:
+          "Concept blijft intern. Verzenden maakt een onveranderlijke versie. Geen betaling of Mollie.",
+        noOrganizations: "Maak eerst een actieve organisatie aan.",
       },
       invoices: {
         title: "Facturen",
@@ -910,6 +952,8 @@ const nl: Messages = {
         emptyTitle: "Nog geen facturen",
         emptyDescription:
           "Maak een concept of zet een geaccepteerde offerte om naar een factuurconcept.",
+        newSubtitle:
+          "Concept opslaan. Uitgeven en betalen zijn aparte stappen — geen Mollie.",
       },
       documents: {
         title: "Documenten",

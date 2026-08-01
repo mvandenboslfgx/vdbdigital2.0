@@ -4,33 +4,39 @@ import { join, relative } from "node:path";
 
 /**
  * SEO/i18n debt guard: catches literal Dutch or English UI copy hardcoded
- * directly in customer-facing components/pages instead of routed through
- * `t()` / the i18n dictionaries. This is a regression guard, not a full
- * translation linter — it uses a curated phrase list that has near-zero
- * false positives, plus a file-level allowlist for known existing debt
+ * directly in components/pages instead of routed through `t()` / the i18n
+ * dictionaries. This is a regression guard, not a full translation linter —
+ * it uses a curated phrase list that has near-zero false positives, plus a
+ * file-level allowlist for known existing debt
  * (`tests/unit/hardcoded-ui-allowlist.txt`).
  *
  * New files (or newly-touched files not already on the allowlist) that
  * introduce one of these phrases fail the test — that's the point: it stops
  * *new* hardcoded copy from landing while we work through the backlog.
+ *
+ * Admin is in scope. It used to be excluded as an "internal, Dutch-only"
+ * surface, but the release bar is that admin is fully EN+NL with English
+ * fallback, so Dutch-only admin chrome is a defect like any other. Admin
+ * files additionally match ADMIN_UI_PATTERNS, which target the back-office
+ * vocabulary the customer-facing list never covered.
  */
 
 const REPO_ROOT = process.cwd();
 
-/** Directories whose customer-facing surface must not hardcode UI copy. */
+/** Directories whose UI surface must not hardcode copy. */
 const SCAN_ROOTS = [join(REPO_ROOT, "src", "app"), join(REPO_ROOT, "src", "components")];
 
 /**
- * Directories that are either translation *sources of truth* (expected to
- * contain literal copy) or documented internal/staff-only surfaces that are
- * intentionally single-locale (Dutch) per `docs/I18N_ARCHITECTURE.md`.
+ * Translation *sources of truth* — these are expected to contain literal copy
+ * in both languages, so scanning them would only ever produce noise.
  */
 const EXCLUDED_DIR_SEGMENTS = [
   `${join("src", "i18n", "messages")}`,
   `${join("src", "i18n", "content")}`,
-  `${join("src", "app", "admin")}`,
-  `${join("src", "components", "admin")}`,
 ];
+
+/** Paths whose files are additionally checked against ADMIN_UI_PATTERNS. */
+const ADMIN_PATH_PREFIXES = ["src/app/admin/", "src/components/admin/"];
 
 const SCANNABLE_EXTENSIONS = new Set([".tsx", ".ts"]);
 const EXCLUDED_FILE_SUFFIXES = [".test.ts", ".test.tsx", ".stories.tsx", ".d.ts"];
@@ -73,6 +79,46 @@ const ENGLISH_UI_PATTERNS: RegExp[] = [
 ];
 
 const UI_PATTERNS = [...DUTCH_UI_PATTERNS, ...ENGLISH_UI_PATTERNS];
+
+/**
+ * Back-office vocabulary. Same convention as above: multi-word phrases are
+ * case-insensitive, single Dutch words require a capitalised first letter so
+ * they match visible button/heading text rather than lowercase route segments
+ * (`/portal/facturen`), `data-testid` values or DB column names.
+ */
+const ADMIN_UI_PATTERNS: RegExp[] = [
+  /\bOpslaan\b/,
+  /\bAnnuleren\b/,
+  /\bBewerken\b/,
+  /\bVerwijderen\b/,
+  /\bToevoegen\b/,
+  /\bAanmaken\b/,
+  /\bDupliceren\b/,
+  /\bArchiveren\b/,
+  /\bHerstellen\b/,
+  /\bZoeken\b/,
+  /\bLaden\b/,
+  /\bOntbreekt\b/,
+  /\bGeblokkeerd\b/,
+  /\bVereist\b/,
+  /\bAlle statussen\b/i,
+  /\bNog geen\b/i,
+  /\bGeen fictieve data\b/i,
+  /\bGeen toestemming\b/i,
+  /\bNiet geconfigureerd\b/i,
+  /\bVerplichte velden\b/i,
+  /\bWijzigingen opslaan\b/i,
+  /\bTerug naar\b/i,
+  /\bNieuwe? [a-z]{3,}\b/,
+];
+
+function isAdminFile(repoRelativeFile: string): boolean {
+  return ADMIN_PATH_PREFIXES.some((prefix) => repoRelativeFile.startsWith(prefix));
+}
+
+function patternsFor(repoRelativeFile: string): RegExp[] {
+  return isAdminFile(repoRelativeFile) ? [...UI_PATTERNS, ...ADMIN_UI_PATTERNS] : UI_PATTERNS;
+}
 
 function toRepoRelativePosix(absolutePath: string): string {
   return relative(REPO_ROOT, absolutePath).split("\\").join("/");
@@ -132,8 +178,9 @@ function findViolations(absoluteFile: string, repoRelativeFile: string): Violati
   const source = readFileSync(absoluteFile, "utf8");
   const lines = source.split("\n");
   const violations: Violation[] = [];
+  const patterns = patternsFor(repoRelativeFile);
   lines.forEach((line, index) => {
-    for (const pattern of UI_PATTERNS) {
+    for (const pattern of patterns) {
       const match = line.match(pattern);
       if (match) {
         violations.push({ file: repoRelativeFile, line: index + 1, match: match[0] });
@@ -152,7 +199,65 @@ describe("SEO-006 hardcoded UI string scan", () => {
     expect(files.length).toBeGreaterThan(50);
   });
 
+  it("scans admin surfaces — admin is EN+NL, not an intentional Dutch-only surface", () => {
+    expect(files.some((f) => f.startsWith("src/app/admin/"))).toBe(true);
+    expect(files.some((f) => f.startsWith("src/components/admin/"))).toBe(true);
+  });
+
+  it("applies the back-office vocabulary to admin files only", () => {
+    expect(patternsFor("src/components/admin/categories-manager.tsx").length).toBe(
+      UI_PATTERNS.length + ADMIN_UI_PATTERNS.length,
+    );
+    expect(patternsFor("src/app/(marketing)/about/page.tsx")).toHaveLength(
+      UI_PATTERNS.length,
+    );
+  });
+
   const allowlist = loadAllowlist();
+
+  /**
+   * Surfaces that reached the EN+NL bar in this workstream. They must stay
+   * clean *and* stay off the allowlist — re-adding one would silently
+   * reintroduce a Dutch-only admin screen.
+   */
+  const LOCALIZED_ADMIN_SURFACES = [
+    "src/app/admin/(protected)/page.tsx",
+    "src/app/admin/(protected)/customers/page.tsx",
+    "src/app/admin/(protected)/customers/new/page.tsx",
+    "src/app/admin/(protected)/organizations/page.tsx",
+    "src/app/admin/(protected)/projects/page.tsx",
+    "src/app/admin/(protected)/projects/new/page.tsx",
+    "src/app/admin/(protected)/quotes/page.tsx",
+    "src/app/admin/(protected)/quotes/new/page.tsx",
+    "src/app/admin/(protected)/invoices/page.tsx",
+    "src/app/admin/(protected)/invoices/new/page.tsx",
+    "src/app/admin/(protected)/documents/page.tsx",
+    "src/app/admin/(protected)/messages/page.tsx",
+    "src/app/admin/(protected)/support/page.tsx",
+    "src/app/admin/(protected)/notifications/page.tsx",
+    "src/app/admin/(protected)/products/page.tsx",
+    "src/app/admin/(protected)/products/[id]/preview/page.tsx",
+    "src/app/admin/(protected)/categories/page.tsx",
+    "src/app/admin/(protected)/addons/page.tsx",
+    "src/app/admin/(protected)/orders/page.tsx",
+    "src/app/admin/(protected)/leads/page.tsx",
+    "src/app/admin/(protected)/content/page.tsx",
+    "src/app/admin/(protected)/users/page.tsx",
+    "src/app/admin/(protected)/roles/page.tsx",
+    "src/app/admin/(protected)/settings/page.tsx",
+    "src/app/admin/(protected)/audit-log/page.tsx",
+    "src/app/admin/(protected)/layout.tsx",
+    "src/components/admin/admin-shell.tsx",
+    "src/components/admin/translation-workflow-panel.tsx",
+  ];
+
+  it("keeps the already-localized admin surfaces clean and off the allowlist", () => {
+    for (const file of LOCALIZED_ADMIN_SURFACES) {
+      expect(files, `${file} is no longer picked up by the scanner`).toContain(file);
+      expect(allowlist.has(file), `${file} must not be allowlisted`).toBe(false);
+      expect(findViolations(join(REPO_ROOT, file), file)).toEqual([]);
+    }
+  });
 
   it("keeps the allowlist free of stale entries", () => {
     for (const entry of allowlist) {
