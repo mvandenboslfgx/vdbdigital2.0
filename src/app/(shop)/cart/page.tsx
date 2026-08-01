@@ -40,10 +40,7 @@ export default async function CartPage() {
 
         {!checkoutOn && (
           <Card className="mb-6 space-y-3">
-            <p className="text-muted">
-              Directe online betaling is momenteel uitgeschakeld. Bekijk producten in de shop
-              en vraag een offerte aan of neem contact op.
-            </p>
+            <p className="text-muted">{t("cart.checkoutDisabledNotice")}</p>
             <div className="flex flex-wrap gap-3">
               <LocaleLinkButton href={paths.shop}>{t("cart.toShop")}</LocaleLinkButton>
               <LocaleLinkButton href={paths.quote} variant="outline">
@@ -59,7 +56,7 @@ export default async function CartPage() {
         {showEmpty ? (
           <Card className="text-center py-12 space-y-4">
             <p className="text-muted">
-              {checkoutOn ? t("cart.empty") : "Er zijn geen afrekenbare artikelen beschikbaar."}
+              {checkoutOn ? t("cart.empty") : t("cart.noCheckoutableItems")}
             </p>
             <LocaleLinkButton href={paths.shop}>{t("cart.toShop")}</LocaleLinkButton>
           </Card>

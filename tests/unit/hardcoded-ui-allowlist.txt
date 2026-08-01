@@ -3,14 +3,10 @@
 # Read by tests/unit/hardcoded-ui-string-scan.test.ts — do not add new
 # entries casually; prefer fixing the hardcoded copy via the i18n dictionary.
 #
-# Auth flow pages predate the next-intl adoption (0ac3d7a) and are still
-# fully Dutch-hardcoded; not yet migrated to the dictionary.
-src/app/(auth)/geen-toegang/page.tsx
-src/app/(auth)/inloggen/page.tsx
-src/app/(auth)/wachtwoord-vergeten/page.tsx
-src/components/auth/auth-login-form.tsx
-# Customer-facing but still hardcoded Dutch copy — flagged for Phase 7 i18n cleanup.
-src/app/(shop)/cart/page.tsx
+# Auth flow pages and the cart page have all been migrated to the i18n
+# dictionary (see tests/unit/hardcoded-ui-string-scan.test.ts scan roots).
+# Keep this list empty — do not re-add entries without exhausting a proper
+# dictionary fix first.
 #
 # =============================================================================
 # Admin surfaces — none. Keep it that way.

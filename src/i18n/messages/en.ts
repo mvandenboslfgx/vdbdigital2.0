@@ -419,6 +419,9 @@ const en = {
   cart: {
     title: "Cart",
     empty: "Your cart is empty.",
+    checkoutDisabledNotice:
+      "Direct online payment is currently disabled. Browse products in the shop and request a quote or get in touch.",
+    noCheckoutableItems: "No items are currently available for checkout.",
     toShop: "Go to shop",
     overview: "Overview",
     subtotal: "Subtotal",

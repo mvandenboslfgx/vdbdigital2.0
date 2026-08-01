@@ -426,6 +426,9 @@ const nl: Messages = {
   cart: {
     title: "Winkelwagen",
     empty: "Je winkelwagen is leeg.",
+    checkoutDisabledNotice:
+      "Directe online betaling is momenteel uitgeschakeld. Bekijk producten in de shop en vraag een offerte aan of neem contact op.",
+    noCheckoutableItems: "Er zijn geen afrekenbare artikelen beschikbaar.",
     toShop: "Naar de shop",
     overview: "Overzicht",
     subtotal: "Subtotaal",
