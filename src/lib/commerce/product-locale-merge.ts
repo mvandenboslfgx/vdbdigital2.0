@@ -155,7 +155,80 @@ export function getMissingTranslationFields(
   return missing;
 }
 
-export type TranslationPublishBlockReason = "missing_fields" | "not_approved" | "forbidden";
+/**
+ * Fields of the canonical English source that a translation is reviewed
+ * against. When any of these change, every non-English translation is
+ * considered drifted and must be re-reviewed.
+ */
+export interface TranslationSourceInput {
+  name?: string | null;
+  shortDescription?: string | null;
+  fullDescription?: string | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  benefits?: string[] | null;
+  includedItems?: string[] | null;
+  excludedItems?: string[] | null;
+}
+
+function normalizeSourcePart(value: string | string[] | null | undefined): string {
+  if (Array.isArray(value)) return value.map((v) => v.trim()).join("\u0001");
+  return (value ?? "").trim();
+}
+
+/**
+ * Stable content fingerprint of the English source copy, stored on the
+ * translation row as `source_hash`.
+ *
+ * Deliberately a plain FNV-1a variant rather than a crypto digest: this runs
+ * in the admin editor (a client component) as well as in the server action, so
+ * it must not pull in `node:crypto`. It is drift detection, not a security
+ * control — a collision only means a re-review is skipped, and the publish
+ * gate still requires an explicit human 'approved' status either way.
+ */
+export function computeTranslationSourceHash(input: TranslationSourceInput): string {
+  const serialized = [
+    normalizeSourcePart(input.name),
+    normalizeSourcePart(input.shortDescription),
+    normalizeSourcePart(input.fullDescription),
+    normalizeSourcePart(input.seoTitle),
+    normalizeSourcePart(input.seoDescription),
+    normalizeSourcePart(input.benefits),
+    normalizeSourcePart(input.includedItems),
+    normalizeSourcePart(input.excludedItems),
+  ].join("\u0000");
+
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < serialized.length; i += 1) {
+    hash ^= serialized.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+
+  return `v1.${serialized.length.toString(36)}.${hash.toString(36)}`;
+}
+
+/**
+ * True when the English source has changed since this translation was last
+ * reviewed against it.
+ *
+ * A row with no stored `source_hash` predates staleness tracking; it is NOT
+ * reported as stale, because we cannot tell drift from "never recorded" and
+ * flagging every legacy row would bury the real signal. Such rows record a
+ * hash on their next save.
+ */
+export function isTranslationSourceStale(
+  storedSourceHash: string | null | undefined,
+  currentSourceHash: string,
+): boolean {
+  if (!storedSourceHash) return false;
+  return storedSourceHash !== currentSourceHash;
+}
+
+export type TranslationPublishBlockReason =
+  | "missing_fields"
+  | "not_approved"
+  | "forbidden"
+  | "stale";
 
 export interface TranslationTransitionResult {
   allowed: boolean;
@@ -168,15 +241,18 @@ export interface TranslationTransitionOptions {
   previousStatus: ProductTranslationStatus | null | undefined;
   /** Actor lacks the 'products.publish' capability — publish must be denied even when content is complete. */
   canPublish?: boolean;
+  /** The English source changed after the last review — re-review is required. */
+  sourceStale?: boolean;
 }
 
 /**
  * Publish gate for the admin translation workflow. A translation may only be
  * promoted to 'published' when:
  *  - the actor holds the 'products.publish' capability, AND
+ *  - every required copy field is present, AND
+ *  - the English source has not drifted since the last review, AND
  *  - it has already passed human review (previous status 'approved', or is
- *    already 'published' — re-saving copy edits keeps it published), AND
- *  - every required copy field is present.
+ *    already 'published' — re-saving copy edits keeps it published).
  * Every other requested status transition is always allowed — the workflow
  * only ever gates the promotion TO 'published'.
  */
@@ -194,10 +270,21 @@ export function canTransitionTranslationStatus(
     return { allowed: false, reason: "missing_fields", missingFields: options.missingFields };
   }
 
+  if (options.sourceStale) {
+    return { allowed: false, reason: "stale" };
+  }
+
   const previous = options.previousStatus ?? "draft";
   if (previous !== "approved" && previous !== "published") {
     return { allowed: false, reason: "not_approved" };
   }
 
   return { allowed: true };
+}
+
+/** Status a blocked publish attempt is safely downgraded to. */
+export function downgradeStatusForBlockedPublish(
+  reason: TranslationPublishBlockReason,
+): ProductTranslationStatus {
+  return reason === "stale" ? "stale" : "needs_review";
 }

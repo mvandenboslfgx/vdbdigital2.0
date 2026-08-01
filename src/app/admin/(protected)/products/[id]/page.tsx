@@ -8,17 +8,20 @@ import { hasPermission } from "@/lib/auth/permissions";
 import { buildPublicationChecklist } from "@/lib/commerce/publication-checklist";
 import { getCheckoutBlockLabelsNl } from "@/lib/commerce/catalog-admin-eligibility";
 import { isLegacyTawkProduct } from "@/lib/commerce/tawk-legacy-blocklist";
+import { getDictionary } from "@/i18n/get-dictionary";
+import { buildTranslationPanelLabels } from "@/lib/admin/translation-panel-labels";
 
-export const metadata: Metadata = {
-  title: "Product bewerken",
-  robots: { index: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getDictionary();
+  return { title: t("admin.page.products.editTitle"), robots: { index: false } };
+}
 
 export default async function AdminEditProductPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { t } = await getDictionary();
   const { id } = await params;
   const access = await checkAdminAccess();
   if (!access.authorized || !access.context) redirect("/admin/login");
@@ -46,6 +49,7 @@ export default async function AdminEditProductPage({
       canArchive={hasPermission(access.context.role, "products.archive")}
       blockReasons={blockReasons}
       legacyRemoved={legacyRemoved}
+      translationLabels={buildTranslationPanelLabels(t)}
     />
   );
 }

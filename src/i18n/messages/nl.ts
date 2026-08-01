@@ -943,6 +943,8 @@ const nl: Messages = {
       products: {
         title: "Producten",
         loading: "Producten laden…",
+        newTitle: "Nieuw product",
+        editTitle: "Product bewerken",
       },
       productPreview: {
         title: "Productpreview",
@@ -1055,6 +1057,19 @@ const nl: Messages = {
         includedItems: "inbegrepen items",
       },
       incomplete: "De {locale}-vertaling ontbreekt of is incompleet.",
+      fields: {
+        name: "Naam",
+        shortDescription: "Korte omschrijving",
+        fullDescription: "Volledige omschrijving",
+        benefits: "Voordelen",
+        includedItems: "Inbegrepen",
+        excludedItems: "Niet inbegrepen",
+        ctaLabel: "Call-to-action",
+        quoteCtaLabel: "Offerte-call-to-action",
+        seoTitle: "SEO-titel",
+        seoDescription: "Meta-omschrijving",
+      },
+      linesHint: "Eén per regel",
       sourceHeading: "Engelse bron",
       sourceHint:
         "Alleen-lezen canonieke copy uit de products-rij. Bewerken doet u in de secties hierboven.",

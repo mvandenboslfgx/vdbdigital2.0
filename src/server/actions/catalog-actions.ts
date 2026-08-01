@@ -29,9 +29,14 @@ import {
 } from "@/lib/commerce/publication-checklist";
 import {
   canTransitionTranslationStatus,
+  computeTranslationSourceHash,
+  downgradeStatusForBlockedPublish,
   getMissingTranslationFields,
+  isTranslationSourceStale,
+  type TranslationPublishBlockReason,
 } from "@/lib/commerce/product-locale-merge";
 import { hasPermission } from "@/lib/auth/permissions";
+import { getDictionary } from "@/i18n/get-dictionary";
 import type { ProductTranslationStatus } from "@/types";
 import { isMissingSchemaError, mapDbProductRow } from "@/server/repositories/map-product";
 import {
@@ -132,88 +137,143 @@ function buildProductInsert(data: CreateProductInput, userId: string) {
   };
 }
 
-const TRANSLATION_BLOCK_MESSAGES: Record<string, (locale: string, extra?: string) => string> = {
-  forbidden: (locale) =>
-    `${locale.toUpperCase()}: publiceren geblokkeerd — geen 'products.publish' bevoegdheid. Status teruggezet naar 'needs_review'.`,
-  not_approved: (locale) =>
-    `${locale.toUpperCase()}: publiceren geblokkeerd — vertaling moet eerst 'approved' zijn. Status teruggezet naar 'needs_review'.`,
-  missing_fields: (locale, extra) =>
-    `${locale.toUpperCase()}: publiceren geblokkeerd — ontbrekende velden (${extra}). Status teruggezet naar 'needs_review'.`,
+const TRANSLATION_BLOCK_KEYS: Record<TranslationPublishBlockReason, string> = {
+  forbidden: "admin.translation.blocked.forbidden",
+  not_approved: "admin.translation.blocked.notApproved",
+  missing_fields: "admin.translation.blocked.missingFields",
+  stale: "admin.translation.blocked.stale",
 };
+
+interface UpsertTranslationsOptions {
+  productId: string;
+  translations: CreateProductInput["translations"];
+  canPublish: boolean;
+  /** Fingerprint of the English source copy being saved alongside these rows. */
+  sourceHash: string;
+  actorUserId: string;
+}
 
 /**
  * Upsert product_translations rows, enforcing the publish gate documented in
  * canTransitionTranslationStatus(): promotion to 'published' requires the
- * 'products.publish' capability, a prior human review ('approved'), and every
- * required copy field to be present. Any blocked transition is safely
- * downgraded to 'needs_review' (never silently dropped, never auto-published)
- * and surfaced back to the caller as a warning string.
+ * 'products.publish' capability, every required copy field, an unchanged
+ * English source, and a prior human review ('approved'). Any blocked
+ * transition is safely downgraded (never silently dropped, never
+ * auto-published) and surfaced back to the caller as a warning string.
+ *
+ * Every status change is written to the audit log, so a promotion to
+ * 'published' — the only status a visitor can ever see — is always
+ * attributable to a person.
  */
-async function upsertTranslations(
-  productId: string,
-  translations: CreateProductInput["translations"],
-  canPublish: boolean,
-): Promise<string[]> {
+async function upsertTranslations({
+  productId,
+  translations,
+  canPublish,
+  sourceHash,
+  actorUserId,
+}: UpsertTranslationsOptions): Promise<string[]> {
   const warnings: string[] = [];
   if (!translations?.length) return warnings;
   const supabase = createServiceRoleClient();
   if (!supabase) return warnings;
 
-  for (const t of translations) {
+  const { t } = await getDictionary();
+
+  for (const translation of translations) {
+    const localeLabel = translation.locale.toUpperCase();
     const row: Record<string, unknown> = {
       product_id: productId,
-      locale: t.locale,
-      name: sanitizePlainText(t.name, 200),
-      slug: t.slug ?? null,
-      short_description: sanitizePlainText(t.shortDescription, 2000),
-      full_description: sanitizeProductHtml(t.fullDescription),
-      benefits: t.benefits,
-      included_items: t.includedItems,
-      excluded_items: t.excludedItems,
-      cta_label: t.ctaLabel ?? null,
-      quote_cta_label: t.quoteCtaLabel ?? null,
-      seo_title: t.seoTitle ?? null,
-      seo_description: t.seoDescription ?? null,
-      delivery_time: t.deliveryTime ?? null,
-      target_audience: t.targetAudience ?? null,
-      workflow: t.workflow ?? null,
-      warnings: t.warnings ?? null,
+      locale: translation.locale,
+      name: sanitizePlainText(translation.name, 200),
+      slug: translation.slug ?? null,
+      short_description: sanitizePlainText(translation.shortDescription, 2000),
+      full_description: sanitizeProductHtml(translation.fullDescription),
+      benefits: translation.benefits,
+      included_items: translation.includedItems,
+      excluded_items: translation.excludedItems,
+      cta_label: translation.ctaLabel ?? null,
+      quote_cta_label: translation.quoteCtaLabel ?? null,
+      seo_title: translation.seoTitle ?? null,
+      seo_description: translation.seoDescription ?? null,
+      delivery_time: translation.deliveryTime ?? null,
+      target_audience: translation.targetAudience ?? null,
+      workflow: translation.workflow ?? null,
+      warnings: translation.warnings ?? null,
       updated_at: new Date().toISOString(),
     };
 
-    // Workflow status column requires the Phase 4 migration
+    // Workflow status columns require the Phase 4 migration
     // (20260801140000_product_translation_status.sql). Never sent when
     // undefined so pre-migration environments keep working (DB default 'draft').
-    if (t.status) {
-      let nextStatus: ProductTranslationStatus = t.status;
+    if (translation.status) {
+      let nextStatus: ProductTranslationStatus = translation.status;
+
+      const { data: existingRow } = await supabase
+        .from("product_translations")
+        .select("status, source_hash")
+        .eq("product_id", productId)
+        .eq("locale", translation.locale)
+        .maybeSingle();
+
+      const previousStatus =
+        (existingRow?.status as ProductTranslationStatus | undefined) ?? null;
+      const sourceStale = isTranslationSourceStale(
+        (existingRow?.source_hash as string | null | undefined) ?? null,
+        sourceHash,
+      );
 
       if (nextStatus === "published") {
-        const { data: existingRow } = await supabase
-          .from("product_translations")
-          .select("status")
-          .eq("product_id", productId)
-          .eq("locale", t.locale)
-          .maybeSingle();
-        const previousStatus =
-          (existingRow?.status as ProductTranslationStatus | undefined) ?? null;
-        const missingFields = getMissingTranslationFields(t);
+        const missingFields = getMissingTranslationFields(translation);
         const gate = canTransitionTranslationStatus("published", {
           missingFields,
           previousStatus,
           canPublish,
+          sourceStale,
         });
 
         if (!gate.allowed && gate.reason) {
-          nextStatus = "needs_review";
+          nextStatus = downgradeStatusForBlockedPublish(gate.reason);
           warnings.push(
-            TRANSLATION_BLOCK_MESSAGES[gate.reason](t.locale, missingFields.join(", ")),
+            t(TRANSLATION_BLOCK_KEYS[gate.reason], {
+              locale: localeLabel,
+              fields: missingFields.join(", "),
+            }),
           );
+        }
+      } else if (sourceStale && nextStatus !== "stale") {
+        // Source drifted under an already-reviewed translation: hold it at
+        // 'stale' so it cannot silently keep an approved/published badge.
+        if (previousStatus === "approved" || previousStatus === "published") {
+          nextStatus = "stale";
+          warnings.push(t("admin.translation.blocked.stale", { locale: localeLabel }));
         }
       }
 
       row.status = nextStatus;
+      row.source_hash = sourceHash;
+      if (nextStatus === "approved") {
+        row.reviewed_at = new Date().toISOString();
+      }
       if (nextStatus === "published") {
         row.published_at = new Date().toISOString();
+      }
+
+      if (previousStatus !== nextStatus) {
+        await writeAuditLog({
+          userId: actorUserId,
+          action: "product.translation.status_changed",
+          resourceType: "product_translation",
+          resourceId: `${productId}:${translation.locale}`,
+          metadata: {
+            productId,
+            locale: translation.locale,
+            fromStatus: previousStatus ?? "none",
+            toStatus: nextStatus,
+            requestedStatus: translation.status,
+            sourceStale,
+            canPublish,
+          },
+        });
       }
     }
 
@@ -224,8 +284,10 @@ async function upsertTranslations(
     if (error && !isMissingSchemaError(error)) {
       console.error("upsertTranslations failed", error.message);
     } else if (error && isMissingSchemaError(error) && "status" in row) {
-      // Migration not applied yet — retry without the new status columns.
+      // Migration not applied yet — retry without the new workflow columns.
       delete row.status;
+      delete row.source_hash;
+      delete row.reviewed_at;
       delete row.published_at;
       await supabase
         .from("product_translations")
@@ -285,11 +347,13 @@ export async function createProductAction(
       };
     }
 
-    const translationWarnings = await upsertTranslations(
-      data.id,
-      parsed.data.translations,
-      hasPermission(ctx.role, "products.publish"),
-    );
+    const translationWarnings = await upsertTranslations({
+      productId: data.id,
+      translations: parsed.data.translations,
+      canPublish: hasPermission(ctx.role, "products.publish"),
+      sourceHash: computeTranslationSourceHash(parsed.data),
+      actorUserId: ctx.user.id,
+    });
 
     await writeAuditLog({
       userId: ctx.user.id,
@@ -404,11 +468,13 @@ export async function updateProductAction(
       };
     }
 
-    const translationWarnings = await upsertTranslations(
-      parsed.data.id,
-      parsed.data.translations,
-      hasPermission(ctx.role, "products.publish"),
-    );
+    const translationWarnings = await upsertTranslations({
+      productId: parsed.data.id,
+      translations: parsed.data.translations,
+      canPublish: hasPermission(ctx.role, "products.publish"),
+      sourceHash: computeTranslationSourceHash(parsed.data),
+      actorUserId: ctx.user.id,
+    });
 
     await writeAuditLog({
       userId: ctx.user.id,

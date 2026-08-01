@@ -4,13 +4,16 @@ import { ProductEditorForm } from "@/components/admin/product-editor-form";
 import { getAdminCategoryOptions } from "@/server/repositories/admin-categories";
 import { checkAdminAccess } from "@/server/auth/require-admin";
 import { hasPermission } from "@/lib/auth/permissions";
+import { getDictionary } from "@/i18n/get-dictionary";
+import { buildTranslationPanelLabels } from "@/lib/admin/translation-panel-labels";
 
-export const metadata: Metadata = {
-  title: "Nieuw product",
-  robots: { index: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getDictionary();
+  return { title: t("admin.page.products.newTitle"), robots: { index: false } };
+}
 
 export default async function AdminNewProductPage() {
+  const { t } = await getDictionary();
   const access = await checkAdminAccess();
   if (!access.authorized || !access.context) redirect("/admin/login");
   if (!hasPermission(access.context.role, "products.create")) {
@@ -27,7 +30,8 @@ export default async function AdminNewProductPage() {
       canChangePrice={hasPermission(access.context.role, "products.change_price")}
       canLegal={hasPermission(access.context.role, "products.legal_approve")}
       canArchive={hasPermission(access.context.role, "products.archive")}
-      blockReasons={["Directe checkout is momenteel algemeen uitgeschakeld"]}
+      blockReasons={[t("admin.page.productPreview.checkoutDisabled")]}
+      translationLabels={buildTranslationPanelLabels(t)}
     />
   );
 }

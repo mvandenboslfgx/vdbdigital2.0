@@ -933,6 +933,8 @@ const en = {
       products: {
         title: "Products",
         loading: "Loading products…",
+        newTitle: "New product",
+        editTitle: "Edit product",
       },
       productPreview: {
         title: "Product preview",
@@ -1045,6 +1047,19 @@ const en = {
         includedItems: "included items",
       },
       incomplete: "The {locale} translation is missing or incomplete.",
+      fields: {
+        name: "Name",
+        shortDescription: "Short description",
+        fullDescription: "Full description",
+        benefits: "Benefits",
+        includedItems: "Included",
+        excludedItems: "Not included",
+        ctaLabel: "Call to action",
+        quoteCtaLabel: "Quote call to action",
+        seoTitle: "SEO title",
+        seoDescription: "Meta description",
+      },
+      linesHint: "One per line",
       sourceHeading: "English source",
       sourceHint:
         "Read-only canonical copy from the products row. Edit it in the sections above.",

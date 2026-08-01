@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   canTransitionTranslationStatus,
+  computeTranslationSourceHash,
+  downgradeStatusForBlockedPublish,
   getMissingTranslationFields,
   hasMinimalEnglishContent,
   isPublishableTranslationStatus,
+  isTranslationSourceStale,
   mergeProductForLocale,
 } from "@/lib/commerce/product-locale-merge";
 import type { Product, ProductTranslation, ProductTranslationStatus } from "@/types";
@@ -290,5 +293,83 @@ describe("canTransitionTranslationStatus", () => {
       previousStatus: "approved",
     });
     expect(result).toEqual({ allowed: true });
+  });
+
+  it("blocks publish when the English source drifted after review", () => {
+    const result = canTransitionTranslationStatus("published", {
+      missingFields: [],
+      previousStatus: "approved",
+      canPublish: true,
+      sourceStale: true,
+    });
+    expect(result).toEqual({ allowed: false, reason: "stale" });
+  });
+
+  it("downgrades a stale-blocked publish to 'stale' and everything else to 'needs_review'", () => {
+    expect(downgradeStatusForBlockedPublish("stale")).toBe("stale");
+    for (const reason of ["forbidden", "missing_fields", "not_approved"] as const) {
+      expect(downgradeStatusForBlockedPublish(reason)).toBe("needs_review");
+    }
+  });
+});
+
+describe("translation source hashing (staleness detection)", () => {
+  const source = {
+    name: "Starter Website",
+    shortDescription: "EN short description",
+    fullDescription: "EN full description",
+    seoTitle: "EN SEO title",
+    seoDescription: "EN SEO description",
+    benefits: ["Fast", "Reliable"],
+    includedItems: ["Up to 5 pages"],
+    excludedItems: [],
+  };
+
+  it("is stable for identical source copy", () => {
+    expect(computeTranslationSourceHash(source)).toBe(
+      computeTranslationSourceHash({ ...source }),
+    );
+  });
+
+  it("ignores surrounding whitespace so a reformat is not treated as drift", () => {
+    expect(computeTranslationSourceHash({ ...source, name: "  Starter Website  " })).toBe(
+      computeTranslationSourceHash(source),
+    );
+  });
+
+  it("changes when any reviewed source field changes", () => {
+    const baseline = computeTranslationSourceHash(source);
+    const variants = [
+      { ...source, name: "Starter Website v2" },
+      { ...source, shortDescription: "Different short description" },
+      { ...source, fullDescription: "Different full description" },
+      { ...source, seoTitle: "Different SEO title" },
+      { ...source, seoDescription: "Different SEO description" },
+      { ...source, benefits: ["Fast"] },
+      { ...source, includedItems: ["Up to 10 pages"] },
+      { ...source, excludedItems: ["Hosting"] },
+    ];
+    for (const variant of variants) {
+      expect(computeTranslationSourceHash(variant)).not.toBe(baseline);
+    }
+  });
+
+  it("does not confuse array boundaries with concatenated text", () => {
+    expect(computeTranslationSourceHash({ ...source, benefits: ["Fast", "Reliable"] })).not.toBe(
+      computeTranslationSourceHash({ ...source, benefits: ["FastReliable"] }),
+    );
+  });
+
+  it("reports drift only when a previously recorded hash no longer matches", () => {
+    const current = computeTranslationSourceHash(source);
+    expect(isTranslationSourceStale(current, current)).toBe(false);
+    expect(isTranslationSourceStale("v1.old.hash", current)).toBe(true);
+  });
+
+  it("treats rows without a recorded hash as not stale (pre-migration rows)", () => {
+    const current = computeTranslationSourceHash(source);
+    expect(isTranslationSourceStale(null, current)).toBe(false);
+    expect(isTranslationSourceStale(undefined, current)).toBe(false);
+    expect(isTranslationSourceStale("", current)).toBe(false);
   });
 });

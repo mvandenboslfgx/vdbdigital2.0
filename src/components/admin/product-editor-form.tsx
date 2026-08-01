@@ -19,8 +19,10 @@ import {
 } from "@/server/actions/catalog-actions";
 import { billingWarningNl } from "@/lib/commerce/catalog-admin-eligibility";
 import { LEGACY_TAWK_ADMIN_STATUS_LABEL } from "@/lib/commerce/tawk-legacy-blocklist";
-import { getMissingTranslationFields } from "@/lib/commerce/product-locale-merge";
-import type { BillingType, PriceMode, Product, ProductTranslation, ProductTranslationStatus } from "@/types";
+import { TranslationWorkflowPanel } from "@/components/admin/translation-workflow-panel";
+import type { TranslationPanelLabels } from "@/lib/admin/translation-panel-labels";
+import { locales } from "@/i18n/config";
+import type { BillingType, PriceMode, Product, ProductTranslationStatus } from "@/types";
 import type { PublicationCheckItem } from "@/lib/commerce/publication-checklist";
 
 type CategoryOption = { id: string; name: string };
@@ -36,51 +38,11 @@ interface Props {
   canArchive: boolean;
   blockReasons: string[];
   legacyRemoved?: boolean;
+  /** Resolved server-side; the panel itself does no dictionary lookups. */
+  translationLabels: TranslationPanelLabels;
 }
 
 const initialState: CatalogActionState = {};
-
-const MISSING_FIELD_LABELS_NL: Record<string, string> = {
-  name: "naam",
-  shortDescription: "korte omschrijving",
-  fullDescription: "volledige omschrijving",
-  seoTitle: "SEO-titel",
-  seoDescription: "meta-omschrijving",
-  includedItems: "inbegrepen items",
-};
-
-/**
- * Publish-readiness hint for a translation. Mirrors the server-side gate in
- * canTransitionTranslationStatus()/upsertTranslations() (see
- * src/server/actions/catalog-actions.ts): a translation can only reach
- * 'published' once it is already 'approved' and has no missing fields. This
- * is informational only — the enforced gate always runs server-side, so a
- * blocked save is safely downgraded to 'needs_review' rather than rejected.
- */
-function MissingFieldsHint({ translation }: { translation?: ProductTranslation }) {
-  const missing = getMissingTranslationFields({
-    name: translation?.name,
-    shortDescription: translation?.shortDescription,
-    fullDescription: translation?.fullDescription,
-    seoTitle: translation?.seoTitle,
-    seoDescription: translation?.seoDescription,
-    includedItems: translation?.includedItems,
-  });
-
-  if (missing.length === 0) {
-    return (
-      <p className="text-small text-emerald-800">
-        Alle verplichte velden voor publicatie zijn ingevuld.
-      </p>
-    );
-  }
-
-  return (
-    <p className="text-small text-amber-800">
-      Ontbreekt nog voor publicatie: {missing.map((f) => MISSING_FIELD_LABELS_NL[f] ?? f).join(", ")}.
-    </p>
-  );
-}
 
 function linesToArray(value: string): string[] {
   return value
@@ -100,6 +62,7 @@ export function ProductEditorForm({
   canArchive,
   blockReasons,
   legacyRemoved = false,
+  translationLabels,
 }: Props) {
   const router = useRouter();
   const [createState, createAction, createPending] = useActionState(
@@ -282,15 +245,6 @@ export function ProductEditorForm({
 
   const nl = product?.translations?.find((t) => t.locale === "nl");
   const en = product?.translations?.find((t) => t.locale === "en");
-
-  const TRANSLATION_STATUS_OPTIONS: { value: ProductTranslationStatus; label: string }[] = [
-    { value: "draft", label: "Draft — niet zichtbaar" },
-    { value: "machine_translated", label: "Machine-vertaald — niet zichtbaar" },
-    { value: "needs_review", label: "Needs review — niet zichtbaar" },
-    { value: "approved", label: "Approved — alleen admin preview" },
-    { value: "published", label: "Published — live op storefront" },
-    { value: "stale", label: "Stale — bron gewijzigd, review vereist" },
-  ];
 
   const centsToEuros = (cents: number | null | undefined) =>
     cents === null || cents === undefined ? "" : (cents / 100).toFixed(2);
@@ -535,98 +489,26 @@ export function ProductEditorForm({
           </div>
         </section>
 
-        <section className="space-y-4">
-          <h2 className="text-lg font-semibold font-display">Meertaligheid</h2>
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div className="space-y-3 rounded-lg border border-border p-4">
-              <h3 className="font-medium">Nederlands</h3>
-              {!nl?.name && mode === "edit" && (
-                <p className="text-small text-amber-800">Nederlandse vertaling ontbreekt of is incompleet.</p>
-              )}
-              <label className="space-y-1.5 text-small font-medium block">
-                Vertaalstatus NL
-                <select
-                  name="nl_status"
-                  defaultValue={nl?.status ?? "draft"}
-                  className="w-full min-h-11 rounded-lg border border-border bg-surface px-3"
-                >
-                  {TRANSLATION_STATUS_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <p className="text-small text-muted">
-                Alleen &quot;Published&quot; wordt getoond aan bezoekers. Machine-vertalingen
-                publiceren nooit automatisch. Publiceren wordt geblokkeerd (en teruggezet naar
-                &quot;Needs review&quot;) tenzij de vertaling al &quot;Approved&quot; was, alle
-                verplichte velden zijn ingevuld, en u de &quot;products.publish&quot;-bevoegdheid
-                heeft.
-              </p>
-              <MissingFieldsHint translation={nl} />
-              <Input name="nl_name" label="Naam NL" defaultValue={nl?.name ?? ""} />
-              <Textarea name="nl_shortDescription" label="Korte omschrijving NL" rows={2} defaultValue={nl?.shortDescription ?? ""} />
-              <Textarea name="nl_fullDescription" label="Lange omschrijving NL" rows={4} defaultValue={nl?.fullDescription ?? ""} />
-              <Textarea name="nl_benefits" label="Voordelen NL" rows={3} defaultValue={(nl?.benefits ?? []).join("\n")} />
-              <Textarea name="nl_includedItems" label="Kenmerken NL" rows={3} defaultValue={(nl?.includedItems ?? []).join("\n")} />
-              <Textarea name="nl_excludedItems" label="Niet inbegrepen NL" rows={2} defaultValue={(nl?.excludedItems ?? []).join("\n")} />
-              <Input name="nl_ctaLabel" label="CTA NL" defaultValue={nl?.ctaLabel ?? ""} />
-              <Input name="nl_quoteCtaLabel" label="Offerte-CTA NL" defaultValue={nl?.quoteCtaLabel ?? ""} />
-              <Input name="nl_seoTitle" label="SEO-titel NL" defaultValue={nl?.seoTitle ?? ""} />
-              <Textarea name="nl_seoDescription" label="Meta NL" rows={2} defaultValue={nl?.seoDescription ?? ""} />
-            </div>
-            <div className="space-y-3 rounded-lg border border-border p-4">
-              <h3 className="font-medium">Engels</h3>
-              {!en?.name && mode === "edit" && (
-                <p className="text-small text-amber-800">Engelse vertaling ontbreekt of is incompleet.</p>
-              )}
-              <label className="space-y-1.5 text-small font-medium block">
-                Translation status EN
-                <select
-                  name="en_status"
-                  defaultValue={en?.status ?? "draft"}
-                  className="w-full min-h-11 rounded-lg border border-border bg-surface px-3"
-                >
-                  {TRANSLATION_STATUS_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <p className="text-small text-muted">
-                Only &quot;Published&quot; is shown to visitors. Machine-translated content never
-                auto-publishes. Publishing is blocked (and reset to &quot;Needs review&quot;)
-                unless the translation was already &quot;Approved&quot;, every required field is
-                filled in, and you hold the &quot;products.publish&quot; capability.
-              </p>
-              <MissingFieldsHint
-                translation={{
-                  locale: "en",
-                  name: en?.name ?? product?.name ?? "",
-                  shortDescription: en?.shortDescription ?? product?.shortDescription ?? "",
-                  fullDescription: en?.fullDescription ?? product?.fullDescription ?? "",
-                  seoTitle: en?.seoTitle ?? product?.seoTitle ?? "",
-                  seoDescription: en?.seoDescription ?? product?.seoDescription ?? "",
-                  includedItems: en?.includedItems ?? product?.includedItems ?? [],
-                  benefits: en?.benefits ?? product?.benefits ?? [],
-                  excludedItems: en?.excludedItems ?? product?.excludedItems ?? [],
-                }}
-              />
-              <Input name="en_name" label="Name EN" defaultValue={en?.name ?? product?.name ?? ""} />
-              <Textarea name="en_shortDescription" label="Short description EN" rows={2} defaultValue={en?.shortDescription ?? product?.shortDescription ?? ""} />
-              <Textarea name="en_fullDescription" label="Full description EN" rows={4} defaultValue={en?.fullDescription ?? product?.fullDescription ?? ""} />
-              <Textarea name="en_benefits" label="Benefits EN" rows={3} defaultValue={(en?.benefits ?? product?.benefits ?? []).join("\n")} />
-              <Textarea name="en_includedItems" label="Included EN" rows={3} defaultValue={(en?.includedItems ?? product?.includedItems ?? []).join("\n")} />
-              <Textarea name="en_excludedItems" label="Excluded EN" rows={2} defaultValue={(en?.excludedItems ?? product?.excludedItems ?? []).join("\n")} />
-              <Input name="en_ctaLabel" label="CTA EN" defaultValue={en?.ctaLabel ?? product?.ctaLabel ?? ""} />
-              <Input name="en_quoteCtaLabel" label="Quote CTA EN" defaultValue={en?.quoteCtaLabel ?? product?.quoteCtaLabel ?? ""} />
-              <Input name="en_seoTitle" label="SEO title EN" defaultValue={en?.seoTitle ?? product?.seoTitle ?? ""} />
-              <Textarea name="en_seoDescription" label="Meta EN" rows={2} defaultValue={en?.seoDescription ?? product?.seoDescription ?? ""} />
-            </div>
-          </div>
-        </section>
+        <TranslationWorkflowPanel
+          source={{
+            name: product?.name ?? "",
+            shortDescription: product?.shortDescription ?? "",
+            fullDescription: product?.fullDescription ?? "",
+            seoTitle: product?.seoTitle ?? "",
+            seoDescription: product?.seoDescription ?? "",
+            benefits: product?.benefits ?? [],
+            includedItems: product?.includedItems ?? [],
+            excludedItems: product?.excludedItems ?? [],
+          }}
+          translations={{ nl, en }}
+          locales={locales}
+          labels={translationLabels}
+          canPublish={canPublish}
+          productId={product?.id}
+          previewHref={(locale) =>
+            `/admin/products/${product?.id}/preview?locale=${locale}`
+          }
+        />
 
         <div className="flex flex-wrap gap-3 sticky bottom-0 bg-background/95 backdrop-blur py-4 border-t border-border">
           <Button type="submit" disabled={pending}>
