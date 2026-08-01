@@ -3,7 +3,6 @@ import type { NextRequest } from "next/server";
 import { updateSupabaseSession } from "@/lib/database/middleware";
 import { isPreviewDeployment } from "@/lib/url/app-url";
 import {
-  defaultLocale,
   legacyRedirects,
   stripLocalePrefix,
   type Locale,
@@ -132,8 +131,16 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
 
-  // First visit: Dutch browser may safely land on /nl (manual cookie always wins later)
+  // Explicit cookie preference restores Dutch on bare home (ADR preference order).
+  // URL remains request context for all other paths (shared /nl links stay /nl).
   const localeCookie = request.cookies.get("NEXT_LOCALE")?.value;
+  if (barePath === "/" && pathLocale === "en" && localeCookie === "nl") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/nl";
+    return NextResponse.redirect(url, 302);
+  }
+
+  // First visit only: Dutch Accept-Language may land on /nl when no cookie yet.
   if (
     barePath === "/" &&
     pathLocale === "en" &&
@@ -153,17 +160,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
 
-  // Admin is English-only
-  if (barePath.startsWith("/admin")) {
-    if (pathname.startsWith("/nl")) {
-      const url = request.nextUrl.clone();
-      url.pathname = barePath;
-      return NextResponse.redirect(url, 308);
-    }
-    const response = await updateSupabaseSession(request);
-    return applySecurityHeaders(attachLocale(response, defaultLocale));
-  }
-
+  // Admin is EN+NL (ADR-001); URL locale wins for the request; English remains fallback via catalogs.
   const locale: Locale = pathLocale;
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-locale", locale);
