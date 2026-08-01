@@ -1,8 +1,11 @@
 import type { Metadata, Viewport } from "next";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages as getIntlMessages } from "next-intl/server";
 import "@/styles/globals.css";
 import { siteConfig } from "@/config/site";
 import { OrganizationJsonLd } from "@/components/seo/organization-json-ld";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
+import "@/i18n/global";
 
 export const viewport: Viewport = {
   themeColor: siteConfig.brand.themeColor,
@@ -78,12 +81,15 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const locale = await getLocale();
+  const messages = await getIntlMessages();
 
   return (
     <html lang={locale} className="h-full">
       <body className="min-h-full flex flex-col antialiased font-sans">
-        <OrganizationJsonLd />
-        {children}
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <OrganizationJsonLd />
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   );

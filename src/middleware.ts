@@ -125,6 +125,13 @@ export async function middleware(request: NextRequest) {
   const { locale: pathLocale, pathname: barePath } =
     stripLocalePrefix(pathname);
 
+  // ADR-001: /en/... permanently redirects to the unprefixed English URL.
+  if (pathname === "/en" || pathname.startsWith("/en/")) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname === "/en" ? "/" : pathname.slice(3) || "/";
+    return NextResponse.redirect(url, 308);
+  }
+
   // First visit: Dutch browser may safely land on /nl (manual cookie always wins later)
   const localeCookie = request.cookies.get("NEXT_LOCALE")?.value;
   if (

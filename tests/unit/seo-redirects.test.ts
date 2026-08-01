@@ -43,10 +43,10 @@ describe("SEO-001 legacy solution alias redirects", () => {
     expect(customWebsites).toContain("paths.websites");
   });
 
-  it("middleware resolves legacy aliases via legacyRedirects map", () => {
+  it("middleware permanently redirects /en to unprefixed English URLs", () => {
     const middleware = readFileSync("src/middleware.ts", "utf8");
-    expect(middleware).toContain("legacyRedirects");
-    expect(middleware).toContain("resolveLegacyTarget");
+    expect(middleware).toContain('pathname === "/en"');
+    expect(middleware).toContain('pathname.startsWith("/en/")');
     expect(middleware).toContain("308");
   });
 });
