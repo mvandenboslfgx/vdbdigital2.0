@@ -6,6 +6,7 @@ import { checkAdminAccess } from "@/server/auth/require-admin";
 import { hasPermission } from "@/lib/auth/permissions";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { buildTranslationPanelLabels } from "@/lib/admin/translation-panel-labels";
+import { buildProductEditorLabels } from "@/lib/admin/product-editor-labels";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getDictionary();
@@ -13,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AdminNewProductPage() {
-  const { t } = await getDictionary();
+  const { t, locale } = await getDictionary();
   const access = await checkAdminAccess();
   if (!access.authorized || !access.context) redirect("/admin/login");
   if (!hasPermission(access.context.role, "products.create")) {
@@ -32,6 +33,7 @@ export default async function AdminNewProductPage() {
       canArchive={hasPermission(access.context.role, "products.archive")}
       blockReasons={[t("admin.page.productPreview.checkoutDisabled")]}
       translationLabels={buildTranslationPanelLabels(t)}
+      labels={buildProductEditorLabels(t, locale)}
     />
   );
 }

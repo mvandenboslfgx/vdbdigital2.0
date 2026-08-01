@@ -21,6 +21,8 @@ import { billingWarningNl } from "@/lib/commerce/catalog-admin-eligibility";
 import { LEGACY_TAWK_ADMIN_STATUS_LABEL } from "@/lib/commerce/tawk-legacy-blocklist";
 import { TranslationWorkflowPanel } from "@/components/admin/translation-workflow-panel";
 import type { TranslationPanelLabels } from "@/lib/admin/translation-panel-labels";
+import type { ProductEditorLabels } from "@/lib/admin/product-editor-labels";
+import { formatDateTime } from "@/i18n/format-date";
 import { locales } from "@/i18n/config";
 import type { BillingType, PriceMode, Product, ProductTranslationStatus } from "@/types";
 import type { PublicationCheckItem } from "@/lib/commerce/publication-checklist";
@@ -40,6 +42,8 @@ interface Props {
   legacyRemoved?: boolean;
   /** Resolved server-side; the panel itself does no dictionary lookups. */
   translationLabels: TranslationPanelLabels;
+  /** Resolved server-side; this editor does no dictionary lookups. */
+  labels: ProductEditorLabels;
 }
 
 const initialState: CatalogActionState = {};
@@ -63,6 +67,7 @@ export function ProductEditorForm({
   blockReasons,
   legacyRemoved = false,
   translationLabels,
+  labels,
 }: Props) {
   const router = useRouter();
   const [createState, createAction, createPending] = useActionState(
@@ -255,12 +260,12 @@ export function ProductEditorForm({
         <div>
           <p className="text-small text-muted mb-1">
             <Link href="/admin/products" className="hover:text-foreground">
-              Producten
+              {labels.breadcrumbProducts}
             </Link>{" "}
-            / {mode === "create" ? "Nieuw" : "Bewerken"}
+            / {mode === "create" ? labels.breadcrumbNew : labels.breadcrumbEdit}
           </p>
           <h1 className="text-h1">
-            {mode === "create" ? "Product aanmaken" : product?.name}
+            {mode === "create" ? labels.createTitle : product?.name}
           </h1>
         </div>
         {product && (
@@ -269,7 +274,7 @@ export function ProductEditorForm({
               href={`/admin/products/${product.id}/preview`}
               className="inline-flex items-center min-h-11 px-4 rounded-lg border border-border text-sm"
             >
-              Preview
+              {labels.preview}
             </Link>
             <form
               action={async (formData) => {
@@ -278,7 +283,7 @@ export function ProductEditorForm({
             >
               <input type="hidden" name="id" value={product.id} />
               <Button type="submit" variant="outline" disabled={legacyRemoved}>
-                Dupliceren
+                {labels.duplicate}
               </Button>
             </form>
           </div>
@@ -291,16 +296,12 @@ export function ProductEditorForm({
           role="status"
         >
           <p className="font-medium">{LEGACY_TAWK_ADMIN_STATUS_LABEL}</p>
-          <p className="mt-1 text-muted">
-            Geen publiceren, herstellen of juridische goedkeuring. Alleen veilige verwijdering is
-            toegestaan.
-          </p>
+          <p className="mt-1 text-muted">{labels.legacyBlockedNote}</p>
         </div>
       )}
 
       <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-small text-amber-950">
-        Directe checkout is momenteel algemeen uitgeschakeld. Juridische goedkeuring wordt nooit
-        automatisch gezet door alleen B2B/B2C te kiezen.
+        {labels.checkoutDisabledNote}
       </div>
 
       {(state.error || publishState.error || legalState.error) && (
@@ -310,7 +311,7 @@ export function ProductEditorForm({
       )}
       {(state.success || publishState.success || legalState.success) && (
         <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-small text-emerald-900">
-          Opgeslagen.
+          {labels.saved}
           {(publishState.warnings ?? state.warnings)?.map((w) => (
             <p key={w} className="mt-1">
               {w}
@@ -321,19 +322,19 @@ export function ProductEditorForm({
 
       <form onSubmit={onSubmit} className="space-y-10">
         <section className="space-y-4">
-          <h2 className="text-lg font-semibold font-display">Algemene gegevens</h2>
+          <h2 className="text-lg font-semibold font-display">{labels.generalHeading}</h2>
           <div className="grid gap-4 md:grid-cols-2">
-            <Input name="name" label="Productnaam" required defaultValue={product?.name} />
-            <Input name="slug" label="Slug" required defaultValue={product?.slug} hint="Alleen a-z, 0-9 en koppeltekens" />
-            <Input name="internalSku" label="Interne SKU" defaultValue={product?.internalSku ?? ""} />
+            <Input name="name" label={labels.name} required defaultValue={product?.name} />
+            <Input name="slug" label={labels.slug} required defaultValue={product?.slug} hint={labels.slugHint} />
+            <Input name="internalSku" label={labels.internalSku} defaultValue={product?.internalSku ?? ""} />
             <label className="space-y-1.5 text-small font-medium">
-              Categorie
+              {labels.category}
               <select
                 name="categoryId"
                 defaultValue={product?.categoryId ?? ""}
                 className="w-full min-h-11 rounded-lg border border-border bg-surface px-3"
               >
-                <option value="">Geen categorie</option>
+                <option value="">{labels.noCategory}</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
@@ -341,63 +342,59 @@ export function ProductEditorForm({
                 ))}
               </select>
             </label>
-            <Input name="badge" label="Badge" defaultValue={product?.badge ?? ""} />
-            <Input name="tags" label="Tags (komma-gescheiden)" defaultValue={(product?.tags ?? []).join(", ")} />
-            <Input name="sortOrder" label="Sorteerpositie" type="number" defaultValue={product?.sortOrder ?? 0} />
+            <Input name="badge" label={labels.badge} defaultValue={product?.badge ?? ""} />
+            <Input name="tags" label={labels.tags} defaultValue={(product?.tags ?? []).join(", ")} />
+            <Input name="sortOrder" label={labels.sortOrder} type="number" defaultValue={product?.sortOrder ?? 0} />
             <label className="flex items-center gap-2 text-small mt-8">
               <input type="checkbox" name="featured" defaultChecked={product?.featured} />
-              Uitgelicht op marketing
+              {labels.featured}
             </label>
           </div>
           <Textarea
             name="shortDescription"
-            label="Korte omschrijving"
+            label={labels.shortDescription}
             required
             rows={3}
             defaultValue={product?.shortDescription}
           />
           <Textarea
             name="fullDescription"
-            label="Volledige omschrijving"
+            label={labels.fullDescription}
             required
             rows={8}
             defaultValue={product?.fullDescription}
           />
-          <p className="text-small text-muted -mt-2">
-            Toegestaan: koppen, lijsten, vet, cursief en veilige links
-          </p>
+          <p className="text-small text-muted -mt-2">{labels.richTextHint}</p>
         </section>
 
         <section className="space-y-4">
-          <h2 className="text-lg font-semibold font-display">Prijsinstellingen</h2>
+          <h2 className="text-lg font-semibold font-display">{labels.pricingHeading}</h2>
           {!canChangePrice && (
-            <p className="text-small text-muted">
-              U mag content bewerken, maar geen prijzen wijzigen.
-            </p>
+            <p className="text-small text-muted">{labels.noPricePermission}</p>
           )}
           <fieldset disabled={!canChangePrice && mode === "edit"} className="grid gap-4 md:grid-cols-2">
             <label className="space-y-1.5 text-small font-medium">
-              Prijstype
+              {labels.priceMode}
               <select
                 value={priceMode}
                 onChange={(e) => setPriceMode(e.target.value as PriceMode)}
                 className="w-full min-h-11 rounded-lg border border-border bg-surface px-3"
               >
-                <option value="FIXED">FIXED — vaste prijs</option>
-                <option value="STARTING_FROM">STARTING_FROM — vanaf-prijs (offerte)</option>
-                <option value="QUOTE_ONLY">QUOTE_ONLY — alleen offerte</option>
+                <option value="FIXED">{labels.priceModeOptions.FIXED}</option>
+                <option value="STARTING_FROM">{labels.priceModeOptions.STARTING_FROM}</option>
+                <option value="QUOTE_ONLY">{labels.priceModeOptions.QUOTE_ONLY}</option>
               </select>
             </label>
             <label className="space-y-1.5 text-small font-medium">
-              Billingmodel
+              {labels.billingModel}
               <select
                 value={billingType}
                 onChange={(e) => setBillingType(e.target.value as BillingType)}
                 className="w-full min-h-11 rounded-lg border border-border bg-surface px-3"
               >
-                <option value="ONE_TIME">ONE_TIME — eenmalig</option>
-                <option value="MONTHLY">MONTHLY — maandelijks</option>
-                <option value="YEARLY">YEARLY — jaarlijks</option>
+                <option value="ONE_TIME">{labels.billingOptions.ONE_TIME}</option>
+                <option value="MONTHLY">{labels.billingOptions.MONTHLY}</option>
+                <option value="YEARLY">{labels.billingOptions.YEARLY}</option>
                 <option value="QUOTE_ONLY">QUOTE_ONLY</option>
                 <option value="FREE">FREE</option>
               </select>
@@ -405,29 +402,29 @@ export function ProductEditorForm({
             {priceMode === "FIXED" && (
               <Input
                 name="amountEuros"
-                label="Bedrag (EUR)"
+                label={labels.amount}
                 defaultValue={centsToEuros(product?.priceCents)}
-                hint="Wordt opgeslagen als gehele centen"
+                hint={labels.amountHint}
               />
             )}
             {priceMode === "STARTING_FROM" && (
               <Input
                 name="fromAmountEuros"
-                label="Vanaf-bedrag (EUR)"
+                label={labels.fromAmount}
                 defaultValue={centsToEuros(product?.fromPriceCents)}
               />
             )}
             <Input
               name="compareAtEuros"
-              label="Oude prijs (optioneel, EUR)"
+              label={labels.compareAt}
               defaultValue={centsToEuros(product?.compareAtCents)}
             />
-            <Input name="vatPercent" label="BTW %" type="number" defaultValue={product?.vatPercent ?? 21} />
-            <Input name="priceLabel" label="Prijslabel" defaultValue={product?.priceLabel ?? ""} />
+            <Input name="vatPercent" label={labels.vatPercent} type="number" defaultValue={product?.vatPercent ?? 21} />
+            <Input name="priceLabel" label={labels.priceLabel} defaultValue={product?.priceLabel ?? ""} />
             {canChangePrice && (
               <Input
                 name="costEuros"
-                label="Interne kostprijs (EUR)"
+                label={labels.costPrice}
                 defaultValue={centsToEuros(product?.costCents)}
               />
             )}
@@ -437,7 +434,7 @@ export function ProductEditorForm({
                 name="priceIncludesVat"
                 defaultChecked={product?.priceIncludesVat}
               />
-              Prijs inclusief btw
+              {labels.priceIncludesVat}
             </label>
           </fieldset>
           {billingWarn && (
@@ -446,14 +443,12 @@ export function ProductEditorForm({
             </div>
           )}
           {priceMode !== "FIXED" && (
-            <p className="text-small text-muted">
-              Alleen FIXED kan ooit direct checkout-eligible zijn. Dit product blijft offertegericht.
-            </p>
+            <p className="text-small text-muted">{labels.onlyFixedEligible}</p>
           )}
         </section>
 
         <section className="space-y-4">
-          <h2 className="text-lg font-semibold font-display">Klanttype (commercieel)</h2>
+          <h2 className="text-lg font-semibold font-display">{labels.audienceHeading}</h2>
           <div className="flex flex-wrap gap-6">
             <label className="flex items-center gap-2 text-small">
               <input type="checkbox" name="audienceB2b" defaultChecked={product?.audienceB2b ?? true} />
@@ -464,28 +459,25 @@ export function ProductEditorForm({
               B2C
             </label>
           </div>
-          <p className="text-small text-muted">
-            Dit is alleen de doelgroep. Juridische publicatiegoedkeuring staat apart en wordt niet
-            automatisch gezet.
-          </p>
+          <p className="text-small text-muted">{labels.audienceNote}</p>
         </section>
 
         <section className="space-y-4">
-          <h2 className="text-lg font-semibold font-display">Productcontent</h2>
+          <h2 className="text-lg font-semibold font-display">{labels.contentHeading}</h2>
           <div className="grid gap-4 md:grid-cols-2">
-            <Textarea name="benefits" label="Belangrijkste voordelen (één per regel)" rows={5} defaultValue={(product?.benefits ?? []).join("\n")} />
-            <Textarea name="includedItems" label="Inbegrepen" rows={5} defaultValue={(product?.includedItems ?? []).join("\n")} />
-            <Textarea name="excludedItems" label="Niet inbegrepen" rows={5} defaultValue={(product?.excludedItems ?? []).join("\n")} />
-            <Textarea name="extensions" label="Uitbreidingen / add-on hints" rows={5} defaultValue={(product?.extensions ?? []).join("\n")} />
-            <Textarea name="targetAudience" label="Doelgroep" rows={3} defaultValue={product?.targetAudience ?? ""} />
-            <Textarea name="workflow" label="Werkwijze" rows={3} defaultValue={product?.workflow ?? ""} />
-            <Input name="deliveryTime" label="Levertijd" defaultValue={product?.deliveryTime ?? ""} />
-            <Textarea name="requiredInput" label="Vereisten van de klant (één per regel)" rows={3} defaultValue={(product?.requiredInput ?? []).join("\n")} />
-            <Input name="ctaLabel" label="Call-to-action" defaultValue={product?.ctaLabel ?? ""} />
-            <Input name="quoteCtaLabel" label="Offerte-call-to-action" defaultValue={product?.quoteCtaLabel ?? ""} />
-            <Textarea name="warnings" label="Waarschuwingen / voorwaarden" rows={3} defaultValue={product?.warnings ?? ""} />
-            <Input name="seoTitle" label="SEO-titel (standaard/EN)" defaultValue={product?.seoTitle ?? ""} />
-            <Textarea name="seoDescription" label="Metaomschrijving (standaard/EN)" rows={3} defaultValue={product?.seoDescription ?? ""} />
+            <Textarea name="benefits" label={labels.benefits} rows={5} defaultValue={(product?.benefits ?? []).join("\n")} />
+            <Textarea name="includedItems" label={labels.includedItems} rows={5} defaultValue={(product?.includedItems ?? []).join("\n")} />
+            <Textarea name="excludedItems" label={labels.excludedItems} rows={5} defaultValue={(product?.excludedItems ?? []).join("\n")} />
+            <Textarea name="extensions" label={labels.extensions} rows={5} defaultValue={(product?.extensions ?? []).join("\n")} />
+            <Textarea name="targetAudience" label={labels.targetAudience} rows={3} defaultValue={product?.targetAudience ?? ""} />
+            <Textarea name="workflow" label={labels.workflow} rows={3} defaultValue={product?.workflow ?? ""} />
+            <Input name="deliveryTime" label={labels.deliveryTime} defaultValue={product?.deliveryTime ?? ""} />
+            <Textarea name="requiredInput" label={labels.requiredInput} rows={3} defaultValue={(product?.requiredInput ?? []).join("\n")} />
+            <Input name="ctaLabel" label={labels.ctaLabel} defaultValue={product?.ctaLabel ?? ""} />
+            <Input name="quoteCtaLabel" label={labels.quoteCtaLabel} defaultValue={product?.quoteCtaLabel ?? ""} />
+            <Textarea name="warnings" label={labels.warnings} rows={3} defaultValue={product?.warnings ?? ""} />
+            <Input name="seoTitle" label={labels.seoTitle} defaultValue={product?.seoTitle ?? ""} />
+            <Textarea name="seoDescription" label={labels.seoDescription} rows={3} defaultValue={product?.seoDescription ?? ""} />
           </div>
         </section>
 
@@ -512,10 +504,10 @@ export function ProductEditorForm({
 
         <div className="flex flex-wrap gap-3 sticky bottom-0 bg-background/95 backdrop-blur py-4 border-t border-border">
           <Button type="submit" disabled={pending}>
-            {mode === "create" ? "Concept opslaan" : "Wijzigingen opslaan"}
+            {mode === "create" ? labels.submitCreate : labels.submitEdit}
           </Button>
           <Link href="/admin/products" className="inline-flex items-center min-h-11 px-4 rounded-lg border border-border text-sm">
-            Annuleren
+            {labels.cancel}
           </Link>
         </div>
       </form>
@@ -523,7 +515,7 @@ export function ProductEditorForm({
       {mode === "edit" && product && (
         <>
           <section className="space-y-4 rounded-lg border border-border p-4">
-            <h2 className="text-lg font-semibold font-display">Publicatieworkflow</h2>
+            <h2 className="text-lg font-semibold font-display">{labels.publicationHeading}</h2>
             <ul className="space-y-2 text-small">
               {checklist.map((item) => (
                 <li
@@ -541,7 +533,7 @@ export function ProductEditorForm({
               ))}
             </ul>
             <div className="rounded-lg bg-surface-elevated px-3 py-2 text-small">
-              <p className="font-medium mb-1">Checkout eligibility (server-side)</p>
+              <p className="font-medium mb-1">{labels.eligibilityHeading}</p>
               <ul className="space-y-1 text-muted">
                 {blockReasons.map((r) => (
                   <li key={r}>• {r}</li>
@@ -566,7 +558,7 @@ export function ProductEditorForm({
                     }}
                   >
                     <Button type="submit" variant="outline" size="sm" disabled={publishPending}>
-                      Zet op {status}
+                      {labels.setStatusTemplate.replace("{status}", status)}
                     </Button>
                   </form>
                 ))}
@@ -575,11 +567,8 @@ export function ProductEditorForm({
           </section>
 
           <section className="space-y-4 rounded-lg border border-border p-4">
-            <h2 className="text-lg font-semibold font-display">VDB Partners</h2>
-            <p className="text-small text-muted">
-              Centrale catalogus blijft SSOT. Partners zien uitsluitend eligible
-              producten via Owner RPC; geen parallelle catalogus of eigen prijzen.
-            </p>
+            <h2 className="text-lg font-semibold font-display">{labels.partnerHeading}</h2>
+            <p className="text-small text-muted">{labels.partnerNote}</p>
             <div className="grid gap-3 md:grid-cols-2">
               <label className="flex items-center gap-2 text-small mt-2">
                 <input
@@ -587,7 +576,7 @@ export function ProductEditorForm({
                   name="partnerEnabled"
                   defaultChecked={product?.partnerEnabled ?? false}
                 />
-                Partner-enabled
+                {labels.partnerEnabled}
               </label>
               <label className="flex items-center gap-2 text-small mt-2">
                 <input
@@ -595,7 +584,7 @@ export function ProductEditorForm({
                   name="partnerFeatured"
                   defaultChecked={product?.partnerFeatured ?? false}
                 />
-                Featured voor Partners
+                {labels.partnerFeatured}
               </label>
               <label className="flex items-center gap-2 text-small mt-2">
                 <input
@@ -603,10 +592,10 @@ export function ProductEditorForm({
                   name="partnerRequiresApproval"
                   defaultChecked={product?.partnerRequiresApproval ?? true}
                 />
-                Lead/offerte vereist goedkeuring
+                {labels.partnerRequiresApproval}
               </label>
               <label className="space-y-1.5 text-small font-medium">
-                Visibility
+                {labels.partnerVisibility}
                 <select
                   name="partnerVisibility"
                   defaultValue={product?.partnerVisibility ?? "none"}
@@ -623,7 +612,7 @@ export function ProductEditorForm({
                 </select>
               </label>
               <label className="space-y-1.5 text-small font-medium">
-                Availability
+                {labels.partnerAvailability}
                 <select
                   name="partnerAvailability"
                   defaultValue={product?.partnerAvailability ?? "available"}
@@ -636,13 +625,13 @@ export function ProductEditorForm({
                 </select>
               </label>
               <label className="space-y-1.5 text-small font-medium">
-                Commissie type
+                {labels.commissionType}
                 <select
                   name="partnerCommissionType"
                   defaultValue={product?.partnerCommissionType ?? "bps"}
                   className="w-full min-h-11 rounded-lg border border-border bg-surface px-3"
                 >
-                  <option value="bps">bps (percentage)</option>
+                  <option value="bps">{labels.commissionTypeBps}</option>
                   <option value="fixed_cents">fixed_cents</option>
                   <option value="tiered">tiered</option>
                   <option value="manual_quote">manual_quote</option>
@@ -650,7 +639,7 @@ export function ProductEditorForm({
               </label>
               <Input
                 name="partnerCommissionValue"
-                label="Commissiewaarde (bps of centen)"
+                label={labels.commissionValue}
                 defaultValue={
                   product?.partnerCommissionValue != null
                     ? String(product.partnerCommissionValue)
@@ -659,11 +648,11 @@ export function ProductEditorForm({
               />
               <Input
                 name="partnerCommissionCurrency"
-                label="Commissievaluta"
+                label={labels.commissionCurrency}
                 defaultValue={product?.partnerCommissionCurrency ?? "EUR"}
               />
               <label className="space-y-1.5 text-small font-medium">
-                Commissiestatus
+                {labels.commissionStatus}
                 <select
                   name="partnerCommissionStatus"
                   defaultValue={product?.partnerCommissionStatus ?? "draft"}
@@ -677,7 +666,7 @@ export function ProductEditorForm({
               </label>
               <Input
                 name="partnerMinimumPriceEuros"
-                label="Minimale Partner-verkoopprijs (€)"
+                label={labels.partnerMinimumPrice}
                 defaultValue={
                   product?.partnerMinimumPriceCents != null
                     ? (product.partnerMinimumPriceCents / 100).toFixed(2)
@@ -686,7 +675,7 @@ export function ProductEditorForm({
               />
               <Input
                 name="partnerMaximumDiscountBps"
-                label="Max. korting (bps)"
+                label={labels.partnerMaximumDiscount}
                 defaultValue={
                   product?.partnerMaximumDiscountBps != null
                     ? String(product.partnerMaximumDiscountBps)
@@ -695,14 +684,14 @@ export function ProductEditorForm({
               />
               <Input
                 name="partnerPriority"
-                label="Partner prioriteit"
+                label={labels.partnerPriority}
                 type="number"
                 defaultValue={String(product?.partnerPriority ?? 100)}
               />
               <div className="md:col-span-2">
                 <Textarea
                   name="partnerSalesCopy"
-                  label="Partner verkooptekst"
+                  label={labels.partnerSalesCopy}
                   rows={3}
                   defaultValue={product?.partnerSalesCopy ?? ""}
                 />
@@ -710,7 +699,7 @@ export function ProductEditorForm({
               <div className="md:col-span-2">
                 <Textarea
                   name="partnerTerms"
-                  label="Partner voorwaarden"
+                  label={labels.partnerTerms}
                   rows={3}
                   defaultValue={product?.partnerTerms ?? ""}
                 />
@@ -719,15 +708,16 @@ export function ProductEditorForm({
           </section>
 
           <section className="space-y-4 rounded-lg border border-border p-4">
-            <h2 className="text-lg font-semibold font-display">Juridische goedkeuring</h2>
+            <h2 className="text-lg font-semibold font-display">{labels.legalHeading}</h2>
             {legacyRemoved ? (
               <p className="text-small text-muted">
-                {LEGACY_TAWK_ADMIN_STATUS_LABEL}. Juridische goedkeuring is geblokkeerd.
+                {labels.legalBlockedLegacyTemplate.replace(
+                  "{status}",
+                  LEGACY_TAWK_ADMIN_STATUS_LABEL,
+                )}
               </p>
             ) : !canLegal ? (
-              <p className="text-small text-muted">
-                Alleen een rol met elevated permission mag juridische goedkeuring wijzigen.
-              </p>
+              <p className="text-small text-muted">{labels.legalNoPermission}</p>
             ) : (
               <form
                 className="grid gap-3 md:grid-cols-2"
@@ -750,7 +740,7 @@ export function ProductEditorForm({
                 }}
               >
                 <label className="space-y-1.5 text-small font-medium">
-                  Legal status
+                  {labels.legalStatus}
                   <select
                     name="legalStatus"
                     defaultValue={product.legalStatus ?? "NOT_REVIEWED"}
@@ -765,7 +755,7 @@ export function ProductEditorForm({
                   </select>
                 </label>
                 <label className="space-y-1.5 text-small font-medium">
-                  Prijsstatus
+                  {labels.priceStatus}
                   <select
                     name="priceStatus"
                     defaultValue={product.priceStatus ?? "DRAFT"}
@@ -780,7 +770,7 @@ export function ProductEditorForm({
                 </label>
                 <Input
                   name="legalTermsVersion"
-                  label="Versie van voorwaarden"
+                  label={labels.legalTermsVersion}
                   defaultValue={product.legalTermsVersion ?? ""}
                 />
                 <label className="flex items-center gap-2 text-small mt-8">
@@ -789,24 +779,30 @@ export function ProductEditorForm({
                     name="publicationReady"
                     defaultChecked={product.publicationReady ?? false}
                   />
-                  Publicatieklaar (commercieel)
+                  {labels.publicationReady}
                 </label>
                 <div className="md:col-span-2">
                   <Textarea
                     name="legalInternalNote"
-                    label="Interne notitie"
+                    label={labels.legalInternalNote}
                     rows={3}
                     defaultValue={product.legalInternalNote ?? ""}
                   />
                 </div>
                 <p className="text-small text-muted md:col-span-2">
-                  Goedgekeurd door: {product.legalApprovedBy ?? "—"} ·{" "}
-                  {product.legalApprovedAt
-                    ? new Date(product.legalApprovedAt).toLocaleString("nl-NL")
-                    : "—"}
+                  {labels.approvedByTemplate
+                    .replace("{by}", product.legalApprovedBy ?? labels.empty)
+                    .replace(
+                      "{at}",
+                      formatDateTime(
+                        product.legalApprovedAt,
+                        labels.locale,
+                        labels.empty,
+                      ),
+                    )}
                 </p>
                 <Button type="submit" disabled={legalPending}>
-                  Juridische status opslaan
+                  {labels.saveLegal}
                 </Button>
               </form>
             )}
@@ -823,7 +819,7 @@ export function ProductEditorForm({
                   <input type="hidden" name="id" value={product.id} />
                   <input type="hidden" name="expectedVersion" value={product.version ?? 1} />
                   <Button type="submit" variant="outline">
-                    Archiveren
+                    {labels.archive}
                   </Button>
                 </form>
               ) : null}
@@ -836,7 +832,7 @@ export function ProductEditorForm({
                   <input type="hidden" name="id" value={product.id} />
                   <input type="hidden" name="expectedVersion" value={product.version ?? 1} />
                   <Button type="submit" variant="outline">
-                    Herstellen uit archief
+                    {labels.restoreFromArchive}
                   </Button>
                 </form>
               ) : null}
@@ -845,18 +841,14 @@ export function ProductEditorForm({
                   await deleteProductAction({}, formData);
                 }}
                 onSubmit={(e) => {
-                  if (
-                    !window.confirm(
-                      "Product definitief verwijderen? Dit kan alleen zonder gekoppelde orders.",
-                    )
-                  ) {
+                  if (!window.confirm(labels.deleteConfirm)) {
                     e.preventDefault();
                   }
                 }}
               >
                 <input type="hidden" name="id" value={product.id} />
                 <Button type="submit" variant="danger">
-                  Veilig verwijderen
+                  {labels.safeDelete}
                 </Button>
               </form>
             </section>

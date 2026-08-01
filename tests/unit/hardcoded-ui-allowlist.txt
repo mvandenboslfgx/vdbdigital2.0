@@ -47,17 +47,15 @@ src/app/admin/(protected)/projects/[id]/overview/page.tsx
 #
 # --- Admin editor / manager client components --------------------------------
 # Large client components whose copy has to be resolved server-side and passed
-# in as props (they cannot call getDictionary()). The product editor's
-# multilingual section was extracted into the fully localized
-# TranslationWorkflowPanel; its remaining sections (pricing, partner terms,
-# legal approval) and the components below still carry Dutch labels and need
-# the same labels-prop treatment.
+# in as props (they cannot call getDictionary()). The categories/add-ons
+# managers and the product editor now take a `labels` prop built by
+# src/lib/admin/*-labels.ts; the components below still carry Dutch labels and
+# need the same treatment.
 src/components/admin/admin-products-table.tsx
 src/components/admin/admin-ticket-internal-note-form.tsx
 src/components/admin/admin-ticket-status-form.tsx
 src/components/admin/create-customer-form.tsx
 src/components/admin/invoice-editor-form.tsx
-src/components/admin/product-editor-form.tsx
 src/components/admin/project-forms.tsx
 src/components/admin/project-settings-form.tsx
 src/components/admin/quote-editor-form.tsx
