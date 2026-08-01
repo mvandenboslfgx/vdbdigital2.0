@@ -27,6 +27,12 @@ import {
   canPublishAsMarketing,
   publicationBlockingErrors,
 } from "@/lib/commerce/publication-checklist";
+import {
+  canTransitionTranslationStatus,
+  getMissingTranslationFields,
+} from "@/lib/commerce/product-locale-merge";
+import { hasPermission } from "@/lib/auth/permissions";
+import type { ProductTranslationStatus } from "@/types";
 import { isMissingSchemaError, mapDbProductRow } from "@/server/repositories/map-product";
 import {
   csvRow,
@@ -126,13 +132,32 @@ function buildProductInsert(data: CreateProductInput, userId: string) {
   };
 }
 
+const TRANSLATION_BLOCK_MESSAGES: Record<string, (locale: string, extra?: string) => string> = {
+  forbidden: (locale) =>
+    `${locale.toUpperCase()}: publiceren geblokkeerd — geen 'products.publish' bevoegdheid. Status teruggezet naar 'needs_review'.`,
+  not_approved: (locale) =>
+    `${locale.toUpperCase()}: publiceren geblokkeerd — vertaling moet eerst 'approved' zijn. Status teruggezet naar 'needs_review'.`,
+  missing_fields: (locale, extra) =>
+    `${locale.toUpperCase()}: publiceren geblokkeerd — ontbrekende velden (${extra}). Status teruggezet naar 'needs_review'.`,
+};
+
+/**
+ * Upsert product_translations rows, enforcing the publish gate documented in
+ * canTransitionTranslationStatus(): promotion to 'published' requires the
+ * 'products.publish' capability, a prior human review ('approved'), and every
+ * required copy field to be present. Any blocked transition is safely
+ * downgraded to 'needs_review' (never silently dropped, never auto-published)
+ * and surfaced back to the caller as a warning string.
+ */
 async function upsertTranslations(
   productId: string,
   translations: CreateProductInput["translations"],
-) {
-  if (!translations?.length) return;
+  canPublish: boolean,
+): Promise<string[]> {
+  const warnings: string[] = [];
+  if (!translations?.length) return warnings;
   const supabase = createServiceRoleClient();
-  if (!supabase) return;
+  if (!supabase) return warnings;
 
   for (const t of translations) {
     const row: Record<string, unknown> = {
@@ -160,8 +185,34 @@ async function upsertTranslations(
     // (20260801140000_product_translation_status.sql). Never sent when
     // undefined so pre-migration environments keep working (DB default 'draft').
     if (t.status) {
-      row.status = t.status;
-      if (t.status === "published") {
+      let nextStatus: ProductTranslationStatus = t.status;
+
+      if (nextStatus === "published") {
+        const { data: existingRow } = await supabase
+          .from("product_translations")
+          .select("status")
+          .eq("product_id", productId)
+          .eq("locale", t.locale)
+          .maybeSingle();
+        const previousStatus =
+          (existingRow?.status as ProductTranslationStatus | undefined) ?? null;
+        const missingFields = getMissingTranslationFields(t);
+        const gate = canTransitionTranslationStatus("published", {
+          missingFields,
+          previousStatus,
+          canPublish,
+        });
+
+        if (!gate.allowed && gate.reason) {
+          nextStatus = "needs_review";
+          warnings.push(
+            TRANSLATION_BLOCK_MESSAGES[gate.reason](t.locale, missingFields.join(", ")),
+          );
+        }
+      }
+
+      row.status = nextStatus;
+      if (nextStatus === "published") {
         row.published_at = new Date().toISOString();
       }
     }
@@ -181,6 +232,8 @@ async function upsertTranslations(
         .upsert(row, { onConflict: "product_id,locale" });
     }
   }
+
+  return warnings;
 }
 
 export async function createProductAction(
@@ -232,7 +285,11 @@ export async function createProductAction(
       };
     }
 
-    await upsertTranslations(data.id, parsed.data.translations);
+    const translationWarnings = await upsertTranslations(
+      data.id,
+      parsed.data.translations,
+      hasPermission(ctx.role, "products.publish"),
+    );
 
     await writeAuditLog({
       userId: ctx.user.id,
@@ -243,7 +300,11 @@ export async function createProductAction(
     });
 
     revalidatePath("/admin/products");
-    return { success: true, productId: data.id };
+    return {
+      success: true,
+      productId: data.id,
+      warnings: translationWarnings.length > 0 ? translationWarnings : undefined,
+    };
   } catch (e) {
     if (e instanceof AuthError) return { error: "Geen toestemming voor deze actie." };
     return { error: "Product aanmaken mislukt." };
@@ -343,7 +404,11 @@ export async function updateProductAction(
       };
     }
 
-    await upsertTranslations(parsed.data.id, parsed.data.translations);
+    const translationWarnings = await upsertTranslations(
+      parsed.data.id,
+      parsed.data.translations,
+      hasPermission(ctx.role, "products.publish"),
+    );
 
     await writeAuditLog({
       userId: ctx.user.id,
@@ -366,7 +431,11 @@ export async function updateProductAction(
 
     revalidatePath("/admin/products");
     revalidatePath(`/admin/products/${parsed.data.id}`);
-    return { success: true, productId: parsed.data.id };
+    return {
+      success: true,
+      productId: parsed.data.id,
+      warnings: translationWarnings.length > 0 ? translationWarnings : undefined,
+    };
   } catch (e) {
     if (e instanceof AuthError) return { error: "Geen toestemming voor deze actie." };
     return { error: "Product bijwerken mislukt." };

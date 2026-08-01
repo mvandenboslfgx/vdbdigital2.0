@@ -113,3 +113,91 @@ export function mergeProductForLocale(
 
   return { product: merged, translationApplied: true, usedStatus: status };
 }
+
+/** Copy fields the admin translation workflow treats as required before a translation can publish. */
+const REQUIRED_TRANSLATION_FIELDS = [
+  "name",
+  "shortDescription",
+  "fullDescription",
+  "seoTitle",
+  "seoDescription",
+] as const;
+
+export type RequiredTranslationField = (typeof REQUIRED_TRANSLATION_FIELDS)[number];
+
+export interface TranslationCompletenessInput {
+  name?: string | null;
+  shortDescription?: string | null;
+  fullDescription?: string | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  includedItems?: string[] | null;
+}
+
+/**
+ * Admin translation workflow completeness check (distinct from
+ * assertProductTranslationComplete() in src/i18n/localize-product.ts, which
+ * checks the *resolved* storefront copy including static-overlay fallback).
+ * This checks the raw DB translation row fields only — used to gate the
+ * draft -> published transition in the admin editor.
+ */
+export function getMissingTranslationFields(
+  input: TranslationCompletenessInput,
+): string[] {
+  const missing: string[] = [];
+  for (const field of REQUIRED_TRANSLATION_FIELDS) {
+    const value = input[field];
+    if (!value || value.trim().length === 0) missing.push(field);
+  }
+  if (!input.includedItems || input.includedItems.length === 0) {
+    missing.push("includedItems");
+  }
+  return missing;
+}
+
+export type TranslationPublishBlockReason = "missing_fields" | "not_approved" | "forbidden";
+
+export interface TranslationTransitionResult {
+  allowed: boolean;
+  reason?: TranslationPublishBlockReason;
+  missingFields?: string[];
+}
+
+export interface TranslationTransitionOptions {
+  missingFields: string[];
+  previousStatus: ProductTranslationStatus | null | undefined;
+  /** Actor lacks the 'products.publish' capability — publish must be denied even when content is complete. */
+  canPublish?: boolean;
+}
+
+/**
+ * Publish gate for the admin translation workflow. A translation may only be
+ * promoted to 'published' when:
+ *  - the actor holds the 'products.publish' capability, AND
+ *  - it has already passed human review (previous status 'approved', or is
+ *    already 'published' — re-saving copy edits keeps it published), AND
+ *  - every required copy field is present.
+ * Every other requested status transition is always allowed — the workflow
+ * only ever gates the promotion TO 'published'.
+ */
+export function canTransitionTranslationStatus(
+  nextStatus: ProductTranslationStatus,
+  options: TranslationTransitionOptions,
+): TranslationTransitionResult {
+  if (nextStatus !== "published") return { allowed: true };
+
+  if (options.canPublish === false) {
+    return { allowed: false, reason: "forbidden" };
+  }
+
+  if (options.missingFields.length > 0) {
+    return { allowed: false, reason: "missing_fields", missingFields: options.missingFields };
+  }
+
+  const previous = options.previousStatus ?? "draft";
+  if (previous !== "approved" && previous !== "published") {
+    return { allowed: false, reason: "not_approved" };
+  }
+
+  return { allowed: true };
+}

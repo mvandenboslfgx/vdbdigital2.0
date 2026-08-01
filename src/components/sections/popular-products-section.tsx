@@ -6,6 +6,7 @@ import { LocaleLink } from "@/i18n/locale-link";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import { localizeProduct } from "@/i18n/localize-product";
 import { paths } from "@/i18n/config";
+import { getProductTranslationsForLocale } from "@/server/repositories/product-locale";
 
 interface PopularProductsSectionProps {
   products: Product[];
@@ -14,7 +15,14 @@ interface PopularProductsSectionProps {
 export async function PopularProductsSection({ products }: PopularProductsSectionProps) {
   const locale = await getLocale();
   const { t } = await getDictionary(locale);
-  const featured = products.slice(0, 6).map((product) => localizeProduct(product, locale));
+  const candidates = products.slice(0, 6);
+  const translations =
+    locale === "en"
+      ? new Map()
+      : await getProductTranslationsForLocale(candidates.map((p) => p.id), locale);
+  const featured = candidates.map((product) =>
+    localizeProduct(product, locale, translations.get(product.id) ?? null),
+  );
 
   return (
     <Section variant="dark">

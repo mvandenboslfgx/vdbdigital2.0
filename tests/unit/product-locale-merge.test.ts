@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  canTransitionTranslationStatus,
+  getMissingTranslationFields,
   hasMinimalEnglishContent,
   isPublishableTranslationStatus,
   mergeProductForLocale,
@@ -189,5 +191,104 @@ describe("mergeProductForLocale", () => {
     expect(result?.product.ctaLabel).toBe(product.ctaLabel);
     // Fields the translation DID provide are still applied.
     expect(result?.product.shortDescription).toBe(nl.shortDescription);
+  });
+});
+
+describe("getMissingTranslationFields", () => {
+  it("reports no missing fields when every required field is present", () => {
+    const nl = translation();
+    expect(getMissingTranslationFields(nl)).toEqual([]);
+  });
+
+  it("reports each missing/empty required field by key", () => {
+    const missing = getMissingTranslationFields({
+      name: "",
+      shortDescription: "   ",
+      fullDescription: "OK",
+      seoTitle: null,
+      seoDescription: "OK",
+      includedItems: [],
+    });
+    expect(missing).toEqual(["name", "shortDescription", "seoTitle", "includedItems"]);
+  });
+});
+
+describe("canTransitionTranslationStatus", () => {
+  it("always allows transitions to any status other than 'published'", () => {
+    const nonPublished: ProductTranslationStatus[] = [
+      "draft",
+      "machine_translated",
+      "needs_review",
+      "approved",
+      "stale",
+    ];
+    for (const status of nonPublished) {
+      expect(
+        canTransitionTranslationStatus(status, {
+          missingFields: ["name"],
+          previousStatus: "draft",
+          canPublish: false,
+        }),
+      ).toEqual({ allowed: true });
+    }
+  });
+
+  it("blocks publish when the actor lacks the 'products.publish' capability", () => {
+    const result = canTransitionTranslationStatus("published", {
+      missingFields: [],
+      previousStatus: "approved",
+      canPublish: false,
+    });
+    expect(result).toEqual({ allowed: false, reason: "forbidden" });
+  });
+
+  it("blocks publish when required fields are missing, even for an approved translation", () => {
+    const result = canTransitionTranslationStatus("published", {
+      missingFields: ["seoTitle"],
+      previousStatus: "approved",
+      canPublish: true,
+    });
+    expect(result).toEqual({
+      allowed: false,
+      reason: "missing_fields",
+      missingFields: ["seoTitle"],
+    });
+  });
+
+  it("blocks publish when the translation has not passed human review ('approved')", () => {
+    for (const previousStatus of ["draft", "machine_translated", "needs_review", "stale", null] as const) {
+      const result = canTransitionTranslationStatus("published", {
+        missingFields: [],
+        previousStatus,
+        canPublish: true,
+      });
+      expect(result).toEqual({ allowed: false, reason: "not_approved" });
+    }
+  });
+
+  it("allows publish once approved, complete, and capable", () => {
+    const result = canTransitionTranslationStatus("published", {
+      missingFields: [],
+      previousStatus: "approved",
+      canPublish: true,
+    });
+    expect(result).toEqual({ allowed: true });
+  });
+
+  it("allows re-saving an already-published, complete translation", () => {
+    const result = canTransitionTranslationStatus("published", {
+      missingFields: [],
+      previousStatus: "published",
+      canPublish: true,
+    });
+    expect(result).toEqual({ allowed: true });
+  });
+
+  it("defaults canPublish to true (capability checked by caller) when omitted", () => {
+    const result = canTransitionTranslationStatus("published", {
+      missingFields: [],
+      previousStatus: "approved",
+    });
+    expect(result).toEqual({ allowed: true });
   });
 });
