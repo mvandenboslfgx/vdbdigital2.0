@@ -1076,6 +1076,14 @@ const nl: Messages = {
         recordSubmit: "Registreren",
         snapshotNote:
           "Snapshots: {count}. Print-HTML preview; geen nep-PDF. Online betalen is niet actief.",
+        previewTitle: "Factuurpreview",
+        previewHint:
+          "Gebruik browser Afdrukken / Opslaan als PDF. Geen nep-PDF in storage.",
+        colDescription: "Omschrijving",
+        colQuantity: "Aantal",
+        colTotal: "Totaal",
+        previewFooter:
+          "Print-geoptimaliseerde HTML. Geen nep-PDF opgeslagen. Online betalen is niet actief.",
       },
       documents: {
         title: "Documenten",
@@ -1519,6 +1527,19 @@ const nl: Messages = {
         b2cAllowed: "B2C toegestaan",
         b2cAudience: "B2C doelgroep",
       },
+    },
+    paymentReversal: {
+      open: "Betaling terugdraaien",
+      disclaimer:
+        "Deze actie draait alleen de administratieve betalingsregistratie terug. Er wordt geen bedrag via een betaalprovider teruggestort.",
+      confirmTitle: "Administratieve betalingsregistratie terugdraaien?",
+      confirmInvoice: "Factuur: {number}",
+      confirmAmount: "Bedrag: {amount} ({currency})",
+      confirmDate: "Registratiedatum: {date}",
+      reasonLabel: "Interne reden (verplicht)",
+      reasonPlaceholder: "Bijv. dubbele registratie gecorrigeerd",
+      busy: "Bezig…",
+      confirmSubmit: "Bevestig terugdraaien",
     },
     paymentMethod: {
       BANK_TRANSFER: "Bankoverschrijving",

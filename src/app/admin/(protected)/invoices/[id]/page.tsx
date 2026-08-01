@@ -24,6 +24,7 @@ import {
 } from "@/server/actions/invoice-actions";
 import { customerFacingInvoiceStatus } from "@/lib/commerce/invoice-status";
 import { ReversePaymentControls } from "@/components/admin/reverse-payment-controls";
+import { buildPaymentReversalLabels } from "@/lib/admin/payment-reversal-labels";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getDictionary();
@@ -193,6 +194,7 @@ export default async function AdminInvoiceDetailPage({
                         amountLabel={formatEuro(p.amount_cents, p.currency)}
                         paymentDate={p.payment_date}
                         currency={p.currency}
+                        labels={buildPaymentReversalLabels(t)}
                       />
                     ) : null}
                   </div>

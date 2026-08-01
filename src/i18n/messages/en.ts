@@ -1070,6 +1070,14 @@ const en = {
         recordSubmit: "Record",
         snapshotNote:
           "Snapshots: {count}. Print-HTML preview; no fake PDF. Paying online is not active.",
+        previewTitle: "Invoice preview",
+        previewHint:
+          "Use the browser's Print / Save as PDF. No fake PDF in storage.",
+        colDescription: "Description",
+        colQuantity: "Quantity",
+        colTotal: "Total",
+        previewFooter:
+          "Print-optimised HTML. No fake PDF stored. Paying online is not active.",
       },
       documents: {
         title: "Documents",
@@ -1524,6 +1532,25 @@ const en = {
         b2cAllowed: "B2C allowed",
         b2cAudience: "B2C audience",
       },
+    },
+    /**
+     * Administrative payment reversal. `disclaimer` is a statement about what
+     * the system does — reversal never calls a payment provider — and is pinned
+     * in both locales by tests/unit/invoice-payment-reversal.test.ts. Do not
+     * soften it into refund wording.
+     */
+    paymentReversal: {
+      open: "Reverse payment",
+      disclaimer:
+        "This only reverses the administrative payment record. No amount is paid back via a payment provider.",
+      confirmTitle: "Reverse the administrative payment record?",
+      confirmInvoice: "Invoice: {number}",
+      confirmAmount: "Amount: {amount} ({currency})",
+      confirmDate: "Registration date: {date}",
+      reasonLabel: "Internal reason (required)",
+      reasonPlaceholder: "E.g. duplicate registration corrected",
+      busy: "Working…",
+      confirmSubmit: "Confirm reversal",
     },
     paymentMethod: {
       BANK_TRANSFER: "Bank transfer",

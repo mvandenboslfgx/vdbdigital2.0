@@ -9,10 +9,13 @@ import {
 } from "@/lib/portal/labels";
 import { getDictionary } from "@/i18n/get-dictionary";
 
-export const metadata: Metadata = {
-  title: "Factuurpreview",
-  robots: { index: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getDictionary();
+  return {
+    title: t("admin.page.invoices.previewTitle"),
+    robots: { index: false },
+  };
+}
 
 export default async function AdminInvoicePreviewPage({
   params,
@@ -32,9 +35,9 @@ export default async function AdminInvoicePreviewPage({
   return (
     <div className="mx-auto max-w-3xl space-y-6 print:max-w-none">
       <div className="print:hidden">
-        <h1 className="text-h1">Preview</h1>
+        <h1 className="text-h1">{t("admin.common.preview")}</h1>
         <p className="text-small text-muted mt-1">
-          Gebruik browser Afdrukken / Opslaan als PDF. Geen nep-PDF in storage.
+          {t("admin.page.invoices.previewHint")}
         </p>
       </div>
       <article className="rounded-xl border border-border p-8 space-y-6 bg-background">
@@ -43,9 +46,11 @@ export default async function AdminInvoicePreviewPage({
             {labelFor(t, INVOICE_TYPE_KEYS, invoice.invoice_type)} ·{" "}
             {invoice.invoice_number}
           </p>
-          <h2 className="text-h2 mt-1">{invoice.title || "Factuur"}</h2>
+          <h2 className="text-h2 mt-1">
+            {invoice.title || t("admin.page.invoices.detailTitle")}
+          </h2>
           <p className="text-small mt-2">
-            {org?.trade_name || org?.legal_name || "—"} ·{" "}
+            {org?.trade_name || org?.legal_name || t("admin.common.empty")} ·{" "}
             {labelFor(t, INVOICE_STATUS_KEYS, invoice.status)}
           </p>
         </header>
@@ -55,9 +60,13 @@ export default async function AdminInvoicePreviewPage({
         <table className="w-full text-small">
           <thead>
             <tr className="border-b border-border text-left">
-              <th className="py-2">Omschrijving</th>
-              <th className="py-2">Aantal</th>
-              <th className="py-2 text-right">Totaal</th>
+              <th className="py-2">
+                {t("admin.page.invoices.colDescription")}
+              </th>
+              <th className="py-2">{t("admin.page.invoices.colQuantity")}</th>
+              <th className="py-2 text-right">
+                {t("admin.page.invoices.colTotal")}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -75,13 +84,20 @@ export default async function AdminInvoicePreviewPage({
           </tbody>
         </table>
         <div className="text-small space-y-1 text-right">
-          <p>Subtotaal: {formatEuro(invoice.subtotal_cents, invoice.currency)}</p>
-          <p>BTW: {formatEuro(invoice.vat_cents, invoice.currency)}</p>
-          <p className="text-h3">
-            Totaal: {formatEuro(invoice.total_cents, invoice.currency)}
+          <p>
+            {t("admin.page.quotes.subtotal")}:{" "}
+            {formatEuro(invoice.subtotal_cents, invoice.currency)}
           </p>
           <p>
-            Openstaand:{" "}
+            {t("admin.page.quotes.vat")}:{" "}
+            {formatEuro(invoice.vat_cents, invoice.currency)}
+          </p>
+          <p className="text-h3">
+            {t("admin.page.invoices.total")}:{" "}
+            {formatEuro(invoice.total_cents, invoice.currency)}
+          </p>
+          <p>
+            {t("admin.page.invoices.outstanding")}:{" "}
             {formatEuro(invoice.amount_due_cents ?? 0, invoice.currency)}
           </p>
         </div>
@@ -91,8 +107,7 @@ export default async function AdminInvoicePreviewPage({
           </p>
         ) : null}
         <p className="text-small text-muted">
-          Print-geoptimaliseerde HTML. Geen nep-PDF opgeslagen. Online betalen is
-          niet actief.
+          {t("admin.page.invoices.previewFooter")}
         </p>
       </article>
     </div>
