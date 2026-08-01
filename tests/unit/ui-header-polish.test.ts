@@ -59,7 +59,7 @@ describe("header polish contracts", () => {
     expect(switcher).toContain("flex-nowrap");
     expect(switcher).toContain("compact");
     expect(switcher).not.toContain("min-w-11");
-    expect(header).toContain("ServerLanguageSwitcher compact");
+    expect(header).toContain("LanguageSwitcherBoundary");
   });
 
   it("removes the dual hero logo", () => {
