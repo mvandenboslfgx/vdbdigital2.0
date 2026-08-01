@@ -12,11 +12,30 @@ export default function robots(): MetadataRoute.Robots {
     };
   }
 
+  // Auth/portal flows are never indexable in either locale (English bare path, Dutch under `/nl`).
+  const nonIndexablePrefixes = [
+    "/admin/",
+    "/api/",
+    "/checkout/",
+    "/portal/",
+    "/inloggen",
+    "/uitloggen",
+    "/auth/",
+    "/wachtwoord",
+    "/account-",
+    "/uitnodiging",
+    "/e-mail-bevestigen",
+    "/geen-toegang",
+  ];
+
   return {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/admin/", "/api/", "/checkout/"],
+      disallow: [
+        ...nonIndexablePrefixes,
+        ...nonIndexablePrefixes.map((prefix) => `/nl${prefix}`),
+      ],
     },
     sitemap: `${siteConfig.url}/sitemap.xml`,
   };

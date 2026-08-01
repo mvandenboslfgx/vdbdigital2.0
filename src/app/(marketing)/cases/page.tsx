@@ -12,6 +12,7 @@ import {
   type CaseDefinition,
 } from "@/config/commercial/cases";
 import { paths } from "@/i18n/config";
+import { buildLocaleAlternates, openGraphLocale } from "@/i18n/seo";
 import { cn } from "@/lib/utilities/cn";
 
 export const caseTypes = [
@@ -34,11 +35,13 @@ export const caseTypes = [
 ] as const;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { t } = await getDictionary();
+  const locale = await getLocale();
+  const { t } = await getDictionary(locale);
   return {
     title: t("nav.cases"),
     description: t("cases.pageMetaDescription"),
-    alternates: { canonical: paths.cases },
+    alternates: buildLocaleAlternates(paths.cases, locale),
+    openGraph: { locale: openGraphLocale(locale) },
   };
 }
 

@@ -7,14 +7,17 @@ import { siteConfig } from "@/config/site";
 import { getDictionary, getLocale, getMessages } from "@/i18n/get-dictionary";
 import { MessagesProvider } from "@/i18n/messages-provider";
 import { paths } from "@/i18n/config";
+import { buildLocaleAlternates, openGraphLocale } from "@/i18n/seo";
 import { LocaleLink } from "@/i18n/locale-link";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { t } = await getDictionary();
+  const locale = await getLocale();
+  const { t } = await getDictionary(locale);
   return {
     title: t("forms.contactTitle"),
     description: t("forms.contactIntro"),
-    alternates: { canonical: paths.contact },
+    alternates: buildLocaleAlternates(paths.contact, locale),
+    openGraph: { locale: openGraphLocale(locale) },
   };
 }
 

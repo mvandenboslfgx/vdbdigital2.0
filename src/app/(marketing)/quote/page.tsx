@@ -6,13 +6,16 @@ import { WhatsAppButton } from "@/components/chat/whatsapp-button";
 import { getDictionary, getLocale, getMessages } from "@/i18n/get-dictionary";
 import { MessagesProvider } from "@/i18n/messages-provider";
 import { paths } from "@/i18n/config";
+import { buildLocaleAlternates, openGraphLocale } from "@/i18n/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { t } = await getDictionary();
+  const locale = await getLocale();
+  const { t } = await getDictionary(locale);
   return {
     title: t("forms.quoteTitle"),
     description: t("forms.quoteIntro"),
-    alternates: { canonical: paths.quote },
+    alternates: buildLocaleAlternates(paths.quote, locale),
+    openGraph: { locale: openGraphLocale(locale) },
   };
 }
 

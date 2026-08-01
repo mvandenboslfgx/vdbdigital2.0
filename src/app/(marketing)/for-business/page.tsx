@@ -1,15 +1,18 @@
 import type { Metadata } from "next";
 import { Container, Section, Card } from "@/components/ui/container";
-import { getDictionary } from "@/i18n/get-dictionary";
+import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import { paths } from "@/i18n/config";
+import { buildLocaleAlternates, openGraphLocale } from "@/i18n/seo";
 import { LocaleLinkButton } from "@/components/ui/locale-link-button";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { t } = await getDictionary();
+  const locale = await getLocale();
+  const { t } = await getDictionary(locale);
   return {
     title: t("forBusiness.title"),
     description: t("forBusiness.intro"),
-    alternates: { canonical: paths.forBusiness },
+    alternates: buildLocaleAlternates(paths.forBusiness, locale),
+    openGraph: { locale: openGraphLocale(locale) },
   };
 }
 
