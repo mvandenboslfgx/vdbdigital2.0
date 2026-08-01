@@ -62,11 +62,8 @@ export async function MarketingLayout({
       <CookieBannerServer labels={cookieLabels} />
       <ContactFabServer
         label={t("nav.contact")}
-        message={
-          locale === "nl"
-            ? "Hallo, ik heb een vraag over VDB Digital."
-            : "Hello, I have a question about VDB Digital."
-        }
+        locale={locale}
+        message={t("forms.whatsappMessageContact")}
       />
     </>
   );

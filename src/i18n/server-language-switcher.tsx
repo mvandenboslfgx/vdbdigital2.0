@@ -62,7 +62,7 @@ export async function ServerLanguageSwitcher({
             aria-current={active ? "true" : undefined}
             aria-label={label}
           >
-            {label}
+            {compact ? code.toUpperCase() : label}
           </a>
         );
       })}

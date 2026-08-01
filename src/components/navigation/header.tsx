@@ -6,7 +6,7 @@ import { isDirectCheckoutEnabled } from "@/config/features";
 import { paths } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { ServerLocaleLink } from "@/i18n/server-locale-link";
-import { ServerLanguageSwitcher } from "@/i18n/server-language-switcher";
+import { LanguageSwitcherBoundary } from "@/i18n/language-switcher-boundary";
 import {
   HeaderCompanyNavServer,
   HeaderMobileNavServer,
@@ -54,6 +54,7 @@ export async function Header({ cartItemCount = 0 }: HeaderProps) {
     openMenu: t("nav.openMenu"),
     closeMenu: t("nav.closeMenu"),
     mobileNav: t("nav.mobileNav"),
+    homeAria: t("nav.homeAria"),
     solutions: t("nav.solutions"),
     forBusiness: t("nav.forBusiness"),
     company: t("nav.company"),
@@ -94,17 +95,17 @@ export async function Header({ cartItemCount = 0 }: HeaderProps) {
       data-surface="dark"
       className="sticky top-0 z-50 border-b border-border/80 bg-background/95 backdrop-blur-md pt-[env(safe-area-inset-top,0px)]"
     >
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 page-pad-x sm:h-16">
-        <ServerLocaleLink
+      <div className="mx-auto flex h-14 max-w-7xl min-w-0 items-center justify-between gap-2 page-pad-x sm:h-16 sm:gap-3">
+          <ServerLocaleLink
           href="/"
-          aria-label="VDB Digital Software — naar de homepage"
+          aria-label={t("nav.homeAria")}
           className="inline-flex shrink-0 items-center"
         >
           <VdbLogo
             lockup="header"
             variant="light"
             priority
-            className="h-10 w-auto max-w-[min(11rem,calc(100vw-11rem))] object-contain object-left sm:h-11 sm:max-w-[14rem] xl:h-12 xl:max-w-none"
+            className="h-10 w-auto max-w-[min(11rem,calc(100vw-9.5rem))] object-contain object-left sm:h-11 sm:max-w-[14rem] xl:h-12 xl:max-w-none"
             alt=""
           />
         </ServerLocaleLink>
@@ -139,8 +140,8 @@ export async function Header({ cartItemCount = 0 }: HeaderProps) {
           />
         </nav>
 
-        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-          <ServerLanguageSwitcher compact className="hidden sm:inline-flex" />
+        <div className="flex min-w-0 shrink-0 items-center gap-1 sm:gap-2">
+          <LanguageSwitcherBoundary compact className="hidden sm:inline-flex" />
           <ServerLocaleLink
             href={paths.login}
             className="text-nowrap-safe hidden sm:inline-flex min-h-10 shrink-0 items-center px-2.5 py-2 text-sm text-muted hover:text-foreground"

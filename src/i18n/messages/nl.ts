@@ -29,6 +29,7 @@ const nl: Messages = {
     mobileNav: "Mobiele navigatie",
     mainNav: "Hoofdnavigatie",
     skipToContent: "Naar hoofdinhoud",
+    homeAria: "VDB Digital Software — naar de homepage",
   },
   solutions: {
     websites: "Websites",

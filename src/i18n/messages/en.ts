@@ -27,6 +27,7 @@ const en = {
     mobileNav: "Mobile navigation",
     mainNav: "Main navigation",
     skipToContent: "Skip to main content",
+    homeAria: "VDB Digital Software — home",
   },
   solutions: {
     websites: "Websites",

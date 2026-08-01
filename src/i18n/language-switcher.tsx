@@ -31,6 +31,7 @@ export function LanguageSwitcher({
       {locales.map((code) => {
         const { href } = buildLanguageSwitchHref(pathname, searchParams, code);
         const active = code === locale;
+        const label = localeLabels[code as Locale];
         return (
           <a
             key={code}
@@ -53,9 +54,9 @@ export function LanguageSwitcher({
                 : "text-muted hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
             )}
             aria-current={active ? "true" : undefined}
-            aria-label={`${code.toUpperCase()} — ${localeLabels[code as Locale]}`}
+            aria-label={label}
           >
-            {code.toUpperCase()}
+            {compact ? code.toUpperCase() : label}
           </a>
         );
       })}

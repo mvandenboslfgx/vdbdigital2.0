@@ -8,12 +8,20 @@ describe("Development fallback guard", () => {
 
   it("disallows dev fallback in production", () => {
     vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("ALLOW_SEED_CATALOG", "");
     expect(allowDevFallback()).toBe(false);
     expect(isProductionRuntime()).toBe(true);
   });
 
+  it("allows explicit seed catalog opt-in even in production runtime", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("ALLOW_SEED_CATALOG", "1");
+    expect(allowDevFallback()).toBe(true);
+  });
+
   it("allows dev fallback in development", () => {
     vi.stubEnv("NODE_ENV", "development");
+    vi.stubEnv("ALLOW_SEED_CATALOG", "");
     expect(allowDevFallback()).toBe(true);
   });
 });

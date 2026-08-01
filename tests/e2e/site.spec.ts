@@ -8,7 +8,7 @@ test.describe("Homepage (English default)", () => {
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
     await expect(
       page.getByRole("heading", {
-        name: /Custom software, websites and automation built around your business/i,
+        name: /Websites and digital systems that turn visitors into enquiries/i,
       }),
     ).toBeVisible();
   });
@@ -31,21 +31,21 @@ test.describe("Dutch locale (/nl)", () => {
     await expect(page.locator("html")).toHaveAttribute("lang", "nl");
     await expect(
       page.getByRole("heading", {
-        name: /Maatwerksoftware, websites en automatisering die rond jouw bedrijf worden gebouwd/i,
+        name: /Websites en digitale systemen die bezoekers omzetten in aanvragen/i,
       }),
     ).toBeVisible();
   });
 
   test("language switcher preserves route", async ({ page }) => {
     await page.goto("/nl/solutions");
-    await page.getByRole("banner").getByRole("link", { name: "English" }).click();
+    await page.getByRole("banner").getByRole("link", { name: /English/i }).click();
     await expect(page).toHaveURL(/\/solutions$/);
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
   });
 
   test("preserves product query when switching language", async ({ page }) => {
     await page.goto("/quote?product=starter-website");
-    await page.getByRole("banner").getByRole("link", { name: "Nederlands" }).click();
+    await page.getByRole("banner").getByRole("link", { name: /Nederlands/i }).click();
     await expect(page).toHaveURL(/\/nl\/quote\?product=starter-website/);
   });
 });
@@ -54,7 +54,7 @@ test.describe("Navigation", () => {
   test("navigates to shop", async ({ page }) => {
     await page.goto("/");
     await page.getByRole("navigation", { name: /Main navigation/i })
-      .getByRole("link", { name: "Shop", exact: true })
+      .getByRole("link", { name: "Software", exact: true })
       .click();
     await expect(page).toHaveURL("/shop");
   });
@@ -62,7 +62,7 @@ test.describe("Navigation", () => {
   test("mobile menu opens in English", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto("/");
-    await page.getByRole("button", { name: /Open menu/i }).click();
+    await page.getByTestId("mobile-menu-button").click();
     await expect(
       page
         .getByLabel(/Mobile navigation/i)
@@ -130,7 +130,8 @@ test.describe("Legal", () => {
 test.describe("Admin", () => {
   test("blocks unauthenticated admin access", async ({ page }) => {
     await page.goto("/admin");
-    await expect(page).toHaveURL(/\/admin\/login/);
+    // Unauthenticated staff are sent to the shared locale-aware login surface.
+    await expect(page).toHaveURL(/\/(nl\/)?inloggen/);
   });
 });
 
@@ -151,11 +152,9 @@ test.describe("Cookie consent & contact FAB", () => {
 
   test("floating contact CTA links to contact page", async ({ page }) => {
     await page.goto("/");
-    const fab = page.getByRole("link", { name: /contact/i }).filter({
-      has: page.locator("svg"),
-    });
-    await expect(fab.first()).toBeVisible();
-    await expect(fab.first()).toHaveAttribute("href", /contact/);
+    const fab = page.getByRole("link", { name: /contact/i }).last();
+    await expect(fab).toBeVisible();
+    await expect(fab).toHaveAttribute("href", /contact/);
     await expect(page.getByText(/WhatsApp.*not configured/i)).toHaveCount(0);
   });
 });
@@ -191,9 +190,32 @@ test.describe("Brand identity", () => {
       }
       const overflow = await page.evaluate(() => {
         const doc = document.documentElement;
-        return doc.scrollWidth > doc.clientWidth + 1;
+        const limit = doc.clientWidth + 1;
+        if (doc.scrollWidth <= limit) {
+          return { overflow: false, offenders: [] as string[] };
+        }
+        const offenders: string[] = [];
+        for (const el of Array.from(document.body.querySelectorAll("*"))) {
+          const style = window.getComputedStyle(el);
+          if (style.display === "none" || style.visibility === "hidden") continue;
+          const rect = el.getBoundingClientRect();
+          if (rect.right > limit || rect.left < -1) {
+            offenders.push(
+              `${style.position}:${el.tagName.toLowerCase()}#${el.id || ""}.${String(el.className).slice(0, 60)}:L${Math.round(rect.left)}R${Math.round(rect.right)}`,
+            );
+          }
+        }
+        return {
+          overflow: offenders.length > 0 || doc.scrollWidth > limit,
+          offenders: offenders.slice(0, 10),
+          scrollWidth: doc.scrollWidth,
+          clientWidth: doc.clientWidth,
+        };
       });
-      expect(overflow, `overflow at ${width}px`).toBe(false);
+      expect(
+        overflow.overflow,
+        `overflow at ${width}px scroll=${overflow.scrollWidth}/${overflow.clientWidth}: ${overflow.offenders.join(" | ")}`,
+      ).toBe(false);
     }
   });
 

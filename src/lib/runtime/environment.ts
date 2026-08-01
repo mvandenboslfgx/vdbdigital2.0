@@ -7,6 +7,7 @@ export function isProductionRuntime(): boolean {
 }
 
 export function allowDevFallback(): boolean {
+  if (process.env.ALLOW_SEED_CATALOG === "1") return true;
   return !isProductionRuntime();
 }
 

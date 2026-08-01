@@ -18,16 +18,22 @@ export async function Footer() {
           <div className="lg:col-span-1">
             <ServerLocaleLink
               href="/"
-              aria-label="VDB Digital Software — naar de homepage"
-              className="inline-flex shrink-0 items-center"
+              aria-label={t("nav.homeAria")}
+              className="inline-flex max-w-full shrink-0 items-center"
             >
-              <VdbLogo lockup="header" variant="light" priority alt="" />
+              <VdbLogo
+                lockup="header"
+                variant="light"
+                priority
+                alt=""
+                className="h-9 w-auto max-w-[min(12rem,calc(100vw-2.5rem))] object-contain object-left"
+              />
             </ServerLocaleLink>
             <p className="mt-4 text-small text-muted prose-width">
               {t("meta.tagline")}
             </p>
-            <div className="mt-5 h-10 min-w-[5.5rem]">
-              <ServerLanguageSwitcher />
+            <div className="mt-5 max-w-full overflow-x-auto">
+              <ServerLanguageSwitcher compact />
             </div>
             <div className="mt-4 flex flex-wrap gap-3">
               <ServerLocaleLink

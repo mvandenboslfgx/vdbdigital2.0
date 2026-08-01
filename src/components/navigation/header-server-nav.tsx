@@ -10,6 +10,7 @@ export type ServerMobileNavLabels = {
   openMenu: string;
   closeMenu: string;
   mobileNav: string;
+  homeAria: string;
   solutions: string;
   forBusiness: string;
   company: string;
@@ -49,8 +50,9 @@ export async function HeaderMobileNavServer({
 
   return (
     <details className="group/mobile relative xl:hidden">
-      <summary
+          <summary
         data-testid="mobile-menu-button"
+        role="button"
         className="flex h-11 w-11 list-none items-center justify-center rounded-lg hover:bg-surface-elevated marker:content-none [&::-webkit-details-marker]:hidden"
         aria-label={labels.openMenu}
       >
@@ -75,7 +77,7 @@ export async function HeaderMobileNavServer({
         <div className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border page-pad-x">
           <ServerLocaleLink
             href="/"
-            aria-label="VDB Digital Software — naar de homepage"
+            aria-label={labels.homeAria ?? "VDB Digital Software"}
             className="inline-flex shrink-0 items-center"
           >
             <VdbLogo
