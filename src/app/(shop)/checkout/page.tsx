@@ -15,6 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t("checkout.title"),
     alternates: { canonical: paths.checkout },
+    robots: { index: false },
   };
 }
 

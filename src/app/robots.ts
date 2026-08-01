@@ -13,11 +13,19 @@ export default function robots(): MetadataRoute.Robots {
   }
 
   // Auth/portal flows are never indexable in either locale (English bare path, Dutch under `/nl`).
+  // NOTE: no trailing slash on /admin, /checkout, /cart, /portal — each of
+  // those also has a bare index route (e.g. `/admin` itself, from the
+  // `(protected)` route group), and a trailing-slash-only prefix like
+  // `/admin/` does NOT match the bare `/admin` path in robots.txt prefix
+  // matching. The bare index pages already carry their own `robots: {
+  // index: false }` metadata (defense in depth), but robots.txt should
+  // block them directly too.
   const nonIndexablePrefixes = [
-    "/admin/",
+    "/admin",
     "/api/",
-    "/checkout/",
-    "/portal/",
+    "/checkout",
+    "/cart",
+    "/portal",
     "/inloggen",
     "/uitloggen",
     "/auth/",

@@ -16,6 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t("cart.title"),
     alternates: { canonical: paths.cart },
+    robots: { index: false },
   };
 }
 

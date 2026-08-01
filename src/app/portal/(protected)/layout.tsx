@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { checkCustomerAccess } from "@/server/auth/require-customer";
 import { PortalShell } from "@/components/portal/portal-shell";
@@ -6,6 +7,15 @@ import { withLocale } from "@/i18n/config";
 import { siteConfig } from "@/config/site";
 
 export const dynamic = "force-dynamic";
+
+/**
+ * Defense-in-depth: every route under /portal/(protected) is customer
+ * account data and must never be indexed, regardless of whether a given
+ * page also sets its own `robots` metadata.
+ */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default async function PortalProtectedLayout({
   children,

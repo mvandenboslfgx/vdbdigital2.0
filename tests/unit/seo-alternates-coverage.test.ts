@@ -11,6 +11,7 @@ import { join, relative } from "node:path";
  */
 
 const MARKETING_ROOT = join(process.cwd(), "src", "app", "(marketing)");
+const SHOP_ROOT = join(process.cwd(), "src", "app", "(shop)");
 
 /**
  * Routes that intentionally do not need locale-aware alternates.
@@ -21,6 +22,13 @@ const ALLOWLIST = new Set<string>([
   "src/app/(marketing)/solutions/live-chat/page.tsx",
   "src/app/(marketing)/solutions/review-flows/page.tsx",
   "src/app/(marketing)/solutions/custom-websites/page.tsx",
+  // Private/personalized cart+checkout flow: robots-noindexed (see robots.test.ts
+  // and per-page `robots: { index: false }` metadata), so hreflang alternates
+  // are not meaningful — there is nothing for a crawler to index in any locale.
+  "src/app/(shop)/cart/page.tsx",
+  "src/app/(shop)/checkout/page.tsx",
+  "src/app/(shop)/checkout/success/page.tsx",
+  "src/app/(shop)/checkout/cancelled/page.tsx",
 ]);
 
 function collectPageFiles(dir: string, acc: string[] = []): string[] {
@@ -40,6 +48,29 @@ function toRepoRelativePosix(absolutePath: string): string {
   return relative(process.cwd(), absolutePath).split("\\").join("/");
 }
 
+function checkAlternatesCoverage(file: string) {
+  const source = readFileSync(join(process.cwd(), file), "utf8");
+
+  if (!source.includes("generateMetadata")) {
+    // No exported metadata function on this route — nothing to validate.
+    return;
+  }
+
+  const usesBareCanonical = /alternates:\s*\{\s*canonical:/.test(source);
+  const usesLocaleAwareHelper =
+    source.includes("buildLocaleAlternates(") ||
+    source.includes("createSolutionMetadata(");
+
+  expect(
+    usesBareCanonical,
+    `${file} sets alternates: { canonical } directly — switch to buildLocaleAlternates(path, locale).`,
+  ).toBe(false);
+  expect(
+    usesLocaleAwareHelper,
+    `${file} has generateMetadata but never calls buildLocaleAlternates (directly or via createSolutionMetadata).`,
+  ).toBe(true);
+}
+
 describe("SEO-005 marketing metadata alternates coverage", () => {
   const pageFiles = collectPageFiles(MARKETING_ROOT).map(toRepoRelativePosix);
 
@@ -51,33 +82,33 @@ describe("SEO-005 marketing metadata alternates coverage", () => {
 
   it.each(candidates)(
     "%s uses locale-aware alternates instead of a bare canonical",
-    (file) => {
-      const source = readFileSync(join(process.cwd(), file), "utf8");
-
-      if (!source.includes("generateMetadata")) {
-        // No exported metadata function on this route — nothing to validate.
-        return;
-      }
-
-      const usesBareCanonical = /alternates:\s*\{\s*canonical:/.test(source);
-      const usesLocaleAwareHelper =
-        source.includes("buildLocaleAlternates(") ||
-        source.includes("createSolutionMetadata(");
-
-      expect(
-        usesBareCanonical,
-        `${file} sets alternates: { canonical } directly — switch to buildLocaleAlternates(path, locale).`,
-      ).toBe(false);
-      expect(
-        usesLocaleAwareHelper,
-        `${file} has generateMetadata but never calls buildLocaleAlternates (directly or via createSolutionMetadata).`,
-      ).toBe(true);
-    },
+    checkAlternatesCoverage,
   );
 
   it("keeps the allowlist free of stale entries", () => {
     for (const entry of ALLOWLIST) {
-      expect(pageFiles).toContain(entry);
+      expect(pageFiles.concat(collectPageFiles(SHOP_ROOT).map(toRepoRelativePosix))).toContain(
+        entry,
+      );
     }
   });
+});
+
+describe("SEO-005 (shop) metadata alternates coverage", () => {
+  const pageFiles = collectPageFiles(SHOP_ROOT).map(toRepoRelativePosix);
+
+  it("finds shop page routes to scan", () => {
+    expect(pageFiles.length).toBeGreaterThan(0);
+  });
+
+  const candidates = pageFiles.filter((file) => !ALLOWLIST.has(file));
+
+  it("has at least one indexable shop route left to check (list + PDP)", () => {
+    expect(candidates.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it.each(candidates)(
+    "%s uses locale-aware alternates instead of a bare canonical",
+    checkAlternatesCoverage,
+  );
 });
