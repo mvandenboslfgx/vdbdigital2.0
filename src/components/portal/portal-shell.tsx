@@ -7,6 +7,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utilities/cn";
 import { VdbLogo } from "@/components/brand/VdbLogo";
 import { stripLocalePrefix } from "@/i18n/config";
+import { LanguageSwitcherBoundary } from "@/i18n/language-switcher-boundary";
 
 export type PortalNavItem = { label: string; href: string };
 
@@ -118,6 +119,9 @@ export function PortalShell({
             navAria={labels.navAria}
             onNavigate={() => setOpen(false)}
           />
+          <div className="mt-4 px-3">
+            <LanguageSwitcherBoundary compact />
+          </div>
           <Link
             href={logoutHref}
             className="mt-4 block px-3 py-2 text-sm text-muted hover:text-foreground"
@@ -143,7 +147,8 @@ export function PortalShell({
         <div className="flex-1 p-3">
           <PortalNavLinks nav={nav} navAria={labels.navAria} />
         </div>
-        <div className="p-3 border-t border-border">
+        <div className="p-3 border-t border-border space-y-2">
+          <LanguageSwitcherBoundary compact className="px-1" />
           <Link
             href={logoutHref}
             className="block px-3 py-2 rounded-lg text-sm text-muted hover:text-foreground hover:bg-surface-elevated"

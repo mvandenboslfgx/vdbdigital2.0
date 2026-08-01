@@ -799,6 +799,8 @@ const nl: Messages = {
     navAria: "Beheernavigatie",
     openMenu: "Menu openen",
     closeMenu: "Menu sluiten",
+    areaLabel: "Beheer",
+    brandAria: "Beheeromgeving",
   },
   empty: {
     shopPreparing: "Shop wordt voorbereid",

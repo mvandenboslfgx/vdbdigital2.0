@@ -789,6 +789,8 @@ const en = {
     navAria: "Admin navigation",
     openMenu: "Open menu",
     closeMenu: "Close menu",
+    areaLabel: "Admin",
+    brandAria: "Admin area",
   },
   empty: {
     shopPreparing: "Shop is being prepared",
