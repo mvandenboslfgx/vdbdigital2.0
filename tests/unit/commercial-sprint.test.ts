@@ -56,8 +56,27 @@ describe("Commercial completion sprint", () => {
   });
 
   it("blocks B2C publication without legal approval", () => {
-    for (const item of commercialCatalog) {
+    const blocked = commercialCatalog.filter(
+      (item) =>
+        item.legalStatus !== "APPROVED_FOR_B2C" &&
+        item.legalStatus !== "APPROVED_FOR_BOTH",
+    );
+    expect(blocked.length).toBeGreaterThan(0);
+    for (const item of blocked) {
       expect(canPublishForB2c(item)).toBe(false);
+    }
+
+    const eligible = commercialCatalog.filter(
+      (item) =>
+        item.b2c &&
+        item.publicationReady &&
+        (item.legalStatus === "APPROVED_FOR_B2C" ||
+          item.legalStatus === "APPROVED_FOR_BOTH") &&
+        (item.priceStatus === "APPROVED" || item.priceStatus === "PUBLISHED"),
+    );
+    expect(eligible.length).toBeGreaterThan(0);
+    for (const item of eligible) {
+      expect(canPublishForB2c(item)).toBe(true);
     }
   });
 

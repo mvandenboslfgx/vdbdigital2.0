@@ -85,7 +85,9 @@ describe("checkout eligibility / price modes", () => {
 
   it("rejects B2C when legal status is not B2C-approved", () => {
     vi.stubEnv("CHECKOUT_ENABLED", "true");
-    const product = baseProduct({ slug: "launch-website" });
+    // growth-care is B2B-only in the commercial catalog (APPROVED_FOR_B2B).
+    const product = baseProduct({ slug: "growth-care", priceCents: 19900 });
     expect(assertCheckoutAllowedForCustomer(product, "B2C")).toMatch(/not approved/i);
+    expect(assertCheckoutAllowedForCustomer(product, "B2B")).toBeNull();
   });
 });

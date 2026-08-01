@@ -203,8 +203,8 @@ describe("payment reversal — migration & action contracts", () => {
     );
     expect(portal).not.toContain("reversal_reason");
     expect(portal).not.toContain("Betaling terugdraaien");
-    expect(portal).toContain("Geregistreerd betaald");
-    expect(portal).toContain("Openstaand");
+    expect(portal).toContain("portal.invoicesPage.paidRegistered");
+    expect(portal).toContain("portal.invoicesPage.outstanding");
   });
 
   it("checkout remains off in this suite", () => {
