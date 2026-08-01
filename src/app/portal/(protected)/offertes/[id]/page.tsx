@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Card } from "@/components/ui/container";
 import { formatEuro, getPortalQuote } from "@/server/repositories/portal";
-import { QUOTE_STATUS_NL, labelNl } from "@/lib/portal/labels";
+import { QUOTE_STATUS_KEYS, labelFor } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 import { QuoteResponseForm } from "@/components/portal/quote-response-form";
 import { hasCustomerPermission } from "@/lib/auth/customer-permissions";
 import { isQuoteExpired } from "@/lib/commerce/quote-money";
@@ -18,6 +19,7 @@ export default async function PortalQuoteDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { t } = await getDictionary();
   const { id } = await params;
   const { quote, items, ctx } = await getPortalQuote(id);
   if (!quote) notFound();
@@ -40,7 +42,7 @@ export default async function PortalQuoteDetailPage({
         </Link>
         <h1 className="text-h1 mt-2">{quote.title}</h1>
         <p className="text-muted">
-          {quote.quote_number} · {labelNl(QUOTE_STATUS_NL, quote.status)}
+          {quote.quote_number} · {labelFor(t, QUOTE_STATUS_KEYS, quote.status)}
           {expired ? " · Verlopen" : ""}
         </p>
       </div>

@@ -4,10 +4,12 @@ import { EmptyState } from "@/components/portal/empty-state";
 import { listAdminInvoices } from "@/server/repositories/admin-invoices";
 import { formatEuro } from "@/server/repositories/portal";
 import {
-  INVOICE_STATUS_NL,
-  INVOICE_TYPE_NL,
-  labelNl,
+  INVOICE_STATUS_KEYS,
+  INVOICE_TYPE_KEYS,
+  labelFor,
+  labelOptions,
 } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export const metadata: Metadata = { title: "Facturen", robots: { index: false } };
 
@@ -16,6 +18,7 @@ export default async function AdminInvoicesPage({
 }: {
   searchParams: Promise<{ q?: string; status?: string; page?: string }>;
 }) {
+  const { t } = await getDictionary();
   const sp = await searchParams;
   const { invoices, total, error } = await listAdminInvoices({
     q: sp.q,
@@ -54,9 +57,9 @@ export default async function AdminInvoicesPage({
           className="min-h-11 px-3 rounded-lg border border-border text-sm"
         >
           <option value="ALL">Alle statussen</option>
-          {Object.keys(INVOICE_STATUS_NL).map((s) => (
-            <option key={s} value={s}>
-              {INVOICE_STATUS_NL[s]}
+          {labelOptions(t, INVOICE_STATUS_KEYS).map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
             </option>
           ))}
         </select>
@@ -112,10 +115,14 @@ export default async function AdminInvoicesPage({
                       {org?.trade_name || org?.legal_name || "—"}
                     </td>
                     <td className="py-3 pr-3">
-                      {labelNl(INVOICE_TYPE_NL, inv.invoice_type ?? "INVOICE")}
+                      {labelFor(
+                        t,
+                        INVOICE_TYPE_KEYS,
+                        inv.invoice_type ?? "INVOICE",
+                      )}
                     </td>
                     <td className="py-3 pr-3">
-                      {labelNl(INVOICE_STATUS_NL, inv.status)}
+                      {labelFor(t, INVOICE_STATUS_KEYS, inv.status)}
                     </td>
                     <td className="py-3 pr-3">
                       {formatEuro(inv.total_cents, inv.currency)}

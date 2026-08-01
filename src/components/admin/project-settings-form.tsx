@@ -9,11 +9,9 @@ import {
   type ProjectActionState,
 } from "@/server/actions/project-actions";
 import { PROJECT_TYPES, PROJECT_STATUSES, PROJECT_PRIORITIES } from "@/lib/validation/projects";
-import {
-  PROJECT_STATUS_NL,
-  PROJECT_TYPE_NL,
-  labelNl,
-} from "@/lib/portal/labels";
+
+/** Resolved on the server via `resolveLabelMap` so this client tree stays locale-agnostic. */
+type EnumLabels = Record<string, string>;
 
 const PRIORITY_NL: Record<string, string> = {
   LOW: "Laag",
@@ -38,7 +36,15 @@ type Project = {
   version: number;
 };
 
-export function ProjectSettingsForm({ project }: { project: Project }) {
+export function ProjectSettingsForm({
+  project,
+  projectTypeLabels,
+  statusLabels,
+}: {
+  project: Project;
+  projectTypeLabels: EnumLabels;
+  statusLabels: EnumLabels;
+}) {
   const [state, action, pending] = useActionState<
     ProjectActionState,
     FormData
@@ -91,9 +97,9 @@ export function ProjectSettingsForm({ project }: { project: Project }) {
             defaultValue={project.project_type}
             className="w-full min-h-11 px-3 rounded-lg border border-border bg-background text-sm"
           >
-            {PROJECT_TYPES.map((t) => (
-              <option key={t} value={t}>
-                {labelNl(PROJECT_TYPE_NL, t)}
+            {PROJECT_TYPES.map((projectType) => (
+              <option key={projectType} value={projectType}>
+                {projectTypeLabels[projectType] ?? projectType}
               </option>
             ))}
           </select>
@@ -110,7 +116,7 @@ export function ProjectSettingsForm({ project }: { project: Project }) {
           >
             {PROJECT_STATUSES.map((s) => (
               <option key={s} value={s}>
-                {labelNl(PROJECT_STATUS_NL, s)}
+                {statusLabels[s] ?? s}
               </option>
             ))}
           </select>

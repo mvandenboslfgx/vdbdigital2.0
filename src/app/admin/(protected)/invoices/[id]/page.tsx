@@ -6,10 +6,11 @@ import { Card } from "@/components/ui/container";
 import { getAdminInvoice } from "@/server/repositories/admin-invoices";
 import { formatEuro } from "@/server/repositories/portal";
 import {
-  INVOICE_STATUS_NL,
-  INVOICE_TYPE_NL,
-  labelNl,
+  INVOICE_STATUS_KEYS,
+  INVOICE_TYPE_KEYS,
+  labelFor,
 } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 import { hasPermission } from "@/lib/auth/permissions";
 import { requireAdmin } from "@/server/auth/require-admin";
 import {
@@ -28,6 +29,7 @@ export default async function AdminInvoiceDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { t } = await getDictionary();
   const { id } = await params;
   const ctx = await requireAdmin();
   const bundle = await getAdminInvoice(id);
@@ -51,8 +53,8 @@ export default async function AdminInvoiceDetailPage({
           <p className="text-small text-muted">{invoice.invoice_number}</p>
           <h1 className="text-h1">{invoice.title || "Factuur"}</h1>
           <p className="text-muted text-small mt-1">
-            {labelNl(INVOICE_TYPE_NL, invoice.invoice_type)} ·{" "}
-            {labelNl(INVOICE_STATUS_NL, status)} ·{" "}
+            {labelFor(t, INVOICE_TYPE_KEYS, invoice.invoice_type)} ·{" "}
+            {labelFor(t, INVOICE_STATUS_KEYS, status)} ·{" "}
             {org?.trade_name || org?.legal_name || "—"}
           </p>
         </div>
@@ -195,7 +197,7 @@ export default async function AdminInvoiceDetailPage({
                 >
                   {c.invoice_number}
                 </Link>{" "}
-                · {labelNl(INVOICE_STATUS_NL, c.status)} ·{" "}
+                · {labelFor(t, INVOICE_STATUS_KEYS, c.status)} ·{" "}
                 {formatEuro(c.total_cents, c.currency)}
               </li>
             ))}

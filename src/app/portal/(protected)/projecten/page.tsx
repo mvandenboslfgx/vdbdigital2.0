@@ -3,10 +3,11 @@ import Link from "next/link";
 import { EmptyState } from "@/components/portal/empty-state";
 import { listPortalProjects } from "@/server/repositories/portal";
 import {
-  PROJECT_STATUS_NL,
-  PROJECT_TYPE_NL,
-  labelNl,
+  PROJECT_STATUS_KEYS,
+  PROJECT_TYPE_KEYS,
+  labelFor,
 } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export const metadata: Metadata = {
   title: "Projecten",
@@ -14,6 +15,7 @@ export const metadata: Metadata = {
 };
 
 export default async function PortalProjectsPage() {
+  const { t } = await getDictionary();
   const result = await listPortalProjects();
   const projects = result.projects;
 
@@ -36,11 +38,11 @@ export default async function PortalProjectsPage() {
                 <div className="flex flex-wrap justify-between gap-2 mb-2">
                   <h2 className="font-medium text-lg">{p.name}</h2>
                   <span className="text-small text-muted">
-                    {labelNl(PROJECT_STATUS_NL, p.status)}
+                    {labelFor(t, PROJECT_STATUS_KEYS, p.status)}
                   </span>
                 </div>
                 <p className="text-small text-muted mb-3">
-                  {labelNl(PROJECT_TYPE_NL, p.project_type)}
+                  {labelFor(t, PROJECT_TYPE_KEYS, p.project_type)}
                   {p.next_milestone_title
                     ? ` · Volgende: ${p.next_milestone_title}`
                     : ""}

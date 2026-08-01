@@ -3,16 +3,18 @@ import { Card } from "@/components/ui/container";
 import { ProjectTabShell } from "@/components/admin/project-tabs";
 import { getAdminProjectBundle } from "@/server/repositories/admin-projects";
 import {
-  ACTION_STATUS_NL,
-  MILESTONE_STATUS_NL,
-  labelNl,
+  ACTION_STATUS_KEYS,
+  MILESTONE_STATUS_KEYS,
+  labelFor,
 } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export default async function AdminProjectOverviewPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { t } = await getDictionary();
   const { id } = await params;
   const bundle = await getAdminProjectBundle(id);
   if (!bundle) notFound();
@@ -54,7 +56,7 @@ export default async function AdminProjectOverviewPage({
           <p className="text-label text-muted mb-1">Volgende mijlpaal</p>
           <p className="text-small font-medium">
             {nextMilestone
-              ? `${nextMilestone.title} · ${labelNl(MILESTONE_STATUS_NL, nextMilestone.status)}`
+              ? `${nextMilestone.title} · ${labelFor(t, MILESTONE_STATUS_KEYS, nextMilestone.status)}`
               : "Geen open mijlpaal"}
           </p>
         </Card>
@@ -131,7 +133,7 @@ export default async function AdminProjectOverviewPage({
             {openCustomer.map(
               (a: { id: string; title: string; status: string }) => (
                 <li key={a.id} className="text-small border border-border rounded-lg px-3 py-2">
-                  {a.title} · {labelNl(ACTION_STATUS_NL, a.status)}
+                  {a.title} · {labelFor(t, ACTION_STATUS_KEYS, a.status)}
                 </li>
               ),
             )}

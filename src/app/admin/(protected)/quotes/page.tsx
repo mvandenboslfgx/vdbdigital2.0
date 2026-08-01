@@ -3,7 +3,12 @@ import Link from "next/link";
 import { EmptyState } from "@/components/portal/empty-state";
 import { listAdminQuotes } from "@/server/repositories/admin-quotes";
 import { formatEuro } from "@/server/repositories/portal";
-import { QUOTE_STATUS_NL, labelNl } from "@/lib/portal/labels";
+import {
+  QUOTE_STATUS_KEYS,
+  labelFor,
+  labelOptions,
+} from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export const metadata: Metadata = { title: "Offertes", robots: { index: false } };
 
@@ -12,6 +17,7 @@ export default async function AdminQuotesPage({
 }: {
   searchParams: Promise<{ q?: string; status?: string; page?: string }>;
 }) {
+  const { t } = await getDictionary();
   const sp = await searchParams;
   const { quotes, total, error } = await listAdminQuotes({
     q: sp.q,
@@ -49,9 +55,9 @@ export default async function AdminQuotesPage({
           className="min-h-11 px-3 rounded-lg border border-border bg-background text-sm"
         >
           <option value="ALL">Alle statussen</option>
-          {Object.entries(QUOTE_STATUS_NL).map(([k, v]) => (
-            <option key={k} value={k}>
-              {v}
+          {labelOptions(t, QUOTE_STATUS_KEYS).map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
             </option>
           ))}
         </select>
@@ -107,7 +113,7 @@ export default async function AdminQuotesPage({
                       {org?.trade_name || org?.legal_name || "—"}
                     </td>
                     <td className="px-3 py-3">
-                      {labelNl(QUOTE_STATUS_NL, q.status)}
+                      {labelFor(t, QUOTE_STATUS_KEYS, q.status)}
                     </td>
                     <td className="px-3 py-3">
                       {formatEuro(q.total_cents, q.currency)}

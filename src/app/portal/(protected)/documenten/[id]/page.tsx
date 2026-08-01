@@ -6,10 +6,8 @@ import { DocumentDownloadButton } from "@/components/documents/document-forms";
 import { getPortalDocument } from "@/server/repositories/portal";
 import { hasCustomerPermission } from "@/lib/auth/customer-permissions";
 import { formatBytes } from "@/lib/validation/documents";
-import {
-  DOCUMENT_CATEGORY_NL,
-  labelNl,
-} from "@/lib/portal/labels";
+import { DOCUMENT_CATEGORY_KEYS, labelFor } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export const metadata: Metadata = {
   title: "Document",
@@ -21,6 +19,7 @@ export default async function PortalDocumentDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { t } = await getDictionary();
   const { id } = await params;
   const { document, versions, ctx } = await getPortalDocument(id);
   if (!document) notFound();
@@ -41,7 +40,7 @@ export default async function PortalDocumentDetailPage({
         </Link>
         <h1 className="text-h1 mt-2">{document.title}</h1>
         <p className="text-muted text-small mt-1">
-          {labelNl(DOCUMENT_CATEGORY_NL, document.category)} · v
+          {labelFor(t, DOCUMENT_CATEGORY_KEYS, document.category)} · v
           {document.version_number}
         </p>
       </div>

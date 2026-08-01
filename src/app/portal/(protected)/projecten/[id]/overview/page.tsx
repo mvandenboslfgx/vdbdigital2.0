@@ -5,16 +5,18 @@ import { CompleteActionForm } from "@/components/portal/project-customer-forms";
 import { getPortalProject } from "@/server/repositories/portal";
 import { hasCustomerPermission } from "@/lib/auth/customer-permissions";
 import {
-  ACTION_STATUS_NL,
-  MILESTONE_STATUS_NL,
-  labelNl,
+  ACTION_STATUS_KEYS,
+  MILESTONE_STATUS_KEYS,
+  labelFor,
 } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export default async function PortalProjectOverviewPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { t } = await getDictionary();
   const { id } = await params;
   const bundle = await getPortalProject(id);
   if (!bundle.project) notFound();
@@ -60,7 +62,7 @@ export default async function PortalProjectOverviewPage({
         {nextMilestone ? (
           <p className="text-small text-muted mt-2">
             Volgende mijlpaal: {nextMilestone.title} (
-            {labelNl(MILESTONE_STATUS_NL, nextMilestone.status)})
+            {labelFor(t, MILESTONE_STATUS_KEYS, nextMilestone.status)})
           </p>
         ) : null}
       </Card>
@@ -84,7 +86,7 @@ export default async function PortalProjectOverviewPage({
                 <li key={a.id} className="rounded-xl border border-border p-4">
                   <p className="font-medium">{a.title}</p>
                   <p className="text-small text-muted mt-1">
-                    {labelNl(ACTION_STATUS_NL, a.status)}
+                    {labelFor(t, ACTION_STATUS_KEYS, a.status)}
                   </p>
                   {a.description ? (
                     <p className="text-small mt-2 whitespace-pre-wrap">

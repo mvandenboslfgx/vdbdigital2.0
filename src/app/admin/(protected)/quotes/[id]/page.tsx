@@ -5,7 +5,8 @@ import { Card } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { getAdminQuote } from "@/server/repositories/admin-quotes";
 import { formatEuro } from "@/server/repositories/portal";
-import { QUOTE_STATUS_NL, labelNl } from "@/lib/portal/labels";
+import { QUOTE_STATUS_KEYS, labelFor } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 import {
   markQuoteReadyAction,
   sendQuoteAction,
@@ -23,6 +24,7 @@ export default async function AdminQuoteDetailPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ fout?: string }>;
 }) {
+  const { t } = await getDictionary();
   const { id } = await params;
   const { fout } = await searchParams;
   const bundle = await getAdminQuote(id);
@@ -41,7 +43,7 @@ export default async function AdminQuoteDetailPage({
         </Link>
         <h1 className="text-h1 mt-2">{quote.title}</h1>
         <p className="text-muted text-small mt-1">
-          {quote.quote_number} · {labelNl(QUOTE_STATUS_NL, quote.status)} ·{" "}
+          {quote.quote_number} · {labelFor(t, QUOTE_STATUS_KEYS, quote.status)} ·{" "}
           {org?.trade_name || org?.legal_name}
         </p>
       </div>

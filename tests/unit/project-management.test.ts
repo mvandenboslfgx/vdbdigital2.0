@@ -7,7 +7,10 @@ import {
 } from "@/lib/validation/projects";
 import { hasPermission } from "@/lib/auth/permissions";
 import { hasCustomerPermission } from "@/lib/auth/customer-permissions";
-import { PROJECT_STATUS_NL, labelNl } from "@/lib/portal/labels";
+import { PROJECT_STATUS_KEYS, labelFor } from "@/lib/portal/labels";
+import { createT } from "@/i18n/create-t";
+import en from "@/i18n/messages/en";
+import nl from "@/i18n/messages/nl";
 import { audienceSafeInternalPath } from "@/lib/security/redirect";
 
 describe("project validation", () => {
@@ -78,13 +81,30 @@ describe("project permissions", () => {
   });
 });
 
-describe("project status labels NL", () => {
+describe("project status labels", () => {
+  const tNl = createT(nl);
+  const tEn = createT(en);
+
   it("uses understandable Dutch labels", () => {
-    expect(labelNl(PROJECT_STATUS_NL, "WAITING_FOR_CUSTOMER")).toBe(
+    expect(labelFor(tNl, PROJECT_STATUS_KEYS, "WAITING_FOR_CUSTOMER")).toBe(
       "Wacht op klant",
     );
-    expect(labelNl(PROJECT_STATUS_NL, "REVIEW")).toBe("Ter beoordeling");
-    expect(labelNl(PROJECT_STATUS_NL, "ON_HOLD")).toBe("Gepauzeerd");
+    expect(labelFor(tNl, PROJECT_STATUS_KEYS, "REVIEW")).toBe("Ter beoordeling");
+    expect(labelFor(tNl, PROJECT_STATUS_KEYS, "ON_HOLD")).toBe("Gepauzeerd");
+  });
+
+  it("uses English labels for the default locale", () => {
+    expect(labelFor(tEn, PROJECT_STATUS_KEYS, "WAITING_FOR_CUSTOMER")).toBe(
+      "Waiting for customer",
+    );
+    expect(labelFor(tEn, PROJECT_STATUS_KEYS, "ON_HOLD")).toBe("On hold");
+  });
+
+  it("falls back to the raw DB code for unknown enum values", () => {
+    expect(labelFor(tEn, PROJECT_STATUS_KEYS, "WAITING_FOR_LEGAL")).toBe(
+      "WAITING_FOR_LEGAL",
+    );
+    expect(labelFor(tEn, PROJECT_STATUS_KEYS, null)).toBe("");
   });
 });
 

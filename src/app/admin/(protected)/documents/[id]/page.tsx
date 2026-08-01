@@ -12,12 +12,14 @@ import { getAdminDocument } from "@/server/repositories/admin-documents";
 import { listAdminOrganizations } from "@/server/repositories/admin-portal";
 import { formatBytes } from "@/lib/validation/documents";
 import {
-  DOCUMENT_CATEGORY_NL,
-  DOCUMENT_STATUS_NL,
-  DOCUMENT_VISIBILITY_NL,
-  SCAN_STATUS_NL,
-  labelNl,
+  DOCUMENT_CATEGORY_KEYS,
+  DOCUMENT_STATUS_KEYS,
+  DOCUMENT_VISIBILITY_KEYS,
+  SCAN_STATUS_KEYS,
+  labelFor,
+  resolveLabelMap,
 } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 import { Button } from "@/components/ui/button";
 import { hasPermission } from "@/lib/auth/permissions";
 
@@ -31,6 +33,7 @@ export default async function AdminDocumentDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { t } = await getDictionary();
   const { id } = await params;
   const bundle = await getAdminDocument(id);
   if (!bundle) notFound();
@@ -81,20 +84,20 @@ export default async function AdminDocumentDetailPage({
             </div>
             <div>
               <dt className="text-muted">Categorie</dt>
-              <dd>{labelNl(DOCUMENT_CATEGORY_NL, doc.category)}</dd>
+              <dd>{labelFor(t, DOCUMENT_CATEGORY_KEYS, doc.category)}</dd>
             </div>
             <div>
               <dt className="text-muted">Status</dt>
-              <dd>{labelNl(DOCUMENT_STATUS_NL, doc.status)}</dd>
+              <dd>{labelFor(t, DOCUMENT_STATUS_KEYS, doc.status)}</dd>
             </div>
             <div>
               <dt className="text-muted">Zichtbaarheid</dt>
-              <dd>{labelNl(DOCUMENT_VISIBILITY_NL, doc.visibility)}</dd>
+              <dd>{labelFor(t, DOCUMENT_VISIBILITY_KEYS, doc.visibility)}</dd>
             </div>
             <div>
               <dt className="text-muted">Virusscan</dt>
               <dd>
-                {labelNl(SCAN_STATUS_NL, doc.scan_status)}
+                {labelFor(t, SCAN_STATUS_KEYS, doc.scan_status)}
                 {doc.scan_status === "NOT_REQUIRED" ? (
                   <span className="text-muted">
                     {" "}
@@ -146,6 +149,7 @@ export default async function AdminDocumentDetailPage({
             documentId={doc.id}
             version={doc.version}
             visibility={doc.visibility}
+            visibilityLabels={resolveLabelMap(t, DOCUMENT_VISIBILITY_KEYS)}
           />
         </Card>
       ) : null}
@@ -191,6 +195,8 @@ export default async function AdminDocumentDetailPage({
               defaultOrganizationId={doc.organization_id}
               defaultProjectId={doc.project_id ?? undefined}
               parentDocumentId={doc.parent_document_id ?? doc.id}
+              categoryLabels={resolveLabelMap(t, DOCUMENT_CATEGORY_KEYS)}
+              visibilityLabels={resolveLabelMap(t, DOCUMENT_VISIBILITY_KEYS)}
             />
           </div>
         ) : null}

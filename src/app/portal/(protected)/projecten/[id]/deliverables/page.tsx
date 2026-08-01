@@ -6,13 +6,15 @@ import {
 } from "@/components/portal/project-customer-forms";
 import { getPortalProject } from "@/server/repositories/portal";
 import { hasCustomerPermission } from "@/lib/auth/customer-permissions";
-import { DELIVERABLE_STATUS_NL, labelNl } from "@/lib/portal/labels";
+import { DELIVERABLE_STATUS_KEYS, labelFor } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export default async function PortalProjectDeliverablesPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { t } = await getDictionary();
   const { id } = await params;
   const bundle = await getPortalProject(id);
   if (!bundle.project) notFound();
@@ -46,7 +48,7 @@ export default async function PortalProjectDeliverablesPage({
               <li key={d.id} className="rounded-xl border border-border p-4">
                 <p className="font-medium">{d.title}</p>
                 <p className="text-small text-muted mt-1">
-                  {labelNl(DELIVERABLE_STATUS_NL, d.status)}
+                  {labelFor(t, DELIVERABLE_STATUS_KEYS, d.status)}
                 </p>
                 {d.description ? (
                   <p className="text-small mt-2 whitespace-pre-wrap">

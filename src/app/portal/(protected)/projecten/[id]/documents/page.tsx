@@ -5,13 +5,15 @@ import { PortalUploadForm } from "@/components/documents/document-forms";
 import { getPortalProject, listPortalFiles } from "@/server/repositories/portal";
 import { hasCustomerPermission } from "@/lib/auth/customer-permissions";
 import { formatBytes } from "@/lib/validation/documents";
-import { DOCUMENT_CATEGORY_NL, labelNl } from "@/lib/portal/labels";
+import { DOCUMENT_CATEGORY_KEYS, labelFor } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export default async function PortalProjectDocumentsPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { t } = await getDictionary();
   const { id } = await params;
   const { project, ctx } = await getPortalProject(id);
   if (!project) notFound();
@@ -39,7 +41,7 @@ export default async function PortalProjectDocumentsPage({
               >
                 <p className="font-medium">{f.title || f.file_name}</p>
                 <p className="text-small text-muted mt-1">
-                  {labelNl(DOCUMENT_CATEGORY_NL, f.category ?? "OTHER")}
+                  {labelFor(t, DOCUMENT_CATEGORY_KEYS, f.category ?? "OTHER")}
                   {f.size_bytes != null ? ` · ${formatBytes(f.size_bytes)}` : ""}
                 </p>
               </Link>

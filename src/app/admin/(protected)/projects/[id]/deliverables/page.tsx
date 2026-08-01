@@ -5,13 +5,15 @@ import {
   ShareDeliverableButton,
 } from "@/components/admin/project-forms";
 import { getAdminProjectBundle } from "@/server/repositories/admin-projects";
-import { DELIVERABLE_STATUS_NL, labelNl } from "@/lib/portal/labels";
+import { DELIVERABLE_STATUS_KEYS, labelFor } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export default async function AdminProjectDeliverablesPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { t } = await getDictionary();
   const { id } = await params;
   const bundle = await getAdminProjectBundle(id);
   if (!bundle) notFound();
@@ -40,7 +42,7 @@ export default async function AdminProjectDeliverablesPage({
                   <div>
                     <p className="font-medium">{d.title}</p>
                     <p className="text-small text-muted mt-1">
-                      {labelNl(DELIVERABLE_STATUS_NL, d.status)}
+                      {labelFor(t, DELIVERABLE_STATUS_KEYS, d.status)}
                       {d.customer_visible ? " · klantzichtbaar" : " · intern"}
                     </p>
                     {d.description ? (

@@ -3,10 +3,12 @@ import Link from "next/link";
 import { EmptyState } from "@/components/portal/empty-state";
 import { listAdminProjectsFiltered } from "@/server/repositories/admin-projects";
 import {
-  PROJECT_STATUS_NL,
-  PROJECT_TYPE_NL,
-  labelNl,
+  PROJECT_STATUS_KEYS,
+  PROJECT_TYPE_KEYS,
+  labelFor,
+  labelOptions,
 } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export const metadata: Metadata = {
   title: "Projecten",
@@ -24,6 +26,7 @@ export default async function AdminProjectsPage({
     page?: string;
   }>;
 }) {
+  const { t } = await getDictionary();
   const sp = await searchParams;
   const page = Number(sp.page || "1") || 1;
   const { projects, total, pageSize, error } = await listAdminProjectsFiltered({
@@ -67,9 +70,9 @@ export default async function AdminProjectsPage({
         >
           <option value="ACTIVE">Actief (niet gearchiveerd)</option>
           <option value="ALL">Alle statussen</option>
-          {Object.entries(PROJECT_STATUS_NL).map(([k, v]) => (
-            <option key={k} value={k}>
-              {v}
+          {labelOptions(t, PROJECT_STATUS_KEYS).map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
             </option>
           ))}
         </select>
@@ -79,9 +82,9 @@ export default async function AdminProjectsPage({
           className="min-h-11 px-3 rounded-lg border border-border bg-background text-sm"
         >
           <option value="ALL">Alle types</option>
-          {Object.entries(PROJECT_TYPE_NL).map(([k, v]) => (
-            <option key={k} value={k}>
-              {v}
+          {labelOptions(t, PROJECT_TYPE_KEYS).map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
             </option>
           ))}
         </select>
@@ -155,10 +158,10 @@ export default async function AdminProjectsPage({
                       "—"}
                   </td>
                   <td className="px-3 py-3">
-                    {labelNl(PROJECT_TYPE_NL, p.project_type)}
+                    {labelFor(t, PROJECT_TYPE_KEYS, p.project_type)}
                   </td>
                   <td className="px-3 py-3">
-                    {labelNl(PROJECT_STATUS_NL, p.status)}
+                    {labelFor(t, PROJECT_STATUS_KEYS, p.status)}
                   </td>
                   <td className="px-3 py-3">{p.progress_percent}%</td>
                   <td className="px-3 py-3 whitespace-nowrap">

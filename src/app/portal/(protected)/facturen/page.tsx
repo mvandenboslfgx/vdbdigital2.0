@@ -3,10 +3,11 @@ import Link from "next/link";
 import { EmptyState } from "@/components/portal/empty-state";
 import { formatEuro, listPortalInvoices } from "@/server/repositories/portal";
 import {
-  INVOICE_STATUS_NL,
-  INVOICE_TYPE_NL,
-  labelNl,
+  INVOICE_STATUS_KEYS,
+  INVOICE_TYPE_KEYS,
+  labelFor,
 } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 import { customerFacingInvoiceStatus } from "@/lib/commerce/invoice-status";
 
 export const metadata: Metadata = {
@@ -15,6 +16,7 @@ export const metadata: Metadata = {
 };
 
 export default async function PortalInvoicesPage() {
+  const { t } = await getDictionary();
   const { invoices, denied } = await listPortalInvoices();
 
   return (
@@ -50,7 +52,11 @@ export default async function PortalInvoicesPage() {
                   <div>
                     <p className="font-medium">{inv.invoice_number}</p>
                     <p className="text-small text-muted">
-                      {labelNl(INVOICE_TYPE_NL, inv.invoice_type ?? "INVOICE")}
+                      {labelFor(
+                        t,
+                        INVOICE_TYPE_KEYS,
+                        inv.invoice_type ?? "INVOICE",
+                      )}
                       {inv.title ? ` · ${inv.title}` : ""}
                     </p>
                     <p className="text-small text-muted">
@@ -71,7 +77,7 @@ export default async function PortalInvoicesPage() {
                       {formatEuro(inv.amount_due_cents ?? 0, inv.currency)}
                     </p>
                     <p className="text-small text-muted">
-                      {labelNl(INVOICE_STATUS_NL, status)}
+                      {labelFor(t, INVOICE_STATUS_KEYS, status)}
                     </p>
                   </div>
                 </Link>

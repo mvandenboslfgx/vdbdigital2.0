@@ -3,10 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatEuro, getPortalInvoice } from "@/server/repositories/portal";
 import {
-  INVOICE_STATUS_NL,
-  INVOICE_TYPE_NL,
-  labelNl,
+  INVOICE_STATUS_KEYS,
+  INVOICE_TYPE_KEYS,
+  labelFor,
 } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 import { customerFacingInvoiceStatus } from "@/lib/commerce/invoice-status";
 import { hasCustomerPermission } from "@/lib/auth/customer-permissions";
 
@@ -20,6 +21,7 @@ export default async function PortalInvoiceDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { t } = await getDictionary();
   const { id } = await params;
   const { invoice, items, creditNotes, ctx, denied } = await getPortalInvoice(id);
   if (denied) notFound();
@@ -47,8 +49,8 @@ export default async function PortalInvoiceDetailPage({
         <h1 className="text-h1 mt-2">{invoice.title || invoice.invoice_number}</h1>
         <p className="text-muted text-small mt-1">
           {invoice.invoice_number} ·{" "}
-          {labelNl(INVOICE_TYPE_NL, invoice.invoice_type ?? "INVOICE")} ·{" "}
-          {labelNl(INVOICE_STATUS_NL, status)}
+          {labelFor(t, INVOICE_TYPE_KEYS, invoice.invoice_type ?? "INVOICE")} ·{" "}
+          {labelFor(t, INVOICE_STATUS_KEYS, status)}
         </p>
       </div>
 

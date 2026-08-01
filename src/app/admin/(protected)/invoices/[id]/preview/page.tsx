@@ -3,10 +3,11 @@ import { notFound } from "next/navigation";
 import { getAdminInvoice } from "@/server/repositories/admin-invoices";
 import { formatEuro } from "@/server/repositories/portal";
 import {
-  INVOICE_STATUS_NL,
-  INVOICE_TYPE_NL,
-  labelNl,
+  INVOICE_STATUS_KEYS,
+  INVOICE_TYPE_KEYS,
+  labelFor,
 } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export const metadata: Metadata = {
   title: "Factuurpreview",
@@ -18,6 +19,7 @@ export default async function AdminInvoicePreviewPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { t } = await getDictionary();
   const { id } = await params;
   const bundle = await getAdminInvoice(id);
   if (!bundle) notFound();
@@ -38,13 +40,13 @@ export default async function AdminInvoicePreviewPage({
       <article className="rounded-xl border border-border p-8 space-y-6 bg-background">
         <header>
           <p className="text-small text-muted">
-            {labelNl(INVOICE_TYPE_NL, invoice.invoice_type)} ·{" "}
+            {labelFor(t, INVOICE_TYPE_KEYS, invoice.invoice_type)} ·{" "}
             {invoice.invoice_number}
           </p>
           <h2 className="text-h2 mt-1">{invoice.title || "Factuur"}</h2>
           <p className="text-small mt-2">
             {org?.trade_name || org?.legal_name || "—"} ·{" "}
-            {labelNl(INVOICE_STATUS_NL, invoice.status)}
+            {labelFor(t, INVOICE_STATUS_KEYS, invoice.status)}
           </p>
         </header>
         <p className="text-small text-muted whitespace-pre-wrap">

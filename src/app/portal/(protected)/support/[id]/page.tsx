@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Card } from "@/components/ui/container";
 import { getPortalTicket } from "@/server/repositories/portal";
-import { TICKET_STATUS_NL, labelNl } from "@/lib/portal/labels";
+import { TICKET_STATUS_KEYS, labelFor } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 import { TicketReplyForm } from "@/components/portal/ticket-reply-form";
 
 export const metadata: Metadata = {
@@ -16,6 +17,7 @@ export default async function PortalTicketDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { t } = await getDictionary();
   const { id } = await params;
   const { ticket, replies } = await getPortalTicket(id);
   if (!ticket) notFound();
@@ -30,7 +32,7 @@ export default async function PortalTicketDetailPage({
           {ticket.ticket_number}: {ticket.subject}
         </h1>
         <p className="text-muted">
-          {labelNl(TICKET_STATUS_NL, ticket.status)}
+          {labelFor(t, TICKET_STATUS_KEYS, ticket.status)}
         </p>
       </div>
 

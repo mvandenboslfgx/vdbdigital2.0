@@ -17,11 +17,13 @@ import {
   DOCUMENT_VISIBILITIES,
   formatBytes,
 } from "@/lib/validation/documents";
-import {
-  DOCUMENT_CATEGORY_NL,
-  DOCUMENT_VISIBILITY_NL,
-  labelNl,
-} from "@/lib/portal/labels";
+
+/** Resolved on the server via `resolveLabelMap` so this client tree stays locale-agnostic. */
+export type EnumLabels = Record<string, string>;
+
+function optionLabel(labels: EnumLabels, code: string): string {
+  return labels[code] ?? code;
+}
 
 function Msg({ state }: { state: DocumentActionState }) {
   if (state.error) {
@@ -46,11 +48,15 @@ export function AdminDocumentUploadForm({
   defaultOrganizationId,
   defaultProjectId,
   parentDocumentId,
+  categoryLabels,
+  visibilityLabels,
 }: {
   organizations: { id: string; label: string }[];
   defaultOrganizationId?: string;
   defaultProjectId?: string;
   parentDocumentId?: string;
+  categoryLabels: EnumLabels;
+  visibilityLabels: EnumLabels;
 }) {
   const [state, action, pending] = useActionState(uploadDocumentAction, {});
   const [fileLabel, setFileLabel] = useState<string>("");
@@ -113,7 +119,7 @@ export function AdminDocumentUploadForm({
           >
             {DOCUMENT_CATEGORIES.map((c) => (
               <option key={c} value={c}>
-                {labelNl(DOCUMENT_CATEGORY_NL, c)}
+                {optionLabel(categoryLabels, c)}
               </option>
             ))}
           </select>
@@ -131,7 +137,7 @@ export function AdminDocumentUploadForm({
             {DOCUMENT_VISIBILITIES.filter((v) => v !== "CUSTOMER_UPLOAD").map(
               (v) => (
                 <option key={v} value={v}>
-                  {labelNl(DOCUMENT_VISIBILITY_NL, v)}
+                  {optionLabel(visibilityLabels, v)}
                 </option>
               ),
             )}
@@ -225,10 +231,12 @@ export function VisibilityForm({
   documentId,
   version,
   visibility,
+  visibilityLabels,
 }: {
   documentId: string;
   version: number;
   visibility: string;
+  visibilityLabels: EnumLabels;
 }) {
   const [state, action, pending] = useActionState(
     updateDocumentVisibilityAction,
@@ -250,7 +258,7 @@ export function VisibilityForm({
         >
           {DOCUMENT_VISIBILITIES.map((v) => (
             <option key={v} value={v}>
-              {labelNl(DOCUMENT_VISIBILITY_NL, v)}
+              {optionLabel(visibilityLabels, v)}
             </option>
           ))}
         </select>

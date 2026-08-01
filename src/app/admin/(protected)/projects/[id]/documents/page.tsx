@@ -5,10 +5,13 @@ import { AdminDocumentUploadForm } from "@/components/documents/document-forms";
 import { getAdminProjectBundle } from "@/server/repositories/admin-projects";
 import { listAdminDocuments } from "@/server/repositories/admin-documents";
 import {
-  DOCUMENT_STATUS_NL,
-  DOCUMENT_VISIBILITY_NL,
-  labelNl,
+  DOCUMENT_CATEGORY_KEYS,
+  DOCUMENT_STATUS_KEYS,
+  DOCUMENT_VISIBILITY_KEYS,
+  labelFor,
+  resolveLabelMap,
 } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 import { formatBytes } from "@/lib/validation/documents";
 
 export default async function AdminProjectDocumentsPage({
@@ -16,6 +19,7 @@ export default async function AdminProjectDocumentsPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { t } = await getDictionary();
   const { id } = await params;
   const bundle = await getAdminProjectBundle(id);
   if (!bundle) notFound();
@@ -39,6 +43,8 @@ export default async function AdminProjectDocumentsPage({
         ]}
         defaultOrganizationId={bundle.project.organization_id}
         defaultProjectId={id}
+        categoryLabels={resolveLabelMap(t, DOCUMENT_CATEGORY_KEYS)}
+        visibilityLabels={resolveLabelMap(t, DOCUMENT_VISIBILITY_KEYS)}
       />
 
       {documents.length === 0 ? (
@@ -60,8 +66,8 @@ export default async function AdminProjectDocumentsPage({
                   {d.title}
                 </Link>
                 <p className="text-small text-muted mt-1">
-                  {labelNl(DOCUMENT_STATUS_NL, d.status)} ·{" "}
-                  {labelNl(DOCUMENT_VISIBILITY_NL, d.visibility)} ·{" "}
+                  {labelFor(t, DOCUMENT_STATUS_KEYS, d.status)} ·{" "}
+                  {labelFor(t, DOCUMENT_VISIBILITY_KEYS, d.visibility)} ·{" "}
                   {formatBytes(d.size_bytes)}
                 </p>
               </div>

@@ -4,11 +4,13 @@ import { EmptyState } from "@/components/portal/empty-state";
 import { listAdminDocuments } from "@/server/repositories/admin-documents";
 import { formatBytes } from "@/lib/validation/documents";
 import {
-  DOCUMENT_CATEGORY_NL,
-  DOCUMENT_STATUS_NL,
-  DOCUMENT_VISIBILITY_NL,
-  labelNl,
+  DOCUMENT_CATEGORY_KEYS,
+  DOCUMENT_STATUS_KEYS,
+  DOCUMENT_VISIBILITY_KEYS,
+  labelFor,
+  labelOptions,
 } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export const metadata: Metadata = {
   title: "Documenten",
@@ -26,6 +28,7 @@ export default async function AdminDocumentsPage({
     page?: string;
   }>;
 }) {
+  const { t } = await getDictionary();
   const sp = await searchParams;
   const page = Number(sp.page || "1") || 1;
   const { documents, total, pageSize, error } = await listAdminDocuments({
@@ -67,9 +70,9 @@ export default async function AdminDocumentsPage({
           className="min-h-11 px-3 rounded-lg border border-border bg-background text-sm"
         >
           <option value="ALL">Alle statussen</option>
-          {Object.entries(DOCUMENT_STATUS_NL).map(([k, v]) => (
-            <option key={k} value={k}>
-              {v}
+          {labelOptions(t, DOCUMENT_STATUS_KEYS).map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
             </option>
           ))}
         </select>
@@ -79,9 +82,9 @@ export default async function AdminDocumentsPage({
           className="min-h-11 px-3 rounded-lg border border-border bg-background text-sm"
         >
           <option value="ALL">Alle zichtbaarheid</option>
-          {Object.entries(DOCUMENT_VISIBILITY_NL).map(([k, v]) => (
-            <option key={k} value={k}>
-              {v}
+          {labelOptions(t, DOCUMENT_VISIBILITY_KEYS).map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
             </option>
           ))}
         </select>
@@ -148,13 +151,13 @@ export default async function AdminDocumentsPage({
                       "—"}
                   </td>
                   <td className="px-3 py-3">
-                    {labelNl(DOCUMENT_CATEGORY_NL, d.category)}
+                    {labelFor(t, DOCUMENT_CATEGORY_KEYS, d.category)}
                   </td>
                   <td className="px-3 py-3">
-                    {labelNl(DOCUMENT_STATUS_NL, d.status)}
+                    {labelFor(t, DOCUMENT_STATUS_KEYS, d.status)}
                   </td>
                   <td className="px-3 py-3">
-                    {labelNl(DOCUMENT_VISIBILITY_NL, d.visibility)}
+                    {labelFor(t, DOCUMENT_VISIBILITY_KEYS, d.visibility)}
                   </td>
                   <td className="px-3 py-3">{formatBytes(d.size_bytes)}</td>
                 </tr>

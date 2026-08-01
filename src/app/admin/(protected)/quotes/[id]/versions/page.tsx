@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAdminQuote } from "@/server/repositories/admin-quotes";
-import { QUOTE_STATUS_NL, labelNl } from "@/lib/portal/labels";
+import { QUOTE_STATUS_KEYS, labelFor } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export const metadata: Metadata = {
   title: "Offerteversies",
@@ -14,6 +15,7 @@ export default async function AdminQuoteVersionsPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { t } = await getDictionary();
   const { id } = await params;
   const bundle = await getAdminQuote(id);
   if (!bundle) notFound();
@@ -48,7 +50,8 @@ export default async function AdminQuoteVersionsPage({
                 className="rounded-xl border border-border p-4 text-small"
               >
                 <p className="font-medium">
-                  Versie {v.version_number} · {labelNl(QUOTE_STATUS_NL, v.status)}
+                  Versie {v.version_number} ·{" "}
+                  {labelFor(t, QUOTE_STATUS_KEYS, v.status)}
                 </p>
                 <p className="text-muted mt-1">
                   {new Date(v.created_at).toLocaleString("nl-NL")}

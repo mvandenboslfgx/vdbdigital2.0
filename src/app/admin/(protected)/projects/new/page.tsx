@@ -5,8 +5,9 @@ import { listAdminOrganizations } from "@/server/repositories/admin-portal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { PROJECT_TYPE_NL, labelNl } from "@/lib/portal/labels";
+import { PROJECT_TYPE_KEYS, labelFor } from "@/lib/portal/labels";
 import { PROJECT_TYPES } from "@/lib/validation/projects";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export const metadata: Metadata = {
   title: "Nieuw project",
@@ -18,6 +19,7 @@ export default async function AdminNewProjectPage({
 }: {
   searchParams: Promise<{ fout?: string }>;
 }) {
+  const { t } = await getDictionary();
   const { fout } = await searchParams;
   const { organizations } = await listAdminOrganizations({
     pageSize: 100,
@@ -83,9 +85,9 @@ export default async function AdminNewProjectPage({
               className="w-full min-h-11 px-3 rounded-lg border border-border bg-background text-sm"
               defaultValue="WEBSITE"
             >
-              {PROJECT_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {labelNl(PROJECT_TYPE_NL, t)}
+              {PROJECT_TYPES.map((projectType) => (
+                <option key={projectType} value={projectType}>
+                  {labelFor(t, PROJECT_TYPE_KEYS, projectType)}
                 </option>
               ))}
             </select>

@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { EmptyState } from "@/components/portal/empty-state";
 import { formatEuro, listPortalQuotes } from "@/server/repositories/portal";
-import { QUOTE_STATUS_NL, labelNl } from "@/lib/portal/labels";
+import { QUOTE_STATUS_KEYS, labelFor } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export const metadata: Metadata = {
   title: "Offertes",
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default async function PortalQuotesPage() {
+  const { t } = await getDictionary();
   const { quotes } = await listPortalQuotes();
 
   return (
@@ -38,7 +40,7 @@ export default async function PortalQuotesPage() {
                       {formatEuro(q.total_cents, q.currency)}
                     </p>
                     <p className="text-small text-muted">
-                      {labelNl(QUOTE_STATUS_NL, q.status)}
+                      {labelFor(t, QUOTE_STATUS_KEYS, q.status)}
                     </p>
                   </div>
                 </div>

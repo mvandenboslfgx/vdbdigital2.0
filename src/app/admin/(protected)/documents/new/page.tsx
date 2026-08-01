@@ -2,6 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AdminDocumentUploadForm } from "@/components/documents/document-forms";
 import { listAdminOrganizations } from "@/server/repositories/admin-portal";
+import {
+  DOCUMENT_CATEGORY_KEYS,
+  DOCUMENT_VISIBILITY_KEYS,
+  resolveLabelMap,
+} from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export const metadata: Metadata = {
   title: "Document uploaden",
@@ -9,6 +15,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminNewDocumentPage() {
+  const { t } = await getDictionary();
   const { organizations } = await listAdminOrganizations({
     pageSize: 100,
     status: "ACTIVE",
@@ -40,6 +47,8 @@ export default async function AdminNewDocumentPage() {
             id: o.id,
             label: o.trade_name || o.legal_name,
           }))}
+          categoryLabels={resolveLabelMap(t, DOCUMENT_CATEGORY_KEYS)}
+          visibilityLabels={resolveLabelMap(t, DOCUMENT_VISIBILITY_KEYS)}
         />
       )}
     </div>

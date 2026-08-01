@@ -7,12 +7,13 @@ import {
   getPortalDashboard,
 } from "@/server/repositories/portal";
 import {
-  INVOICE_STATUS_NL,
-  PROJECT_STATUS_NL,
-  QUOTE_STATUS_NL,
-  TICKET_STATUS_NL,
-  labelNl,
+  INVOICE_STATUS_KEYS,
+  PROJECT_STATUS_KEYS,
+  QUOTE_STATUS_KEYS,
+  TICKET_STATUS_KEYS,
+  labelFor,
 } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export const metadata: Metadata = {
   title: "Klantenportaal",
@@ -20,6 +21,7 @@ export const metadata: Metadata = {
 };
 
 export default async function PortalDashboardPage() {
+  const { t } = await getDictionary();
   const {
     ctx,
     projects,
@@ -88,7 +90,7 @@ export default async function PortalDashboardPage() {
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="font-medium">{p.name}</p>
                     <span className="text-small text-muted">
-                      {labelNl(PROJECT_STATUS_NL, p.status)}
+                      {labelFor(t, PROJECT_STATUS_KEYS, p.status)}
                     </span>
                   </div>
                   <div className="mt-3 h-2 rounded-full bg-surface-elevated overflow-hidden">
@@ -125,18 +127,19 @@ export default async function PortalDashboardPage() {
                       href={`/portal/offertes/${q.id}`}
                       className="block rounded-lg border border-border p-3 text-small hover:border-primary"
                     >
-                      Offerte {q.quote_number} — {labelNl(QUOTE_STATUS_NL, q.status)}
+                      Offerte {q.quote_number} —{" "}
+                      {labelFor(t, QUOTE_STATUS_KEYS, q.status)}
                     </Link>
                   </li>
                 ))}
-              {tickets.map((t) => (
-                <li key={t.id}>
+              {tickets.map((ticket) => (
+                <li key={ticket.id}>
                   <Link
-                    href={`/portal/support/${t.id}`}
+                    href={`/portal/support/${ticket.id}`}
                     className="block rounded-lg border border-border p-3 text-small hover:border-primary"
                   >
-                    Ticket {t.ticket_number}: {t.subject} —{" "}
-                    {labelNl(TICKET_STATUS_NL, t.status)}
+                    Ticket {ticket.ticket_number}: {ticket.subject} —{" "}
+                    {labelFor(t, TICKET_STATUS_KEYS, ticket.status)}
                   </Link>
                 </li>
               ))}
@@ -189,7 +192,7 @@ export default async function PortalDashboardPage() {
                   >
                     {q.quote_number} · {q.title} ·{" "}
                     {formatEuro(q.total_cents, q.currency)} ·{" "}
-                    {labelNl(QUOTE_STATUS_NL, q.status)}
+                    {labelFor(t, QUOTE_STATUS_KEYS, q.status)}
                   </Link>
                 </li>
               ))}
@@ -199,7 +202,7 @@ export default async function PortalDashboardPage() {
                   className="rounded-lg border border-border p-3 text-small"
                 >
                   {inv.invoice_number} · {formatEuro(inv.total_cents, inv.currency)} ·{" "}
-                  {labelNl(INVOICE_STATUS_NL, inv.status)}
+                  {labelFor(t, INVOICE_STATUS_KEYS, inv.status)}
                 </li>
               ))}
             </ul>

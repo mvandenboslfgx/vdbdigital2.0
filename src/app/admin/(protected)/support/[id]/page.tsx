@@ -11,7 +11,8 @@ import {
   createServerSupabaseClient,
   createServiceRoleClient,
 } from "@/lib/database/server";
-import { TICKET_STATUS_NL, labelNl } from "@/lib/portal/labels";
+import { TICKET_STATUS_KEYS, labelFor } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export const metadata: Metadata = {
   title: "Supportticket",
@@ -58,6 +59,7 @@ export default async function AdminSupportDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { t } = await getDictionary();
   const { id } = await params;
   const ctx = await requireAdmin();
   await requirePermission(ctx, "support.manage");
@@ -110,7 +112,7 @@ export default async function AdminSupportDetailPage({
         <h1 className="text-h1 mt-2">{ticket.subject}</h1>
         <p className="text-muted text-small">
           {ticket.ticket_number} ·{" "}
-          {labelNl(TICKET_STATUS_NL, ticket.status) || ticket.status} ·{" "}
+          {labelFor(t, TICKET_STATUS_KEYS, ticket.status)} ·{" "}
           {ticket.priority} · {ticket.category}
         </p>
         <p className="text-small mt-3 whitespace-pre-wrap">{ticket.description}</p>

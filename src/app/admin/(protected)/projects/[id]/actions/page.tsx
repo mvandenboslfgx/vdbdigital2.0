@@ -2,13 +2,15 @@ import { notFound } from "next/navigation";
 import { ProjectTabShell } from "@/components/admin/project-tabs";
 import { CreateActionForm } from "@/components/admin/project-forms";
 import { getAdminProjectBundle } from "@/server/repositories/admin-projects";
-import { ACTION_STATUS_NL, labelNl } from "@/lib/portal/labels";
+import { ACTION_STATUS_KEYS, labelFor } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export default async function AdminProjectActionsPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { t } = await getDictionary();
   const { id } = await params;
   const bundle = await getAdminProjectBundle(id);
   if (!bundle) notFound();
@@ -33,7 +35,7 @@ export default async function AdminProjectActionsPage({
               <li key={a.id} className="rounded-xl border border-border p-4">
                 <p className="font-medium">{a.title}</p>
                 <p className="text-small text-muted mt-1">
-                  {labelNl(ACTION_STATUS_NL, a.status)} ·{" "}
+                  {labelFor(t, ACTION_STATUS_KEYS, a.status)} ·{" "}
                   {a.assigned_to_type === "CUSTOMER"
                     ? "Klant"
                     : a.assigned_to_type === "INTERNAL"
