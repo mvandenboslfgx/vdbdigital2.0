@@ -2,10 +2,11 @@
 
 **Worktree:** `C:/Users/XXX/vdbdigital-visual-rc6-i18n`  
 **Branch:** `integration/visual-rc6-i18n-foundation` (no upstream)  
-**Actuele HEAD:** `2032028f43ad8497049fc6a345b8d254de49161e`  
+**Functionele code-tip (laatste niet-docs feature/fix):** `b918b12da3b1e606bbec0f366ed9f7ee0330c0cd`  
+**Actuele HEAD (inclusief dit rapport):** zie `git rev-parse HEAD` in deze worktree — op moment van afronding: `0149f87683776eee0cf29ba8156bf7a0c433766c`  
 **Rapport gegenereerd:** 2026-08-01  
 
-Dit rapport komt exact overeen met `git rev-parse HEAD` op bovenstaande tip. Niets is gepusht, gedeployed, of extern toegepast.
+Dit rapport hoort bij de lokale integratiebranch. Verifieer altijd met `git rev-parse HEAD` + `git status --porcelain=v1`. Niets is gepusht, gedeployed, of extern toegepast.
 
 ---
 
@@ -35,7 +36,7 @@ Feiten (geen reset/rebase):
 | Path | `C:/Users/XXX/vdbdigital-visual-rc6-i18n` |
 | Branch | `integration/visual-rc6-i18n-foundation` |
 | Upstream | **geen** (lokale integratiebranch) |
-| HEAD | `2032028f43ad8497049fc6a345b8d254de49161e` |
+| HEAD | `0149f87683776eee0cf29ba8156bf7a0c433766c` (docs tip; functionele tip `b918b12`) |
 | `git status -sb` | schoon (`## integration/visual-rc6-i18n-foundation`) |
 
 ---
@@ -278,4 +279,4 @@ Pre-existing lint in CJS scripts blijft buiten release-claim; geen i18n-regressi
 | Internationalisering volledig t.o.v. Owner-release | **NEE** tot migrations + products-nl retirement + dual-runtime cleanup + externe gates |
 | Verder lokaal | optioneel: migration dry-run docs, remaining Playwright files, lint CJS quarantine |
 
-**Actuele tip voor alle verdere discussie:** `2032028f43ad8497049fc6a345b8d254de49161e` op `integration/visual-rc6-i18n-foundation`.
+**Actuele tip voor alle verdere discussie:** `git rev-parse HEAD` in `C:/Users/XXX/vdbdigital-visual-rc6-i18n` op `integration/visual-rc6-i18n-foundation` (bij afronding: `0149f87683776eee0cf29ba8156bf7a0c433766c`; laatste functionele fix `b918b12`).
