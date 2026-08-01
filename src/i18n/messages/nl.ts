@@ -1016,6 +1016,14 @@ const nl: Messages = {
       title: "Profiel",
       organisation: "Organisatie: {org}",
     },
+    languagePreference: {
+      title: "Taal",
+      description:
+        "Kies de taal voor het portaal. Dezelfde taal gebruiken we voor de berichten die we je sturen.",
+      save: "Taal opslaan",
+      saving: "Opslaan…",
+      notSetHint: "Nog geen taal opgeslagen — het portaal volgt dit apparaat.",
+    },
     securityPage: {
       title: "Beveiliging",
       passwordTitle: "Wachtwoord",

@@ -1006,6 +1006,14 @@ const en = {
       title: "Profile",
       organisation: "Organisation: {org}",
     },
+    languagePreference: {
+      title: "Language",
+      description:
+        "Choose the language for the portal. We use the same language for the messages we send you.",
+      save: "Save language",
+      saving: "Saving…",
+      notSetHint: "No language saved yet — the portal follows this device.",
+    },
     securityPage: {
       title: "Security",
       passwordTitle: "Password",

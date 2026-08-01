@@ -7,6 +7,13 @@ import {
   stripLocalePrefix,
   type Locale,
 } from "@/i18n/config";
+import { parsePreferredLocale } from "@/i18n/preference";
+import {
+  LOCALE_CHOICE_COOKIE,
+  LOCALE_CHOICE_MAX_AGE,
+  parseLocaleChoice,
+  serializeLocaleChoice,
+} from "@/i18n/locale-choice";
 
 function applySecurityHeaders(response: NextResponse): NextResponse {
   response.headers.set("X-Content-Type-Options", "nosniff");
@@ -85,6 +92,39 @@ function attachLocale(response: NextResponse, locale: Locale): NextResponse {
 
 function attachPathname(response: NextResponse, barePath: string): NextResponse {
   response.headers.set("x-pathname", barePath);
+  return response;
+}
+
+/**
+ * `NEXT_LOCALE` always mirrors the URL, so it cannot express intent. Moving to a
+ * different locale than the one this session was already on is a deliberate act
+ * (the language switcher), so record it as an explicit choice — that is what
+ * keeps Accept-Language detection from overriding it later, and what lets a
+ * guest's choice become their account preference on first sign-in.
+ *
+ * A visitor arriving cold on a shared /nl link has no previous locale and so
+ * gets no marker; detection rules still apply to them.
+ */
+function attachLocaleChoice(
+  response: NextResponse,
+  request: NextRequest,
+  locale: Locale,
+): NextResponse {
+  const previousLocale = parsePreferredLocale(
+    request.cookies.get("NEXT_LOCALE")?.value,
+  );
+  if (!previousLocale || previousLocale === locale) return response;
+
+  const existing = parseLocaleChoice(
+    request.cookies.get(LOCALE_CHOICE_COOKIE)?.value,
+  );
+  if (existing?.locale === locale) return response;
+
+  response.cookies.set(
+    LOCALE_CHOICE_COOKIE,
+    serializeLocaleChoice({ source: "user", locale }),
+    { path: "/", sameSite: "lax", maxAge: LOCALE_CHOICE_MAX_AGE },
+  );
   return response;
 }
 
@@ -191,7 +231,10 @@ export async function middleware(request: NextRequest) {
         });
 
   return applySecurityHeaders(
-    attachPathname(attachLocale(response, locale), barePath),
+    attachPathname(
+      attachLocaleChoice(attachLocale(response, locale), request, locale),
+      barePath,
+    ),
   );
 }
 

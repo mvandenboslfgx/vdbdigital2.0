@@ -1,5 +1,6 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createServerSupabaseClient } from "@/lib/database/server";
@@ -13,7 +14,19 @@ import { checkRateLimit } from "@/lib/security/rate-limit";
 import { resolveAppUrl } from "@/lib/url/app-url";
 import { hashInviteToken } from "@/lib/auth/invite-token";
 import { getDictionary } from "@/i18n/get-dictionary";
-import { withLocale } from "@/i18n/config";
+import { withLocale, type Locale } from "@/i18n/config";
+import { LOCALE_COOKIE } from "@/i18n/preference";
+import {
+  LOCALE_CHOICE_COOKIE,
+  LOCALE_CHOICE_MAX_AGE,
+  resolveLoginLocaleSync,
+  serializeLocaleChoice,
+  shouldClearChoiceOnLogout,
+} from "@/i18n/locale-choice";
+import {
+  adoptPreferredLocaleIfUnset,
+  getAccountPreferredLocale,
+} from "@/server/repositories/profile-locale";
 import type { TranslateFn } from "@/i18n/create-t";
 import { z } from "zod";
 
@@ -64,6 +77,42 @@ export type AuthActionState = {
 
 function genericAuthError(t: TranslateFn): AuthActionState {
   return { error: t("errors.genericLoginFailed") };
+}
+
+/**
+ * Align the session's locale with the account preference (ADR-001: account
+ * beats cookie). A guest who explicitly picked a language keeps it and has it
+ * adopted as their preference, but only when the account has none yet.
+ */
+async function syncSessionLocale(
+  userId: string,
+  requestLocale: Locale,
+): Promise<Locale> {
+  const cookieStore = await cookies();
+  const sync = resolveLoginLocaleSync({
+    accountLocale: await getAccountPreferredLocale(userId),
+    choiceCookie: cookieStore.get(LOCALE_CHOICE_COOKIE)?.value,
+    requestLocale,
+  });
+
+  if (sync.persistToAccount) {
+    await adoptPreferredLocaleIfUnset(userId, sync.persistToAccount);
+  }
+
+  if (sync.cookieChoice) {
+    cookieStore.set(LOCALE_COOKIE, sync.locale, {
+      path: "/",
+      sameSite: "lax",
+      maxAge: LOCALE_CHOICE_MAX_AGE,
+    });
+    cookieStore.set(
+      LOCALE_CHOICE_COOKIE,
+      serializeLocaleChoice(sync.cookieChoice),
+      { path: "/", sameSite: "lax", maxAge: LOCALE_CHOICE_MAX_AGE },
+    );
+  }
+
+  return sync.locale;
 }
 
 function rateLimitMessage(
@@ -129,12 +178,18 @@ export async function loginAction(
     metadata: { step: "password" },
   });
 
+  const sessionLocale = await syncSessionLocale(data.user.id, locale);
   const destination = await resolvePostLoginPath(data.user.id, parsed.data.next);
-  redirect(withLocale(destination, locale));
+  redirect(withLocale(destination, sessionLocale));
 }
 
 export async function logoutAction(): Promise<void> {
   const { locale } = await getDictionary();
+  const cookieStore = await cookies();
+  const clearChoice = shouldClearChoiceOnLogout(
+    cookieStore.get(LOCALE_CHOICE_COOKIE)?.value,
+  );
+
   const supabase = await createServerSupabaseClient();
   if (supabase) {
     const {
@@ -148,6 +203,13 @@ export async function logoutAction(): Promise<void> {
       });
     }
   }
+
+  // An account's preference must not carry over to whoever signs in next on
+  // this device; a choice the visitor made themselves stays.
+  if (clearChoice) {
+    cookieStore.delete(LOCALE_CHOICE_COOKIE);
+  }
+
   redirect(withLocale("/inloggen", locale));
 }
 
@@ -414,8 +476,9 @@ export async function acceptInvitationAction(
       return { error: t("errors.accountExists") };
     }
     await attachMembership(service, invite, signedIn.user.id, fullName);
+    const sessionLocale = await syncSessionLocale(signedIn.user.id, locale);
     const destination = await resolvePostLoginPath(signedIn.user.id);
-    redirect(withLocale(destination, locale));
+    redirect(withLocale(destination, sessionLocale));
   }
 
   await attachMembership(service, invite, created.user.id, fullName);
@@ -434,7 +497,8 @@ export async function acceptInvitationAction(
     metadata: { organizationId: invite.organization_id },
   });
 
-  redirect(withLocale("/portal", locale));
+  const sessionLocale = await syncSessionLocale(created.user.id, locale);
+  redirect(withLocale("/portal", sessionLocale));
 }
 
 async function attachMembership(
