@@ -21,20 +21,24 @@ import {
 } from "@/lib/portal/labels";
 import { documentDownloadLabels } from "@/lib/portal/form-labels";
 import { getDictionary } from "@/i18n/get-dictionary";
+import { formatDateTime } from "@/i18n/format-date";
 import { Button } from "@/components/ui/button";
 import { hasPermission } from "@/lib/auth/permissions";
 
-export const metadata: Metadata = {
-  title: "Document",
-  robots: { index: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getDictionary();
+  return {
+    title: t("admin.page.documents.detailTitle"),
+    robots: { index: false },
+  };
+}
 
 export default async function AdminDocumentDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { t } = await getDictionary();
+  const { t, locale } = await getDictionary();
   const { id } = await params;
   const bundle = await getAdminDocument(id);
   if (!bundle) notFound();
@@ -53,7 +57,7 @@ export default async function AdminDocumentDetailPage({
           href="/admin/documents"
           className="text-small text-primary hover:underline"
         >
-          ← Documenten
+          {t("admin.page.documents.backToList")}
         </Link>
         <h1 className="text-h1 mt-2">{doc.title}</h1>
         <p className="text-muted text-small mt-1 font-mono">
@@ -65,11 +69,15 @@ export default async function AdminDocumentDetailPage({
         <Card>
           <dl className="text-small space-y-2">
             <div>
-              <dt className="text-muted">Organisatie</dt>
-              <dd>{org?.trade_name || org?.legal_name || "—"}</dd>
+              <dt className="text-muted">
+                {t("admin.page.documents.organization")}
+              </dt>
+              <dd>
+                {org?.trade_name || org?.legal_name || t("admin.common.empty")}
+              </dd>
             </div>
             <div>
-              <dt className="text-muted">Project</dt>
+              <dt className="text-muted">{t("admin.page.documents.project")}</dt>
               <dd>
                 {project ? (
                   <Link
@@ -79,30 +87,36 @@ export default async function AdminDocumentDetailPage({
                     {project.name}
                   </Link>
                 ) : (
-                  "—"
+                  t("admin.common.empty")
                 )}
               </dd>
             </div>
             <div>
-              <dt className="text-muted">Categorie</dt>
+              <dt className="text-muted">
+                {t("admin.page.documents.category")}
+              </dt>
               <dd>{labelFor(t, DOCUMENT_CATEGORY_KEYS, doc.category)}</dd>
             </div>
             <div>
-              <dt className="text-muted">Status</dt>
+              <dt className="text-muted">{t("admin.common.colStatus")}</dt>
               <dd>{labelFor(t, DOCUMENT_STATUS_KEYS, doc.status)}</dd>
             </div>
             <div>
-              <dt className="text-muted">Zichtbaarheid</dt>
+              <dt className="text-muted">
+                {t("admin.page.documents.visibility")}
+              </dt>
               <dd>{labelFor(t, DOCUMENT_VISIBILITY_KEYS, doc.visibility)}</dd>
             </div>
             <div>
-              <dt className="text-muted">Virusscan</dt>
+              <dt className="text-muted">
+                {t("admin.page.documents.virusScan")}
+              </dt>
               <dd>
                 {labelFor(t, SCAN_STATUS_KEYS, doc.scan_status)}
                 {doc.scan_status === "NOT_REQUIRED" ? (
                   <span className="text-muted">
                     {" "}
-                    — Virusscan nog niet uitgevoerd
+                    — {t("admin.page.documents.scanNotRun")}
                   </span>
                 ) : null}
               </dd>
@@ -112,28 +126,36 @@ export default async function AdminDocumentDetailPage({
         <Card>
           <dl className="text-small space-y-2">
             <div>
-              <dt className="text-muted">Bestandsnaam</dt>
+              <dt className="text-muted">
+                {t("admin.page.documents.fileName")}
+              </dt>
               <dd>{doc.safe_filename || doc.file_name}</dd>
             </div>
             <div>
-              <dt className="text-muted">MIME</dt>
+              <dt className="text-muted">
+                {t("admin.page.documents.mimeType")}
+              </dt>
               <dd>{doc.mime_type}</dd>
             </div>
             <div>
-              <dt className="text-muted">Grootte</dt>
+              <dt className="text-muted">{t("admin.page.documents.size")}</dt>
               <dd>{formatBytes(doc.size_bytes)}</dd>
             </div>
             <div>
-              <dt className="text-muted">Checksum (SHA-256)</dt>
+              <dt className="text-muted">
+                {t("admin.page.documents.checksum")}
+              </dt>
               <dd className="break-all font-mono text-xs">
-                {doc.checksum_sha256 || "—"}
+                {doc.checksum_sha256 || t("admin.common.empty")}
               </dd>
             </div>
             <div>
-              <dt className="text-muted">Versie</dt>
+              <dt className="text-muted">{t("admin.page.documents.version")}</dt>
               <dd>
                 v{doc.version_number}
-                {doc.is_current ? " (huidig)" : ""}
+                {doc.is_current
+                  ? ` ${t("admin.page.documents.currentSuffix")}`
+                  : ""}
               </dd>
             </div>
             <div className="pt-2">
@@ -149,7 +171,9 @@ export default async function AdminDocumentDetailPage({
 
       {hasPermission(ctx.role, "documents.manage_visibility") ? (
         <Card>
-          <h2 className="text-h3 mb-3">Zichtbaarheid</h2>
+          <h2 className="text-h3 mb-3">
+            {t("admin.page.documents.visibility")}
+          </h2>
           <VisibilityForm
             documentId={doc.id}
             version={doc.version}
@@ -160,7 +184,7 @@ export default async function AdminDocumentDetailPage({
       ) : null}
 
       <section>
-        <h2 className="text-h3 mb-3">Versies</h2>
+        <h2 className="text-h3 mb-3">{t("admin.page.documents.versions")}</h2>
         <ul className="space-y-2 mb-4">
           {versions.map(
             (v: {
@@ -179,10 +203,12 @@ export default async function AdminDocumentDetailPage({
                   className="text-primary hover:underline"
                 >
                   v{v.version_number}
-                  {v.is_current ? " · huidig" : ""}
+                  {v.is_current
+                    ? ` · ${t("admin.page.documents.currentTag")}`
+                    : ""}
                 </Link>
                 <span className="text-muted">
-                  {new Date(v.created_at).toLocaleString("nl-NL")}
+                  {formatDateTime(v.created_at, locale)}
                   {v.change_summary ? ` · ${v.change_summary}` : ""}
                 </span>
               </li>
@@ -191,7 +217,9 @@ export default async function AdminDocumentDetailPage({
         </ul>
         {hasPermission(ctx.role, "documents.manage_versions") ? (
           <div>
-            <h3 className="font-medium mb-2">Nieuwe versie uploaden</h3>
+            <h3 className="font-medium mb-2">
+              {t("admin.page.documents.uploadNewVersion")}
+            </h3>
             <AdminDocumentUploadForm
               organizations={organizations.map((o) => ({
                 id: o.id,
@@ -208,9 +236,13 @@ export default async function AdminDocumentDetailPage({
       </section>
 
       <section>
-        <h2 className="text-h3 mb-3">Recente downloads</h2>
+        <h2 className="text-h3 mb-3">
+          {t("admin.page.documents.recentDownloads")}
+        </h2>
         {downloads.length === 0 ? (
-          <p className="text-muted text-small">Nog geen downloads geregistreerd.</p>
+          <p className="text-muted text-small">
+            {t("admin.page.documents.noDownloads")}
+          </p>
         ) : (
           <ul className="text-small space-y-1">
             {downloads.map(
@@ -220,8 +252,7 @@ export default async function AdminDocumentDetailPage({
                 created_at: string;
               }) => (
                 <li key={d.id}>
-                  {d.actor_audience} ·{" "}
-                  {new Date(d.created_at).toLocaleString("nl-NL")}
+                  {d.actor_audience} · {formatDateTime(d.created_at, locale)}
                 </li>
               ),
             )}
@@ -235,7 +266,7 @@ export default async function AdminDocumentDetailPage({
           <input type="hidden" name="documentId" value={doc.id} />
           <input type="hidden" name="expectedVersion" value={doc.version} />
           <Button type="submit" variant="outline">
-            Archiveer document
+            {t("admin.page.documents.archiveDocument")}
           </Button>
         </form>
       ) : null}

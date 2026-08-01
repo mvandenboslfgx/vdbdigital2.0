@@ -29,8 +29,6 @@ src/app/(shop)/cart/page.tsx
 # headings, activity-timeline copy and empty states. Deferred as one batch so
 # the copy is reviewed against the record schemas in a single pass rather than
 # guessed page by page.
-src/app/admin/(protected)/customers/[id]/page.tsx
-src/app/admin/(protected)/documents/[id]/page.tsx
 src/app/admin/(protected)/invoices/[id]/preview/page.tsx
 #
 # --- Admin editor / manager client components --------------------------------
