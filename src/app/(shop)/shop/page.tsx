@@ -62,6 +62,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
     category: categoryRaw,
     page,
     pageSize: 12,
+    locale,
   });
 
   const activeCategory =

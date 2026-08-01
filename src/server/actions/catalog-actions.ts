@@ -27,7 +27,7 @@ import {
   canPublishAsMarketing,
   publicationBlockingErrors,
 } from "@/lib/commerce/publication-checklist";
-import { mapDbProductRow } from "@/server/repositories/map-product";
+import { isMissingSchemaError, mapDbProductRow } from "@/server/repositories/map-product";
 import {
   csvRow,
   FORBIDDEN_IMPORT_HEADERS,
@@ -135,29 +135,51 @@ async function upsertTranslations(
   if (!supabase) return;
 
   for (const t of translations) {
-    await supabase.from("product_translations").upsert(
-      {
-        product_id: productId,
-        locale: t.locale,
-        name: sanitizePlainText(t.name, 200),
-        slug: t.slug ?? null,
-        short_description: sanitizePlainText(t.shortDescription, 2000),
-        full_description: sanitizeProductHtml(t.fullDescription),
-        benefits: t.benefits,
-        included_items: t.includedItems,
-        excluded_items: t.excludedItems,
-        cta_label: t.ctaLabel ?? null,
-        quote_cta_label: t.quoteCtaLabel ?? null,
-        seo_title: t.seoTitle ?? null,
-        seo_description: t.seoDescription ?? null,
-        delivery_time: t.deliveryTime ?? null,
-        target_audience: t.targetAudience ?? null,
-        workflow: t.workflow ?? null,
-        warnings: t.warnings ?? null,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "product_id,locale" },
-    );
+    const row: Record<string, unknown> = {
+      product_id: productId,
+      locale: t.locale,
+      name: sanitizePlainText(t.name, 200),
+      slug: t.slug ?? null,
+      short_description: sanitizePlainText(t.shortDescription, 2000),
+      full_description: sanitizeProductHtml(t.fullDescription),
+      benefits: t.benefits,
+      included_items: t.includedItems,
+      excluded_items: t.excludedItems,
+      cta_label: t.ctaLabel ?? null,
+      quote_cta_label: t.quoteCtaLabel ?? null,
+      seo_title: t.seoTitle ?? null,
+      seo_description: t.seoDescription ?? null,
+      delivery_time: t.deliveryTime ?? null,
+      target_audience: t.targetAudience ?? null,
+      workflow: t.workflow ?? null,
+      warnings: t.warnings ?? null,
+      updated_at: new Date().toISOString(),
+    };
+
+    // Workflow status column requires the Phase 4 migration
+    // (20260801140000_product_translation_status.sql). Never sent when
+    // undefined so pre-migration environments keep working (DB default 'draft').
+    if (t.status) {
+      row.status = t.status;
+      if (t.status === "published") {
+        row.published_at = new Date().toISOString();
+      }
+    }
+
+    const { error } = await supabase
+      .from("product_translations")
+      .upsert(row, { onConflict: "product_id,locale" });
+
+    if (error && !isMissingSchemaError(error)) {
+      console.error("upsertTranslations failed", error.message);
+    } else if (error && isMissingSchemaError(error) && "status" in row) {
+      // Migration not applied yet — retry without the new status columns.
+      delete row.status;
+      delete row.published_at;
+      await supabase
+        .from("product_translations")
+        .upsert(row, { onConflict: "product_id,locale" });
+    }
   }
 }
 

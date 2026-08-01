@@ -168,6 +168,73 @@ describe("product localization parity", () => {
   });
 });
 
+describe("localizeProduct: DB translation vs. products-nl.ts fallback (Phase 4)", () => {
+  const starter = seedProducts.find((p) => p.slug === "starter-website")!;
+
+  function nlTranslation(overrides: Partial<Parameters<typeof localizeProduct>[2]> = {}) {
+    return {
+      locale: "nl" as const,
+      name: "DB Naam NL",
+      slug: null,
+      shortDescription: "DB korte omschrijving uit product_translations",
+      fullDescription: "DB volledige omschrijving",
+      benefits: [],
+      includedItems: [],
+      excludedItems: [],
+      ctaLabel: null,
+      quoteCtaLabel: null,
+      seoTitle: null,
+      seoDescription: null,
+      deliveryTime: null,
+      targetAudience: null,
+      workflow: null,
+      warnings: null,
+      status: "published" as const,
+      ...overrides,
+    };
+  }
+
+  it("prefers a published DB translation over the static products-nl.ts overlay", () => {
+    const localized = localizeProduct(starter, "nl", nlTranslation());
+    expect(localized.name).toBe("DB Naam NL");
+    expect(localized.shortDescription).toBe(
+      "DB korte omschrijving uit product_translations",
+    );
+  });
+
+  it("falls back to products-nl.ts when there is no DB row", () => {
+    const withoutDbRow = localizeProduct(starter, "nl", null);
+    const staticOnly = localizeProduct(starter, "nl");
+    expect(withoutDbRow.name).toEqual(staticOnly.name);
+    expect(withoutDbRow.name).not.toBe("DB Naam NL");
+  });
+
+  it("falls back to products-nl.ts when the DB row is not publishable (e.g. draft/needs_review)", () => {
+    const draft = localizeProduct(starter, "nl", nlTranslation({ status: "draft" }));
+    const needsReview = localizeProduct(
+      starter,
+      "nl",
+      nlTranslation({ status: "needs_review" }),
+    );
+    const machineTranslated = localizeProduct(
+      starter,
+      "nl",
+      nlTranslation({ status: "machine_translated" }),
+    );
+    const staticOnly = localizeProduct(starter, "nl");
+
+    for (const localized of [draft, needsReview, machineTranslated]) {
+      expect(localized.name).toBe(staticOnly.name);
+      expect(localized.name).not.toBe("DB Naam NL");
+    }
+  });
+
+  it("does not affect English locale regardless of DB translation", () => {
+    const en = localizeProduct(starter, "en", nlTranslation());
+    expect(en).toBe(starter);
+  });
+});
+
 describe("cart calculation locale independence", () => {
   it("keeps totals identical regardless of presentational locale", () => {
     const lines = [

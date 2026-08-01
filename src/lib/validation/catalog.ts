@@ -28,6 +28,15 @@ export const productStatusSchema = z.enum([
   "ARCHIVED",
 ]);
 
+export const productTranslationStatusSchema = z.enum([
+  "draft",
+  "machine_translated",
+  "needs_review",
+  "approved",
+  "published",
+  "stale",
+]);
+
 export const productTranslationSchema = z.object({
   locale: z.enum(["nl", "en"]),
   name: z.string().max(200),
@@ -45,6 +54,8 @@ export const productTranslationSchema = z.object({
   targetAudience: z.string().max(2000).nullable().optional(),
   workflow: z.string().max(5000).nullable().optional(),
   warnings: z.string().max(5000).nullable().optional(),
+  // Workflow gate — 'machine_translated' must never auto-publish (see migration comment).
+  status: productTranslationStatusSchema.default("draft"),
 });
 
 export const productContentSchema = z.object({
@@ -262,6 +273,7 @@ export function eurosToCents(input: string): number | null {
   return Number.isFinite(cents) ? cents : null;
 }
 
+export type ProductTranslationInput = z.infer<typeof productTranslationSchema>;
 export type CreateProductInput = z.infer<typeof createProductSchema>;
 export type UpdateProductInput = z.infer<typeof updateProductSchema>;
 export type LegalApprovalInput = z.infer<typeof legalApprovalSchema>;

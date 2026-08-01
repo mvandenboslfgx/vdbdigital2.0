@@ -19,7 +19,7 @@ import {
 } from "@/server/actions/catalog-actions";
 import { billingWarningNl } from "@/lib/commerce/catalog-admin-eligibility";
 import { LEGACY_TAWK_ADMIN_STATUS_LABEL } from "@/lib/commerce/tawk-legacy-blocklist";
-import type { BillingType, PriceMode, Product } from "@/types";
+import type { BillingType, PriceMode, Product, ProductTranslationStatus } from "@/types";
 import type { PublicationCheckItem } from "@/lib/commerce/publication-checklist";
 
 type CategoryOption = { id: string; name: string };
@@ -168,6 +168,8 @@ export function ProductEditorForm({
           quoteCtaLabel: String(fd.get("nl_quoteCtaLabel") ?? "") || null,
           seoTitle: String(fd.get("nl_seoTitle") ?? "") || null,
           seoDescription: String(fd.get("nl_seoDescription") ?? "") || null,
+          status: (String(fd.get("nl_status") ?? "draft") ||
+            "draft") as ProductTranslationStatus,
         },
         {
           locale: "en" as const,
@@ -181,6 +183,8 @@ export function ProductEditorForm({
           quoteCtaLabel: String(fd.get("en_quoteCtaLabel") ?? "") || null,
           seoTitle: String(fd.get("en_seoTitle") ?? "") || null,
           seoDescription: String(fd.get("en_seoDescription") ?? "") || null,
+          status: (String(fd.get("en_status") ?? "draft") ||
+            "draft") as ProductTranslationStatus,
         },
       ],
       pricing: {
@@ -235,6 +239,15 @@ export function ProductEditorForm({
 
   const nl = product?.translations?.find((t) => t.locale === "nl");
   const en = product?.translations?.find((t) => t.locale === "en");
+
+  const TRANSLATION_STATUS_OPTIONS: { value: ProductTranslationStatus; label: string }[] = [
+    { value: "draft", label: "Draft — niet zichtbaar" },
+    { value: "machine_translated", label: "Machine-vertaald — niet zichtbaar" },
+    { value: "needs_review", label: "Needs review — niet zichtbaar" },
+    { value: "approved", label: "Approved — alleen admin preview" },
+    { value: "published", label: "Published — live op storefront" },
+    { value: "stale", label: "Stale — bron gewijzigd, review vereist" },
+  ];
 
   const centsToEuros = (cents: number | null | undefined) =>
     cents === null || cents === undefined ? "" : (cents / 100).toFixed(2);
@@ -487,6 +500,24 @@ export function ProductEditorForm({
               {!nl?.name && mode === "edit" && (
                 <p className="text-small text-amber-800">Nederlandse vertaling ontbreekt of is incompleet.</p>
               )}
+              <label className="space-y-1.5 text-small font-medium block">
+                Vertaalstatus NL
+                <select
+                  name="nl_status"
+                  defaultValue={nl?.status ?? "draft"}
+                  className="w-full min-h-11 rounded-lg border border-border bg-surface px-3"
+                >
+                  {TRANSLATION_STATUS_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <p className="text-small text-muted">
+                Alleen &quot;Published&quot; wordt getoond aan bezoekers. Machine-vertalingen
+                publiceren nooit automatisch.
+              </p>
               <Input name="nl_name" label="Naam NL" defaultValue={nl?.name ?? ""} />
               <Textarea name="nl_shortDescription" label="Korte omschrijving NL" rows={2} defaultValue={nl?.shortDescription ?? ""} />
               <Textarea name="nl_fullDescription" label="Lange omschrijving NL" rows={4} defaultValue={nl?.fullDescription ?? ""} />
@@ -503,6 +534,24 @@ export function ProductEditorForm({
               {!en?.name && mode === "edit" && (
                 <p className="text-small text-amber-800">Engelse vertaling ontbreekt of is incompleet.</p>
               )}
+              <label className="space-y-1.5 text-small font-medium block">
+                Translation status EN
+                <select
+                  name="en_status"
+                  defaultValue={en?.status ?? "draft"}
+                  className="w-full min-h-11 rounded-lg border border-border bg-surface px-3"
+                >
+                  {TRANSLATION_STATUS_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <p className="text-small text-muted">
+                Only &quot;Published&quot; is shown to visitors. Machine-translated content never
+                auto-publishes.
+              </p>
               <Input name="en_name" label="Name EN" defaultValue={en?.name ?? product?.name ?? ""} />
               <Textarea name="en_shortDescription" label="Short description EN" rows={2} defaultValue={en?.shortDescription ?? product?.shortDescription ?? ""} />
               <Textarea name="en_fullDescription" label="Full description EN" rows={4} defaultValue={en?.fullDescription ?? product?.fullDescription ?? ""} />

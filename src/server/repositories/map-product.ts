@@ -11,6 +11,7 @@ import type {
   ProductMedia,
   ProductStatus,
   ProductTranslation,
+  ProductTranslationStatus,
 } from "@/types";
 
 function asStringArray(value: unknown): string[] {
@@ -121,6 +122,11 @@ export function mapDbTranslationRow(row: Record<string, unknown>): ProductTransl
     targetAudience: (row.target_audience as string | null) ?? null,
     workflow: (row.workflow as string | null) ?? null,
     warnings: (row.warnings as string | null) ?? null,
+    // Pre-migration rows (column missing) behave as 'draft' — never publishable.
+    status: (row.status as ProductTranslationStatus | undefined) ?? "draft",
+    sourceHash: (row.source_hash as string | null | undefined) ?? null,
+    reviewedAt: (row.reviewed_at as string | null | undefined) ?? null,
+    publishedAt: (row.published_at as string | null | undefined) ?? null,
   };
 }
 

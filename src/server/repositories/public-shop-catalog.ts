@@ -1,4 +1,6 @@
 import "server-only";
+import type { Locale } from "@/i18n/config";
+import { localizeProduct } from "@/i18n/localize-product";
 import type { Product } from "@/types";
 import {
   isBlockedPublicShopSlug,
@@ -8,6 +10,7 @@ import {
   getAllCategories,
   getAllProducts,
 } from "@/server/repositories/products";
+import { getProductTranslationForLocale, getProductTranslationsForLocale } from "@/server/repositories/product-locale";
 
 export {
   isPublicShopProduct,
@@ -28,6 +31,7 @@ export type PublicShopQuery = {
   category?: string | "all";
   page?: number;
   pageSize?: number;
+  locale?: Locale;
 };
 
 export type PublicShopPageResult = {
@@ -40,23 +44,53 @@ export type PublicShopPageResult = {
   allCount: number;
 };
 
-export async function listPublicShopProducts(): Promise<Product[]> {
-  const products = await getAllProducts();
-  return products
-    .filter(isPublicShopProduct)
-    .sort(
-      (a, b) =>
-        (a.sortOrder ?? 0) - (b.sortOrder ?? 0) ||
-        a.name.localeCompare(b.name, "nl"),
-    );
+function sortShopProducts(products: Product[]): Product[] {
+  return [...products].sort(
+    (a, b) =>
+      (a.sortOrder ?? 0) - (b.sortOrder ?? 0) ||
+      a.name.localeCompare(b.name, "nl"),
+  );
+}
+
+/**
+ * Public shop product list, localized for the requested locale.
+ *
+ * Phase 4 SSOT: for non-English locales, published product_translations rows
+ * are batch-fetched and merged in (see localizeProduct/mergeProductForLocale).
+ * The static products-nl.ts overlay remains as a fallback for products that
+ * do not yet have a published DB translation.
+ */
+export async function listPublicShopProducts(
+  locale: Locale = "en",
+): Promise<Product[]> {
+  const eligible = (await getAllProducts()).filter(isPublicShopProduct);
+
+  if (locale === "en") {
+    return sortShopProducts(eligible);
+  }
+
+  const translations = await getProductTranslationsForLocale(
+    eligible.map((p) => p.id),
+    locale,
+  );
+  const localized = eligible.map((p) =>
+    localizeProduct(p, locale, translations.get(p.id) ?? null),
+  );
+  return sortShopProducts(localized);
 }
 
 export async function getPublicShopProductBySlug(
   slug: string,
+  locale: Locale = "en",
 ): Promise<Product | null> {
   if (isBlockedPublicShopSlug(slug)) return null;
-  const products = await listPublicShopProducts();
-  return products.find((p) => p.slug === slug) ?? null;
+  const eligible = (await getAllProducts()).filter(isPublicShopProduct);
+  const product = eligible.find((p) => p.slug === slug) ?? null;
+  if (!product) return null;
+  if (locale === "en") return product;
+
+  const translation = await getProductTranslationForLocale(product.id, locale);
+  return localizeProduct(product, locale, translation);
 }
 
 export async function getAllPublicShopSlugs(): Promise<string[]> {
@@ -71,9 +105,10 @@ export async function queryPublicShopCatalog(
   const page = Math.max(query.page ?? 1, 1);
   const q = (query.q ?? "").trim().toLowerCase();
   const category = query.category ?? "all";
+  const locale = query.locale ?? "en";
 
   const [products, allCategories] = await Promise.all([
-    listPublicShopProducts(),
+    listPublicShopProducts(locale),
     getAllCategories(),
   ]);
 

@@ -1,6 +1,7 @@
 import type { Locale } from "@/i18n/config";
 import { productsNl } from "@/i18n/content/products-nl";
-import type { Product } from "@/types";
+import { mergeProductForLocale } from "@/lib/commerce/product-locale-merge";
+import type { Product, ProductTranslation } from "@/types";
 
 const COPY_FIELDS = [
   "name",
@@ -21,11 +22,38 @@ export type PublicationAdvice =
 
 type ProductWithConcept = Product & { is_concept?: boolean };
 
-export function localizeProduct(product: Product, locale: Locale): Product {
+/**
+ * Localize a product for display.
+ *
+ * Phase 4 SSOT: when `dbTranslation` is provided AND its status is
+ * publishable ('published', or 'approved' for gated admin preview), its copy
+ * takes priority — this is the path toward product_translations becoming the
+ * single source of truth for storefront copy.
+ *
+ * FALLBACK ONLY: when there is no DB row for this locale yet (or the row
+ * exists but isn't publishable, e.g. still 'draft'/'machine_translated'/
+ * 'needs_review'), we fall back to the static `products-nl.ts` overlay so the
+ * NL storefront keeps working during the migration. Once product_translations
+ * reaches parity for a product, its DB row supersedes the static overlay.
+ * Do not delete products-nl.ts until that parity is confirmed.
+ */
+export function localizeProduct(
+  product: Product,
+  locale: Locale,
+  dbTranslation?: ProductTranslation | null,
+): Product {
   if (locale === "en") {
     return product;
   }
 
+  if (dbTranslation) {
+    const merged = mergeProductForLocale(product, locale, dbTranslation);
+    if (merged?.translationApplied) {
+      return merged.product;
+    }
+  }
+
+  // FALLBACK ONLY — see doc comment above.
   const overlay = productsNl[product.slug];
   if (!overlay) {
     return product;
