@@ -2,7 +2,7 @@
 
 **Worktree:** `C:/Users/XXX/vdbdigital-visual-rc6-i18n`  
 **Branch:** `integration/visual-rc6-i18n-foundation` (no upstream)  
-**Actuele HEAD:** `0b97b15fd55ef3b5841f9028d509541c1ce9a911`  
+**Actuele HEAD:** `2032028f43ad8497049fc6a345b8d254de49161e`  
 **Rapport gegenereerd:** 2026-08-01  
 
 Dit rapport komt exact overeen met `git rev-parse HEAD` op bovenstaande tip. Niets is gepusht, gedeployed, of extern toegepast.
@@ -35,16 +35,16 @@ Feiten (geen reset/rebase):
 | Path | `C:/Users/XXX/vdbdigital-visual-rc6-i18n` |
 | Branch | `integration/visual-rc6-i18n-foundation` |
 | Upstream | **geen** (lokale integratiebranch) |
-| HEAD | `0b97b15fd55ef3b5841f9028d509541c1ce9a911` |
+| HEAD | `2032028f43ad8497049fc6a345b8d254de49161e` |
 | `git status -sb` | schoon (`## integration/visual-rc6-i18n-foundation`) |
 
 ---
 
 ## 2. Commitlijst (integratie + i18n vanaf ADR)
 
-Volledige tip bevat ADR `31170f8`, Phase 0 merge `8453f5b`, RC6/cherry-picks, en alle i18n-afrondingscommits tot `0b97b15`. Belangrijke domeincommits (nieuwste eerst, selectie):
+Volledige tip bevat ADR `31170f8`, Phase 0 merge `8453f5b`, RC6/cherry-picks, en alle i18n-afrondingscommits tot `2032028`. Belangrijke domeincommits (nieuwste eerst, selectie):
 
-- `0b97b15` — query-preserving switcher, seed/e2e shop, 320px overflow, FAB fallback  
+- `2032028` — query-preserving switcher, seed/e2e shop, 320px overflow, FAB fallback  
 - `b2b14fb` — hardcoded-UI allowlist leeggemaakt (auth+cart)  
 - admin i18n-reeks (`095faf0`…`3b2aca5`, `1cdc929`, `5b6ad1f`…)  
 - `ec80160` — commercial/portal test-alignment  
@@ -278,4 +278,4 @@ Pre-existing lint in CJS scripts blijft buiten release-claim; geen i18n-regressi
 | Internationalisering volledig t.o.v. Owner-release | **NEE** tot migrations + products-nl retirement + dual-runtime cleanup + externe gates |
 | Verder lokaal | optioneel: migration dry-run docs, remaining Playwright files, lint CJS quarantine |
 
-**Actuele tip voor alle verdere discussie:** `0b97b15fd55ef3b5841f9028d509541c1ce9a911` op `integration/visual-rc6-i18n-foundation`.
+**Actuele tip voor alle verdere discussie:** `2032028f43ad8497049fc6a345b8d254de49161e` op `integration/visual-rc6-i18n-foundation`.
