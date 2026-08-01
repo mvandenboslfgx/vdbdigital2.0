@@ -951,6 +951,8 @@ const en = {
         newSubtitle:
           "A draft stays internal. Sending creates an immutable version. No payment or Mollie.",
         noOrganizations: "Create an active organisation first.",
+        editTitle: "Edit quote",
+        backToQuote: "← Quote",
       },
       invoices: {
         title: "Invoices",
@@ -963,6 +965,8 @@ const en = {
           "Create a draft, or convert an accepted quote into a draft invoice.",
         newSubtitle:
           "Save a draft. Issuing and payment are separate steps — no Mollie.",
+        editTitle: "Edit invoice",
+        submitCreate: "Create draft",
       },
       documents: {
         title: "Documents",
@@ -1102,6 +1106,59 @@ const en = {
         title: "Audit log",
         description:
           "Admin actions are logged in the audit_logs table once Supabase is configured.",
+      },
+    },
+    /**
+     * Quote and invoice line-item editors. Both render the same line grid and
+     * indicative-totals block, so the shared copy lives here once; the couple
+     * of surface-specific strings stay under `admin.page.quotes|invoices`.
+     *
+     * "Indicative"/"preview" wording is load-bearing: the server always
+     * recalculates the authoritative amounts.
+     */
+    lineItemEditor: {
+      chooseOrganization: "Choose organisation",
+      projectOptional: "Project (optional)",
+      projectIdOptional: "Project ID (optional)",
+      quoteIdOptional: "Quote ID (optional)",
+      description: "Description",
+      termsVersion: "Terms version",
+      discountAmount: "Discount amount (€)",
+      headerDiscount: "Header discount (EUR)",
+      issueDate: "Issue date",
+      dueDate: "Due date",
+      paymentInstruction: "Payment instruction (visible to the customer after issuing)",
+      paymentInstructionPlaceholder: "IBAN / reference — no online payment",
+      externalAccountingReference: "External accounting reference",
+      linesHeading: "Lines",
+      addLine: "Add line",
+      quantity: "Quantity",
+      priceExclVat: "Price excl. VAT (€)",
+      priceEur: "Price EUR",
+      vatBasisPoints: "VAT bp",
+      optionalLine: "Optional line",
+      lineTotalIndicative: "Line total (indicative): €{amount} (recalculated by the server)",
+      subtotalPreview: "Subtotal (preview)",
+      vatPreview: "VAT (preview)",
+      totalPreview: "Total (preview)",
+      subtotalIndicative: "Subtotal (indicative)",
+      vatIndicative: "VAT (indicative)",
+      totalIndicative: "Total (indicative)",
+      previewNotAuthoritative:
+        "The preview is not authoritative. The server recalculates all amounts.",
+      serverRecalculates:
+        "The server recalculates the amounts. No Mollie / online payment.",
+      itemType: {
+        SERVICE: "Service",
+        PRODUCT: "Product",
+        ADDON: "Add-on",
+        CUSTOM: "Custom",
+        DISCOUNT: "Discount",
+      },
+      invoiceType: {
+        INVOICE: "Invoice",
+        CREDIT_NOTE: "Credit note",
+        PROFORMA: "Proforma",
       },
     },
     /**

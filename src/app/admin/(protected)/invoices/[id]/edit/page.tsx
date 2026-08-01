@@ -7,17 +7,20 @@ import {
 } from "@/server/repositories/admin-invoices";
 import { requireAdmin } from "@/server/auth/require-admin";
 import { requirePermission } from "@/server/auth/require-permission";
+import { getDictionary } from "@/i18n/get-dictionary";
+import { buildInvoiceEditorLabels } from "@/lib/admin/line-item-editor-labels";
 
-export const metadata: Metadata = {
-  title: "Factuur bewerken",
-  robots: { index: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getDictionary();
+  return { title: t("admin.page.invoices.editTitle"), robots: { index: false } };
+}
 
 export default async function AdminInvoiceEditPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { t } = await getDictionary();
   const { id } = await params;
   const ctx = await requireAdmin();
   await requirePermission(ctx, "invoices.edit");
@@ -48,7 +51,7 @@ export default async function AdminInvoiceEditPage({
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <h1 className="text-h1">Factuur bewerken</h1>
+      <h1 className="text-h1">{t("admin.page.invoices.editTitle")}</h1>
       <InvoiceEditorForm
         mode="edit"
         organizations={organizations}
@@ -69,6 +72,7 @@ export default async function AdminInvoiceEditPage({
             bundle.invoice.external_accounting_reference,
         }}
         initialItems={initialItems}
+        labels={buildInvoiceEditorLabels(t)}
       />
     </div>
   );

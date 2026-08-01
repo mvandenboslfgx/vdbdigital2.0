@@ -4,6 +4,7 @@ import { listOrganizationsForInvoiceForm } from "@/server/repositories/admin-inv
 import { requireAdmin } from "@/server/auth/require-admin";
 import { requirePermission } from "@/server/auth/require-permission";
 import { getDictionary } from "@/i18n/get-dictionary";
+import { buildInvoiceEditorLabels } from "@/lib/admin/line-item-editor-labels";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getDictionary();
@@ -24,7 +25,11 @@ export default async function AdminNewInvoicePage() {
           {t("admin.page.invoices.newSubtitle")}
         </p>
       </div>
-      <InvoiceEditorForm mode="create" organizations={organizations} />
+      <InvoiceEditorForm
+        mode="create"
+        organizations={organizations}
+        labels={buildInvoiceEditorLabels(t)}
+      />
     </div>
   );
 }

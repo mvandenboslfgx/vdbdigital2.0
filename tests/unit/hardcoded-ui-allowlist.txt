@@ -55,8 +55,6 @@ src/components/admin/admin-products-table.tsx
 src/components/admin/admin-ticket-internal-note-form.tsx
 src/components/admin/admin-ticket-status-form.tsx
 src/components/admin/create-customer-form.tsx
-src/components/admin/invoice-editor-form.tsx
 src/components/admin/project-forms.tsx
 src/components/admin/project-settings-form.tsx
-src/components/admin/quote-editor-form.tsx
 src/components/admin/reverse-payment-controls.tsx

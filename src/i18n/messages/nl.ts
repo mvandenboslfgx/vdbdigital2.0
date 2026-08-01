@@ -962,6 +962,8 @@ const nl: Messages = {
         newSubtitle:
           "Concept blijft intern. Verzenden maakt een onveranderlijke versie. Geen betaling of Mollie.",
         noOrganizations: "Maak eerst een actieve organisatie aan.",
+        editTitle: "Offerte bewerken",
+        backToQuote: "← Offerte",
       },
       invoices: {
         title: "Facturen",
@@ -974,6 +976,8 @@ const nl: Messages = {
           "Maak een concept of zet een geaccepteerde offerte om naar een factuurconcept.",
         newSubtitle:
           "Concept opslaan. Uitgeven en betalen zijn aparte stappen — geen Mollie.",
+        editTitle: "Factuur bewerken",
+        submitCreate: "Concept maken",
       },
       documents: {
         title: "Documenten",
@@ -1113,6 +1117,60 @@ const nl: Messages = {
         title: "Auditlog",
         description:
           "Beheeracties worden gelogd in de tabel audit_logs zodra Supabase is geconfigureerd.",
+      },
+    },
+    /**
+     * Regeleditors voor offertes en facturen. Beide renderen hetzelfde
+     * regelgrid en dezelfde indicatieve totalen, dus de gedeelde copy staat
+     * hier één keer; de paar surface-specifieke strings blijven onder
+     * `admin.page.quotes|invoices`.
+     *
+     * "Indicatief"/"preview" is bewust gekozen: de server herberekent altijd
+     * de authoritatieve bedragen.
+     */
+    lineItemEditor: {
+      chooseOrganization: "Kies organisatie",
+      projectOptional: "Project (optioneel)",
+      projectIdOptional: "Project-ID (optioneel)",
+      quoteIdOptional: "Offerte-ID (optioneel)",
+      description: "Omschrijving",
+      termsVersion: "Voorwaardenversie",
+      discountAmount: "Kortingsbedrag (€)",
+      headerDiscount: "Kopkorting (EUR)",
+      issueDate: "Uitgiftedatum",
+      dueDate: "Vervaldatum",
+      paymentInstruction: "Betaalinstructie (zichtbaar voor klant na uitgifte)",
+      paymentInstructionPlaceholder: "IBAN / referentie — geen online betaling",
+      externalAccountingReference: "Externe boekhoudreferentie",
+      linesHeading: "Regels",
+      addLine: "Regel toevoegen",
+      quantity: "Aantal",
+      priceExclVat: "Prijs excl. btw (€)",
+      priceEur: "Prijs EUR",
+      vatBasisPoints: "Btw bp",
+      optionalLine: "Optionele regel",
+      lineTotalIndicative: "Regeltotaal (indicatief): €{amount} (server herberekent)",
+      subtotalPreview: "Subtotaal (preview)",
+      vatPreview: "Btw (preview)",
+      totalPreview: "Totaal (preview)",
+      subtotalIndicative: "Subtotaal (indicatief)",
+      vatIndicative: "Btw (indicatief)",
+      totalIndicative: "Totaal (indicatief)",
+      previewNotAuthoritative:
+        "De preview is niet-authoritatief. De server herberekent alle bedragen.",
+      serverRecalculates:
+        "De server herberekent de bedragen. Geen Mollie / online betaling.",
+      itemType: {
+        SERVICE: "Dienst",
+        PRODUCT: "Product",
+        ADDON: "Add-on",
+        CUSTOM: "Custom",
+        DISCOUNT: "Korting",
+      },
+      invoiceType: {
+        INVOICE: "Factuur",
+        CREDIT_NOTE: "Creditnota",
+        PROFORMA: "Proforma",
       },
     },
     /**

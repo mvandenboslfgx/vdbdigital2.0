@@ -4,6 +4,7 @@ import { QuoteEditorForm } from "@/components/admin/quote-editor-form";
 import { listAdminOrganizations } from "@/server/repositories/admin-portal";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { withLocale } from "@/i18n/config";
+import { buildQuoteEditorLabels } from "@/lib/admin/line-item-editor-labels";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getDictionary();
@@ -42,6 +43,7 @@ export default async function AdminNewQuotePage() {
             id: o.id,
             label: o.trade_name || o.legal_name,
           }))}
+          labels={buildQuoteEditorLabels(t)}
         />
       )}
     </div>
