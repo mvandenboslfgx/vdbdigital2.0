@@ -9,15 +9,20 @@ import {
   labelOptions,
 } from "@/lib/portal/labels";
 import { getDictionary } from "@/i18n/get-dictionary";
+import { formatDate } from "@/i18n/format-date";
+import { withLocale } from "@/i18n/config";
 
-export const metadata: Metadata = { title: "Offertes", robots: { index: false } };
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getDictionary();
+  return { title: t("admin.page.quotes.title"), robots: { index: false } };
+}
 
 export default async function AdminQuotesPage({
   searchParams,
 }: {
   searchParams: Promise<{ q?: string; status?: string; page?: string }>;
 }) {
-  const { t } = await getDictionary();
+  const { t, locale } = await getDictionary();
   const sp = await searchParams;
   const { quotes, total, error } = await listAdminQuotes({
     q: sp.q,
@@ -29,16 +34,19 @@ export default async function AdminQuotesPage({
     <div className="space-y-6">
       <div className="flex flex-wrap justify-between gap-3">
         <div>
-          <h1 className="text-h1">Offertes</h1>
+          <h1 className="text-h1">{t("admin.page.quotes.title")}</h1>
           <p className="text-muted text-small mt-1">
-            {total} offerte{total === 1 ? "" : "s"} · geen Mollie / checkout
+            {t(
+              total === 1 ? "admin.page.quotes.countOne" : "admin.page.quotes.countOther",
+              { count: total },
+            )}
           </p>
         </div>
         <Link
-          href="/admin/quotes/new"
+          href={withLocale("/admin/quotes/new", locale)}
           className="rounded-lg bg-primary text-white px-4 py-2 text-sm min-h-11 inline-flex items-center"
         >
-          Nieuwe offerte
+          {t("admin.page.quotes.newQuote")}
         </Link>
       </div>
 
@@ -46,15 +54,17 @@ export default async function AdminQuotesPage({
         <input
           name="q"
           defaultValue={sp.q ?? ""}
-          placeholder="Zoek nummer of titel"
+          placeholder={t("admin.page.quotes.searchPlaceholder")}
+          aria-label={t("admin.common.search")}
           className="min-h-11 px-3 rounded-lg border border-border bg-background text-sm"
         />
         <select
           name="status"
           defaultValue={sp.status ?? "ALL"}
+          aria-label={t("admin.common.colStatus")}
           className="min-h-11 px-3 rounded-lg border border-border bg-background text-sm"
         >
-          <option value="ALL">Alle statussen</option>
+          <option value="ALL">{t("admin.common.allStatuses")}</option>
           {labelOptions(t, QUOTE_STATUS_KEYS).map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -62,7 +72,7 @@ export default async function AdminQuotesPage({
           ))}
         </select>
         <button type="submit" className="min-h-11 px-4 rounded-lg border border-border text-sm">
-          Filter
+          {t("admin.common.filter")}
         </button>
       </form>
 
@@ -74,22 +84,26 @@ export default async function AdminQuotesPage({
 
       {quotes.length === 0 ? (
         <EmptyState
-          title="Nog geen offertes"
-          description="Maak een conceptofferte voor een actieve organisatie."
-          actionHref="/admin/quotes/new"
-          actionLabel="Offerte aanmaken"
+          title={t("admin.page.quotes.emptyTitle")}
+          description={t("admin.page.quotes.emptyDescription")}
+          actionHref={withLocale("/admin/quotes/new", locale)}
+          actionLabel={t("admin.page.quotes.emptyAction")}
         />
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border">
           <table className="min-w-full text-sm">
             <thead className="bg-surface-elevated text-muted text-left">
               <tr>
-                <th className="px-3 py-3 font-medium">Nummer</th>
-                <th className="px-3 py-3 font-medium">Titel</th>
-                <th className="px-3 py-3 font-medium">Organisatie</th>
-                <th className="px-3 py-3 font-medium">Status</th>
-                <th className="px-3 py-3 font-medium">Totaal</th>
-                <th className="px-3 py-3 font-medium">Geldig tot</th>
+                <th className="px-3 py-3 font-medium">{t("admin.common.colNumber")}</th>
+                <th className="px-3 py-3 font-medium">{t("admin.common.colTitle")}</th>
+                <th className="px-3 py-3 font-medium">
+                  {t("admin.common.colOrganization")}
+                </th>
+                <th className="px-3 py-3 font-medium">{t("admin.common.colStatus")}</th>
+                <th className="px-3 py-3 font-medium">{t("admin.common.colTotal")}</th>
+                <th className="px-3 py-3 font-medium">
+                  {t("admin.common.colValidUntil")}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -102,7 +116,7 @@ export default async function AdminQuotesPage({
                   <tr key={q.id} className="border-t border-border">
                     <td className="px-3 py-3">
                       <Link
-                        href={`/admin/quotes/${q.id}`}
+                        href={withLocale(`/admin/quotes/${q.id}`, locale)}
                         className="text-primary hover:underline"
                       >
                         {q.quote_number}
@@ -110,7 +124,7 @@ export default async function AdminQuotesPage({
                     </td>
                     <td className="px-3 py-3">{q.title}</td>
                     <td className="px-3 py-3">
-                      {org?.trade_name || org?.legal_name || "—"}
+                      {org?.trade_name || org?.legal_name || t("admin.common.empty")}
                     </td>
                     <td className="px-3 py-3">
                       {labelFor(t, QUOTE_STATUS_KEYS, q.status)}
@@ -118,11 +132,7 @@ export default async function AdminQuotesPage({
                     <td className="px-3 py-3">
                       {formatEuro(q.total_cents, q.currency)}
                     </td>
-                    <td className="px-3 py-3">
-                      {q.valid_until
-                        ? new Date(q.valid_until).toLocaleDateString("nl-NL")
-                        : "—"}
-                    </td>
+                    <td className="px-3 py-3">{formatDate(q.valid_until, locale)}</td>
                   </tr>
                 );
               })}

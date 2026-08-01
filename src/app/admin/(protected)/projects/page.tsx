@@ -9,11 +9,13 @@ import {
   labelOptions,
 } from "@/lib/portal/labels";
 import { getDictionary } from "@/i18n/get-dictionary";
+import { formatDate } from "@/i18n/format-date";
+import { withLocale } from "@/i18n/config";
 
-export const metadata: Metadata = {
-  title: "Projecten",
-  robots: { index: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getDictionary();
+  return { title: t("admin.page.projects.title"), robots: { index: false } };
+}
 
 export default async function AdminProjectsPage({
   searchParams,
@@ -26,7 +28,7 @@ export default async function AdminProjectsPage({
     page?: string;
   }>;
 }) {
-  const { t } = await getDictionary();
+  const { t, locale } = await getDictionary();
   const sp = await searchParams;
   const page = Number(sp.page || "1") || 1;
   const { projects, total, pageSize, error } = await listAdminProjectsFiltered({
@@ -43,16 +45,21 @@ export default async function AdminProjectsPage({
     <div className="space-y-6">
       <div className="flex flex-wrap justify-between gap-3">
         <div>
-          <h1 className="text-h1">Projecten</h1>
+          <h1 className="text-h1">{t("admin.page.projects.title")}</h1>
           <p className="text-muted text-small mt-1">
-            {total} project{total === 1 ? "" : "en"} · echte data uit de database
+            {t(
+              total === 1
+                ? "admin.page.projects.countOne"
+                : "admin.page.projects.countOther",
+              { count: total },
+            )}
           </p>
         </div>
         <Link
-          href="/admin/projects/new"
+          href={withLocale("/admin/projects/new", locale)}
           className="rounded-lg bg-primary text-white px-4 py-2 text-sm min-h-11 inline-flex items-center"
         >
-          Nieuw project
+          {t("admin.page.projects.newProject")}
         </Link>
       </div>
 
@@ -60,16 +67,18 @@ export default async function AdminProjectsPage({
         <input
           name="q"
           defaultValue={sp.q ?? ""}
-          placeholder="Zoek naam of nummer"
+          placeholder={t("admin.page.projects.searchPlaceholder")}
+          aria-label={t("admin.common.search")}
           className="min-h-11 px-3 rounded-lg border border-border bg-background text-sm lg:col-span-2"
         />
         <select
           name="status"
           defaultValue={sp.status ?? "ACTIVE"}
+          aria-label={t("admin.common.colStatus")}
           className="min-h-11 px-3 rounded-lg border border-border bg-background text-sm"
         >
-          <option value="ACTIVE">Actief (niet gearchiveerd)</option>
-          <option value="ALL">Alle statussen</option>
+          <option value="ACTIVE">{t("admin.page.projects.statusActiveOnly")}</option>
+          <option value="ALL">{t("admin.common.allStatuses")}</option>
           {labelOptions(t, PROJECT_STATUS_KEYS).map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -79,9 +88,10 @@ export default async function AdminProjectsPage({
         <select
           name="type"
           defaultValue={sp.type ?? "ALL"}
+          aria-label={t("admin.common.colType")}
           className="min-h-11 px-3 rounded-lg border border-border bg-background text-sm"
         >
-          <option value="ALL">Alle types</option>
+          <option value="ALL">{t("admin.common.allTypes")}</option>
           {labelOptions(t, PROJECT_TYPE_KEYS).map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -91,46 +101,51 @@ export default async function AdminProjectsPage({
         <select
           name="visibility"
           defaultValue={sp.visibility ?? "ALL"}
+          aria-label={t("admin.common.colVisibility")}
           className="min-h-11 px-3 rounded-lg border border-border bg-background text-sm"
         >
-          <option value="ALL">Alle zichtbaarheid</option>
-          <option value="INTERNAL">Intern</option>
-          <option value="CUSTOMER_VISIBLE">Klantzichtbaar</option>
+          <option value="ALL">{t("admin.common.allVisibility")}</option>
+          <option value="INTERNAL">{t("admin.common.internal")}</option>
+          <option value="CUSTOMER_VISIBLE">{t("admin.common.customerVisible")}</option>
         </select>
         <button
           type="submit"
           className="min-h-11 rounded-lg border border-border px-4 text-sm hover:border-primary"
         >
-          Filter
+          {t("admin.common.filter")}
         </button>
       </form>
 
       {error ? (
         <p className="text-sm text-red-600" role="alert">
-          Projecten konden niet geladen worden: {error}
+          {t("admin.page.projects.loadFailed", { error })}
         </p>
       ) : null}
 
       {projects.length === 0 ? (
         <EmptyState
-          title="Nog geen projecten"
-          description="Maak een project aan voor een actieve klantorganisatie. Geen fictieve data."
-          actionHref="/admin/projects/new"
-          actionLabel="Project aanmaken"
+          title={t("admin.page.projects.emptyTitle")}
+          description={t("admin.page.projects.emptyDescription")}
+          actionHref={withLocale("/admin/projects/new", locale)}
+          actionLabel={t("admin.page.projects.emptyAction")}
         />
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border">
           <table className="min-w-full text-sm">
             <thead className="bg-surface-elevated text-left text-muted">
               <tr>
-                <th className="px-3 py-3 font-medium">Nummer</th>
-                <th className="px-3 py-3 font-medium">Naam</th>
-                <th className="px-3 py-3 font-medium">Organisatie</th>
-                <th className="px-3 py-3 font-medium">Type</th>
-                <th className="px-3 py-3 font-medium">Status</th>
-                <th className="px-3 py-3 font-medium">Voortgang</th>
-                <th className="px-3 py-3 font-medium">Oplevering</th>
-                <th className="px-3 py-3 font-medium">Zichtbaar</th>
+                <th className="px-3 py-3 font-medium">{t("admin.common.colNumber")}</th>
+                <th className="px-3 py-3 font-medium">{t("admin.common.colName")}</th>
+                <th className="px-3 py-3 font-medium">
+                  {t("admin.common.colOrganization")}
+                </th>
+                <th className="px-3 py-3 font-medium">{t("admin.common.colType")}</th>
+                <th className="px-3 py-3 font-medium">{t("admin.common.colStatus")}</th>
+                <th className="px-3 py-3 font-medium">{t("admin.common.colProgress")}</th>
+                <th className="px-3 py-3 font-medium">{t("admin.common.colDelivery")}</th>
+                <th className="px-3 py-3 font-medium">
+                  {t("admin.common.colVisibility")}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -138,7 +153,7 @@ export default async function AdminProjectsPage({
                 <tr key={p.id} className="border-t border-border">
                   <td className="px-3 py-3 whitespace-nowrap">
                     <Link
-                      href={`/admin/projects/${p.id}/overview`}
+                      href={withLocale(`/admin/projects/${p.id}/overview`, locale)}
                       className="text-primary hover:underline"
                     >
                       {p.project_number}
@@ -146,7 +161,7 @@ export default async function AdminProjectsPage({
                   </td>
                   <td className="px-3 py-3">
                     <Link
-                      href={`/admin/projects/${p.id}/overview`}
+                      href={withLocale(`/admin/projects/${p.id}/overview`, locale)}
                       className="font-medium hover:underline"
                     >
                       {p.name}
@@ -155,7 +170,7 @@ export default async function AdminProjectsPage({
                   <td className="px-3 py-3">
                     {p.organization?.trade_name ||
                       p.organization?.legal_name ||
-                      "—"}
+                      t("admin.common.empty")}
                   </td>
                   <td className="px-3 py-3">
                     {labelFor(t, PROJECT_TYPE_KEYS, p.project_type)}
@@ -165,14 +180,12 @@ export default async function AdminProjectsPage({
                   </td>
                   <td className="px-3 py-3">{p.progress_percent}%</td>
                   <td className="px-3 py-3 whitespace-nowrap">
-                    {p.planned_delivery_date
-                      ? new Date(p.planned_delivery_date).toLocaleDateString(
-                          "nl-NL",
-                        )
-                      : "—"}
+                    {formatDate(p.planned_delivery_date, locale)}
                   </td>
                   <td className="px-3 py-3">
-                    {p.visibility === "CUSTOMER_VISIBLE" ? "Klant" : "Intern"}
+                    {p.visibility === "CUSTOMER_VISIBLE"
+                      ? t("admin.common.customer")
+                      : t("admin.common.internal")}
                   </td>
                 </tr>
               ))}
@@ -188,18 +201,18 @@ export default async function AdminProjectsPage({
               href={`?page=${page - 1}&q=${sp.q ?? ""}&status=${sp.status ?? "ACTIVE"}`}
               className="text-primary hover:underline"
             >
-              Vorige
+              {t("admin.common.previous")}
             </Link>
           ) : null}
           <span className="text-muted">
-            Pagina {page} / {totalPages}
+            {t("admin.common.pageOf", { page, totalPages })}
           </span>
           {page < totalPages ? (
             <Link
               href={`?page=${page + 1}&q=${sp.q ?? ""}&status=${sp.status ?? "ACTIVE"}`}
               className="text-primary hover:underline"
             >
-              Volgende
+              {t("admin.common.next")}
             </Link>
           ) : null}
         </div>

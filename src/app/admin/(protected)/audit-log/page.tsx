@@ -1,20 +1,20 @@
 import type { Metadata } from "next";
 import { Card } from "@/components/ui/container";
+import { getDictionary } from "@/i18n/get-dictionary";
 
-export const metadata: Metadata = {
-  title: "Audit log",
-  robots: { index: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getDictionary();
+  return { title: t("admin.page.auditLog.title"), robots: { index: false } };
+}
 
-export default function AdminAuditPage() {
+export default async function AdminAuditPage() {
+  const { t } = await getDictionary();
+
   return (
     <div>
-      <h1 className="text-h1 mb-8">Audit log</h1>
+      <h1 className="text-h1 mb-8">{t("admin.page.auditLog.title")}</h1>
       <Card>
-        <p className="text-muted">
-          Admin actions are logged in the audit_logs table once Supabase is
-          configured.
-        </p>
+        <p className="text-muted">{t("admin.page.auditLog.description")}</p>
       </Card>
     </div>
   );

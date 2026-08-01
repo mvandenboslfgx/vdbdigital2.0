@@ -7,7 +7,10 @@ import { createServiceRoleClient } from "@/lib/database/server";
 import { TICKET_STATUS_KEYS, labelFor } from "@/lib/portal/labels";
 import { getDictionary } from "@/i18n/get-dictionary";
 
-export const metadata: Metadata = { title: "Support", robots: { index: false } };
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getDictionary();
+  return { title: t("admin.page.support.title"), robots: { index: false } };
+}
 
 export default async function AdminSupportPage() {
   const { t } = await getDictionary();
@@ -25,11 +28,11 @@ export default async function AdminSupportPage() {
   const rows = data ?? [];
   return (
     <div className="space-y-6" data-testid="admin-support-list">
-      <h1 className="text-h1">Support</h1>
+      <h1 className="text-h1">{t("admin.page.support.title")}</h1>
       {rows.length === 0 ? (
         <EmptyState
-          title="Nog geen tickets"
-          description="Supporttickets van klanten verschijnen hier. Niets verdwijnt stil."
+          title={t("admin.page.support.emptyTitle")}
+          description={t("admin.page.support.emptyDescription")}
         />
       ) : (
         <ul className="space-y-2">

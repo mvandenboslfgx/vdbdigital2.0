@@ -4,11 +4,12 @@ import { CategoriesManager } from "@/components/admin/categories-manager";
 import { getAdminCategories } from "@/server/repositories/admin-categories";
 import { checkAdminAccess } from "@/server/auth/require-admin";
 import { hasPermission } from "@/lib/auth/permissions";
+import { getDictionary } from "@/i18n/get-dictionary";
 
-export const metadata: Metadata = {
-  title: "Categorieën",
-  robots: { index: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getDictionary();
+  return { title: t("admin.page.categories.title"), robots: { index: false } };
+}
 
 export default async function AdminCategoriesPage() {
   const access = await checkAdminAccess();
