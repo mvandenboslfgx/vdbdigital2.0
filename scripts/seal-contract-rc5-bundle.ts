@@ -7,6 +7,10 @@
  *                      checksums.json and BUNDLE_SHA256.txt, keys sorted ascending.
  *   BUNDLE_SHA256.txt — sha256 of "<file>:<sha256>" lines joined by "\n" plus a
  *                      trailing "\n", over the same file set.
+ *
+ * File digests are hashed after CRLF→LF normalization so seals are stable across
+ * platforms (`core.autocrlf`). Do not re-seal historical bundles unless content
+ * intentionally changes.
  */
 import { createHash } from "node:crypto";
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -17,8 +21,17 @@ const CONTRACT_VERSION = "vdb-backend-contract@0.2.0-rc.5";
 const SCHEMA_VERSION = "2026.07.29.partner-identity-directory-rc5";
 const EXCLUDED = new Set(["checksums.json", "BUNDLE_SHA256.txt"]);
 
+function normalizeNewlinesToLf(buf: Buffer): Buffer {
+  return Buffer.from(
+    buf.toString("utf8").replace(/\r\n/g, "\n").replace(/\r/g, "\n"),
+    "utf8",
+  );
+}
+
 function sha256File(path: string): string {
-  return createHash("sha256").update(readFileSync(path)).digest("hex");
+  return createHash("sha256")
+    .update(normalizeNewlinesToLf(readFileSync(path)))
+    .digest("hex");
 }
 
 function main() {

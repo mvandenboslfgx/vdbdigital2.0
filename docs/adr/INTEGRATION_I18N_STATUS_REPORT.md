@@ -3,7 +3,8 @@
 **Date:** 2026-08-01  
 **Worktree:** `C:/Users/XXX/vdbdigital-visual-rc6-i18n`  
 **Branch:** `integration/visual-rc6-i18n-foundation`  
-**HEAD:** `1cafc7d0261e0e860f9df39fe4b4776c6d0a7510`  
+**HEAD:** `f75855ec2a4804b6da874cbd29ca22c19f0d7e0f`  
+**Note:** `1cafc7d…` is the parent commit (portal/SEO/switcher). Tip = status-report commit on top of that.  
 **Audit WT:** `C:/Users/XXX/vdbdigital-i18n-audit` @ `0fe80ca` — **untouched / clean**  
 **Push / deploy / staging apply:** **none**
 

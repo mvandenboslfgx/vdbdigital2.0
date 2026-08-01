@@ -1,10 +1,13 @@
 /**
  * Contract bundle pin for partner identity + admin directory detail rc.5.
  */
-import { createHash } from "node:crypto";
 import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import {
+  bundleDigestFromChecksums,
+  sealMatchesContractFile,
+} from "./helpers/contract-bundle-digest";
 
 const BUNDLE = resolve("contracts/releases/vdb-backend-contract-0.2.0-rc.5");
 const CONTRACT_VERSION = "vdb-backend-contract@0.2.0-rc.5";
@@ -180,19 +183,28 @@ describe("vdb-backend-contract@0.2.0-rc.5 bundle", () => {
     expect(financial.invariants).toContain("ledger_balanced_debit_eq_credit");
   });
 
-  it("lists the four rc.5 migrations in apply order", () => {
+  it("lists the five rc.5 migrations in apply order", () => {
+    // Sealed on 76694a3 lineage: five identity-directory migrations ending at
+    // 20260729140400 (fixture-flag verifier narrow). Older test pinned 40300/4.
     const mig = readJson("migration-manifest.json");
-    expect(mig.highestVersion).toBe("20260729140300");
-    expect(mig.partnerIdentityDirectoryMigrationCount).toBe(4);
-    expect(mig.partnerIdentityDirectoryMigrations).toHaveLength(4);
+    expect(mig.highestVersion).toBe("20260729140400");
+    expect(mig.partnerIdentityDirectoryMigrationCount).toBe(5);
+    expect(mig.partnerIdentityDirectoryMigrations).toHaveLength(5);
     expect(
       mig.partnerIdentityDirectoryMigrations.map((m: { version: string }) => m.version),
-    ).toEqual(["20260729140000", "20260729140100", "20260729140200", "20260729140300"]);
+    ).toEqual([
+      "20260729140000",
+      "20260729140100",
+      "20260729140200",
+      "20260729140300",
+      "20260729140400",
+    ]);
     expect(mig.applyOrder).toEqual([
       "20260729140000_partner_identity_directory_rc5_schema.sql",
       "20260729140100_partner_identity_directory_rc5_activation.sql",
       "20260729140200_admin_directory_detail_rc5_rpcs.sql",
       "20260729140300_partner_identity_directory_rc5_verify.sql",
+      "20260729140400_rc5_verifier_fixture_flag_exists_only.sql",
     ]);
     expect(mig.applyPolicy.production).toBe("NOT AUTHORIZED");
     // rc.4 and earlier migration groups must survive the copy.
@@ -223,17 +235,14 @@ describe("vdb-backend-contract@0.2.0-rc.5 bundle", () => {
 
     expect(Object.keys(checksums).sort()).toEqual(files);
     for (const f of files) {
-      const sha = createHash("sha256")
-        .update(readFileSync(resolve(BUNDLE, f)))
-        .digest("hex");
-      expect(checksums[f], `${f} checksum drifted`).toBe(sha);
+      expect(
+        sealMatchesContractFile(readFileSync(resolve(BUNDLE, f)), checksums[f]),
+        `${f} checksum drifted (LF/CRLF-tolerant)`,
+      ).toBe(true);
     }
 
-    const bundleSha = createHash("sha256")
-      .update(files.map((f) => `${f}:${checksums[f]}`).join("\n") + "\n")
-      .digest("hex");
     expect(readFileSync(resolve(BUNDLE, "BUNDLE_SHA256.txt"), "utf8").trim()).toBe(
-      bundleSha,
+      bundleDigestFromChecksums(files, checksums),
     );
   });
 });

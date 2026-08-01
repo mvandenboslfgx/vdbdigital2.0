@@ -160,9 +160,12 @@ const files = fs
   .sort();
 const checksums = {};
 for (const f of files) {
-  checksums[f] = createHash("sha256")
-    .update(fs.readFileSync(path.join(B, f)))
-    .digest("hex");
+  const raw = fs.readFileSync(path.join(B, f));
+  const lf = Buffer.from(
+    raw.toString("utf8").replace(/\r\n/g, "\n").replace(/\r/g, "\n"),
+    "utf8",
+  );
+  checksums[f] = createHash("sha256").update(lf).digest("hex");
 }
 fs.writeFileSync(`${B}/checksums.json`, JSON.stringify(checksums, null, 2) + "\n");
 const concat = files.map((f) => `${f}:${checksums[f]}`).join("\n") + "\n";

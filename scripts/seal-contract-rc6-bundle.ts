@@ -1,6 +1,9 @@
 /**
  * Recompute checksums.json + BUNDLE_SHA256.txt for the rc.6 contract bundle.
  * Local only. No publish, no remote, no secrets.
+ *
+ * File digests are hashed after CRLF→LF normalization so seals are stable across
+ * platforms. Do not re-seal historical bundles unless content intentionally changes.
  */
 import { createHash } from "node:crypto";
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -11,8 +14,17 @@ const CONTRACT_VERSION = "vdb-backend-contract@0.2.0-rc.6";
 const SCHEMA_VERSION = "2026.07.29.partner-approval-aal2-rc6";
 const EXCLUDED = new Set(["checksums.json", "BUNDLE_SHA256.txt"]);
 
+function normalizeNewlinesToLf(buf: Buffer): Buffer {
+  return Buffer.from(
+    buf.toString("utf8").replace(/\r\n/g, "\n").replace(/\r/g, "\n"),
+    "utf8",
+  );
+}
+
 function sha256File(path: string): string {
-  return createHash("sha256").update(readFileSync(path)).digest("hex");
+  return createHash("sha256")
+    .update(normalizeNewlinesToLf(readFileSync(path)))
+    .digest("hex");
 }
 
 function main() {

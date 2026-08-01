@@ -1,10 +1,13 @@
 /**
  * Contract bundle pin for partner approval AAL2 rc.6.
  */
-import { createHash } from "node:crypto";
 import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import {
+  bundleDigestFromChecksums,
+  sealMatchesContractFile,
+} from "./helpers/contract-bundle-digest";
 
 const BUNDLE = resolve("contracts/releases/vdb-backend-contract-0.2.0-rc.6");
 const CONTRACT_VERSION = "vdb-backend-contract@0.2.0-rc.6";
@@ -60,17 +63,15 @@ describe("vdb-backend-contract@0.2.0-rc.6 bundle", () => {
     const files = readdirSync(BUNDLE)
       .filter((f) => f !== "checksums.json" && f !== "BUNDLE_SHA256.txt")
       .sort();
-    const checksums = readJson("checksums.json");
+    const checksums = readJson("checksums.json") as Record<string, string>;
     for (const f of files) {
-      const digest = createHash("sha256")
-        .update(readFileSync(resolve(BUNDLE, f)))
-        .digest("hex");
-      expect(checksums[f]).toBe(digest);
+      expect(
+        sealMatchesContractFile(readFileSync(resolve(BUNDLE, f)), checksums[f]),
+        `${f} checksum drifted (LF/CRLF-tolerant)`,
+      ).toBe(true);
     }
-    const concat = files.map((f) => `${f}:${checksums[f]}`).join("\n") + "\n";
-    const bundleSha = createHash("sha256").update(concat).digest("hex");
     expect(readFileSync(resolve(BUNDLE, "BUNDLE_SHA256.txt"), "utf8").trim()).toBe(
-      bundleSha,
+      bundleDigestFromChecksums(files, checksums),
     );
   });
 });
