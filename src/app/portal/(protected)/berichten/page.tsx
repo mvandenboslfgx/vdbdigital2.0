@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { EmptyState } from "@/components/portal/empty-state";
 import { listPortalConversations } from "@/server/repositories/portal";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export const metadata: Metadata = {
   title: "Berichten",
@@ -8,20 +9,19 @@ export const metadata: Metadata = {
 };
 
 export default async function PortalMessagesPage() {
+  const { t, locale } = await getDictionary();
   const { conversations } = await listPortalConversations();
 
   return (
     <div className="space-y-6">
-      <h1 className="text-h1">Berichten</h1>
-      <p className="text-muted text-small">
-        Beveiligd berichtencentrum met VDB Digital. Geen externe chatwidget.
-      </p>
+      <h1 className="text-h1">{t("portal.messagesPage.title")}</h1>
+      <p className="text-muted text-small">{t("portal.messagesPage.intro")}</p>
       {conversations.length === 0 ? (
         <EmptyState
-          title="Nog geen gesprekken"
-          description="Wanneer VDB Digital of jij een gesprek start, verschijnt dat hier."
+          title={t("portal.messagesPage.emptyTitle")}
+          description={t("portal.messagesPage.emptyBody")}
           actionHref="/portal/support"
-          actionLabel="Open een supportticket"
+          actionLabel={t("portal.messagesPage.openTicket")}
         />
       ) : (
         <ul className="space-y-3">
@@ -33,8 +33,10 @@ export default async function PortalMessagesPage() {
               <p className="font-medium">{c.subject}</p>
               <p className="text-small text-muted mt-1">
                 {c.last_message_at
-                  ? new Date(c.last_message_at).toLocaleString("nl-NL")
-                  : "Nog geen berichten"}
+                  ? new Date(c.last_message_at).toLocaleString(
+                      locale === "nl" ? "nl-NL" : "en-US",
+                    )
+                  : t("portal.messagesPage.noMessagesYet")}
               </p>
             </li>
           ))}

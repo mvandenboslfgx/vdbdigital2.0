@@ -5,6 +5,7 @@ import { getPortalQuote } from "@/server/repositories/portal";
 import { QuoteResponseForm } from "@/components/portal/quote-response-form";
 import { hasCustomerPermission } from "@/lib/auth/customer-permissions";
 import { isQuoteExpired } from "@/lib/commerce/quote-money";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export const metadata: Metadata = {
   title: "Offerte afwijzen",
@@ -16,6 +17,7 @@ export default async function PortalQuoteDeclinePage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { t } = await getDictionary();
   const { id } = await params;
   const { quote, ctx } = await getPortalQuote(id);
   if (!quote) notFound();
@@ -35,12 +37,11 @@ export default async function PortalQuoteDeclinePage({
           href={`/portal/offertes/${id}`}
           className="text-small text-primary hover:underline"
         >
-          ← Offerte
+          {t("portal.quoteDeclinePage.backLink")}
         </Link>
-        <h1 className="text-h1 mt-2">Offerte afwijzen</h1>
+        <h1 className="text-h1 mt-2">{t("portal.quoteDeclinePage.title")}</h1>
         <p className="text-muted text-small mt-2">
-          Je wijst offerte {quote.quote_number} af. Daarna is accepteren alleen
-          mogelijk via een nieuwe verzonden versie.
+          {t("portal.quoteDeclinePage.intro", { number: quote.quote_number })}
         </p>
       </div>
       <QuoteResponseForm quoteId={quote.id} mode="decline" />

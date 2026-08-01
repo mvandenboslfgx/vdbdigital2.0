@@ -3,12 +3,14 @@ import { PortalProjectTabShell } from "@/components/portal/project-tabs";
 import { ProjectFeedbackForm } from "@/components/portal/project-customer-forms";
 import { getPortalProject } from "@/server/repositories/portal";
 import { hasCustomerPermission } from "@/lib/auth/customer-permissions";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export default async function PortalProjectFeedbackPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { t, locale } = await getDictionary();
   const { id } = await params;
   const bundle = await getPortalProject(id);
   if (!bundle.project) notFound();
@@ -22,7 +24,9 @@ export default async function PortalProjectFeedbackPage({
     <PortalProjectTabShell projectId={id} active="feedback">
       {canFeedback ? <ProjectFeedbackForm projectId={id} /> : null}
       {bundle.feedback.length === 0 ? (
-        <p className="text-muted text-small">Nog geen feedback geplaatst.</p>
+        <p className="text-muted text-small">
+          {t("portal.projectFeedbackPage.empty")}
+        </p>
       ) : (
         <ul className="space-y-3">
           {bundle.feedback.map(
@@ -33,7 +37,9 @@ export default async function PortalProjectFeedbackPage({
               >
                 <p className="whitespace-pre-wrap">{f.body}</p>
                 <p className="text-muted mt-2">
-                  {new Date(f.created_at).toLocaleString("nl-NL")}
+                  {new Date(f.created_at).toLocaleString(
+                    locale === "nl" ? "nl-NL" : "en-US",
+                  )}
                 </p>
               </li>
             ),

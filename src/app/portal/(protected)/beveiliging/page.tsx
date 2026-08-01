@@ -1,43 +1,45 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Card } from "@/components/ui/container";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export const metadata: Metadata = {
   title: "Beveiliging",
   robots: { index: false },
 };
 
-export default function PortalSecurityPage() {
+export default async function PortalSecurityPage() {
+  const { t } = await getDictionary();
+
   return (
     <div className="space-y-6 max-w-lg">
-      <h1 className="text-h1">Beveiliging</h1>
+      <h1 className="text-h1">{t("portal.securityPage.title")}</h1>
       <Card className="space-y-4">
         <div>
-          <h2 className="font-medium mb-1">Wachtwoord</h2>
+          <h2 className="font-medium mb-1">{t("portal.securityPage.passwordTitle")}</h2>
           <p className="text-small text-muted mb-3">
-            Wijzig je wachtwoord via de beveiligde resetflow.
+            {t("portal.securityPage.passwordBody")}
           </p>
           <Link
             href="/wachtwoord-vergeten"
             className="text-small text-primary hover:underline"
           >
-            Wachtwoord resetten
+            {t("portal.securityPage.resetPassword")}
           </Link>
         </div>
         <div className="border-t border-border pt-4">
-          <h2 className="font-medium mb-1">MFA (optioneel)</h2>
+          <h2 className="font-medium mb-1">{t("portal.securityPage.mfaTitle")}</h2>
           <p className="text-small text-muted">
-            Extra authenticatie is optioneel voor klanten. Voor beheerders is
-            MFA verplicht (AAL2).
+            {t("portal.securityPage.mfaBody")}
           </p>
         </div>
         <div className="border-t border-border pt-4">
-          <h2 className="font-medium mb-1">Sessies</h2>
+          <h2 className="font-medium mb-1">{t("portal.securityPage.sessionsTitle")}</h2>
           <p className="text-small text-muted mb-3">
-            Log uit op dit apparaat om de sessie te beëindigen.
+            {t("portal.securityPage.sessionsBody")}
           </p>
           <Link href="/uitloggen" className="text-small text-primary hover:underline">
-            Uitloggen
+            {t("portal.securityPage.logout")}
           </Link>
         </div>
       </Card>

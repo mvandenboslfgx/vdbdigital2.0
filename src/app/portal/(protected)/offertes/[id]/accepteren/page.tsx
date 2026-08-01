@@ -5,6 +5,7 @@ import { getPortalQuote } from "@/server/repositories/portal";
 import { QuoteResponseForm } from "@/components/portal/quote-response-form";
 import { hasCustomerPermission } from "@/lib/auth/customer-permissions";
 import { isQuoteExpired } from "@/lib/commerce/quote-money";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export const metadata: Metadata = {
   title: "Offerte accepteren",
@@ -16,6 +17,7 @@ export default async function PortalQuoteAcceptPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { t } = await getDictionary();
   const { id } = await params;
   const { quote, ctx } = await getPortalQuote(id);
   if (!quote) notFound();
@@ -28,6 +30,8 @@ export default async function PortalQuoteAcceptPage({
     redirect(`/portal/offertes/${id}`);
   }
 
+  const termsVersion = quote.terms_version || "—";
+
   return (
     <div className="space-y-6 max-w-lg">
       <div>
@@ -35,19 +39,19 @@ export default async function PortalQuoteAcceptPage({
           href={`/portal/offertes/${id}`}
           className="text-small text-primary hover:underline"
         >
-          ← Offerte
+          {t("portal.quoteAcceptPage.backLink")}
         </Link>
-        <h1 className="text-h1 mt-2">Digitale offerteacceptatie</h1>
+        <h1 className="text-h1 mt-2">{t("portal.quoteAcceptPage.title")}</h1>
         <p className="text-muted text-small mt-2">
-          Je accepteert offerte {quote.quote_number} onder voorwaardenversie{" "}
-          {quote.terms_version || "—"}. Dit is geen gekwalificeerde elektronische
-          handtekening en start geen betaling.
+          {t("portal.quoteAcceptPage.intro", {
+            number: quote.quote_number,
+            version: termsVersion,
+          })}
         </p>
       </div>
       <label className="flex gap-2 text-small items-start">
         <input type="checkbox" required form="accept-form" className="mt-1" />
-        Ik bevestig dat ik de offerte en voorwaardenversie{" "}
-        {quote.terms_version || "—"} heb gelezen en akkoord ga.
+        {t("portal.quoteAcceptPage.confirmLabel", { version: termsVersion })}
       </label>
       <div id="accept-form">
         <QuoteResponseForm quoteId={quote.id} mode="accept" />

@@ -1,12 +1,14 @@
 import { notFound } from "next/navigation";
 import { PortalProjectTabShell } from "@/components/portal/project-tabs";
 import { getPortalProject } from "@/server/repositories/portal";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export default async function PortalProjectActivityPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { t, locale } = await getDictionary();
   const { id } = await params;
   const { project, activity } = await getPortalProject(id);
   if (!project) notFound();
@@ -15,7 +17,7 @@ export default async function PortalProjectActivityPage({
     <PortalProjectTabShell projectId={id} active="activity">
       {activity.length === 0 ? (
         <p className="text-muted text-small">
-          Er is nog geen zichtbare projectactiviteit.
+          {t("portal.projectActivityPage.empty")}
         </p>
       ) : (
         <ol className="space-y-3">
@@ -27,7 +29,9 @@ export default async function PortalProjectActivityPage({
               >
                 <p className="font-medium">{a.summary}</p>
                 <p className="text-muted mt-1">
-                  {new Date(a.created_at).toLocaleString("nl-NL")}
+                  {new Date(a.created_at).toLocaleString(
+                    locale === "nl" ? "nl-NL" : "en-US",
+                  )}
                 </p>
               </li>
             ),
