@@ -136,8 +136,9 @@ account is incomplete. There is no API to classify them yet.
 
 - No payout request UI: `partner_payouts` is `false` everywhere.
 - No production backend: rc.5 is not deployed to `nhsrdnjfsxfikfbdmdfj`.
-- No public onboarding authorization: KYC, legal and fiscal items are all open
-  (`LEGAL_FISCAL_PROVIDER_DECISIONS.md`).
+- No public onboarding authorization: legal/fiscal items remain open; external
+  IDV is **de-scoped for v1** (`LEGAL_FISCAL_PROVIDER_DECISIONS.md`,
+  `DECISION_B_IDENTITY_GATE.md`).
 
 ## Verified on staging
 
