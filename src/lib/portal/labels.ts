@@ -137,6 +137,26 @@ export const DOCUMENT_CATEGORY_CODES = [
   "OTHER",
 ] as const;
 
+/** product_translations.status — DB enum, display-only translation. */
+export const PRODUCT_TRANSLATION_STATUS_CODES = [
+  "draft",
+  "machine_translated",
+  "needs_review",
+  "approved",
+  "published",
+  "stale",
+] as const;
+
+/** Required copy fields reported by getMissingTranslationFields(). */
+export const TRANSLATION_FIELD_CODES = [
+  "name",
+  "shortDescription",
+  "fullDescription",
+  "seoTitle",
+  "seoDescription",
+  "includedItems",
+] as const;
+
 export const SCAN_STATUS_CODES = [
   "NOT_REQUIRED",
   "PENDING",
@@ -195,6 +215,20 @@ export const DOCUMENT_CATEGORY_KEYS = keyMap(
   DOCUMENT_CATEGORY_CODES,
 );
 export const SCAN_STATUS_KEYS = keyMap("portal.status.scan", SCAN_STATUS_CODES);
+/** Long-form option labels (include the "not visible"/"live" consequence). */
+export const TRANSLATION_STATUS_KEYS = keyMap(
+  "admin.translation.status",
+  PRODUCT_TRANSLATION_STATUS_CODES,
+);
+/** Badge-sized labels for the same codes. */
+export const TRANSLATION_STATUS_SHORT_KEYS = keyMap(
+  "admin.translation.statusShort",
+  PRODUCT_TRANSLATION_STATUS_CODES,
+);
+export const TRANSLATION_FIELD_KEYS = keyMap(
+  "admin.translation.missingFields",
+  TRANSLATION_FIELD_CODES,
+);
 
 /**
  * Translate an enum code. Unknown codes and missing translations fall back to

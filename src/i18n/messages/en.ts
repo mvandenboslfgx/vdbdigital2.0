@@ -791,6 +791,283 @@ const en = {
     closeMenu: "Close menu",
     areaLabel: "Admin",
     brandAria: "Admin area",
+    /**
+     * Shared admin chrome. Nav labels above stay flat strings because
+     * `src/app/admin/(protected)/layout.tsx` resolves them as `admin.<key>`;
+     * page copy lives under `admin.page.*` so the two never collide.
+     */
+    common: {
+      filter: "Filter",
+      search: "Search",
+      allStatuses: "All statuses",
+      allTypes: "All types",
+      allVisibility: "All visibility",
+      save: "Save",
+      saving: "Saving…",
+      saved: "Saved.",
+      cancel: "Cancel",
+      previous: "Previous",
+      next: "Next",
+      pageOf: "Page {page} of {totalPages}",
+      pageSizeNote: "Page {page} · showing max {pageSize} per page",
+      loadFailed: "Could not load data: {error}",
+      configured: "Configured",
+      notConfigured: "Not configured",
+      enabled: "Enabled",
+      disabled: "Disabled",
+      internal: "Internal",
+      customerVisible: "Customer-visible",
+      customer: "Customer",
+      empty: "—",
+      preview: "Preview",
+      duplicate: "Duplicate",
+      loading: "Loading…",
+      blockedSuffix: "blocked",
+      colNumber: "Number",
+      colTitle: "Title",
+      colName: "Name",
+      colOrganization: "Organisation",
+      colType: "Type",
+      colStatus: "Status",
+      colTotal: "Total",
+      colOutstanding: "Outstanding",
+      colDue: "Due",
+      colVisibility: "Visible",
+      colCategory: "Category",
+      colSize: "Size",
+      colProgress: "Progress",
+      colDelivery: "Delivery",
+      colValidUntil: "Valid until",
+      colContact: "Contact",
+      colCustomer: "Customer",
+    },
+    page: {
+      dashboard: {
+        title: "Dashboard",
+        subtitle: "Real database records only. No invented revenue.",
+        activeCustomers: "Active customers",
+        openLeads: "Open leads",
+        activeProjects: "Active projects",
+        openQuotes: "Open quotes",
+        openTickets: "Open support tickets",
+        publishedProducts: "Published products",
+        quickActions: "Quick actions",
+        newCustomer: "Create customer",
+        manageProducts: "Manage products",
+      },
+      customers: {
+        title: "Customers",
+        countOne: "{count} organisation",
+        countOther: "{count} organisations",
+        searchPlaceholder: "Search by name, number or email",
+        statusActive: "Active",
+        statusInvited: "Invited",
+        statusBlocked: "Blocked",
+        statusArchived: "Archived",
+        emptyTitle: "No customers yet",
+        emptyDescription:
+          "Create a customer organisation and send an invitation. No fictitious data.",
+      },
+      projects: {
+        title: "Projects",
+        countOne: "{count} project · real data from the database",
+        countOther: "{count} projects · real data from the database",
+        newProject: "New project",
+        searchPlaceholder: "Search name or number",
+        statusActiveOnly: "Active (not archived)",
+        loadFailed: "Projects could not be loaded: {error}",
+        emptyTitle: "No projects yet",
+        emptyDescription:
+          "Create a project for an active customer organisation. No fictitious data.",
+        emptyAction: "Create project",
+      },
+      quotes: {
+        title: "Quotes",
+        countOne: "{count} quote · no Mollie / checkout",
+        countOther: "{count} quotes · no Mollie / checkout",
+        newQuote: "New quote",
+        searchPlaceholder: "Search number or title",
+        emptyTitle: "No quotes yet",
+        emptyDescription: "Create a draft quote for an active organisation.",
+        emptyAction: "Create quote",
+      },
+      invoices: {
+        title: "Invoices",
+        countOne: "{count} invoice · display & manual registration · no Mollie",
+        countOther: "{count} invoices · display & manual registration · no Mollie",
+        newInvoice: "New invoice",
+        searchPlaceholder: "Search number or title",
+        emptyTitle: "No invoices yet",
+        emptyDescription:
+          "Create a draft, or convert an accepted quote into a draft invoice.",
+      },
+      documents: {
+        title: "Documents",
+        countOne: "{count} document · private buckets · signed downloads",
+        countOther: "{count} documents · private buckets · signed downloads",
+        upload: "Upload",
+        searchPlaceholder: "Search title, file or number",
+        loadFailed: "Loading documents failed: {error}",
+        emptyTitle: "No documents yet",
+        emptyDescription: "Upload a file for an organisation. No fictitious data.",
+        emptyAction: "Upload document",
+      },
+      messages: {
+        title: "Messages",
+        subtitle: "Internal message centre. No external live chat widget active.",
+        emptyTitle: "No conversations yet",
+        emptyDescription: "Customer conversations appear here as soon as they exist.",
+      },
+      support: {
+        title: "Support",
+        emptyTitle: "No tickets yet",
+        emptyDescription:
+          "Customer support tickets appear here. Nothing disappears silently.",
+      },
+      notifications: {
+        title: "Notifications",
+        emptyTitle: "No notifications yet",
+        emptyDescription:
+          "Tenant-safe notifications appear here once they are created.",
+      },
+      products: {
+        title: "Products",
+        loading: "Loading products…",
+      },
+      productPreview: {
+        title: "Product preview",
+        backToEdit: "Back to editing",
+        heading: "Preview — {name}",
+        subtitle: "Safe preview: no order, no Mollie, no public indexing.",
+        checkoutDisabled: "Direct checkout is currently disabled globally.",
+        desktopView: "Desktop view",
+        mobileView: "Mobile view",
+        eligibilityHeading: "Why checkout would or would not be available",
+        quoteCta: "Request a quote",
+        quoteCtaShort: "Quote",
+        localeHeading: "Preview locale",
+        localeHint:
+          "Preview renders the copy a visitor in this locale would actually get: only a published translation is applied, otherwise the English source is shown.",
+        localeApplied: "Showing the {locale} translation ({status}).",
+        localeFallback:
+          "No publishable {locale} translation — showing the English source instead.",
+        unavailable:
+          "This product has no minimum English source copy, so nothing can be rendered safely for any locale.",
+      },
+      categories: {
+        title: "Categories",
+      },
+      addons: {
+        title: "Add-ons",
+        migrationRequired:
+          "Add-on tables require the catalogue migration (not applied live yet).",
+      },
+      orders: {
+        title: "Orders",
+        description:
+          "Orders will appear here once Supabase is configured and orders exist in the database.",
+      },
+      leads: {
+        title: "Leads",
+        description:
+          "Contact, quote and support requests will appear here once Supabase is configured.",
+      },
+      content: {
+        title: "Content",
+        metaTitle: "Manage content",
+        description: "Manage page content, SEO settings and site configuration.",
+      },
+      users: {
+        title: "Users",
+        subtitle: "Only OWNER may grant or revoke OWNER/ADMIN roles.",
+        emptyTitle: "No staff users found",
+        emptyDescription: "Admin roles come from admin_roles + profiles.",
+      },
+      roles: {
+        title: "Roles & permissions",
+        subtitle:
+          "CUSTOMER is not part of admin_roles; customers work via organization_members.",
+      },
+      settings: {
+        title: "Settings",
+        description:
+          "Site settings are managed via environment variables and the site_settings table in Supabase.",
+        booking: "Booking",
+        bookingFallback: "Not configured (fallback active)",
+        foundingClientOffer: "Founding Client Offer",
+        liveChat: "Live chat widget",
+        liveChatValue: "Removed — contact page / WhatsApp only",
+        readinessTitle: "Site readiness",
+        readinessDescription:
+          "Missing business data and pre-production checks. Sensitive values are never shown here.",
+      },
+      auditLog: {
+        title: "Audit log",
+        description:
+          "Admin actions are logged in the audit_logs table once Supabase is configured.",
+      },
+    },
+    /**
+     * Product translation workflow (product_translations). Status codes are DB
+     * enum values and are never translated — only these display labels are.
+     */
+    translation: {
+      sectionTitle: "Multilingual",
+      statusLabel: "Translation status ({locale})",
+      status: {
+        draft: "Draft — not visible",
+        machine_translated: "Machine-translated — not visible",
+        needs_review: "Needs review — not visible",
+        approved: "Approved — admin preview only",
+        published: "Published — live on the storefront",
+        stale: "Stale — source changed, review required",
+      },
+      statusShort: {
+        draft: "Draft",
+        machine_translated: "Machine-translated",
+        needs_review: "Needs review",
+        approved: "Approved",
+        published: "Published",
+        stale: "Stale",
+      },
+      gateHint:
+        'Only "Published" is shown to visitors. Machine-translated content never auto-publishes. Publishing is blocked (and reset to "Needs review") unless the translation was already "Approved", every required field is filled in, and you hold the "products.publish" capability.',
+      noPublishCapability:
+        'You do not hold "products.publish", so this translation can never be promoted to Published from here.',
+      complete: "All fields required for publication are filled in.",
+      missing: "Still missing before publication: {fields}.",
+      missingFields: {
+        name: "name",
+        shortDescription: "short description",
+        fullDescription: "full description",
+        seoTitle: "SEO title",
+        seoDescription: "meta description",
+        includedItems: "included items",
+      },
+      incomplete: "The {locale} translation is missing or incomplete.",
+      sourceHeading: "English source",
+      sourceHint:
+        "Read-only canonical copy from the products row. Edit it in the sections above.",
+      translatedHeading: "{locale} translation",
+      staleTitle: "Source changed since this translation was reviewed",
+      staleDescription:
+        "The English source no longer matches the snapshot this translation was approved against. Re-review the copy; the status is held at Stale until a human approves it again.",
+      staleBadge: "Stale",
+      reviewedAt: "Last human review: {date}",
+      publishedAt: "Published: {date}",
+      neverReviewed: "Never reviewed by a person",
+      previewLink: "Preview {locale}",
+      blocked: {
+        forbidden:
+          "{locale}: publishing blocked — no 'products.publish' capability. Status reset to 'needs_review'.",
+        notApproved:
+          "{locale}: publishing blocked — the translation must be 'approved' first. Status reset to 'needs_review'.",
+        missingFields:
+          "{locale}: publishing blocked — missing fields ({fields}). Status reset to 'needs_review'.",
+        stale:
+          "{locale}: publishing blocked — the English source changed after review. Status reset to 'stale'.",
+      },
+    },
   },
   empty: {
     shopPreparing: "Shop is being prepared",

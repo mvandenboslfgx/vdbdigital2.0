@@ -801,6 +801,283 @@ const nl: Messages = {
     closeMenu: "Menu sluiten",
     areaLabel: "Beheer",
     brandAria: "Beheeromgeving",
+    /**
+     * Gedeelde beheerchrome. De navigatielabels hierboven blijven platte
+     * strings omdat `src/app/admin/(protected)/layout.tsx` ze als
+     * `admin.<key>` opzoekt; paginacopy staat onder `admin.page.*`.
+     */
+    common: {
+      filter: "Filter",
+      search: "Zoeken",
+      allStatuses: "Alle statussen",
+      allTypes: "Alle types",
+      allVisibility: "Alle zichtbaarheid",
+      save: "Opslaan",
+      saving: "Opslaan…",
+      saved: "Opgeslagen.",
+      cancel: "Annuleren",
+      previous: "Vorige",
+      next: "Volgende",
+      pageOf: "Pagina {page} van {totalPages}",
+      pageSizeNote: "Pagina {page} · toont max {pageSize} per pagina",
+      loadFailed: "Gegevens laden mislukt: {error}",
+      configured: "Geconfigureerd",
+      notConfigured: "Niet geconfigureerd",
+      enabled: "Ingeschakeld",
+      disabled: "Uitgeschakeld",
+      internal: "Intern",
+      customerVisible: "Klantzichtbaar",
+      customer: "Klant",
+      empty: "—",
+      preview: "Preview",
+      duplicate: "Dupliceren",
+      loading: "Laden…",
+      blockedSuffix: "geblokkeerd",
+      colNumber: "Nummer",
+      colTitle: "Titel",
+      colName: "Naam",
+      colOrganization: "Organisatie",
+      colType: "Type",
+      colStatus: "Status",
+      colTotal: "Totaal",
+      colOutstanding: "Openstaand",
+      colDue: "Verval",
+      colVisibility: "Zichtbaar",
+      colCategory: "Categorie",
+      colSize: "Grootte",
+      colProgress: "Voortgang",
+      colDelivery: "Oplevering",
+      colValidUntil: "Geldig tot",
+      colContact: "Contact",
+      colCustomer: "Klant",
+    },
+    page: {
+      dashboard: {
+        title: "Dashboard",
+        subtitle: "Alleen echte databasegegevens. Geen verzonnen omzet.",
+        activeCustomers: "Actieve klanten",
+        openLeads: "Open leads",
+        activeProjects: "Actieve projecten",
+        openQuotes: "Openstaande offertes",
+        openTickets: "Open supporttickets",
+        publishedProducts: "Gepubliceerde producten",
+        quickActions: "Snelacties",
+        newCustomer: "Klant aanmaken",
+        manageProducts: "Producten beheren",
+      },
+      customers: {
+        title: "Klanten",
+        countOne: "{count} organisatie",
+        countOther: "{count} organisaties",
+        searchPlaceholder: "Zoek op naam, nummer of e-mail",
+        statusActive: "Actief",
+        statusInvited: "Uitgenodigd",
+        statusBlocked: "Geblokkeerd",
+        statusArchived: "Gearchiveerd",
+        emptyTitle: "Nog geen klanten",
+        emptyDescription:
+          "Maak een klantorganisatie aan en verstuur een uitnodiging. Geen fictieve data.",
+      },
+      projects: {
+        title: "Projecten",
+        countOne: "{count} project · echte data uit de database",
+        countOther: "{count} projecten · echte data uit de database",
+        newProject: "Nieuw project",
+        searchPlaceholder: "Zoek naam of nummer",
+        statusActiveOnly: "Actief (niet gearchiveerd)",
+        loadFailed: "Projecten konden niet geladen worden: {error}",
+        emptyTitle: "Nog geen projecten",
+        emptyDescription:
+          "Maak een project aan voor een actieve klantorganisatie. Geen fictieve data.",
+        emptyAction: "Project aanmaken",
+      },
+      quotes: {
+        title: "Offertes",
+        countOne: "{count} offerte · geen Mollie / checkout",
+        countOther: "{count} offertes · geen Mollie / checkout",
+        newQuote: "Nieuwe offerte",
+        searchPlaceholder: "Zoek nummer of titel",
+        emptyTitle: "Nog geen offertes",
+        emptyDescription: "Maak een conceptofferte voor een actieve organisatie.",
+        emptyAction: "Offerte aanmaken",
+      },
+      invoices: {
+        title: "Facturen",
+        countOne: "{count} factuur · weergave & handmatige registratie · geen Mollie",
+        countOther: "{count} facturen · weergave & handmatige registratie · geen Mollie",
+        newInvoice: "Nieuwe factuur",
+        searchPlaceholder: "Zoek nummer of titel",
+        emptyTitle: "Nog geen facturen",
+        emptyDescription:
+          "Maak een concept of zet een geaccepteerde offerte om naar een factuurconcept.",
+      },
+      documents: {
+        title: "Documenten",
+        countOne: "{count} document · private buckets · signed downloads",
+        countOther: "{count} documenten · private buckets · signed downloads",
+        upload: "Uploaden",
+        searchPlaceholder: "Zoek titel, bestand of nummer",
+        loadFailed: "Documenten laden mislukt: {error}",
+        emptyTitle: "Nog geen documenten",
+        emptyDescription: "Upload een bestand voor een organisatie. Geen fictieve data.",
+        emptyAction: "Document uploaden",
+      },
+      messages: {
+        title: "Berichten",
+        subtitle: "Intern berichtencentrum. Geen externe livechatwidget actief.",
+        emptyTitle: "Nog geen gesprekken",
+        emptyDescription: "Klantgesprekken verschijnen hier zodra ze bestaan.",
+      },
+      support: {
+        title: "Support",
+        emptyTitle: "Nog geen tickets",
+        emptyDescription:
+          "Supporttickets van klanten verschijnen hier. Niets verdwijnt stil.",
+      },
+      notifications: {
+        title: "Notificaties",
+        emptyTitle: "Nog geen notificaties",
+        emptyDescription:
+          "Tenant-safe notificaties verschijnen hier wanneer ze worden aangemaakt.",
+      },
+      products: {
+        title: "Producten",
+        loading: "Producten laden…",
+      },
+      productPreview: {
+        title: "Productpreview",
+        backToEdit: "Terug naar bewerken",
+        heading: "Preview — {name}",
+        subtitle: "Veilige preview: geen order, geen Mollie, geen publieke indexatie.",
+        checkoutDisabled: "Directe checkout is momenteel algemeen uitgeschakeld.",
+        desktopView: "Desktopweergave",
+        mobileView: "Mobiele weergave",
+        eligibilityHeading: "Waarom checkout wel/niet beschikbaar zou zijn",
+        quoteCta: "Offerte aanvragen",
+        quoteCtaShort: "Offerte",
+        localeHeading: "Preview-taal",
+        localeHint:
+          "De preview toont de copy die een bezoeker in deze taal daadwerkelijk krijgt: alleen een gepubliceerde vertaling wordt toegepast, anders zie je de Engelse bron.",
+        localeApplied: "Toont de {locale}-vertaling ({status}).",
+        localeFallback:
+          "Geen publiceerbare {locale}-vertaling — de Engelse bron wordt getoond.",
+        unavailable:
+          "Dit product heeft geen minimale Engelse broncopy, dus er kan voor geen enkele taal iets veilig worden getoond.",
+      },
+      categories: {
+        title: "Categorieën",
+      },
+      addons: {
+        title: "Add-ons",
+        migrationRequired:
+          "Add-on tabellen vereisen de catalogusmigratie (nog niet live toegepast).",
+      },
+      orders: {
+        title: "Bestellingen",
+        description:
+          "Bestellingen verschijnen hier zodra Supabase is geconfigureerd en er orders in de database staan.",
+      },
+      leads: {
+        title: "Leads",
+        description:
+          "Contact-, offerte- en supportaanvragen verschijnen hier zodra Supabase is geconfigureerd.",
+      },
+      content: {
+        title: "Content",
+        metaTitle: "Content beheren",
+        description: "Beheer paginacontent, SEO-instellingen en siteconfiguratie.",
+      },
+      users: {
+        title: "Gebruikers",
+        subtitle: "Alleen OWNER mag OWNER/ADMIN-rollen toekennen of intrekken.",
+        emptyTitle: "Geen staff-gebruikers gevonden",
+        emptyDescription: "Adminrollen komen uit admin_roles + profiles.",
+      },
+      roles: {
+        title: "Rollen & rechten",
+        subtitle:
+          "CUSTOMER zit niet in admin_roles; klanten werken via organization_members.",
+      },
+      settings: {
+        title: "Instellingen",
+        description:
+          "Site-instellingen worden beheerd via omgevingsvariabelen en de tabel site_settings in Supabase.",
+        booking: "Boeken",
+        bookingFallback: "Niet geconfigureerd (fallback actief)",
+        foundingClientOffer: "Founding Client Offer",
+        liveChat: "Livechatwidget",
+        liveChatValue: "Verwijderd — alleen contactpagina / WhatsApp",
+        readinessTitle: "Site readiness",
+        readinessDescription:
+          "Ontbrekende bedrijfsgegevens en pre-productiechecks. Gevoelige waarden worden hier nooit getoond.",
+      },
+      auditLog: {
+        title: "Auditlog",
+        description:
+          "Beheeracties worden gelogd in de tabel audit_logs zodra Supabase is geconfigureerd.",
+      },
+    },
+    /**
+     * Vertaalworkflow voor producten (product_translations). Statuscodes zijn
+     * DB-enumwaarden en worden nooit vertaald — alleen deze weergavelabels.
+     */
+    translation: {
+      sectionTitle: "Meertaligheid",
+      statusLabel: "Vertaalstatus ({locale})",
+      status: {
+        draft: "Draft — niet zichtbaar",
+        machine_translated: "Machine-vertaald — niet zichtbaar",
+        needs_review: "Needs review — niet zichtbaar",
+        approved: "Approved — alleen admin preview",
+        published: "Published — live op storefront",
+        stale: "Stale — bron gewijzigd, review vereist",
+      },
+      statusShort: {
+        draft: "Draft",
+        machine_translated: "Machine-vertaald",
+        needs_review: "Needs review",
+        approved: "Approved",
+        published: "Published",
+        stale: "Stale",
+      },
+      gateHint:
+        'Alleen "Published" wordt getoond aan bezoekers. Machine-vertalingen publiceren nooit automatisch. Publiceren wordt geblokkeerd (en teruggezet naar "Needs review") tenzij de vertaling al "Approved" was, alle verplichte velden zijn ingevuld, en u de "products.publish"-bevoegdheid heeft.',
+      noPublishCapability:
+        'U heeft geen "products.publish", dus deze vertaling kan hier nooit naar Published worden gezet.',
+      complete: "Alle verplichte velden voor publicatie zijn ingevuld.",
+      missing: "Ontbreekt nog voor publicatie: {fields}.",
+      missingFields: {
+        name: "naam",
+        shortDescription: "korte omschrijving",
+        fullDescription: "volledige omschrijving",
+        seoTitle: "SEO-titel",
+        seoDescription: "meta-omschrijving",
+        includedItems: "inbegrepen items",
+      },
+      incomplete: "De {locale}-vertaling ontbreekt of is incompleet.",
+      sourceHeading: "Engelse bron",
+      sourceHint:
+        "Alleen-lezen canonieke copy uit de products-rij. Bewerken doet u in de secties hierboven.",
+      translatedHeading: "{locale}-vertaling",
+      staleTitle: "Bron gewijzigd sinds deze vertaling is gereviewd",
+      staleDescription:
+        "De Engelse bron komt niet meer overeen met de snapshot waartegen deze vertaling is goedgekeurd. Review de copy opnieuw; de status blijft Stale tot een mens opnieuw goedkeurt.",
+      staleBadge: "Stale",
+      reviewedAt: "Laatste menselijke review: {date}",
+      publishedAt: "Gepubliceerd: {date}",
+      neverReviewed: "Nooit door een mens gereviewd",
+      previewLink: "Preview {locale}",
+      blocked: {
+        forbidden:
+          "{locale}: publiceren geblokkeerd — geen 'products.publish' bevoegdheid. Status teruggezet naar 'needs_review'.",
+        notApproved:
+          "{locale}: publiceren geblokkeerd — vertaling moet eerst 'approved' zijn. Status teruggezet naar 'needs_review'.",
+        missingFields:
+          "{locale}: publiceren geblokkeerd — ontbrekende velden ({fields}). Status teruggezet naar 'needs_review'.",
+        stale:
+          "{locale}: publiceren geblokkeerd — de Engelse bron is na review gewijzigd. Status teruggezet naar 'stale'.",
+      },
+    },
   },
   empty: {
     shopPreparing: "Shop wordt voorbereid",
