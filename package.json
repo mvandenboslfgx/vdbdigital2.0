@@ -44,7 +44,8 @@
     "catalog:verify-no-tawk": "tsx scripts/verify-catalog-no-tawk.ts",
     "checkout:release-gate": "tsx scripts/checkout-release-gate.ts",
     "db:verify-messaging-support-appointments": "tsx scripts/verify-messaging-support-appointments-contract.ts",
-    "test:messaging-support-appointments-rls": "tsx scripts/test-messaging-support-appointments-rls.ts"
+    "test:messaging-support-appointments-rls": "tsx scripts/test-messaging-support-appointments-rls.ts",
+    "staging:mollie-e2e": "tsx scripts/staging-mollie-e2e.ts"
   },
   "dependencies": {
     "@mollie/api-client": "^4.6.0",

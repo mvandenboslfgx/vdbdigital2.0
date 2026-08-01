@@ -39,6 +39,13 @@ export function buildMollieWebhookUrl(): WebhookUrlResult {
   }
 
   const token = getMollieWebhookToken();
+  if (!token && !allowsMissingMollieWebhookToken()) {
+    return {
+      ok: false,
+      error:
+        "MOLLIE_WEBHOOK_TOKEN ontbreekt. Staging/preview/production weigeren onbeschermde webhooks.",
+    };
+  }
   if (token) {
     params.set("token", token);
   }
@@ -48,13 +55,35 @@ export function buildMollieWebhookUrl(): WebhookUrlResult {
   return { ok: true, url };
 }
 
-/** Valideert optioneel applicatiewebhooktoken uit query (niet Mollie signature). */
+/**
+ * Local/unit tests may omit the application webhook token.
+ * Staging, preview, and production must fail closed when the token is unset —
+ * otherwise any caller can POST a payment id to the webhook endpoint.
+ */
+export function allowsMissingMollieWebhookToken(
+  env: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env,
+): boolean {
+  if (env.NODE_ENV === "test") return true;
+  const appEnv = (env.APP_ENV ?? "").trim().toLowerCase();
+  if (appEnv === "staging" || appEnv === "production") return false;
+  if (env.VERCEL_ENV === "production" || env.VERCEL_ENV === "preview") {
+    return false;
+  }
+  // Local development only
+  return env.NODE_ENV !== "production";
+}
+
+/** Valideert applicatiewebhooktoken uit query (niet Mollie signature). */
 export function verifyMollieWebhookToken(
   providedToken: string | null,
+  env: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env,
 ): { valid: true } | { valid: false; reason: "missing" | "invalid" } {
   const expected = getMollieWebhookToken();
   if (!expected) {
-    return { valid: true };
+    if (allowsMissingMollieWebhookToken(env)) {
+      return { valid: true };
+    }
+    return { valid: false, reason: "missing" };
   }
 
   if (!providedToken) {

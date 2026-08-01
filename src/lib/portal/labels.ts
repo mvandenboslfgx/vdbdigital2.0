@@ -72,6 +72,7 @@ export const INVOICE_TYPE_NL: Record<string, string> = {
 };
 
 export const TICKET_STATUS_NL: Record<string, string> = {
+  NEW: "Nieuw",
   OPEN: "Open",
   IN_PROGRESS: "In behandeling",
   WAITING_FOR_CUSTOMER: "Wacht op jou",

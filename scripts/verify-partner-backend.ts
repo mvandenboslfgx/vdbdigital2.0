@@ -37,6 +37,91 @@ function assert(cond: boolean, msg: string) {
   if (!cond) throw new Error(msg);
 }
 
+const STAFF = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1";
+
+function asUser(uid: string, sql: string): string {
+  return psql(
+    `${sql}\nFROM (SELECT set_config('request.jwt.claim.sub','${uid}',true)) s;`,
+  );
+}
+
+/** rc.4 governance RPCs call require_aal2(), which reads request.jwt.claims. */
+function asUserAal2(uid: string, sql: string): string {
+  return psql(`
+SELECT set_config('request.jwt.claim.sub','${uid}',true);
+SELECT set_config('request.jwt.claim.role','authenticated',true);
+SELECT set_config('request.jwt.claims','{"sub":"${uid}","role":"authenticated","aal":"aal2"}',true);
+${sql}
+`);
+}
+
+function setComplianceFlag(enabled: boolean) {
+  psql(
+    `UPDATE public.feature_flags SET enabled = ${enabled}, updated_at = now() WHERE key = 'partner_compliance_fixtures';`,
+  );
+}
+
+/**
+ * rc.5 moved activation out of application approval: a partner only reaches
+ * ACTIVE once partner_activation_checklist passes. The scenarios below need
+ * ACTIVE partners, so they walk the real checklist instead of writing status
+ * directly — accept the current agreement, record synthetic verification
+ * fixtures, then let staff approval run partner_try_activate.
+ */
+function driveToActive(
+  partnerUserId: string,
+  applicationId: string,
+  partnerCode: string,
+  partnerType: "INDIVIDUAL" | "BUSINESS",
+): string {
+  const partnerId = psql(
+    `SELECT id FROM public.partner_profiles WHERE user_id = '${partnerUserId}'::uuid;`,
+  );
+  assert(!!partnerId, `driveToActive: no PENDING profile for ${partnerUserId}`);
+
+  const versionId = psql(`
+SELECT id FROM public.partner_agreement_versions
+WHERE is_current
+  AND agreement_type = '${partnerType === "BUSINESS" ? "BUSINESS_PARTNER" : "INDIVIDUAL_PARTNER"}';
+`);
+  asUser(
+    partnerUserId,
+    `SELECT public.accept_partner_agreement('${versionId}'::uuid)`,
+  );
+
+  setComplianceFlag(true);
+  try {
+    asUser(
+      STAFF,
+      `SELECT public.staff_set_partner_compliance_fixture(
+  '${partnerId}'::uuid, 'VERIFIED', 'VERIFIED',
+  ${partnerType === "BUSINESS" ? "'VERIFIED'" : "NULL"}, 'APPROVED'
+)`,
+    );
+  } finally {
+    setComplianceFlag(false);
+  }
+
+  const reviewed = asUser(
+    STAFF,
+    `SELECT public.review_partner_application('${applicationId}'::uuid, true, NULL, '${partnerCode}')`,
+  );
+  assert(reviewed === partnerId, `driveToActive: review returned ${reviewed}`);
+
+  const status = psql(
+    `SELECT status::text FROM public.partner_profiles WHERE id = '${partnerId}'::uuid;`,
+  );
+  const blocks = psql(
+    `SELECT activation_block_codes::text FROM public.partner_profiles WHERE id = '${partnerId}'::uuid;`,
+  );
+  assert(
+    status === "ACTIVE",
+    `driveToActive: ${partnerType} partner stayed ${status} (blocked by ${blocks})`,
+  );
+
+  return partnerId;
+}
+
 function sha256(s: string) {
   return createHash("sha256").update(s).digest("hex");
 }
@@ -84,9 +169,17 @@ BEGIN
   DELETE FROM public.partner_sales WHERE partner_id IN (SELECT id FROM public.partner_profiles WHERE user_id IN (partner_a, partner_b));
   DELETE FROM public.partner_leads WHERE partner_id IN (SELECT id FROM public.partner_profiles WHERE user_id IN (partner_a, partner_b));
   DELETE FROM public.partner_codes WHERE partner_id IN (SELECT id FROM public.partner_profiles WHERE user_id IN (partner_a, partner_b));
+  -- Fixture idempotency keys are stable but the resources they point at are
+  -- recreated every run, so stale cache rows would raise IDEMPOTENCY_CONFLICT.
+  DELETE FROM public.admin_rpc_idempotency WHERE idempotency_key LIKE 'fixture:%';
   DELETE FROM public.partner_applications WHERE user_id IN (partner_a, partner_b);
+  -- accepted_by_user_id has no cascade, so acceptances go before the profiles.
+  DELETE FROM public.partner_agreement_acceptances WHERE accepted_by_user_id IN (partner_a, partner_b);
   DELETE FROM public.partner_profiles WHERE user_id IN (partner_a, partner_b);
   DELETE FROM public.admin_roles WHERE user_id = staff_id;
+  -- rc.5 audits intake, agreement acceptance, fixtures and activation, all of
+  -- which pin profiles rows a re-run needs to drop.
+  DELETE FROM public.audit_logs WHERE user_id IN (staff_id, partner_a, partner_b, customer_id);
   DELETE FROM public.profiles WHERE id IN (staff_id, partner_a, partner_b, customer_id);
   DELETE FROM auth.users WHERE id IN (staff_id, partner_a, partner_b, customer_id);
 
@@ -111,38 +204,45 @@ BEGIN
 END $$;
 `);
 
-  // Scenario 4: partner A submits application; staff approves
-  const appA = psql(`
-SELECT public.submit_partner_application('Partner A BV','Partner A','partner.a.fixture@example.invalid',NULL,NULL,NULL)
-FROM (SELECT set_config('request.jwt.claim.sub','bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1',true)) s;
-`);
+  // Scenario 4: partner A (BUSINESS) submits a typed application; staff approves
+  const appA = asUser(
+    "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1",
+    `SELECT public.submit_partner_application('BUSINESS','Partner A BV','Partner A','partner.a.fixture@example.invalid','12345678',NULL,NULL)`,
+  );
   assert(!!appA, "scenario4: application id missing");
-
-  const partnerAId = psql(`
-SELECT public.review_partner_application('${appA}'::uuid, true, NULL, 'PARTNERA')
-FROM (SELECT set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1',true)) s;
-`);
+  const partnerAId = driveToActive(
+    "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1",
+    appA,
+    "PARTNERA",
+    "BUSINESS",
+  );
   assert(!!partnerAId, "scenario5 prep: partner A id");
 
-  // Partner B
-  const appB = psql(`
-SELECT public.submit_partner_application('Partner B BV','Partner B','partner.b.fixture@example.invalid')
-FROM (SELECT set_config('request.jwt.claim.sub','cccccccc-cccc-cccc-cccc-ccccccccccc1',true)) s;
-`);
-  const partnerBId = psql(`
-SELECT public.review_partner_application('${appB}'::uuid, true, NULL, 'PARTNERB')
-FROM (SELECT set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1',true)) s;
-`);
+  // Partner B (INDIVIDUAL) — no company details, no KvK
+  const appB = asUser(
+    "cccccccc-cccc-cccc-cccc-ccccccccccc1",
+    `SELECT public.submit_partner_application('INDIVIDUAL','Partner B','Partner B','partner.b.fixture@example.invalid')`,
+  );
+  const partnerBId = driveToActive(
+    "cccccccc-cccc-cccc-cccc-ccccccccccc1",
+    appB,
+    "PARTNERB",
+    "INDIVIDUAL",
+  );
 
-  // Scenario 4: create lead
-  const leadA = psql(`
-SELECT public.create_partner_lead('Lead A','lead.a@example.invalid','dedupe-a','Co A',NULL,'hello','PARTNERA')
-FROM (SELECT set_config('request.jwt.claim.sub','bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1',true)) s;
-`);
-  const leadB = psql(`
-SELECT public.create_partner_lead('Lead B','lead.b@example.invalid','dedupe-b')
-FROM (SELECT set_config('request.jwt.claim.sub','cccccccc-cccc-cccc-cccc-ccccccccccc1',true)) s;
-`);
+  // Scenario 4: create lead.
+  // 20260728210000 added an 8-arg create_partner_lead next to the 7-arg compat
+  // wrapper. Because the 8th argument has a default, any call with 7 or fewer
+  // arguments matches both candidates and Postgres refuses to choose, so all
+  // eight arguments are always supplied here.
+  const leadA = asUser(
+    "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb1",
+    `SELECT public.create_partner_lead('Lead A','lead.a@example.invalid','dedupe-a','Co A',NULL,'hello','PARTNERA',NULL::uuid)`,
+  );
+  const leadB = asUser(
+    "cccccccc-cccc-cccc-cccc-ccccccccccc1",
+    `SELECT public.create_partner_lead('Lead B','lead.b@example.invalid','dedupe-b',NULL,NULL,NULL,NULL,NULL::uuid)`,
+  );
   assert(!!leadA && !!leadB, "scenario4 leads");
   console.log("SCENARIO 4: PASS");
 
@@ -184,6 +284,19 @@ SELECT COUNT(*)::text FROM (
 ) x;
 `);
   assert(unbalanced === "0", "ledger unbalanced");
+
+  // rc.4 moved the commission accrual out of confirm_partner_sale: a sale now
+  // leaves the commission PENDING and approve_partner_commission posts the
+  // liability, so the payout scenario needs an explicit approval first.
+  const commissionId = psql(
+    `SELECT id FROM public.partner_commissions WHERE partner_sale_id = '${saleId}'::uuid;`,
+  );
+  const approved = asUserAal2(
+    STAFF,
+    `SELECT public.approve_partner_commission('${commissionId}'::uuid, 'fixture commission approval', 'fixture:comm-approve-a');`,
+  );
+  assert(approved.includes("approved"), `commission approval: ${approved}`);
+  console.log("SCENARIO 7 COMMISSION APPROVAL: PASS");
 
   // Scenario 9: payout — rc.2 fail-closed flags default OFF; enable only for synthetic fixtures.
   psql(`
