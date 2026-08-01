@@ -862,6 +862,7 @@ const en = {
       colAmount: "Amount",
       versionNumber: "Version {number}",
       checksum: "checksum",
+      all: "All",
     },
     page: {
       dashboard: {
@@ -965,6 +966,15 @@ const en = {
           NORMAL: "Normal",
           HIGH: "High",
           URGENT: "Urgent",
+        },
+        settings: {
+          visibilityInternal: "Internal only",
+          progressPercent: "Progress (%)",
+          actualDelivery: "Actual delivery",
+          completeOverride: "Explicitly complete below 100% (this is logged)",
+          duplicateAsDraft: "Duplicate as draft",
+          archiveProject: "Archive project",
+          archived: "This project is archived.",
         },
       },
       quotes: {
@@ -1132,6 +1142,38 @@ const en = {
         loading: "Loading products…",
         newTitle: "New product",
         editTitle: "Edit product",
+        subtitle:
+          "Manage the catalogue, prices and visibility. Direct checkout is currently disabled globally.",
+        exportCsv: "Export CSV",
+        exportFileStem: "products-export",
+        exportFailed: "Export failed",
+        migrationNotApplied:
+          "The catalogue migration has not been applied yet. Basic fields work; extended filters, legal approval and media require the migration (do not apply it live without a gate).",
+        bulkDone: "Bulk action completed.",
+        searchPlaceholder: "Name, SKU, slug",
+        filterPriceMode: "Price type",
+        filterBillingType: "Billing model",
+        filterAudience: "Audience",
+        filterPartnerHealth: "Partner health",
+        audienceBoth: "Both",
+        selectedCount: "{count} selected",
+        hide: "Hide",
+        setCategory: "Category → {name}",
+        emptyTitle: "No products found",
+        emptyDescription: "Adjust the filters or create a new product.",
+        selectAll: "Select all",
+        selectRow: "Select {name}",
+        colProduct: "Product",
+        colSku: "SKU",
+        colPrice: "Price",
+        colBilling: "Billing",
+        colAudience: "B2B/B2C",
+        colCheckout: "Checkout",
+        colChanged: "Changed",
+        noCategory: "No category",
+        noSku: "no SKU",
+        countOne: "{count} product · page {page} of {totalPages}",
+        countOther: "{count} products · page {page} of {totalPages}",
       },
       productPreview: {
         title: "Product preview",
@@ -1450,6 +1492,39 @@ const en = {
      * portal_invoice_payment_method display labels. Registration is manual, so
      * none of these imply a payment provider.
      */
+    /**
+     * Catalogue enum display labels. `catalog.badge.*` is the copy the badges
+     * render around a code, so a client badge never has to look a code up.
+     */
+    catalog: {
+      productStatus: {
+        DRAFT: "Draft",
+        REVIEW: "In review",
+        PUBLISHED: "Published",
+        HIDDEN: "Hidden",
+        ARCHIVED: "Archived",
+      },
+      priceMode: {
+        FIXED: "Fixed price",
+        STARTING_FROM: "From price",
+        QUOTE_ONLY: "Quote only",
+      },
+      billingType: {
+        ONE_TIME: "One-off",
+        MONTHLY: "Monthly",
+        YEARLY: "Yearly",
+        QUOTE_ONLY: "Quote",
+      },
+      badge: {
+        quoteOnlySuffix: "Quote only",
+        directlySellable: "Directly sellable",
+        checkoutBlocked: "Checkout blocked",
+        b2bAllowed: "B2B allowed",
+        b2bAudience: "B2B audience",
+        b2cAllowed: "B2C allowed",
+        b2cAudience: "B2C audience",
+      },
+    },
     paymentMethod: {
       BANK_TRANSFER: "Bank transfer",
       CASH: "Cash",

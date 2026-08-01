@@ -9,16 +9,10 @@ import {
   type ProjectActionState,
 } from "@/server/actions/project-actions";
 import { PROJECT_TYPES, PROJECT_STATUSES, PROJECT_PRIORITIES } from "@/lib/validation/projects";
+import type { ProjectSettingsFormLabels } from "@/lib/admin/project-settings-labels";
 
 /** Resolved on the server via `resolveLabelMap` so this client tree stays locale-agnostic. */
 type EnumLabels = Record<string, string>;
-
-const PRIORITY_NL: Record<string, string> = {
-  LOW: "Laag",
-  NORMAL: "Normaal",
-  HIGH: "Hoog",
-  URGENT: "Urgent",
-};
 
 type Project = {
   id: string;
@@ -40,10 +34,12 @@ export function ProjectSettingsForm({
   project,
   projectTypeLabels,
   statusLabels,
+  labels,
 }: {
   project: Project;
   projectTypeLabels: EnumLabels;
   statusLabels: EnumLabels;
+  labels: ProjectSettingsFormLabels;
 }) {
   const [state, action, pending] = useActionState<
     ProjectActionState,
@@ -68,14 +64,14 @@ export function ProjectSettingsForm({
 
       <div>
         <label htmlFor="name" className="block text-small font-medium mb-1">
-          Naam
+          {labels.name}
         </label>
         <Input id="name" name="name" required defaultValue={project.name} maxLength={200} />
       </div>
 
       <div>
         <label htmlFor="description" className="block text-small font-medium mb-1">
-          Omschrijving
+          {labels.description}
         </label>
         <Textarea
           id="description"
@@ -89,7 +85,7 @@ export function ProjectSettingsForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="projectType" className="block text-small font-medium mb-1">
-            Type
+            {labels.type}
           </label>
           <select
             id="projectType"
@@ -106,7 +102,7 @@ export function ProjectSettingsForm({
         </div>
         <div>
           <label htmlFor="status" className="block text-small font-medium mb-1">
-            Status
+            {labels.status}
           </label>
           <select
             id="status"
@@ -123,7 +119,7 @@ export function ProjectSettingsForm({
         </div>
         <div>
           <label htmlFor="priority" className="block text-small font-medium mb-1">
-            Prioriteit
+            {labels.priority}
           </label>
           <select
             id="priority"
@@ -133,14 +129,14 @@ export function ProjectSettingsForm({
           >
             {PROJECT_PRIORITIES.map((p) => (
               <option key={p} value={p}>
-                {PRIORITY_NL[p] ?? p}
+                {labels.priorityLabels[p] ?? p}
               </option>
             ))}
           </select>
         </div>
         <div>
           <label htmlFor="visibility" className="block text-small font-medium mb-1">
-            Klantzichtbaarheid
+            {labels.visibility}
           </label>
           <select
             id="visibility"
@@ -148,13 +144,13 @@ export function ProjectSettingsForm({
             defaultValue={project.visibility}
             className="w-full min-h-11 px-3 rounded-lg border border-border bg-background text-sm"
           >
-            <option value="INTERNAL">Alleen intern</option>
-            <option value="CUSTOMER_VISIBLE">Zichtbaar voor klant</option>
+            <option value="INTERNAL">{labels.visibilityInternal}</option>
+            <option value="CUSTOMER_VISIBLE">{labels.visibilityCustomer}</option>
           </select>
         </div>
         <div>
           <label htmlFor="progressPercent" className="block text-small font-medium mb-1">
-            Voortgang (%)
+            {labels.progressPercent}
           </label>
           <Input
             id="progressPercent"
@@ -167,7 +163,7 @@ export function ProjectSettingsForm({
         </div>
         <div>
           <label htmlFor="startDate" className="block text-small font-medium mb-1">
-            Startdatum
+            {labels.startDate}
           </label>
           <Input
             id="startDate"
@@ -178,7 +174,7 @@ export function ProjectSettingsForm({
         </div>
         <div>
           <label htmlFor="plannedDeliveryDate" className="block text-small font-medium mb-1">
-            Geplande oplevering
+            {labels.plannedDelivery}
           </label>
           <Input
             id="plannedDeliveryDate"
@@ -189,7 +185,7 @@ export function ProjectSettingsForm({
         </div>
         <div>
           <label htmlFor="actualDeliveryDate" className="block text-small font-medium mb-1">
-            Werkelijke oplevering
+            {labels.actualDelivery}
           </label>
           <Input
             id="actualDeliveryDate"
@@ -208,11 +204,11 @@ export function ProjectSettingsForm({
 
       <label className="flex items-start gap-2 text-small">
         <input type="checkbox" name="completeOverride" value="1" className="mt-1" />
-        Expliciet afronden onder 100% (wordt gelogd)
+        {labels.completeOverride}
       </label>
 
       <Button type="submit" disabled={pending}>
-        {pending ? "Opslaan…" : "Wijzigingen opslaan"}
+        {pending ? labels.saving : labels.submit}
       </Button>
     </form>
   );

@@ -37,6 +37,4 @@ src/app/admin/(protected)/invoices/[id]/preview/page.tsx
 # managers and the product editor now take a `labels` prop built by
 # src/lib/admin/*-labels.ts; the components below still carry Dutch labels and
 # need the same treatment.
-src/components/admin/admin-products-table.tsx
-src/components/admin/project-settings-form.tsx
 src/components/admin/reverse-payment-controls.tsx

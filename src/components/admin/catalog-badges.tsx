@@ -1,22 +1,15 @@
 import { Badge } from "@/components/ui/container";
 import { cn } from "@/lib/utilities/cn";
+import type { CatalogBadgeLabels } from "@/lib/admin/catalog-badge-labels";
 
-const STATUS_NL: Record<string, string> = {
-  DRAFT: "Concept",
-  REVIEW: "In review",
-  PUBLISHED: "Gepubliceerd",
-  HIDDEN: "Verborgen",
-  ARCHIVED: "Gearchiveerd",
-};
-
-const PRICE_MODE_NL: Record<string, string> = {
-  FIXED: "Vaste prijs",
-  STARTING_FROM: "Vanaf-prijs",
-  QUOTE_ONLY: "Alleen offerte",
-};
-
-export function StatusBadge({ status }: { status: string }) {
-  const label = STATUS_NL[status] ?? status;
+export function StatusBadge({
+  status,
+  labels,
+}: {
+  status: string;
+  labels: CatalogBadgeLabels;
+}) {
+  const label = labels.productStatus[status] ?? status;
   const tone =
     status === "PUBLISHED"
       ? "bg-emerald-50 text-emerald-800 border-emerald-200"
@@ -28,23 +21,37 @@ export function StatusBadge({ status }: { status: string }) {
   return <Badge className={cn("border", tone)}>{label}</Badge>;
 }
 
-export function PriceModeBadge({ mode }: { mode: string }) {
+export function PriceModeBadge({
+  mode,
+  labels,
+}: {
+  mode: string;
+  labels: CatalogBadgeLabels;
+}) {
   return (
     <Badge className="border border-border">
-      {PRICE_MODE_NL[mode] ?? mode}
-      {mode === "QUOTE_ONLY" || mode === "STARTING_FROM" ? " · Alleen offerte" : ""}
+      {labels.priceMode[mode] ?? mode}
+      {mode === "QUOTE_ONLY" || mode === "STARTING_FROM"
+        ? ` · ${labels.quoteOnlySuffix}`
+        : ""}
     </Badge>
   );
 }
 
-export function EligibilityBadge({ sellable }: { sellable: boolean }) {
+export function EligibilityBadge({
+  sellable,
+  labels,
+}: {
+  sellable: boolean;
+  labels: CatalogBadgeLabels;
+}) {
   return sellable ? (
     <Badge className="border border-emerald-200 bg-emerald-50 text-emerald-800">
-      Direct verkoopbaar
+      {labels.directlySellable}
     </Badge>
   ) : (
     <Badge className="border border-rose-200 bg-rose-50 text-rose-800">
-      Checkout geblokkeerd
+      {labels.checkoutBlocked}
     </Badge>
   );
 }
@@ -54,26 +61,26 @@ export function AudienceBadges({
   b2c,
   b2bLegal,
   b2cLegal,
+  labels,
 }: {
   b2b: boolean;
   b2c: boolean;
   b2bLegal: boolean;
   b2cLegal: boolean;
+  labels: CatalogBadgeLabels;
 }) {
   return (
     <div className="flex flex-wrap gap-1.5">
       {b2b && (
         <Badge className={b2bLegal ? "border border-emerald-200" : "border border-amber-200"}>
-          {b2bLegal ? "B2B toegestaan" : "B2B doelgroep"}
+          {b2bLegal ? labels.b2bAllowed : labels.b2bAudience}
         </Badge>
       )}
       {b2c && (
         <Badge className={b2cLegal ? "border border-emerald-200" : "border border-amber-200"}>
-          {b2cLegal ? "B2C toegestaan" : "B2C doelgroep"}
+          {b2cLegal ? labels.b2cAllowed : labels.b2cAudience}
         </Badge>
       )}
     </div>
   );
 }
-
-export { STATUS_NL, PRICE_MODE_NL };

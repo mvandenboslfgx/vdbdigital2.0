@@ -17,6 +17,7 @@ import {
   LEGACY_TAWK_ADMIN_STATUS_LABEL,
 } from "@/lib/commerce/tawk-legacy-blocklist";
 import { getDictionary } from "@/i18n/get-dictionary";
+import { buildProductsTableLabels } from "@/lib/admin/products-table-labels";
 import type { BillingType, PriceMode, ProductStatus } from "@/types";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -29,7 +30,7 @@ export default async function AdminProductsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { t } = await getDictionary();
+  const { t, locale } = await getDictionary();
   const params = await searchParams;
   const access = await checkAdminAccess();
   const role = access.context?.role ?? "SUPPORT";
@@ -98,6 +99,7 @@ export default async function AdminProductsPage({
         canBulk={hasPermission(role, "products.update")}
         schemaExtended={list.schemaExtended}
         error={list.error}
+        labels={buildProductsTableLabels(t, locale)}
       />
     </Suspense>
   );

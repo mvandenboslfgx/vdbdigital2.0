@@ -157,6 +157,36 @@ export const TRANSLATION_FIELD_CODES = [
   "includedItems",
 ] as const;
 
+/** Catalogue enums used by the admin products surfaces. */
+export const PRODUCT_STATUS_CODES = [
+  "DRAFT",
+  "REVIEW",
+  "PUBLISHED",
+  "HIDDEN",
+  "ARCHIVED",
+] as const;
+
+export const PRICE_MODE_CODES = [
+  "FIXED",
+  "STARTING_FROM",
+  "QUOTE_ONLY",
+] as const;
+
+export const BILLING_TYPE_CODES = [
+  "ONE_TIME",
+  "MONTHLY",
+  "YEARLY",
+  "QUOTE_ONLY",
+] as const;
+
+/** Mirrors PROJECT_PRIORITIES in src/lib/validation/projects.ts. */
+export const PROJECT_PRIORITY_CODES = [
+  "LOW",
+  "NORMAL",
+  "HIGH",
+  "URGENT",
+] as const;
+
 /** portal_invoice_payment_method — manual registration only, no provider. */
 export const PAYMENT_METHOD_CODES = [
   "BANK_TRANSFER",
@@ -227,6 +257,22 @@ export const SCAN_STATUS_KEYS = keyMap("portal.status.scan", SCAN_STATUS_CODES);
 export const PAYMENT_METHOD_KEYS = keyMap(
   "admin.paymentMethod",
   PAYMENT_METHOD_CODES,
+);
+export const PROJECT_PRIORITY_KEYS = keyMap(
+  "admin.page.projects.priority",
+  PROJECT_PRIORITY_CODES,
+);
+export const PRODUCT_STATUS_KEYS = keyMap(
+  "admin.catalog.productStatus",
+  PRODUCT_STATUS_CODES,
+);
+export const PRICE_MODE_KEYS = keyMap(
+  "admin.catalog.priceMode",
+  PRICE_MODE_CODES,
+);
+export const BILLING_TYPE_KEYS = keyMap(
+  "admin.catalog.billingType",
+  BILLING_TYPE_CODES,
 );
 /** Long-form option labels (include the "not visible"/"live" consequence). */
 export const TRANSLATION_STATUS_KEYS = keyMap(

@@ -13,6 +13,7 @@ import {
   resolveLabelMap,
 } from "@/lib/portal/labels";
 import { getDictionary } from "@/i18n/get-dictionary";
+import { buildProjectSettingsFormLabels } from "@/lib/admin/project-settings-labels";
 
 export default async function AdminProjectSettingsPage({
   params,
@@ -45,13 +46,14 @@ export default async function AdminProjectSettingsPage({
         }}
         projectTypeLabels={resolveLabelMap(t, PROJECT_TYPE_KEYS)}
         statusLabels={resolveLabelMap(t, PROJECT_STATUS_KEYS)}
+        labels={buildProjectSettingsFormLabels(t)}
       />
 
       <div className="flex flex-wrap gap-3 pt-4 border-t border-border">
         <form action={duplicateProjectAsDraftAction}>
           <input type="hidden" name="projectId" value={project.id} />
           <Button type="submit" variant="outline">
-            Dupliceer als concept
+            {t("admin.page.projects.settings.duplicateAsDraft")}
           </Button>
         </form>
         {!project.archived_at ? (
@@ -59,11 +61,13 @@ export default async function AdminProjectSettingsPage({
             <input type="hidden" name="projectId" value={project.id} />
             <input type="hidden" name="expectedVersion" value={project.version} />
             <Button type="submit" variant="outline">
-              Archiveer project
+              {t("admin.page.projects.settings.archiveProject")}
             </Button>
           </form>
         ) : (
-          <p className="text-small text-muted">Dit project is gearchiveerd.</p>
+          <p className="text-small text-muted">
+            {t("admin.page.projects.settings.archived")}
+          </p>
         )}
       </div>
     </ProjectTabShell>

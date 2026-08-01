@@ -14,6 +14,7 @@ import { isDirectlySellableServerSide } from "@/lib/commerce/catalog-admin-eligi
 import { mergeProductForLocale } from "@/lib/commerce/product-locale-merge";
 import { TRANSLATION_STATUS_SHORT_KEYS, labelFor } from "@/lib/portal/labels";
 import { getDictionary } from "@/i18n/get-dictionary";
+import { buildCatalogBadgeLabels } from "@/lib/admin/catalog-badge-labels";
 import { isLocale, locales, withLocale, type Locale } from "@/i18n/config";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -81,6 +82,7 @@ export default async function AdminProductPreviewPage({
   const reasons = getCheckoutBlockLabelsNl(product, "B2B");
   const sellable = isDirectlySellableServerSide(product);
   const mode = resolveStoredOrDerivedPriceMode(product);
+  const badgeLabels = buildCatalogBadgeLabels(t);
 
   return (
     <div className="space-y-6">
@@ -102,9 +104,9 @@ export default async function AdminProductPreviewPage({
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <StatusBadge status={product.status} />
-          <PriceModeBadge mode={mode} />
-          <EligibilityBadge sellable={sellable} />
+          <StatusBadge status={product.status} labels={badgeLabels} />
+          <PriceModeBadge mode={mode} labels={badgeLabels} />
+          <EligibilityBadge sellable={sellable} labels={badgeLabels} />
         </div>
       </div>
 
