@@ -30,8 +30,27 @@ export type NotificationLocaleEvent = z.infer<
   typeof notificationLocaleEventSchema
 >;
 
+export type NotificationLocaleEventInput = Omit<
+  NotificationLocaleEvent,
+  "fallbackLocale"
+> & {
+  fallbackLocale?: "en";
+};
+
+/**
+ * Producer-side constructor. Email/notification producers should use this
+ * instead of hand-building payloads so consumers receive one stable contract.
+ */
+export function createNotificationLocaleEvent(
+  input: NotificationLocaleEventInput,
+): NotificationLocaleEvent {
+  return notificationLocaleEventSchema.parse(input);
+}
+
 export function parseNotificationLocaleEvent(
   input: unknown,
 ): NotificationLocaleEvent {
   return notificationLocaleEventSchema.parse(input);
 }
+
+export type LocaleSource = z.infer<typeof localeSourceSchema>;
