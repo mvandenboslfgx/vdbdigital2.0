@@ -157,6 +157,15 @@ export const TRANSLATION_FIELD_CODES = [
   "includedItems",
 ] as const;
 
+/** portal_invoice_payment_method — manual registration only, no provider. */
+export const PAYMENT_METHOD_CODES = [
+  "BANK_TRANSFER",
+  "CASH",
+  "CARD_EXTERNAL",
+  "ACCOUNTING_IMPORT",
+  "OTHER",
+] as const;
+
 export const SCAN_STATUS_CODES = [
   "NOT_REQUIRED",
   "PENDING",
@@ -215,6 +224,10 @@ export const DOCUMENT_CATEGORY_KEYS = keyMap(
   DOCUMENT_CATEGORY_CODES,
 );
 export const SCAN_STATUS_KEYS = keyMap("portal.status.scan", SCAN_STATUS_CODES);
+export const PAYMENT_METHOD_KEYS = keyMap(
+  "admin.paymentMethod",
+  PAYMENT_METHOD_CODES,
+);
 /** Long-form option labels (include the "not visible"/"live" consequence). */
 export const TRANSLATION_STATUS_KEYS = keyMap(
   "admin.translation.status",

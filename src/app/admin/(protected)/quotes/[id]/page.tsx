@@ -14,8 +14,15 @@ import {
 } from "@/server/actions/quote-actions";
 import { createInvoiceFromAcceptedQuoteAction } from "@/server/actions/invoice-actions";
 import { hasPermission } from "@/lib/auth/permissions";
+import { formatDate, formatDateTime } from "@/i18n/format-date";
 
-export const metadata: Metadata = { title: "Offerte", robots: { index: false } };
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getDictionary();
+  return {
+    title: t("admin.page.quotes.detailTitle"),
+    robots: { index: false },
+  };
+}
 
 export default async function AdminQuoteDetailPage({
   params,
@@ -24,7 +31,7 @@ export default async function AdminQuoteDetailPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ fout?: string }>;
 }) {
-  const { t } = await getDictionary();
+  const { t, locale } = await getDictionary();
   const { id } = await params;
   const { fout } = await searchParams;
   const bundle = await getAdminQuote(id);
@@ -39,7 +46,7 @@ export default async function AdminQuoteDetailPage({
     <div className="space-y-6">
       <div>
         <Link href="/admin/quotes" className="text-small text-primary hover:underline">
-          ← Offertes
+          {t("admin.page.quotes.backToList")}
         </Link>
         <h1 className="text-h1 mt-2">{quote.title}</h1>
         <p className="text-muted text-small mt-1">
@@ -50,7 +57,7 @@ export default async function AdminQuoteDetailPage({
 
       {fout ? (
         <p className="text-sm text-red-600" role="alert">
-          Actie mislukt ({fout}). Controleer status, voorwaarden en versie.
+          {t("admin.page.quotes.actionFailed", { code: fout })}
         </p>
       ) : null}
 
@@ -60,66 +67,60 @@ export default async function AdminQuoteDetailPage({
             href={`/admin/quotes/${quote.id}/edit`}
             className="min-h-11 inline-flex items-center px-4 rounded-lg border border-border text-sm"
           >
-            Bewerken
+            {t("admin.common.edit")}
           </Link>
         ) : null}
         <Link
           href={`/admin/quotes/${quote.id}/preview`}
           className="min-h-11 inline-flex items-center px-4 rounded-lg border border-border text-sm"
         >
-          Preview
+          {t("admin.common.preview")}
         </Link>
         <Link
           href={`/admin/quotes/${quote.id}/versions`}
           className="min-h-11 inline-flex items-center px-4 rounded-lg border border-border text-sm"
         >
-          Versies
+          {t("admin.page.quotes.versionsHeading")}
         </Link>
       </div>
 
       <Card>
         <dl className="grid sm:grid-cols-2 gap-3 text-small">
           <div>
-            <dt className="text-muted">Subtotaal</dt>
+            <dt className="text-muted">{t("admin.page.quotes.subtotal")}</dt>
             <dd>{formatEuro(quote.subtotal_cents, quote.currency)}</dd>
           </div>
           <div>
-            <dt className="text-muted">BTW</dt>
+            <dt className="text-muted">{t("admin.page.quotes.vat")}</dt>
             <dd>{formatEuro(quote.vat_cents, quote.currency)}</dd>
           </div>
           <div>
-            <dt className="text-muted">Totaal</dt>
+            <dt className="text-muted">{t("admin.page.quotes.total")}</dt>
             <dd className="font-semibold text-lg">
               {formatEuro(quote.total_cents, quote.currency)}
             </dd>
           </div>
           <div>
-            <dt className="text-muted">Voorwaarden</dt>
-            <dd>{quote.terms_version || "—"}</dd>
+            <dt className="text-muted">{t("admin.page.quotes.terms")}</dt>
+            <dd>{quote.terms_version || t("admin.common.empty")}</dd>
           </div>
           <div>
-            <dt className="text-muted">Geldig tot</dt>
-            <dd>
-              {quote.valid_until
-                ? new Date(quote.valid_until).toLocaleDateString("nl-NL")
-                : "—"}
-            </dd>
+            <dt className="text-muted">{t("admin.page.quotes.validUntil")}</dt>
+            <dd>{formatDate(quote.valid_until, locale)}</dd>
           </div>
           <div>
-            <dt className="text-muted">Verzonden</dt>
-            <dd>
-              {quote.sent_at
-                ? new Date(quote.sent_at).toLocaleString("nl-NL")
-                : "—"}
-            </dd>
+            <dt className="text-muted">{t("admin.page.quotes.sentAt")}</dt>
+            <dd>{formatDateTime(quote.sent_at, locale)}</dd>
           </div>
         </dl>
       </Card>
 
       <section>
-        <h2 className="text-h3 mb-3">Regels</h2>
+        <h2 className="text-h3 mb-3">{t("admin.page.quotes.lines")}</h2>
         {items.length === 0 ? (
-          <p className="text-muted text-small">Nog geen regels.</p>
+          <p className="text-muted text-small">
+            {t("admin.page.quotes.noLines")}
+          </p>
         ) : (
           <ul className="space-y-2">
             {items.map(
@@ -136,7 +137,10 @@ export default async function AdminQuoteDetailPage({
                 >
                   <span>
                     {item.title}
-                    {item.is_optional ? " (optioneel)" : ""} · {item.quantity}×
+                    {item.is_optional
+                      ? ` ${t("admin.page.quotes.optionalSuffix")}`
+                      : ""}{" "}
+                    · {item.quantity}×
                   </span>
                   <span>{formatEuro(item.total_cents, quote.currency)}</span>
                 </li>
@@ -148,16 +152,21 @@ export default async function AdminQuoteDetailPage({
 
       {acceptance ? (
         <Card>
-          <h2 className="text-h3 mb-2">Acceptatie</h2>
+          <h2 className="text-h3 mb-2">
+            {t("admin.page.quotes.acceptanceHeading")}
+          </h2>
           <p className="text-small">
-            Digitale offerteacceptatie op{" "}
-            {new Date(acceptance.accepted_at).toLocaleString("nl-NL")} ·{" "}
-            {formatEuro(acceptance.accepted_total_cents, acceptance.accepted_currency)}{" "}
-            · voorwaarden {acceptance.accepted_terms_version}
+            {t("admin.page.quotes.acceptanceLine", {
+              date: formatDateTime(acceptance.accepted_at, locale),
+              total: formatEuro(
+                acceptance.accepted_total_cents,
+                acceptance.accepted_currency,
+              ),
+              terms: acceptance.accepted_terms_version,
+            })}
           </p>
           <p className="text-small text-muted mt-2">
-            Dit is geen gekwalificeerde elektronische handtekening en start geen
-            betaling.
+            {t("admin.page.quotes.acceptanceNote")}
           </p>
         </Card>
       ) : null}
@@ -168,7 +177,7 @@ export default async function AdminQuoteDetailPage({
           <form action={markQuoteReadyAction}>
             <input type="hidden" name="quoteId" value={quote.id} />
             <input type="hidden" name="expectedVersion" value={quote.version} />
-            <Button type="submit">Markeer als gereed</Button>
+            <Button type="submit">{t("admin.page.quotes.markReady")}</Button>
           </form>
         ) : null}
         {hasPermission(ctx.role, "quotes.send") &&
@@ -176,7 +185,7 @@ export default async function AdminQuoteDetailPage({
           <form action={sendQuoteAction}>
             <input type="hidden" name="quoteId" value={quote.id} />
             <input type="hidden" name="expectedVersion" value={quote.version} />
-            <Button type="submit">Verzenden</Button>
+            <Button type="submit">{t("admin.page.quotes.send")}</Button>
           </form>
         ) : null}
         {hasPermission(ctx.role, "quotes.withdraw") &&
@@ -187,11 +196,11 @@ export default async function AdminQuoteDetailPage({
             <input
               name="reason"
               required
-              placeholder="Reden intrekking"
+              placeholder={t("admin.page.quotes.withdrawReason")}
               className="min-h-11 px-3 rounded-lg border border-border text-sm"
             />
             <Button type="submit" variant="outline">
-              Intrekken
+              {t("admin.page.quotes.withdraw")}
             </Button>
           </form>
         ) : null}
@@ -200,15 +209,14 @@ export default async function AdminQuoteDetailPage({
           <form action={createInvoiceFromAcceptedQuoteAction}>
             <input type="hidden" name="quoteId" value={quote.id} />
             <Button type="submit" variant="outline">
-              Factuurconcept maken
+              {t("admin.page.quotes.createInvoiceDraft")}
             </Button>
           </form>
         ) : null}
       </div>
 
       <p className="text-small text-muted">
-        Versies in snapshot: {versions.length}. PDF-generatie volgt later; preview
-        is printbare HTML zonder nep-PDF.
+        {t("admin.page.quotes.snapshotNote", { count: versions.length })}
       </p>
     </div>
   );

@@ -870,6 +870,8 @@ const nl: Messages = {
       colActive: "Actief",
       colDate: "Datum",
       colAmount: "Bedrag",
+      versionNumber: "Versie {number}",
+      checksum: "checksum",
     },
     page: {
       dashboard: {
@@ -973,6 +975,34 @@ const nl: Messages = {
         noOrganizations: "Maak eerst een actieve organisatie aan.",
         editTitle: "Offerte bewerken",
         backToQuote: "← Offerte",
+        detailTitle: "Offerte",
+        backToList: "← Offertes",
+        versionsTitle: "Offerteversies",
+        versionsHeading: "Versies",
+        noVersions: "Nog geen verzonden snapshots. Verzenden maakt versie 1.",
+        actionFailed:
+          "Actie mislukt ({code}). Controleer status, voorwaarden en versie.",
+        subtotal: "Subtotaal",
+        vat: "BTW",
+        total: "Totaal",
+        terms: "Voorwaarden",
+        validUntil: "Geldig tot",
+        sentAt: "Verzonden",
+        lines: "Regels",
+        noLines: "Nog geen regels.",
+        optionalSuffix: "(optioneel)",
+        acceptanceHeading: "Acceptatie",
+        acceptanceLine:
+          "Digitale offerteacceptatie op {date} · {total} · voorwaarden {terms}",
+        acceptanceNote:
+          "Dit is geen gekwalificeerde elektronische handtekening en start geen betaling.",
+        markReady: "Markeer als gereed",
+        send: "Verzenden",
+        withdrawReason: "Reden intrekking",
+        withdraw: "Intrekken",
+        createInvoiceDraft: "Factuurconcept maken",
+        snapshotNote:
+          "Versies in snapshot: {count}. PDF-generatie volgt later; preview is printbare HTML zonder nep-PDF.",
       },
       invoices: {
         title: "Facturen",
@@ -987,6 +1017,38 @@ const nl: Messages = {
           "Concept opslaan. Uitgeven en betalen zijn aparte stappen — geen Mollie.",
         editTitle: "Factuur bewerken",
         submitCreate: "Concept maken",
+        detailTitle: "Factuur",
+        versionsTitle: "Factuurversies",
+        versionsHeading: "Versies",
+        backToInvoice: "← Terug",
+        noVersions:
+          "Nog geen uitgegeven snapshot. Uitgeven maakt een onveranderlijke versie.",
+        total: "Totaal",
+        paid: "Betaald",
+        outstanding: "Openstaand",
+        issueDate: "Uitgifte",
+        dueDate: "Verval",
+        quoteLink: "Offerte:",
+        lines: "Regels",
+        recordedPayments: "Geregistreerde betalingen",
+        paymentReversed: "Teruggedraaid",
+        paymentActive: "Actief",
+        reversedOn: "Administratief teruggedraaid op {date}",
+        reversalReasonRecorded: " · interne reden vastgelegd",
+        creditNotes: "Creditnota's",
+        markReady: "Markeer als gereed",
+        issue: "Uitgeven",
+        startCreditNote: "Creditnota starten",
+        recordPaymentHeading: "Betaling registreren",
+        recordPaymentNote:
+          "Handmatige registratie — geen providerbetaling of Mollie-call.",
+        amountEuros: "Bedrag (EUR)",
+        paymentDate: "Datum",
+        paymentMethod: "Methode",
+        externalReference: "Externe referentie",
+        recordSubmit: "Registreren",
+        snapshotNote:
+          "Snapshots: {count}. Print-HTML preview; geen nep-PDF. Online betalen is niet actief.",
       },
       documents: {
         title: "Documenten",
@@ -1349,6 +1411,13 @@ const nl: Messages = {
       deleteConfirm:
         "Product definitief verwijderen? Dit kan alleen als er geen orders aan gekoppeld zijn.",
       safeDelete: "Veilig verwijderen",
+    },
+    paymentMethod: {
+      BANK_TRANSFER: "Bankoverschrijving",
+      CASH: "Contant",
+      CARD_EXTERNAL: "Externe kaart",
+      ACCOUNTING_IMPORT: "Boekhoudimport",
+      OTHER: "Overig",
     },
     /**
      * Vertaalworkflow voor producten (product_translations). Statuscodes zijn

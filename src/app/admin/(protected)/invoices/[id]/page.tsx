@@ -8,9 +8,12 @@ import { formatEuro } from "@/server/repositories/portal";
 import {
   INVOICE_STATUS_KEYS,
   INVOICE_TYPE_KEYS,
+  PAYMENT_METHOD_KEYS,
   labelFor,
+  labelOptions,
 } from "@/lib/portal/labels";
 import { getDictionary } from "@/i18n/get-dictionary";
+import { formatDate, formatDateTime } from "@/i18n/format-date";
 import { hasPermission } from "@/lib/auth/permissions";
 import { requireAdmin } from "@/server/auth/require-admin";
 import {
@@ -22,14 +25,20 @@ import {
 import { customerFacingInvoiceStatus } from "@/lib/commerce/invoice-status";
 import { ReversePaymentControls } from "@/components/admin/reverse-payment-controls";
 
-export const metadata: Metadata = { title: "Factuur", robots: { index: false } };
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getDictionary();
+  return {
+    title: t("admin.page.invoices.detailTitle"),
+    robots: { index: false },
+  };
+}
 
 export default async function AdminInvoiceDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { t } = await getDictionary();
+  const { t, locale } = await getDictionary();
   const { id } = await params;
   const ctx = await requireAdmin();
   const bundle = await getAdminInvoice(id);
@@ -51,11 +60,13 @@ export default async function AdminInvoiceDetailPage({
       <div className="flex flex-wrap justify-between gap-3">
         <div>
           <p className="text-small text-muted">{invoice.invoice_number}</p>
-          <h1 className="text-h1">{invoice.title || "Factuur"}</h1>
+          <h1 className="text-h1">
+            {invoice.title || t("admin.page.invoices.detailTitle")}
+          </h1>
           <p className="text-muted text-small mt-1">
             {labelFor(t, INVOICE_TYPE_KEYS, invoice.invoice_type)} ·{" "}
             {labelFor(t, INVOICE_STATUS_KEYS, status)} ·{" "}
-            {org?.trade_name || org?.legal_name || "—"}
+            {org?.trade_name || org?.legal_name || t("admin.common.empty")}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -63,20 +74,20 @@ export default async function AdminInvoiceDetailPage({
             href={`/admin/invoices/${invoice.id}/preview`}
             className="rounded-lg border border-border px-4 py-2 text-sm min-h-11 inline-flex items-center"
           >
-            Preview
+            {t("admin.common.preview")}
           </Link>
           <Link
             href={`/admin/invoices/${invoice.id}/versions`}
             className="rounded-lg border border-border px-4 py-2 text-sm min-h-11 inline-flex items-center"
           >
-            Versies
+            {t("admin.page.invoices.versionsHeading")}
           </Link>
           {["DRAFT", "IN_REVIEW", "READY"].includes(invoice.status) ? (
             <Link
               href={`/admin/invoices/${invoice.id}/edit`}
               className="rounded-lg border border-border px-4 py-2 text-sm min-h-11 inline-flex items-center"
             >
-              Bewerken
+              {t("admin.common.edit")}
             </Link>
           ) : null}
         </div>
@@ -84,23 +95,30 @@ export default async function AdminInvoiceDetailPage({
 
       <Card className="p-5 space-y-2 text-small">
         <p>
-          Totaal:{" "}
+          {t("admin.page.invoices.total")}:{" "}
           <strong>{formatEuro(invoice.total_cents, invoice.currency)}</strong>
         </p>
         <p>
-          Betaald: {formatEuro(invoice.amount_paid_cents ?? 0, invoice.currency)}
+          {t("admin.page.invoices.paid")}:{" "}
+          {formatEuro(invoice.amount_paid_cents ?? 0, invoice.currency)}
         </p>
         <p>
-          Openstaand:{" "}
+          {t("admin.page.invoices.outstanding")}:{" "}
           <strong>
             {formatEuro(invoice.amount_due_cents ?? 0, invoice.currency)}
           </strong>
         </p>
-        <p>Uitgifte: {invoice.issue_date?.slice(0, 10) || "—"}</p>
-        <p>Verval: {invoice.due_date?.slice(0, 10) || "—"}</p>
+        <p>
+          {t("admin.page.invoices.issueDate")}:{" "}
+          {formatDate(invoice.issue_date, locale)}
+        </p>
+        <p>
+          {t("admin.page.invoices.dueDate")}:{" "}
+          {formatDate(invoice.due_date, locale)}
+        </p>
         {invoice.quote ? (
           <p>
-            Offerte:{" "}
+            {t("admin.page.invoices.quoteLink")}{" "}
             <Link
               href={`/admin/quotes/${(invoice.quote as { id: string }).id}`}
               className="text-primary underline-offset-2 hover:underline"
@@ -112,7 +130,7 @@ export default async function AdminInvoiceDetailPage({
       </Card>
 
       <div>
-        <h2 className="text-h3 mb-3">Regels</h2>
+        <h2 className="text-h3 mb-3">{t("admin.page.invoices.lines")}</h2>
         <ul className="space-y-2">
           {items.map((item) => (
             <li
@@ -134,7 +152,9 @@ export default async function AdminInvoiceDetailPage({
 
       {payments.length > 0 ? (
         <div>
-          <h2 className="text-h3 mb-3">Geregistreerde betalingen</h2>
+          <h2 className="text-h3 mb-3">
+            {t("admin.page.invoices.recordedPayments")}
+          </h2>
           <ul className="space-y-2 text-small">
             {payments.map((p) => {
               const reversed = Boolean(p.reversed_at);
@@ -144,23 +164,21 @@ export default async function AdminInvoiceDetailPage({
                     <div>
                       <p>
                         {formatEuro(p.amount_cents, p.currency)} ·{" "}
-                        {p.payment_method} · {p.payment_date}
-                        {reversed ? (
-                          <span className="ml-2 rounded-md border border-border px-1.5 py-0.5 text-xs text-muted">
-                            Teruggedraaid
-                          </span>
-                        ) : (
-                          <span className="ml-2 rounded-md border border-border px-1.5 py-0.5 text-xs text-muted">
-                            Actief
-                          </span>
-                        )}
+                        {labelFor(t, PAYMENT_METHOD_KEYS, p.payment_method)} ·{" "}
+                        {formatDate(p.payment_date, locale)}
+                        <span className="ml-2 rounded-md border border-border px-1.5 py-0.5 text-xs text-muted">
+                          {reversed
+                            ? t("admin.page.invoices.paymentReversed")
+                            : t("admin.page.invoices.paymentActive")}
+                        </span>
                       </p>
                       {reversed && p.reversed_at ? (
                         <p className="text-muted mt-1 text-xs">
-                          Administratief teruggedraaid op{" "}
-                          {new Date(p.reversed_at).toLocaleString("nl-NL")}
+                          {t("admin.page.invoices.reversedOn", {
+                            date: formatDateTime(p.reversed_at, locale),
+                          })}
                           {p.reversal_reason
-                            ? ` · interne reden vastgelegd`
+                            ? t("admin.page.invoices.reversalReasonRecorded")
                             : ""}
                         </p>
                       ) : null}
@@ -187,7 +205,9 @@ export default async function AdminInvoiceDetailPage({
 
       {creditNotes.length > 0 ? (
         <div>
-          <h2 className="text-h3 mb-3">Creditnota&apos;s</h2>
+          <h2 className="text-h3 mb-3">
+            {t("admin.page.invoices.creditNotes")}
+          </h2>
           <ul className="space-y-2 text-small">
             {creditNotes.map((c) => (
               <li key={c.id}>
@@ -211,7 +231,9 @@ export default async function AdminInvoiceDetailPage({
           <form action={markInvoiceReadyAction}>
             <input type="hidden" name="invoiceId" value={invoice.id} />
             <input type="hidden" name="expectedVersion" value={invoice.version} />
-            <Button type="submit">Markeer als gereed</Button>
+            <Button type="submit">
+              {t("admin.page.invoices.markReady")}
+            </Button>
           </form>
         ) : null}
         {hasPermission(ctx.role, "invoices.issue") &&
@@ -219,7 +241,7 @@ export default async function AdminInvoiceDetailPage({
           <form action={issueInvoiceAction}>
             <input type="hidden" name="invoiceId" value={invoice.id} />
             <input type="hidden" name="expectedVersion" value={invoice.version} />
-            <Button type="submit">Uitgeven</Button>
+            <Button type="submit">{t("admin.page.invoices.issue")}</Button>
           </form>
         ) : null}
         {hasPermission(ctx.role, "invoices.create_credit_note") &&
@@ -230,7 +252,7 @@ export default async function AdminInvoiceDetailPage({
           <form action={createCreditNoteAction}>
             <input type="hidden" name="invoiceId" value={invoice.id} />
             <Button type="submit" variant="outline">
-              Creditnota starten
+              {t("admin.page.invoices.startCreditNote")}
             </Button>
           </form>
         ) : null}
@@ -239,16 +261,18 @@ export default async function AdminInvoiceDetailPage({
       {hasPermission(ctx.role, "invoices.record_payment") &&
       ["OPEN", "PARTIALLY_PAID", "OVERDUE", "ISSUED"].includes(invoice.status) ? (
         <Card className="p-5 space-y-3">
-          <h2 className="text-h3">Betaling registreren</h2>
+          <h2 className="text-h3">
+            {t("admin.page.invoices.recordPaymentHeading")}
+          </h2>
           <p className="text-small text-muted">
-            Handmatige registratie — geen providerbetaling of Mollie-call.
+            {t("admin.page.invoices.recordPaymentNote")}
           </p>
           <form action={recordInvoicePaymentAction} className="flex flex-wrap gap-3 items-end">
             <input type="hidden" name="invoiceId" value={invoice.id} />
             <input type="hidden" name="expectedVersion" value={invoice.version} />
             <div>
               <label className="block text-small mb-1" htmlFor="amountEuros">
-                Bedrag (EUR)
+                {t("admin.page.invoices.amountEuros")}
               </label>
               <input
                 id="amountEuros"
@@ -259,7 +283,7 @@ export default async function AdminInvoiceDetailPage({
             </div>
             <div>
               <label className="block text-small mb-1" htmlFor="paymentDate">
-                Datum
+                {t("admin.page.invoices.paymentDate")}
               </label>
               <input
                 id="paymentDate"
@@ -271,7 +295,7 @@ export default async function AdminInvoiceDetailPage({
             </div>
             <div>
               <label className="block text-small mb-1" htmlFor="paymentMethod">
-                Methode
+                {t("admin.page.invoices.paymentMethod")}
               </label>
               <select
                 id="paymentMethod"
@@ -279,26 +303,27 @@ export default async function AdminInvoiceDetailPage({
                 className="min-h-11 px-3 rounded-lg border border-border text-sm"
                 defaultValue="BANK_TRANSFER"
               >
-                <option value="BANK_TRANSFER">Bankoverschrijving</option>
-                <option value="CASH">Contant</option>
-                <option value="CARD_EXTERNAL">Externe kaart</option>
-                <option value="ACCOUNTING_IMPORT">Boekhoudimport</option>
-                <option value="OTHER">Overig</option>
+                {labelOptions(t, PAYMENT_METHOD_KEYS).map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
             </div>
             <input
               name="externalReference"
-              placeholder="Externe referentie"
+              placeholder={t("admin.page.invoices.externalReference")}
               className="min-h-11 px-3 rounded-lg border border-border text-sm"
             />
-            <Button type="submit">Registreren</Button>
+            <Button type="submit">
+              {t("admin.page.invoices.recordSubmit")}
+            </Button>
           </form>
         </Card>
       ) : null}
 
       <p className="text-small text-muted">
-        Snapshots: {versions.length}. Print-HTML preview; geen nep-PDF. Online
-        betalen is niet actief.
+        {t("admin.page.invoices.snapshotNote", { count: versions.length })}
       </p>
     </div>
   );

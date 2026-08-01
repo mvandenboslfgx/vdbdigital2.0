@@ -860,6 +860,8 @@ const en = {
       colActive: "Active",
       colDate: "Date",
       colAmount: "Amount",
+      versionNumber: "Version {number}",
+      checksum: "checksum",
     },
     page: {
       dashboard: {
@@ -962,6 +964,39 @@ const en = {
         noOrganizations: "Create an active organisation first.",
         editTitle: "Edit quote",
         backToQuote: "← Quote",
+        detailTitle: "Quote",
+        backToList: "← Quotes",
+        versionsTitle: "Quote versions",
+        versionsHeading: "Versions",
+        noVersions: "No sent snapshots yet. Sending creates version 1.",
+        actionFailed:
+          "Action failed ({code}). Check the status, terms and version.",
+        subtotal: "Subtotal",
+        vat: "VAT",
+        total: "Total",
+        terms: "Terms",
+        validUntil: "Valid until",
+        sentAt: "Sent",
+        lines: "Lines",
+        noLines: "No lines yet.",
+        optionalSuffix: "(optional)",
+        acceptanceHeading: "Acceptance",
+        /**
+         * `acceptanceNote` repeats the disclaimer already approved for the
+         * customer-facing portal (`portal.quoteAccept.confirmNote`) verbatim, so
+         * admins and customers read the same legal statement.
+         */
+        acceptanceLine:
+          "Digital quote acceptance on {date} · {total} · terms {terms}",
+        acceptanceNote:
+          "This is not a qualified electronic signature and does not start a payment.",
+        markReady: "Mark as ready",
+        send: "Send",
+        withdrawReason: "Reason for withdrawal",
+        withdraw: "Withdraw",
+        createInvoiceDraft: "Create invoice draft",
+        snapshotNote:
+          "Versions in snapshot: {count}. PDF generation follows later; the preview is printable HTML, not a fake PDF.",
       },
       invoices: {
         title: "Invoices",
@@ -976,6 +1011,38 @@ const en = {
           "Save a draft. Issuing and payment are separate steps — no Mollie.",
         editTitle: "Edit invoice",
         submitCreate: "Create draft",
+        detailTitle: "Invoice",
+        versionsTitle: "Invoice versions",
+        versionsHeading: "Versions",
+        backToInvoice: "← Back",
+        noVersions:
+          "No issued snapshot yet. Issuing creates an immutable version.",
+        total: "Total",
+        paid: "Paid",
+        outstanding: "Outstanding",
+        issueDate: "Issued",
+        dueDate: "Due",
+        quoteLink: "Quote:",
+        lines: "Lines",
+        recordedPayments: "Recorded payments",
+        paymentReversed: "Reversed",
+        paymentActive: "Active",
+        reversedOn: "Reversed for administration on {date}",
+        reversalReasonRecorded: " · internal reason recorded",
+        creditNotes: "Credit notes",
+        markReady: "Mark as ready",
+        issue: "Issue",
+        startCreditNote: "Start credit note",
+        recordPaymentHeading: "Record payment",
+        recordPaymentNote:
+          "Manual registration — no provider payment or Mollie call.",
+        amountEuros: "Amount (EUR)",
+        paymentDate: "Date",
+        paymentMethod: "Method",
+        externalReference: "External reference",
+        recordSubmit: "Record",
+        snapshotNote:
+          "Snapshots: {count}. Print-HTML preview; no fake PDF. Paying online is not active.",
       },
       documents: {
         title: "Documents",
@@ -1341,6 +1408,17 @@ const en = {
       deleteConfirm:
         "Permanently delete this product? This is only possible when no orders are linked.",
       safeDelete: "Safe delete",
+    },
+    /**
+     * portal_invoice_payment_method display labels. Registration is manual, so
+     * none of these imply a payment provider.
+     */
+    paymentMethod: {
+      BANK_TRANSFER: "Bank transfer",
+      CASH: "Cash",
+      CARD_EXTERNAL: "External card",
+      ACCOUNTING_IMPORT: "Accounting import",
+      OTHER: "Other",
     },
     /**
      * Product translation workflow (product_translations). Status codes are DB
