@@ -652,6 +652,23 @@ const en = {
   empty: {
     shopPreparing: "Shop is being prepared",
   },
+  portal: {
+    navAria: "Client portal navigation",
+    brandAria: "Client portal",
+    overview: "Overview",
+    projects: "Projects",
+    quotes: "Quotes",
+    invoices: "Invoices",
+    documents: "Documents",
+    messages: "Messages",
+    support: "Support",
+    notifications: "Notifications",
+    profile: "Profile",
+    security: "Security",
+    logout: "Log out",
+    openMenu: "Open menu",
+    closeMenu: "Close menu",
+  },
 } as const satisfies Record<string, unknown>;
 
 type DeepStringify<T> = {

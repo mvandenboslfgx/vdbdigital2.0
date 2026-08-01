@@ -662,6 +662,23 @@ const nl: Messages = {
   empty: {
     shopPreparing: "Shop wordt voorbereid",
   },
+  portal: {
+    navAria: "Klantenportaal navigatie",
+    brandAria: "Klantenportaal",
+    overview: "Overzicht",
+    projects: "Projecten",
+    quotes: "Offertes",
+    invoices: "Facturen",
+    documents: "Documenten",
+    messages: "Berichten",
+    support: "Support",
+    notifications: "Meldingen",
+    profile: "Profiel",
+    security: "Beveiliging",
+    logout: "Uitloggen",
+    openMenu: "Menu openen",
+    closeMenu: "Menu sluiten",
+  },
 };
 
 export default nl;

@@ -7,6 +7,7 @@ import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import { buildLocaleAlternates } from "@/i18n/seo";
 import { paths } from "@/i18n/config";
 import { LocaleLink } from "@/i18n/locale-link";
+import { localizeProduct } from "@/i18n/localize-product";
 import {
   getPublicShopProductBySlug,
   publicShopCtaLabel,
@@ -51,8 +52,9 @@ export default async function ShopProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
   const locale = await getLocale();
   const { t } = await getDictionary(locale);
-  const product = await getPublicShopProductBySlug(slug);
-  if (!product) notFound();
+  const raw = await getPublicShopProductBySlug(slug);
+  if (!raw) notFound();
+  const product = localizeProduct(raw, locale);
 
   const price = publicShopPriceDisplay(product, locale);
   const cta = publicShopCtaLabel(product, locale);

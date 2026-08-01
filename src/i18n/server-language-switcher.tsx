@@ -1,5 +1,6 @@
 import "server-only";
 
+import { Globe } from "lucide-react";
 import { headers } from "next/headers";
 import { cn } from "@/lib/utilities/cn";
 import { getLocale } from "@/i18n/get-dictionary";
@@ -12,8 +13,8 @@ import {
 } from "@/i18n/config";
 
 /**
- * Server-rendered language switcher — no client JS / Suspense / useSearchParams.
- * Query strings are intentionally not preserved (marketing pages rarely need them).
+ * Premium server language switcher (ADR-001 Phase 7).
+ * Native language names + globe; no flags as sole identifier.
  */
 export async function ServerLanguageSwitcher({
   className,
@@ -26,20 +27,24 @@ export async function ServerLanguageSwitcher({
   const headerStore = await headers();
   const pathname = headerStore.get("x-pathname") ?? "/";
   const { pathname: bare } = stripLocalePrefix(pathname);
-  const groupLabel = locale === "nl" ? "Taal" : "Language";
+  const groupLabel = locale === "nl" ? "Taal kiezen" : "Choose language";
 
   return (
     <div
       className={cn(
-        "inline-flex shrink-0 flex-nowrap items-center gap-0.5 rounded-md border border-border/80 p-0.5",
+        "inline-flex shrink-0 flex-nowrap items-center gap-1 rounded-md border border-border/80 p-0.5",
         className,
       )}
       role="group"
       aria-label={groupLabel}
     >
+      <span className="inline-flex h-9 w-9 items-center justify-center text-muted" aria-hidden>
+        <Globe className="h-4 w-4" strokeWidth={1.75} />
+      </span>
       {locales.map((code) => {
         const href = withLocale(bare, code);
         const active = code === locale;
+        const label = localeLabels[code as Locale];
         return (
           <a
             key={code}
@@ -50,15 +55,15 @@ export async function ServerLanguageSwitcher({
               "text-nowrap-safe inline-flex items-center justify-center rounded px-2.5 font-medium transition-colors touch-manipulation",
               compact
                 ? "min-h-9 min-w-[2.25rem] text-xs"
-                : "min-h-10 min-w-[2.5rem] text-small",
+                : "min-h-10 px-3 text-small",
               active
                 ? "bg-primary text-primary-fg"
                 : "text-muted hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
             )}
             aria-current={active ? "true" : undefined}
-            aria-label={`${code.toUpperCase()} — ${localeLabels[code as Locale]}`}
+            aria-label={label}
           >
-            {code.toUpperCase()}
+            {label}
           </a>
         );
       })}

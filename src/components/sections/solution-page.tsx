@@ -4,7 +4,8 @@ import { Container, Section, Card } from "@/components/ui/container";
 import { LocaleLinkButton } from "@/components/ui/locale-link-button";
 import { LocaleLink } from "@/i18n/locale-link";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
-import { paths } from "@/i18n/config";
+import { paths, type Locale } from "@/i18n/config";
+import { buildLocaleAlternates } from "@/i18n/seo";
 import { BookingCta } from "@/components/commercial/booking-cta";
 
 export interface SolutionPageSections {
@@ -276,12 +277,17 @@ export function createSolutionMetadata(
   title: string,
   description: string,
   path: string,
+  locale: Locale = "en",
 ): Metadata {
   const pageTitle = title.replace(/\s*\|\s*VDB Digital Software\s*$/i, "").trim();
   return {
     title: pageTitle,
     description,
-    alternates: { canonical: path },
-    openGraph: { title: pageTitle, description },
+    alternates: buildLocaleAlternates(path, locale),
+    openGraph: {
+      title: pageTitle,
+      description,
+      locale: locale === "nl" ? "nl_NL" : "en_GB",
+    },
   };
 }
