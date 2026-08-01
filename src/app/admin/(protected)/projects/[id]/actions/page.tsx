@@ -4,6 +4,7 @@ import { CreateActionForm } from "@/components/admin/project-forms";
 import { getAdminProjectBundle } from "@/server/repositories/admin-projects";
 import { ACTION_STATUS_KEYS, labelFor } from "@/lib/portal/labels";
 import { getDictionary } from "@/i18n/get-dictionary";
+import { buildActionFormLabels } from "@/lib/admin/project-forms-labels";
 
 export default async function AdminProjectActionsPage({
   params,
@@ -17,9 +18,11 @@ export default async function AdminProjectActionsPage({
 
   return (
     <ProjectTabShell projectId={id} active="actions">
-      <CreateActionForm projectId={id} />
+      <CreateActionForm projectId={id} labels={buildActionFormLabels(t)} />
       {bundle.actions.length === 0 ? (
-        <p className="text-muted text-small">Nog geen acties.</p>
+        <p className="text-muted text-small">
+          {t("admin.projectDetail.noActions")}
+        </p>
       ) : (
         <ul className="space-y-3">
           {bundle.actions.map(
@@ -37,11 +40,15 @@ export default async function AdminProjectActionsPage({
                 <p className="text-small text-muted mt-1">
                   {labelFor(t, ACTION_STATUS_KEYS, a.status)} ·{" "}
                   {a.assigned_to_type === "CUSTOMER"
-                    ? "Klant"
+                    ? t("admin.projectDetail.assignedCustomer")
                     : a.assigned_to_type === "INTERNAL"
-                      ? "Intern"
-                      : "Niet toegewezen"}
-                  {a.customer_visible ? " · zichtbaar" : " · verborgen"}
+                      ? t("admin.projectDetail.assignedInternal")
+                      : t("admin.projectDetail.assignedUnassigned")}
+                  {` · ${
+                    a.customer_visible
+                      ? t("admin.projectDetail.visibleTag")
+                      : t("admin.projectDetail.hiddenTag")
+                  }`}
                 </p>
                 {a.description ? (
                   <p className="text-small mt-2 whitespace-pre-wrap">

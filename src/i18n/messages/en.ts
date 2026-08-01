@@ -1135,6 +1135,61 @@ const en = {
       },
     },
     /**
+     * Project detail tabs and the project client forms. The short inline tags
+     * (`· internal`, `· customer-visible`) stay lowercase: they are appended to
+     * an already-capitalised status label, not sentences of their own.
+     */
+    projectDetail: {
+      noMilestones: "No milestones yet.",
+      noActions: "No actions yet.",
+      noActivity: "No activity yet.",
+      noActivityRecorded: "No activity recorded yet.",
+      noFeedback: "No feedback yet.",
+      noDeliverables: "No deliverables yet. Files follow in the documents phase.",
+      noDocuments: "No documents linked to this project yet.",
+      customerVisibleTag: "customer-visible",
+      internalTag: "internal",
+      customerActionTag: "customer action",
+      visibleTag: "visible",
+      hiddenTag: "hidden",
+      customerTag: "customer",
+      assignedCustomer: "Customer",
+      assignedInternal: "Internal",
+      assignedUnassigned: "Unassigned",
+      sharedWithCustomer: "Shared with the customer",
+      deadline: "Deadline: {date}",
+      rejection: "Rejection: {reason}",
+      progress: "Progress",
+      openCustomerActions: "Open customer actions",
+      openInternalActions: "Open internal actions",
+      nextMilestone: "Next milestone",
+      noOpenMilestone: "No open milestone",
+      description: "Description",
+      planning: "Planning",
+      planningStart: "Start",
+      planningPlanned: "Planned",
+      planningActual: "Actual",
+      recentActivity: "Recent activity",
+      organizationFallback: "Organisation",
+    },
+    projectForms: {
+      addMilestone: "Add milestone",
+      milestoneDescription: "Description (internal or visible)",
+      customerVisible: "Visible to the customer",
+      requiresCustomerAction: "Requires customer action",
+      saveMilestone: "Save milestone",
+      addAction: "Add action",
+      customerVisibleRequired: "Customer-visible (required for a customer action)",
+      saveAction: "Save action",
+      deliverableHeading: "Deliverable (metadata)",
+      deliverableNote:
+        "Files follow in the documents phase. Only the title and approval status here.",
+      requiresApproval: "Requires customer approval",
+      saveDraft: "Save draft",
+      sharing: "Sharing…",
+      shareWithCustomer: "Share with the customer",
+    },
+    /**
      * Quote and invoice line-item editors. Both render the same line grid and
      * indicative-totals block, so the shared copy lives here once; the couple
      * of surface-specific strings stay under `admin.page.quotes|invoices`.

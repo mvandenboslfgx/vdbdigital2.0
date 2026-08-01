@@ -38,7 +38,7 @@ export default async function AdminProjectDocumentsPage({
             label:
               bundle.project.organization?.trade_name ||
               bundle.project.organization?.legal_name ||
-              "Organisatie",
+              t("admin.projectDetail.organizationFallback"),
           },
         ]}
         defaultOrganizationId={bundle.project.organization_id}
@@ -49,7 +49,7 @@ export default async function AdminProjectDocumentsPage({
 
       {documents.length === 0 ? (
         <p className="text-muted text-small">
-          Nog geen documenten gekoppeld aan dit project.
+          {t("admin.projectDetail.noDocuments")}
         </p>
       ) : (
         <ul className="space-y-2">

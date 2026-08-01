@@ -36,13 +36,6 @@ src/app/admin/(protected)/invoices/[id]/preview/page.tsx
 src/app/admin/(protected)/invoices/[id]/versions/page.tsx
 src/app/admin/(protected)/quotes/[id]/page.tsx
 src/app/admin/(protected)/quotes/[id]/versions/page.tsx
-src/app/admin/(protected)/projects/[id]/actions/page.tsx
-src/app/admin/(protected)/projects/[id]/activity/page.tsx
-src/app/admin/(protected)/projects/[id]/deliverables/page.tsx
-src/app/admin/(protected)/projects/[id]/documents/page.tsx
-src/app/admin/(protected)/projects/[id]/feedback/page.tsx
-src/app/admin/(protected)/projects/[id]/milestones/page.tsx
-src/app/admin/(protected)/projects/[id]/overview/page.tsx
 #
 # --- Admin editor / manager client components --------------------------------
 # Large client components whose copy has to be resolved server-side and passed
@@ -51,6 +44,5 @@ src/app/admin/(protected)/projects/[id]/overview/page.tsx
 # src/lib/admin/*-labels.ts; the components below still carry Dutch labels and
 # need the same treatment.
 src/components/admin/admin-products-table.tsx
-src/components/admin/project-forms.tsx
 src/components/admin/project-settings-form.tsx
 src/components/admin/reverse-payment-controls.tsx

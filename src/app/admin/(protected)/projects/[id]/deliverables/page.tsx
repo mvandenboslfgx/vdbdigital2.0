@@ -7,6 +7,10 @@ import {
 import { getAdminProjectBundle } from "@/server/repositories/admin-projects";
 import { DELIVERABLE_STATUS_KEYS, labelFor } from "@/lib/portal/labels";
 import { getDictionary } from "@/i18n/get-dictionary";
+import {
+  buildDeliverableFormLabels,
+  buildShareDeliverableLabels,
+} from "@/lib/admin/project-forms-labels";
 
 export default async function AdminProjectDeliverablesPage({
   params,
@@ -20,10 +24,13 @@ export default async function AdminProjectDeliverablesPage({
 
   return (
     <ProjectTabShell projectId={id} active="deliverables">
-      <CreateDeliverableForm projectId={id} />
+      <CreateDeliverableForm
+        projectId={id}
+        labels={buildDeliverableFormLabels(t)}
+      />
       {bundle.deliverables.length === 0 ? (
         <p className="text-muted text-small">
-          Nog geen opleveringen. Bestanden volgen in de documentenfase.
+          {t("admin.projectDetail.noDeliverables")}
         </p>
       ) : (
         <ul className="space-y-3">
@@ -43,7 +50,11 @@ export default async function AdminProjectDeliverablesPage({
                     <p className="font-medium">{d.title}</p>
                     <p className="text-small text-muted mt-1">
                       {labelFor(t, DELIVERABLE_STATUS_KEYS, d.status)}
-                      {d.customer_visible ? " · klantzichtbaar" : " · intern"}
+                      {` · ${
+                        d.customer_visible
+                          ? t("admin.projectDetail.customerVisibleTag")
+                          : t("admin.projectDetail.internalTag")
+                      }`}
                     </p>
                     {d.description ? (
                       <p className="text-small mt-2 whitespace-pre-wrap">
@@ -52,7 +63,9 @@ export default async function AdminProjectDeliverablesPage({
                     ) : null}
                     {d.rejection_reason ? (
                       <p className="text-small text-red-600 mt-2">
-                        Afwijzing: {d.rejection_reason}
+                        {t("admin.projectDetail.rejection", {
+                          reason: d.rejection_reason,
+                        })}
                       </p>
                     ) : null}
                   </div>
@@ -60,6 +73,7 @@ export default async function AdminProjectDeliverablesPage({
                     <ShareDeliverableButton
                       deliverableId={d.id}
                       version={d.version}
+                      labels={buildShareDeliverableLabels(t)}
                     />
                   ) : null}
                 </div>
