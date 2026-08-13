@@ -4,21 +4,27 @@ import { ContactForm } from "@/components/forms/contact-form";
 import { WhatsAppButton } from "@/components/chat/whatsapp-button";
 import { CompanyLegalBlock } from "@/components/sections/company-legal-block";
 import { siteConfig } from "@/config/site";
-import { getDictionary } from "@/i18n/get-dictionary";
+import { getDictionary, getLocale, getMessages } from "@/i18n/get-dictionary";
+import { MessagesProvider } from "@/i18n/messages-provider";
 import { paths } from "@/i18n/config";
+import { buildLocaleAlternates, openGraphLocale } from "@/i18n/seo";
 import { LocaleLink } from "@/i18n/locale-link";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { t } = await getDictionary();
+  const locale = await getLocale();
+  const { t } = await getDictionary(locale);
   return {
     title: t("forms.contactTitle"),
     description: t("forms.contactIntro"),
-    alternates: { canonical: paths.contact },
+    alternates: buildLocaleAlternates(paths.contact, locale),
+    openGraph: { locale: openGraphLocale(locale) },
   };
 }
 
 export default async function ContactPage() {
-  const { t } = await getDictionary();
+  const locale = await getLocale();
+  const { t } = await getDictionary(locale);
+  const messages = await getMessages(locale);
 
   return (
     <>
@@ -34,7 +40,9 @@ export default async function ContactPage() {
         <Container>
           <div className="grid lg:grid-cols-2 gap-10">
             <Card variant="light">
-              <ContactForm />
+              <MessagesProvider locale={locale} messages={messages}>
+                <ContactForm />
+              </MessagesProvider>
             </Card>
             <div className="space-y-8">
               <div>
@@ -58,7 +66,7 @@ export default async function ContactPage() {
                       <dt className="text-light-muted">{t("common.phone")}</dt>
                       <dd>
                         <a
-                          href={`tel:${siteConfig.company.phone.replace(/\s/g, "")}`}
+                          href={`tel:${siteConfig.company.phoneTel}`}
                           className="text-light-foreground hover:text-primary transition-colors"
                         >
                           {siteConfig.company.phone}
@@ -93,7 +101,10 @@ export default async function ContactPage() {
                 <h2 className="text-h3 text-light-foreground mb-3">
                   {t("forms.whatsapp")}
                 </h2>
-                <WhatsAppButton message={t("forms.whatsappMessageContact")} />
+                <WhatsAppButton
+                  message={t("forms.whatsappMessageContact")}
+                  label={t("forms.whatsapp")}
+                />
               </div>
               <div>
                 <h2 className="text-h3 text-light-foreground mb-3">

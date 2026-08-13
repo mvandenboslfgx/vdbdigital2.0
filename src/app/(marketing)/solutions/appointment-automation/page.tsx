@@ -13,6 +13,7 @@ export async function generateMetadata() {
     content.metaTitle,
     content.metaDescription,
     paths.appointmentAutomation,
+    locale
   );
 }
 

@@ -7,10 +7,16 @@ import {
 } from "@/server/actions/admin-portal-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import type { CreateCustomerFormLabels } from "@/lib/admin/support-form-labels";
 
 const initial: AdminPortalActionState = {};
 
-export function CreateCustomerForm() {
+export function CreateCustomerForm({
+  labels,
+}: {
+  /** Resolved server-side; this form does no dictionary lookups. */
+  labels: CreateCustomerFormLabels;
+}) {
   const [state, formAction, pending] = useActionState(
     createCustomerAction,
     initial,
@@ -21,23 +27,23 @@ export function CreateCustomerForm() {
       action={formAction}
       className="rounded-xl border border-border bg-surface p-5 space-y-4"
     >
-      <h2 className="text-h3">Klant aanmaken & uitnodigen</h2>
+      <h2 className="text-h3">{labels.heading}</h2>
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
           <label htmlFor="legalName" className="block text-small font-medium mb-1">
-            Officiële naam
+            {labels.legalName}
           </label>
           <Input id="legalName" name="legalName" required maxLength={200} />
         </div>
         <div>
           <label htmlFor="tradeName" className="block text-small font-medium mb-1">
-            Handelsnaam
+            {labels.tradeName}
           </label>
           <Input id="tradeName" name="tradeName" maxLength={200} />
         </div>
         <div>
           <label htmlFor="type" className="block text-small font-medium mb-1">
-            Type
+            {labels.type}
           </label>
           <select
             id="type"
@@ -45,8 +51,8 @@ export function CreateCustomerForm() {
             className="w-full min-h-11 px-3 rounded-lg border border-border bg-background text-sm"
             defaultValue="BUSINESS"
           >
-            <option value="BUSINESS">Zakelijk</option>
-            <option value="CONSUMER">Particulier</option>
+            <option value="BUSINESS">{labels.typeBusiness}</option>
+            <option value="CONSUMER">{labels.typeConsumer}</option>
           </select>
         </div>
         <div>
@@ -54,7 +60,7 @@ export function CreateCustomerForm() {
             htmlFor="contactEmail"
             className="block text-small font-medium mb-1"
           >
-            Contact e-mail
+            {labels.contactEmail}
           </label>
           <Input
             id="contactEmail"
@@ -69,7 +75,7 @@ export function CreateCustomerForm() {
             htmlFor="inviteEmail"
             className="block text-small font-medium mb-1"
           >
-            Uitnodiging naar
+            {labels.inviteEmail}
           </label>
           <Input
             id="inviteEmail"
@@ -86,7 +92,7 @@ export function CreateCustomerForm() {
         </p>
       )}
       <Button type="submit" disabled={pending}>
-        {pending ? "Aanmaken…" : "Aanmaken en uitnodigen"}
+        {pending ? labels.creating : labels.submit}
       </Button>
     </form>
   );

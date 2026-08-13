@@ -2,6 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { reverseInvoicePaymentAction } from "@/server/actions/invoice-actions";
+import type { PaymentReversalLabels } from "@/lib/admin/payment-reversal-labels";
 
 type Props = {
   invoiceId: string;
@@ -11,6 +12,7 @@ type Props = {
   amountLabel: string;
   paymentDate: string;
   currency: string;
+  labels: PaymentReversalLabels;
 };
 
 function createReversalIdempotencyKey(paymentRecordId: string): string {
@@ -32,6 +34,7 @@ export function ReversePaymentControls({
   amountLabel,
   paymentDate,
   currency,
+  labels,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
@@ -49,13 +52,15 @@ export function ReversePaymentControls({
 
     const confirmed = window.confirm(
       [
-        "Administratieve betalingsregistratie terugdraaien?",
+        labels.confirmTitle,
         "",
-        `Factuur: ${invoiceNumber}`,
-        `Bedrag: ${amountLabel} (${currency})`,
-        `Registratiedatum: ${paymentDate}`,
+        labels.confirmInvoice.replace("{number}", invoiceNumber),
+        labels.confirmAmount
+          .replace("{amount}", amountLabel)
+          .replace("{currency}", currency),
+        labels.confirmDate.replace("{date}", paymentDate),
         "",
-        "Deze actie draait alleen de administratieve betalingsregistratie terug. Er wordt geen bedrag via een betaalprovider teruggestort.",
+        labels.disclaimer,
       ].join("\n"),
     );
     if (!confirmed) return;
@@ -74,7 +79,7 @@ export function ReversePaymentControls({
         className="text-sm text-primary underline-offset-2 hover:underline min-h-11 px-1"
         onClick={() => setOpen(true)}
       >
-        Betaling terugdraaien
+        {labels.open}
       </button>
     );
   }
@@ -92,12 +97,9 @@ export function ReversePaymentControls({
         name="reversalIdempotencyKey"
         value={idempotencyKey}
       />
-      <p className="text-xs text-muted">
-        Deze actie draait alleen de administratieve betalingsregistratie terug.
-        Er wordt geen bedrag via een betaalprovider teruggestort.
-      </p>
+      <p className="text-xs text-muted">{labels.disclaimer}</p>
       <label className="block text-small" htmlFor={`reason-${paymentRecordId}`}>
-        Interne reden (verplicht)
+        {labels.reasonLabel}
       </label>
       <textarea
         id={`reason-${paymentRecordId}`}
@@ -108,7 +110,7 @@ export function ReversePaymentControls({
         value={reason}
         onChange={(e) => setReason(e.target.value)}
         className="w-full min-h-[72px] rounded-lg border border-border px-3 py-2 text-sm"
-        placeholder="Bijv. dubbele registratie gecorrigeerd"
+        placeholder={labels.reasonPlaceholder}
       />
       <div className="flex flex-wrap gap-2">
         <button
@@ -116,7 +118,7 @@ export function ReversePaymentControls({
           disabled={pending || reason.trim().length < 3}
           className="min-h-11 rounded-lg bg-primary px-4 text-sm font-medium text-white disabled:opacity-50"
         >
-          {pending ? "Bezig…" : "Bevestig terugdraaien"}
+          {pending ? labels.busy : labels.confirmSubmit}
         </button>
         <button
           type="button"
@@ -127,7 +129,7 @@ export function ReversePaymentControls({
             setReason("");
           }}
         >
-          Annuleren
+          {labels.cancel}
         </button>
       </div>
     </form>

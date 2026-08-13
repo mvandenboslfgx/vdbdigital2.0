@@ -1,0 +1,20 @@
+# Known hardcoded-UI-string debt, allowlisted by file (not by line).
+# Format: one repo-relative path per line. `#` starts a comment.
+# Read by tests/unit/hardcoded-ui-string-scan.test.ts — do not add new
+# entries casually; prefer fixing the hardcoded copy via the i18n dictionary.
+#
+# Auth flow pages and the cart page have all been migrated to the i18n
+# dictionary (see tests/unit/hardcoded-ui-string-scan.test.ts scan roots).
+# Keep this list empty — do not re-add entries without exhausting a proper
+# dictionary fix first.
+#
+# =============================================================================
+# Admin surfaces — none. Keep it that way.
+# =============================================================================
+# Admin is IN SCOPE for this scanner and the release bar is EN+NL with English
+# fallback, so Dutch-only admin chrome is a defect rather than an accepted
+# design. Every admin surface is now localized: the sidebar pages, the record
+# detail pages, and the editor/manager client components, which take a `labels`
+# prop built by src/lib/admin/*-labels.ts because they cannot call
+# getDictionary() themselves. Do not add an admin entry back here — resolve the
+# copy server-side and pass it in instead.

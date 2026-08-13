@@ -227,7 +227,7 @@ describe("Auth no-access loop hardening — redirect matrix (static)", () => {
     expect(existsSync(page)).toBe(true);
     const src = readFileSync(page, "utf8");
     expect(src).toContain("logoutAction");
-    expect(src).toContain("Uitloggen");
+    expect(src).toContain("auth.noAccessLogout");
     expect(src).toContain("index: false");
     expect(src).toContain('dynamic = "force-dynamic"');
     expect(src).toContain("isAuthNoAccessPath");
@@ -266,8 +266,11 @@ describe("Auth no-access loop hardening — redirect matrix (static)", () => {
     );
 
     // No-access page must not bounce authenticated users back to /inloggen
-    // when still unauthorized — only when session is absent.
-    expect(noAccessSrc).toMatch(/if \(!user\) \{\s*redirect\("\/inloggen"\)/);
+    // when still unauthorized — only when session is absent. The redirect
+    // target is locale-aware (withLocale) but must resolve to /inloggen.
+    expect(noAccessSrc).toMatch(
+      /if \(!user\) \{\s*redirect\(withLocale\("\/inloggen", locale\)\)/,
+    );
     expect(noAccessSrc).toContain("isAuthNoAccessPath(destination)");
 
     // Resolver terminal path is /geen-toegang, not /inloggen?fout=...

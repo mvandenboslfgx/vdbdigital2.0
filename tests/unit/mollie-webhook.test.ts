@@ -37,10 +37,29 @@ describe("Application webhook token", () => {
     process.env = { ...env };
   });
 
-  it("accepts when no token configured", () => {
+  it("accepts missing token only in local/test contexts", () => {
     delete process.env.MOLLIE_WEBHOOK_TOKEN;
     delete process.env.MOLLIE_WEBHOOK_SECRET;
+    delete process.env.APP_ENV;
+    delete process.env.VERCEL_ENV;
+    (process.env as { NODE_ENV?: string }).NODE_ENV = "test";
     expect(verifyMollieWebhookToken(null).valid).toBe(true);
+  });
+
+  it("fail-closes when token unset on staging", () => {
+    delete process.env.MOLLIE_WEBHOOK_TOKEN;
+    delete process.env.MOLLIE_WEBHOOK_SECRET;
+    process.env.APP_ENV = "staging";
+    (process.env as { NODE_ENV?: string }).NODE_ENV = "production";
+    expect(verifyMollieWebhookToken(null).valid).toBe(false);
+  });
+
+  it("fail-closes when token unset on Vercel preview", () => {
+    delete process.env.MOLLIE_WEBHOOK_TOKEN;
+    delete process.env.MOLLIE_WEBHOOK_SECRET;
+    process.env.VERCEL_ENV = "preview";
+    (process.env as { NODE_ENV?: string }).NODE_ENV = "production";
+    expect(verifyMollieWebhookToken(null, process.env).valid).toBe(false);
   });
 
   it("rejects invalid token with timing-safe compare", () => {

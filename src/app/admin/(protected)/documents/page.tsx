@@ -4,16 +4,19 @@ import { EmptyState } from "@/components/portal/empty-state";
 import { listAdminDocuments } from "@/server/repositories/admin-documents";
 import { formatBytes } from "@/lib/validation/documents";
 import {
-  DOCUMENT_CATEGORY_NL,
-  DOCUMENT_STATUS_NL,
-  DOCUMENT_VISIBILITY_NL,
-  labelNl,
+  DOCUMENT_CATEGORY_KEYS,
+  DOCUMENT_STATUS_KEYS,
+  DOCUMENT_VISIBILITY_KEYS,
+  labelFor,
+  labelOptions,
 } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
+import { withLocale } from "@/i18n/config";
 
-export const metadata: Metadata = {
-  title: "Documenten",
-  robots: { index: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getDictionary();
+  return { title: t("admin.page.documents.title"), robots: { index: false } };
+}
 
 export default async function AdminDocumentsPage({
   searchParams,
@@ -26,6 +29,7 @@ export default async function AdminDocumentsPage({
     page?: string;
   }>;
 }) {
+  const { t, locale } = await getDictionary();
   const sp = await searchParams;
   const page = Number(sp.page || "1") || 1;
   const { documents, total, pageSize, error } = await listAdminDocuments({
@@ -40,17 +44,21 @@ export default async function AdminDocumentsPage({
     <div className="space-y-6">
       <div className="flex flex-wrap justify-between gap-3">
         <div>
-          <h1 className="text-h1">Documenten</h1>
+          <h1 className="text-h1">{t("admin.page.documents.title")}</h1>
           <p className="text-muted text-small mt-1">
-            {total} document{total === 1 ? "" : "en"} · private buckets · signed
-            downloads
+            {t(
+              total === 1
+                ? "admin.page.documents.countOne"
+                : "admin.page.documents.countOther",
+              { count: total },
+            )}
           </p>
         </div>
         <Link
-          href="/admin/documents/new"
+          href={withLocale("/admin/documents/new", locale)}
           className="rounded-lg bg-primary text-white px-4 py-2 text-sm min-h-11 inline-flex items-center"
         >
-          Uploaden
+          {t("admin.page.documents.upload")}
         </Link>
       </div>
 
@@ -58,30 +66,33 @@ export default async function AdminDocumentsPage({
         <input
           name="q"
           defaultValue={sp.q ?? ""}
-          placeholder="Zoek titel, bestand of nummer"
+          placeholder={t("admin.page.documents.searchPlaceholder")}
+          aria-label={t("admin.common.search")}
           className="min-h-11 px-3 rounded-lg border border-border bg-background text-sm lg:col-span-2"
         />
         <select
           name="status"
           defaultValue={sp.status ?? "ALL"}
+          aria-label={t("admin.common.colStatus")}
           className="min-h-11 px-3 rounded-lg border border-border bg-background text-sm"
         >
-          <option value="ALL">Alle statussen</option>
-          {Object.entries(DOCUMENT_STATUS_NL).map(([k, v]) => (
-            <option key={k} value={k}>
-              {v}
+          <option value="ALL">{t("admin.common.allStatuses")}</option>
+          {labelOptions(t, DOCUMENT_STATUS_KEYS).map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
             </option>
           ))}
         </select>
         <select
           name="visibility"
           defaultValue={sp.visibility ?? "ALL"}
+          aria-label={t("admin.common.colVisibility")}
           className="min-h-11 px-3 rounded-lg border border-border bg-background text-sm"
         >
-          <option value="ALL">Alle zichtbaarheid</option>
-          {Object.entries(DOCUMENT_VISIBILITY_NL).map(([k, v]) => (
-            <option key={k} value={k}>
-              {v}
+          <option value="ALL">{t("admin.common.allVisibility")}</option>
+          {labelOptions(t, DOCUMENT_VISIBILITY_KEYS).map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
             </option>
           ))}
         </select>
@@ -89,35 +100,39 @@ export default async function AdminDocumentsPage({
           type="submit"
           className="min-h-11 rounded-lg border border-border px-4 text-sm"
         >
-          Filter
+          {t("admin.common.filter")}
         </button>
       </form>
 
       {error ? (
         <p className="text-sm text-red-600" role="alert">
-          Documenten laden mislukt: {error}
+          {t("admin.page.documents.loadFailed", { error })}
         </p>
       ) : null}
 
       {documents.length === 0 ? (
         <EmptyState
-          title="Nog geen documenten"
-          description="Upload een bestand voor een organisatie. Geen fictieve data."
-          actionHref="/admin/documents/new"
-          actionLabel="Document uploaden"
+          title={t("admin.page.documents.emptyTitle")}
+          description={t("admin.page.documents.emptyDescription")}
+          actionHref={withLocale("/admin/documents/new", locale)}
+          actionLabel={t("admin.page.documents.emptyAction")}
         />
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border">
           <table className="min-w-full text-sm">
             <thead className="bg-surface-elevated text-left text-muted">
               <tr>
-                <th className="px-3 py-3 font-medium">Nummer</th>
-                <th className="px-3 py-3 font-medium">Titel</th>
-                <th className="px-3 py-3 font-medium">Organisatie</th>
-                <th className="px-3 py-3 font-medium">Categorie</th>
-                <th className="px-3 py-3 font-medium">Status</th>
-                <th className="px-3 py-3 font-medium">Zichtbaar</th>
-                <th className="px-3 py-3 font-medium">Grootte</th>
+                <th className="px-3 py-3 font-medium">{t("admin.common.colNumber")}</th>
+                <th className="px-3 py-3 font-medium">{t("admin.common.colTitle")}</th>
+                <th className="px-3 py-3 font-medium">
+                  {t("admin.common.colOrganization")}
+                </th>
+                <th className="px-3 py-3 font-medium">{t("admin.common.colCategory")}</th>
+                <th className="px-3 py-3 font-medium">{t("admin.common.colStatus")}</th>
+                <th className="px-3 py-3 font-medium">
+                  {t("admin.common.colVisibility")}
+                </th>
+                <th className="px-3 py-3 font-medium">{t("admin.common.colSize")}</th>
               </tr>
             </thead>
             <tbody>
@@ -125,7 +140,7 @@ export default async function AdminDocumentsPage({
                 <tr key={d.id} className="border-t border-border">
                   <td className="px-3 py-3 whitespace-nowrap">
                     <Link
-                      href={`/admin/documents/${d.id}`}
+                      href={withLocale(`/admin/documents/${d.id}`, locale)}
                       className="text-primary hover:underline"
                     >
                       {d.document_number}
@@ -133,7 +148,7 @@ export default async function AdminDocumentsPage({
                   </td>
                   <td className="px-3 py-3">
                     <Link
-                      href={`/admin/documents/${d.id}`}
+                      href={withLocale(`/admin/documents/${d.id}`, locale)}
                       className="font-medium hover:underline"
                     >
                       {d.title}
@@ -145,16 +160,16 @@ export default async function AdminDocumentsPage({
                   <td className="px-3 py-3">
                     {d.organization?.trade_name ||
                       d.organization?.legal_name ||
-                      "—"}
+                      t("admin.common.empty")}
                   </td>
                   <td className="px-3 py-3">
-                    {labelNl(DOCUMENT_CATEGORY_NL, d.category)}
+                    {labelFor(t, DOCUMENT_CATEGORY_KEYS, d.category)}
                   </td>
                   <td className="px-3 py-3">
-                    {labelNl(DOCUMENT_STATUS_NL, d.status)}
+                    {labelFor(t, DOCUMENT_STATUS_KEYS, d.status)}
                   </td>
                   <td className="px-3 py-3">
-                    {labelNl(DOCUMENT_VISIBILITY_NL, d.visibility)}
+                    {labelFor(t, DOCUMENT_VISIBILITY_KEYS, d.visibility)}
                   </td>
                   <td className="px-3 py-3">{formatBytes(d.size_bytes)}</td>
                 </tr>
@@ -166,7 +181,7 @@ export default async function AdminDocumentsPage({
 
       {total > pageSize ? (
         <p className="text-small text-muted">
-          Pagina {page} · toont max {pageSize} per pagina
+          {t("admin.common.pageSizeNote", { page, pageSize })}
         </p>
       ) : null}
     </div>

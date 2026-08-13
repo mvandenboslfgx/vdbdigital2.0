@@ -1,9 +1,10 @@
 {
-  "count": 26,
+  "count": 27,
   "partnerRpcs": [
     { "name": "submit_partner_application" },
     { "name": "review_partner_application" },
     { "name": "create_partner_lead" },
+    { "name": "list_partner_catalog" },
     { "name": "review_partner_lead" },
     { "name": "confirm_partner_sale" },
     { "name": "request_partner_payout" },

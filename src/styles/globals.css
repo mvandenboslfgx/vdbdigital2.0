@@ -14,11 +14,18 @@
   --light-muted: #5d6978;
   --light-border: #dce2e9;
 
-  --primary: #4e73ff;
-  --primary-hover: #6687ff;
-  --primary-soft: rgba(78, 115, 255, 0.14);
-  --secondary: #31c4e8;
-  --secondary-soft: rgba(49, 196, 232, 0.12);
+  /* Champagne gold accent — primary CTAs use near-black text on champagne */
+  --primary: #dcc59a;
+  --primary-hover: #e8d4b0;
+  --primary-fg: #0c0e12;
+  --primary-soft: rgba(220, 197, 154, 0.14);
+  /* Readable champagne on light surfaces (≥4.5:1 vs #f5f7fa / white) */
+  --primary-on-light: #7a5c28;
+  --accent: #c4a574;
+  --accent-hover: #d4b896;
+  --accent-soft: rgba(196, 165, 116, 0.16);
+  --secondary: #8fa0b5;
+  --secondary-soft: rgba(143, 160, 181, 0.12);
 
   --success: #31c48d;
   --warning: #eab84e;
@@ -40,9 +47,13 @@
   --space-safe-top: env(safe-area-inset-top, 0px);
   --space-safe-bottom: env(safe-area-inset-bottom, 0px);
 
+  /* Public routes: system sans — no webfont on the critical path */
+  --font-body:
+    "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue",
+    Helvetica, Arial, sans-serif;
   --font-sans: var(--font-body);
-  --font-display: var(--font-display);
-  --font-mono: var(--font-mono);
+  --font-display: var(--font-body);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 @theme inline {
@@ -59,15 +70,19 @@
   --color-light-border: var(--light-border);
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
+  --color-primary-fg: var(--primary-fg);
   --color-primary-soft: var(--primary-soft);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
   --color-secondary: var(--secondary);
   --color-secondary-soft: var(--secondary-soft);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
   --font-sans: var(--font-body);
-  --font-display: var(--font-display);
-  --font-mono: var(--font-mono);
+  --font-display: var(--font-body);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 @layer base {
@@ -82,6 +97,8 @@
     /* Do not hide overflow-x globally — fix overflow at the source. */
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    /* Reserve scrollbar gutter to avoid tiny footer CLS when overflow appears. */
+    scrollbar-gutter: stable;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -117,7 +134,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--primary);
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
 }
@@ -215,6 +232,12 @@
     color: var(--light-foreground);
   }
 
+  /* Champagne #dcc59a fails WCAG AA on light surfaces — use darker token */
+  .section-light .text-primary,
+  [data-surface="light"] .text-primary {
+    color: var(--primary-on-light);
+  }
+
   .surface-card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -241,8 +264,8 @@
   }
 
   [data-surface="light"] :is(a, button)[data-btn-tone="auto"][data-btn-variant="outline"]:hover {
-    color: var(--primary);
-    border-color: var(--primary);
+    color: var(--primary-on-light);
+    border-color: var(--primary-on-light);
   }
 
   [data-surface="light"] :is(a, button)[data-btn-tone="light"][data-btn-variant="outline"] {
@@ -284,10 +307,17 @@
   @media (min-width: 768px) {
     .hero-glow {
       background:
-        radial-gradient(ellipse 70% 50% at 70% 40%, rgba(78, 115, 255, 0.18), transparent 55%),
-        radial-gradient(ellipse 50% 40% at 20% 80%, rgba(49, 196, 232, 0.1), transparent 50%),
+        radial-gradient(ellipse 65% 45% at 72% 38%, rgba(220, 197, 154, 0.12), transparent 55%),
+        radial-gradient(ellipse 45% 35% at 18% 78%, rgba(143, 160, 181, 0.08), transparent 50%),
         var(--background);
     }
+  }
+
+  /* Prevent mid-word breaks in nav / CTA chrome */
+  .text-nowrap-safe {
+    white-space: nowrap;
+    word-break: normal;
+    overflow-wrap: normal;
   }
 
   .touch-target {
@@ -337,7 +367,7 @@
   z-index: 100;
   padding: 0.75rem 1rem;
   background: var(--primary);
-  color: white;
+  color: var(--primary-fg);
   border-radius: var(--radius-md);
   font-weight: 500;
 }

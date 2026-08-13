@@ -17,11 +17,13 @@ import {
   DOCUMENT_VISIBILITIES,
   formatBytes,
 } from "@/lib/validation/documents";
-import {
-  DOCUMENT_CATEGORY_NL,
-  DOCUMENT_VISIBILITY_NL,
-  labelNl,
-} from "@/lib/portal/labels";
+
+/** Resolved on the server via `resolveLabelMap` so this client tree stays locale-agnostic. */
+export type EnumLabels = Record<string, string>;
+
+function optionLabel(labels: EnumLabels, code: string): string {
+  return labels[code] ?? code;
+}
 
 function Msg({ state }: { state: DocumentActionState }) {
   if (state.error) {
@@ -46,11 +48,15 @@ export function AdminDocumentUploadForm({
   defaultOrganizationId,
   defaultProjectId,
   parentDocumentId,
+  categoryLabels,
+  visibilityLabels,
 }: {
   organizations: { id: string; label: string }[];
   defaultOrganizationId?: string;
   defaultProjectId?: string;
   parentDocumentId?: string;
+  categoryLabels: EnumLabels;
+  visibilityLabels: EnumLabels;
 }) {
   const [state, action, pending] = useActionState(uploadDocumentAction, {});
   const [fileLabel, setFileLabel] = useState<string>("");
@@ -113,7 +119,7 @@ export function AdminDocumentUploadForm({
           >
             {DOCUMENT_CATEGORIES.map((c) => (
               <option key={c} value={c}>
-                {labelNl(DOCUMENT_CATEGORY_NL, c)}
+                {optionLabel(categoryLabels, c)}
               </option>
             ))}
           </select>
@@ -131,7 +137,7 @@ export function AdminDocumentUploadForm({
             {DOCUMENT_VISIBILITIES.filter((v) => v !== "CUSTOMER_UPLOAD").map(
               (v) => (
                 <option key={v} value={v}>
-                  {labelNl(DOCUMENT_VISIBILITY_NL, v)}
+                  {optionLabel(visibilityLabels, v)}
                 </option>
               ),
             )}
@@ -179,12 +185,20 @@ export function AdminDocumentUploadForm({
   );
 }
 
+export type DocumentDownloadLabels = {
+  submit: string;
+  working: string;
+  failed: string;
+};
+
 export function DocumentDownloadButton({
   documentId,
   audience,
+  labels,
 }: {
   documentId: string;
   audience: "staff" | "customer";
+  labels: DocumentDownloadLabels;
 }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -203,14 +217,14 @@ export function DocumentDownloadButton({
                 ? await getStaffDocumentDownloadAction(documentId)
                 : await getPortalDocumentDownloadAction(documentId);
             if (result.error || !result.downloadUrl) {
-              setError(result.error ?? "Download mislukt.");
+              setError(result.error ?? labels.failed);
               return;
             }
             window.location.assign(result.downloadUrl);
           });
         }}
       >
-        {pending ? "Bezig…" : "Downloaden"}
+        {pending ? labels.working : labels.submit}
       </Button>
       {error ? (
         <p className="text-sm text-red-600" role="alert">
@@ -225,10 +239,12 @@ export function VisibilityForm({
   documentId,
   version,
   visibility,
+  visibilityLabels,
 }: {
   documentId: string;
   version: number;
   visibility: string;
+  visibilityLabels: EnumLabels;
 }) {
   const [state, action, pending] = useActionState(
     updateDocumentVisibilityAction,
@@ -250,7 +266,7 @@ export function VisibilityForm({
         >
           {DOCUMENT_VISIBILITIES.map((v) => (
             <option key={v} value={v}>
-              {labelNl(DOCUMENT_VISIBILITY_NL, v)}
+              {optionLabel(visibilityLabels, v)}
             </option>
           ))}
         </select>
@@ -263,20 +279,38 @@ export function VisibilityForm({
   );
 }
 
-export function PortalUploadForm({ projectId }: { projectId?: string }) {
+export type PortalUploadLabels = {
+  heading: string;
+  titlePlaceholder: string;
+  submit: string;
+  submitting: string;
+};
+
+export function PortalUploadForm({
+  projectId,
+  labels,
+}: {
+  projectId?: string;
+  labels: PortalUploadLabels;
+}) {
   const [state, action, pending] = useActionState(
     uploadPortalDocumentAction,
     {},
   );
   return (
     <form action={action} className="space-y-3 rounded-xl border border-border p-4">
-      <h3 className="font-medium">Bestand aanleveren</h3>
+      <h3 className="font-medium">{labels.heading}</h3>
       <Msg state={state} />
       {projectId ? <input type="hidden" name="projectId" value={projectId} /> : null}
-      <Input name="title" required maxLength={200} placeholder="Titel" />
+      <Input
+        name="title"
+        required
+        maxLength={200}
+        placeholder={labels.titlePlaceholder}
+      />
       <input name="file" type="file" required className="block w-full text-sm" />
       <Button type="submit" disabled={pending}>
-        {pending ? "Uploaden…" : "Uploaden"}
+        {pending ? labels.submitting : labels.submit}
       </Button>
     </form>
   );

@@ -32,6 +32,19 @@ export type LegalApprovalStatus =
 
 export type CatalogLocale = "nl" | "en";
 
+/**
+ * Phase 4 product_translations workflow gate.
+ * Only 'published' (and 'approved' for gated admin preview) may ever be
+ * surfaced to storefront visitors — see src/server/repositories/product-locale.ts.
+ */
+export type ProductTranslationStatus =
+  | "draft"
+  | "machine_translated"
+  | "needs_review"
+  | "approved"
+  | "published"
+  | "stale";
+
 export type OrderStatus =
   | "PENDING"
   | "PAID"
@@ -94,6 +107,11 @@ export interface ProductTranslation {
   targetAudience?: string | null;
   workflow?: string | null;
   warnings?: string | null;
+  /** Defaults to 'draft' when absent (pre-migration rows / not yet set). */
+  status?: ProductTranslationStatus;
+  sourceHash?: string | null;
+  reviewedAt?: string | null;
+  publishedAt?: string | null;
 }
 
 export interface ProductMedia {
@@ -180,6 +198,20 @@ export interface Product {
   createdAt?: string;
   primaryImagePath?: string | null;
   isConcept?: boolean;
+  partnerEnabled?: boolean;
+  partnerVisibility?: string;
+  partnerCommissionType?: string;
+  partnerCommissionValue?: number | null;
+  partnerCommissionCurrency?: string;
+  partnerCommissionStatus?: string;
+  partnerMinimumPriceCents?: number | null;
+  partnerMaximumDiscountBps?: number | null;
+  partnerRequiresApproval?: boolean;
+  partnerTerms?: string | null;
+  partnerSalesCopy?: string | null;
+  partnerAvailability?: string;
+  partnerPriority?: number;
+  partnerFeatured?: boolean;
   translations?: ProductTranslation[];
   media?: ProductMedia[];
   addons?: ProductAddon[];

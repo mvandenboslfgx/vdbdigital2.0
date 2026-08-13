@@ -10,12 +10,24 @@ import { Textarea } from "@/components/ui/textarea";
 
 const initial: PortalActionState = {};
 
+export type QuoteResponseFormLabels = {
+  headingAccept: string;
+  headingDecline: string;
+  headingBoth: string;
+  reasonLabelDecline: string;
+  reasonLabelAccept: string;
+  accept: string;
+  decline: string;
+};
+
 export function QuoteResponseForm({
   quoteId,
   mode = "both",
+  labels,
 }: {
   quoteId: string;
   mode?: "both" | "accept" | "decline";
+  labels: QuoteResponseFormLabels;
 }) {
   const [state, formAction, pending] = useActionState(
     respondToQuoteAction,
@@ -27,14 +39,16 @@ export function QuoteResponseForm({
       <input type="hidden" name="quoteId" value={quoteId} />
       <h2 className="text-h3">
         {mode === "accept"
-          ? "Bevestig acceptatie"
+          ? labels.headingAccept
           : mode === "decline"
-            ? "Bevestig afwijzing"
-            : "Reageren"}
+            ? labels.headingDecline
+            : labels.headingBoth}
       </h2>
       <div>
         <label htmlFor="note" className="block text-small font-medium mb-1">
-          {mode === "decline" ? "Reden (optioneel)" : "Opmerking (optioneel)"}
+          {mode === "decline"
+            ? labels.reasonLabelDecline
+            : labels.reasonLabelAccept}
         </label>
         <Textarea id="note" name="note" rows={3} maxLength={2000} />
       </div>
@@ -51,7 +65,7 @@ export function QuoteResponseForm({
       <div className="flex flex-wrap gap-3">
         {mode !== "decline" ? (
           <Button type="submit" name="decision" value="ACCEPT" disabled={pending}>
-            Offerte accepteren
+            {labels.accept}
           </Button>
         ) : null}
         {mode !== "accept" ? (
@@ -62,7 +76,7 @@ export function QuoteResponseForm({
             variant="outline"
             disabled={pending}
           >
-            Offerte afwijzen
+            {labels.decline}
           </Button>
         ) : null}
       </div>

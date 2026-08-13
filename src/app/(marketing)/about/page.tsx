@@ -5,15 +5,18 @@ import { CtaSection } from "@/components/sections/cta-section";
 import { BrandLink } from "@/components/brand/BrandLink";
 import { CompanyLegalBlock } from "@/components/sections/company-legal-block";
 import { LocaleLinkButton } from "@/components/ui/locale-link-button";
-import { getDictionary } from "@/i18n/get-dictionary";
+import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import { paths } from "@/i18n/config";
+import { buildLocaleAlternates, openGraphLocale } from "@/i18n/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { t } = await getDictionary();
+  const locale = await getLocale();
+  const { t } = await getDictionary(locale);
   return {
     title: t("about.title"),
     description: t("meta.description"),
-    alternates: { canonical: paths.about },
+    alternates: buildLocaleAlternates(paths.about, locale),
+    openGraph: { locale: openGraphLocale(locale) },
   };
 }
 

@@ -3,10 +3,15 @@ import { EmptyState } from "@/components/portal/empty-state";
 import { requireAdmin } from "@/server/auth/require-admin";
 import { requirePermission } from "@/server/auth/require-permission";
 import { createServiceRoleClient } from "@/lib/database/server";
+import { getDictionary } from "@/i18n/get-dictionary";
 
-export const metadata: Metadata = { title: "Berichten", robots: { index: false } };
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getDictionary();
+  return { title: t("admin.page.messages.title"), robots: { index: false } };
+}
 
 export default async function AdminMessagesPage() {
+  const { t } = await getDictionary();
   const ctx = await requireAdmin();
   await requirePermission(ctx, "messages.manage");
   const supabase = createServiceRoleClient();
@@ -21,14 +26,12 @@ export default async function AdminMessagesPage() {
   const rows = data ?? [];
   return (
     <div className="space-y-6">
-      <h1 className="text-h1">Berichten</h1>
-      <p className="text-muted text-small">
-        Intern berichtencentrum. Geen externe livechatwidget actief.
-      </p>
+      <h1 className="text-h1">{t("admin.page.messages.title")}</h1>
+      <p className="text-muted text-small">{t("admin.page.messages.subtitle")}</p>
       {rows.length === 0 ? (
         <EmptyState
-          title="Nog geen gesprekken"
-          description="Klantgesprekken verschijnen hier zodra ze bestaan."
+          title={t("admin.page.messages.emptyTitle")}
+          description={t("admin.page.messages.emptyDescription")}
         />
       ) : (
         <ul className="space-y-2">

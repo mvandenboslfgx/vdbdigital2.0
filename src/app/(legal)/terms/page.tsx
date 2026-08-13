@@ -1,85 +1,27 @@
 import type { Metadata } from "next";
-import { LegalPageContent } from "@/components/sections/legal-page";
-import { CompanyLegalBlock } from "@/components/sections/company-legal-block";
+import { LegalDocumentBody } from "@/components/sections/legal-document-body";
+import { paths } from "@/i18n/config";
+import { getLegalContent } from "@/i18n/content/legal";
 import { siteConfig } from "@/config/site";
+import { buildLocaleAlternates } from "@/i18n/seo";
+import { getLocale } from "@/i18n/get-dictionary";
 
-export const metadata: Metadata = {
-  title: "Terms and conditions",
-  description: "Terms and conditions of VDB Digital for services and digital products.",
-  alternates: { canonical: "/terms" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const content = getLegalContent("terms", locale, {
+    legalName: siteConfig.legalName,
+    contactEmail: siteConfig.contactEmail,
+    supportEmail: siteConfig.supportEmail,
+    privacyContact: siteConfig.legal.privacyContact,
+  });
+
+  return {
+    title: content.metaTitle,
+    description: content.metaDescription,
+    alternates: buildLocaleAlternates(paths.terms, locale),
+  };
+}
 
 export default function TermsPage() {
-  return (
-    <LegalPageContent title="Terms and conditions">
-      <p>
-        These terms and conditions apply to all services and products offered by{" "}
-        {siteConfig.legalName} through the website, shop or custom agreements.
-      </p>
-
-      <h2 className="text-h3 text-light-foreground">Company details</h2>
-      <CompanyLegalBlock />
-
-      <h2 className="text-h3 text-light-foreground">Scope of these terms</h2>
-      <p>
-        These terms primarily cover business-to-business (B2B) services and digital
-        products. Where mandatory consumer law applies to a consumer (B2C)
-        purchase, those statutory rights prevail over conflicting clauses.
-      </p>
-
-      <h2 className="text-h3 text-light-foreground">Complaints</h2>
-      <p>
-        Complaints about services or products can be sent to{" "}
-        {siteConfig.contactEmail}. We aim to acknowledge complaints within five
-        business days and resolve them within a reasonable period. Escalation to
-        the competent Dutch court remains available where required by law.
-      </p>
-
-      <h2 className="text-h3 text-light-foreground">Offer and agreement</h2>
-      <p>
-        Quotes and shop offers are non-binding until acceptance and payment (shop)
-        or until written confirmation of the agreement (custom work). Obvious errors
-        in price or description do not bind us.
-      </p>
-
-      <h2 className="text-h3 text-light-foreground">Orders and payment</h2>
-      <p>
-        Shop orders are processed after successful payment via Mollie. Prices are
-        shown inclusive or exclusive of VAT as indicated on the product page.
-        Subscriptions are invoiced periodically according to the selected billing
-        frequency.
-      </p>
-
-      <h2 className="text-h3 text-light-foreground">Delivery</h2>
-      <p>
-        Delivery times are indicative and confirmed per product or project. Digital
-        services begin after payment or according to the agreed schedule.
-      </p>
-
-      <h2 className="text-h3 text-light-foreground">Intellectual property</h2>
-      <p>
-        Design, code and documentation remain the property of VDB Digital or
-        licensors, unless otherwise agreed in writing. Clients receive a right of
-        use for the intended purpose.
-      </p>
-
-      <h2 className="text-h3 text-light-foreground">Liability</h2>
-      <p>
-        Our liability is limited to the amount paid for the relevant assignment or
-        order, to the extent permitted by mandatory law. Indirect damage is
-        excluded where legally permitted.
-      </p>
-
-      <h2 className="text-h3 text-light-foreground">Applicable law</h2>
-      <p>
-        These terms are governed by Dutch law. Disputes are submitted to the
-        competent court in the Netherlands, without prejudice to mandatory consumer
-        protection.
-      </p>
-
-      <p className="text-small text-light-muted">
-        Last updated: {siteConfig.legal.lastUpdated}
-      </p>
-    </LegalPageContent>
-  );
+  return <LegalDocumentBody page="terms" />;
 }

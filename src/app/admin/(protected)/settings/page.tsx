@@ -3,55 +3,58 @@ import { Card } from "@/components/ui/container";
 import { getSiteReadinessWarnings } from "@/config/commercial/site-readiness";
 import { foundingClientOfferConfig } from "@/config/commercial/founding-client-offer";
 import { isBookingConfigured } from "@/config/commercial/booking";
+import { getDictionary } from "@/i18n/get-dictionary";
 
-export const metadata: Metadata = {
-  title: "Settings",
-  robots: { index: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getDictionary();
+  return { title: t("admin.page.settings.title"), robots: { index: false } };
+}
 
-export default function AdminSettingsPage() {
+export default async function AdminSettingsPage() {
+  const { t } = await getDictionary();
   const readinessWarnings = getSiteReadinessWarnings();
+  const configured = t("admin.common.configured");
+  const notConfigured = t("admin.common.notConfigured");
+
+  const integrations = [
+    { label: "Supabase", value: process.env.NEXT_PUBLIC_SUPABASE_URL ? configured : notConfigured },
+    { label: "Mollie", value: process.env.MOLLIE_API_KEY ? configured : notConfigured },
+    { label: "Resend", value: process.env.RESEND_API_KEY ? configured : notConfigured },
+    {
+      label: t("admin.page.settings.booking"),
+      value: isBookingConfigured() ? configured : t("admin.page.settings.bookingFallback"),
+    },
+    {
+      label: t("admin.page.settings.foundingClientOffer"),
+      value: foundingClientOfferConfig.enabled
+        ? t("admin.common.enabled")
+        : t("admin.common.disabled"),
+    },
+    {
+      label: t("admin.page.settings.liveChat"),
+      value: t("admin.page.settings.liveChatValue"),
+    },
+  ];
 
   return (
     <div>
-      <h1 className="text-h1 mb-8">Settings</h1>
+      <h1 className="text-h1 mb-8">{t("admin.page.settings.title")}</h1>
       <Card className="space-y-4 mb-8">
-        <p className="text-muted">
-          Site settings are managed via environment variables and the site_settings
-          table in Supabase.
-        </p>
+        <p className="text-muted">{t("admin.page.settings.description")}</p>
         <dl className="text-small space-y-2">
-          <div className="flex justify-between">
-            <dt className="text-muted">Supabase</dt>
-            <dd>{process.env.NEXT_PUBLIC_SUPABASE_URL ? "Configured" : "Not configured"}</dd>
-          </div>
-          <div className="flex justify-between">
-            <dt className="text-muted">Mollie</dt>
-            <dd>{process.env.MOLLIE_API_KEY ? "Configured" : "Not configured"}</dd>
-          </div>
-          <div className="flex justify-between">
-            <dt className="text-muted">Resend</dt>
-            <dd>{process.env.RESEND_API_KEY ? "Configured" : "Not configured"}</dd>
-          </div>
-          <div className="flex justify-between">
-            <dt className="text-muted">Booking</dt>
-            <dd>{isBookingConfigured() ? "Configured" : "Not configured (fallback active)"}</dd>
-          </div>
-          <div className="flex justify-between">
-            <dt className="text-muted">Founding Client Offer</dt>
-            <dd>{foundingClientOfferConfig.enabled ? "Enabled" : "Disabled"}</dd>
-          </div>
-          <div className="flex justify-between gap-4">
-            <dt className="text-muted">Live chat widget</dt>
-            <dd className="text-right">Removed — contact page / WhatsApp only</dd>
-          </div>
+          {integrations.map((integration) => (
+            <div key={integration.label} className="flex justify-between gap-4">
+              <dt className="text-muted">{integration.label}</dt>
+              <dd className="text-right">{integration.value}</dd>
+            </div>
+          ))}
         </dl>
       </Card>
 
       <Card className="space-y-4">
-        <h2 className="text-h3">Site readiness</h2>
+        <h2 className="text-h3">{t("admin.page.settings.readinessTitle")}</h2>
         <p className="text-muted text-small">
-          Missing business data and pre-production checks. Sensitive values are never shown here.
+          {t("admin.page.settings.readinessDescription")}
         </p>
         <ul className="space-y-2">
           {readinessWarnings.map((warning) => (

@@ -1,10 +1,6 @@
 "use server";
 
-import {
-  contactFormSchema,
-  quoteFormSchema,
-  supportFormSchema,
-} from "@/lib/validation/forms";
+import { createFormSchemas } from "@/lib/validation/forms";
 import { checkRateLimit, rateLimitErrorMessage } from "@/lib/security/rate-limit";
 import { verifyOrigin } from "@/lib/security/origin";
 import {
@@ -20,6 +16,7 @@ import {
 } from "@/lib/database/server";
 import { isProductionRuntime } from "@/lib/runtime/environment";
 import { parseFormLocale } from "@/i18n/locale-query";
+import { getDictionary } from "@/i18n/get-dictionary";
 import { randomUUID } from "crypto";
 
 export type FormState = {
@@ -138,6 +135,8 @@ export async function submitContactAction(
   if (raw.website) return { errors: ["Invalid request"] };
 
   const locale = parseFormLocale(raw.locale);
+  const { t } = await getDictionary(locale);
+  const { contactFormSchema } = createFormSchemas(t);
   const parsed = contactFormSchema.safeParse(raw);
   if (!parsed.success) {
     return { errors: parsed.error.issues.map((i) => i.message) };
@@ -193,6 +192,8 @@ export async function submitQuoteAction(
   }
 
   const locale = parseFormLocale(formData.get("locale"));
+  const { t } = await getDictionary(locale);
+  const { quoteFormSchema } = createFormSchemas(t);
   const prepared = {
     ...Object.fromEntries(formData.entries()),
     privacyConsent: formData.get("privacyConsent") === "true" ? true : undefined,
@@ -278,6 +279,8 @@ export async function submitSupportAction(
   if (raw.website) return { errors: ["Invalid request"] };
 
   const locale = parseFormLocale(raw.locale);
+  const { t } = await getDictionary(locale);
+  const { supportFormSchema } = createFormSchemas(t);
   const parsed = supportFormSchema.safeParse(raw);
   if (!parsed.success) {
     return { errors: parsed.error.issues.map((i) => i.message) };

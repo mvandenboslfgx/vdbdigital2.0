@@ -9,6 +9,7 @@ import {
   saveCategoryAction,
   type CatalogActionState,
 } from "@/server/actions/catalog-actions";
+import type { CategoriesManagerLabels } from "@/lib/admin/catalog-manager-labels";
 import type { Category } from "@/types";
 
 const initial: CatalogActionState = {};
@@ -16,9 +17,12 @@ const initial: CatalogActionState = {};
 export function CategoriesManager({
   categories,
   canManage,
+  labels,
 }: {
   categories: Category[];
   canManage: boolean;
+  /** Resolved server-side; this component does no dictionary lookups. */
+  labels: CategoriesManagerLabels;
 }) {
   const [state, action, pending] = useActionState(saveCategoryAction, initial);
   const [editing, setEditing] = useState<Category | null>(null);
@@ -26,10 +30,8 @@ export function CategoriesManager({
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-h1 mb-1">Categorieën</h1>
-        <p className="text-muted text-small">
-          Beheer productcategorieën. Verwijderen is geblokkeerd zolang actieve producten gekoppeld zijn.
-        </p>
+        <h1 className="text-h1 mb-1">{labels.title}</h1>
+        <p className="text-muted text-small">{labels.subtitle}</p>
       </div>
 
       {state.error && (
@@ -39,7 +41,7 @@ export function CategoriesManager({
       )}
       {state.success && (
         <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-small">
-          Categorie opgeslagen.
+          {labels.saved}
         </div>
       )}
 
@@ -47,13 +49,13 @@ export function CategoriesManager({
         <table className="w-full text-small">
           <thead className="bg-surface-elevated text-left">
             <tr>
-              <th className="p-3">Naam</th>
-              <th className="p-3">Slug</th>
-              <th className="p-3">NL</th>
-              <th className="p-3">Producten</th>
-              <th className="p-3">Actief</th>
-              <th className="p-3">Volgorde</th>
-              <th className="p-3">Acties</th>
+              <th className="p-3">{labels.colName}</th>
+              <th className="p-3">{labels.colSlug}</th>
+              <th className="p-3">{labels.colNameNl}</th>
+              <th className="p-3">{labels.colProducts}</th>
+              <th className="p-3">{labels.colActive}</th>
+              <th className="p-3">{labels.colOrder}</th>
+              <th className="p-3">{labels.colActions}</th>
             </tr>
           </thead>
           <tbody>
@@ -61,9 +63,9 @@ export function CategoriesManager({
               <tr key={c.id} className="border-t border-border">
                 <td className="p-3 font-medium">{c.name}</td>
                 <td className="p-3 text-muted">{c.slug}</td>
-                <td className="p-3">{c.nameNl || "—"}</td>
+                <td className="p-3">{c.nameNl || labels.empty}</td>
                 <td className="p-3">{c.productCount ?? 0}</td>
-                <td className="p-3">{c.isActive === false ? "Nee" : "Ja"}</td>
+                <td className="p-3">{c.isActive === false ? labels.no : labels.yes}</td>
                 <td className="p-3">{c.sortOrder}</td>
                 <td className="p-3 space-x-2">
                   {canManage && (
@@ -73,7 +75,7 @@ export function CategoriesManager({
                         className="text-primary"
                         onClick={() => setEditing(c)}
                       >
-                        Bewerken
+                        {labels.edit}
                       </button>
                       <form
                         action={async (formData) => {
@@ -83,7 +85,7 @@ export function CategoriesManager({
                       >
                         <input type="hidden" name="id" value={c.id} />
                         <button type="submit" className="text-danger">
-                          Verwijderen
+                          {labels.delete}
                         </button>
                       </form>
                     </>
@@ -120,32 +122,34 @@ export function CategoriesManager({
           }}
         >
           <h2 className="font-semibold">
-            {editing ? `Categorie bewerken: ${editing.name}` : "Nieuwe categorie"}
+            {editing
+              ? labels.editHeadingTemplate.replace("{name}", editing.name)
+              : labels.createHeading}
           </h2>
           <div className="grid gap-3 md:grid-cols-2">
-            <Input name="name" label="Naam (EN)" required defaultValue={editing?.name} key={`n-${editing?.id}`} />
-            <Input name="slug" label="Slug" required defaultValue={editing?.slug} key={`s-${editing?.id}`} />
-            <Input name="nameNl" label="Naam NL" defaultValue={editing?.nameNl ?? ""} key={`nn-${editing?.id}`} />
-            <Input name="sortOrder" label="Volgorde" type="number" defaultValue={editing?.sortOrder ?? 0} key={`o-${editing?.id}`} />
-            <Input name="imagePath" label="Afbeelding/icon pad" defaultValue={editing?.imagePath ?? ""} key={`i-${editing?.id}`} />
+            <Input name="name" label={labels.fieldName} required defaultValue={editing?.name} key={`n-${editing?.id}`} />
+            <Input name="slug" label={labels.fieldSlug} required defaultValue={editing?.slug} key={`s-${editing?.id}`} />
+            <Input name="nameNl" label={labels.fieldNameNl} defaultValue={editing?.nameNl ?? ""} key={`nn-${editing?.id}`} />
+            <Input name="sortOrder" label={labels.fieldOrder} type="number" defaultValue={editing?.sortOrder ?? 0} key={`o-${editing?.id}`} />
+            <Input name="imagePath" label={labels.fieldImagePath} defaultValue={editing?.imagePath ?? ""} key={`i-${editing?.id}`} />
             <label className="flex items-center gap-2 text-small mt-8">
               <input type="checkbox" name="isActive" defaultChecked={editing?.isActive !== false} />
-              Actief
+              {labels.fieldActive}
             </label>
             <div className="md:col-span-2">
-              <Textarea name="description" label="Omschrijving EN" rows={3} defaultValue={editing?.description} key={`d-${editing?.id}`} />
+              <Textarea name="description" label={labels.fieldDescription} rows={3} defaultValue={editing?.description} key={`d-${editing?.id}`} />
             </div>
             <div className="md:col-span-2">
-              <Textarea name="descriptionNl" label="Omschrijving NL" rows={3} defaultValue={editing?.descriptionNl ?? ""} key={`dn-${editing?.id}`} />
+              <Textarea name="descriptionNl" label={labels.fieldDescriptionNl} rows={3} defaultValue={editing?.descriptionNl ?? ""} key={`dn-${editing?.id}`} />
             </div>
           </div>
           <div className="flex gap-2">
             <Button type="submit" disabled={pending}>
-              Opslaan
+              {labels.save}
             </Button>
             {editing && (
               <Button type="button" variant="ghost" onClick={() => setEditing(null)}>
-                Annuleren
+                {labels.cancel}
               </Button>
             )}
           </div>

@@ -1,4 +1,4 @@
-import { isLocale, type Locale } from "@/i18n/config";
+import { isLocale, stripLocalePrefix, withLocale, type Locale } from "@/i18n/config";
 
 /** Safe query keys preserved across language switches. */
 export const SAFE_QUERY_KEYS = new Set([
@@ -67,4 +67,37 @@ export function appendFilteredSearch(path: string, params: URLSearchParams): str
 export function parseFormLocale(raw: unknown): Locale {
   if (typeof raw === "string" && isLocale(raw)) return raw;
   return "en";
+}
+
+export interface LanguageSwitchTarget {
+  href: string;
+  /**
+   * True when there was no reliable "current route" to translate (empty /
+   * missing pathname), so the switcher fell back to that locale's home page
+   * instead of building a target from unknown/invalid input. Every real
+   * route in this app is served under both locales via the middleware
+   * rewrite (see `src/middleware.ts`), so this only ever fires for a
+   * missing/blank pathname value, not for a route that "doesn't exist" in
+   * the target locale.
+   */
+  isFallback: boolean;
+}
+
+/**
+ * Single source of truth for what a language switcher link should point at,
+ * shared by `LanguageSwitcher` (client) and `ServerLanguageSwitcher` (server)
+ * so both apply the same safe-query-param filtering and the same fallback
+ * rule. Never throws, never returns an empty/malformed href.
+ */
+export function buildLanguageSwitchHref(
+  pathname: string | null | undefined,
+  searchParams: URLSearchParams | Record<string, string | string[] | undefined>,
+  targetLocale: Locale,
+): LanguageSwitchTarget {
+  const raw = typeof pathname === "string" ? pathname.trim() : "";
+  const isFallback = raw.length === 0;
+  const { pathname: bare } = stripLocalePrefix(isFallback ? "/" : raw);
+  const query = filterSearchParams(searchParams);
+  const href = appendFilteredSearch(withLocale(bare, targetLocale), query);
+  return { href, isFallback };
 }

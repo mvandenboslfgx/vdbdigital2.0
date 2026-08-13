@@ -2,10 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAdminProjectBundle } from "@/server/repositories/admin-projects";
 import {
-  PROJECT_STATUS_NL,
-  PROJECT_TYPE_NL,
-  labelNl,
+  PROJECT_STATUS_KEYS,
+  PROJECT_TYPE_KEYS,
+  labelFor,
 } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export default async function AdminProjectLayout({
   children,
@@ -14,6 +15,7 @@ export default async function AdminProjectLayout({
   children: React.ReactNode;
   params: Promise<{ id: string }>;
 }) {
+  const { t } = await getDictionary();
   const { id } = await params;
   const bundle = await getAdminProjectBundle(id);
   if (!bundle) notFound();
@@ -36,8 +38,8 @@ export default async function AdminProjectLayout({
           {project.organization?.trade_name ||
             project.organization?.legal_name ||
             "—"}{" "}
-          · {labelNl(PROJECT_TYPE_NL, project.project_type)} ·{" "}
-          {labelNl(PROJECT_STATUS_NL, project.status)} ·{" "}
+          · {labelFor(t, PROJECT_TYPE_KEYS, project.project_type)} ·{" "}
+          {labelFor(t, PROJECT_STATUS_KEYS, project.status)} ·{" "}
           {project.visibility === "CUSTOMER_VISIBLE"
             ? "Klantzichtbaar"
             : "Intern"}

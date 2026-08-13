@@ -2,22 +2,28 @@ import { notFound } from "next/navigation";
 import { ProjectTabShell } from "@/components/admin/project-tabs";
 import { CreateMilestoneForm } from "@/components/admin/project-forms";
 import { getAdminProjectBundle } from "@/server/repositories/admin-projects";
-import { MILESTONE_STATUS_NL, labelNl } from "@/lib/portal/labels";
+import { MILESTONE_STATUS_KEYS, labelFor } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
+import { buildMilestoneFormLabels } from "@/lib/admin/project-forms-labels";
+import { formatDate } from "@/i18n/format-date";
 
 export default async function AdminProjectMilestonesPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { t, locale } = await getDictionary();
   const { id } = await params;
   const bundle = await getAdminProjectBundle(id);
   if (!bundle) notFound();
 
   return (
     <ProjectTabShell projectId={id} active="milestones">
-      <CreateMilestoneForm projectId={id} />
+      <CreateMilestoneForm projectId={id} labels={buildMilestoneFormLabels(t)} />
       {bundle.milestones.length === 0 ? (
-        <p className="text-muted text-small">Nog geen mijlpalen.</p>
+        <p className="text-muted text-small">
+          {t("admin.projectDetail.noMilestones")}
+        </p>
       ) : (
         <ol className="space-y-3">
           {bundle.milestones.map(
@@ -37,9 +43,15 @@ export default async function AdminProjectMilestonesPage({
                     {m.sort_order + 1}. {m.title}
                   </p>
                   <p className="text-small text-muted">
-                    {labelNl(MILESTONE_STATUS_NL, m.status)}
-                    {m.customer_visible ? " · klantzichtbaar" : " · intern"}
-                    {m.requires_customer_action ? " · klantactie" : ""}
+                    {labelFor(t, MILESTONE_STATUS_KEYS, m.status)}
+                    {` · ${
+                      m.customer_visible
+                        ? t("admin.projectDetail.customerVisibleTag")
+                        : t("admin.projectDetail.internalTag")
+                    }`}
+                    {m.requires_customer_action
+                      ? ` · ${t("admin.projectDetail.customerActionTag")}`
+                      : ""}
                   </p>
                 </div>
                 {m.description ? (
@@ -49,7 +61,9 @@ export default async function AdminProjectMilestonesPage({
                 ) : null}
                 {m.due_date ? (
                   <p className="text-small text-muted mt-2">
-                    Deadline: {new Date(m.due_date).toLocaleDateString("nl-NL")}
+                    {t("admin.projectDetail.deadline", {
+                      date: formatDate(m.due_date, locale),
+                    })}
                   </p>
                 ) : null}
               </li>

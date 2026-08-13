@@ -1,38 +1,47 @@
-"use client";
-
 import { siteConfig, hasCompanyLocation, hasSocial } from "@/config/site";
 import { Container } from "@/components/ui/container";
-import { BrandLink } from "@/components/brand/BrandLink";
-import { useConsent } from "@/components/consent/consent-provider";
-import { useI18n } from "@/i18n/provider";
-import { LocaleLink } from "@/i18n/locale-link";
-import { LanguageSwitcherBoundary } from "@/i18n/language-switcher-boundary";
+import { VdbLogo } from "@/components/brand/VdbLogo";
+import { ServerLocaleLink } from "@/i18n/server-locale-link";
+import { ServerLanguageSwitcher } from "@/i18n/server-language-switcher";
 import { paths } from "@/i18n/config";
+import { getDictionary } from "@/i18n/get-dictionary";
+import { FooterCookiePreferencesButton } from "@/components/layout/footer-cookie-preferences-button";
 
-export function Footer() {
+export async function Footer() {
   const { footer } = siteConfig.navigation;
-  const { openPreferences } = useConsent();
-  const { t } = useI18n();
+  const { t } = await getDictionary();
 
   return (
     <footer data-surface="dark" className="border-t border-border bg-surface section-dark">
       <Container className="py-12 sm:py-16 pb-[max(3rem,env(safe-area-inset-bottom))]">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10">
           <div className="lg:col-span-1">
-            <BrandLink variant="light" logoClassName="h-11 w-auto" />
+            <ServerLocaleLink
+              href="/"
+              aria-label={t("nav.homeAria")}
+              className="inline-flex max-w-full shrink-0 items-center"
+            >
+              <VdbLogo
+                lockup="header"
+                variant="light"
+                priority
+                alt=""
+                className="h-9 w-auto max-w-[min(12rem,calc(100vw-2.5rem))] object-contain object-left"
+              />
+            </ServerLocaleLink>
             <p className="mt-4 text-small text-muted prose-width">
               {t("meta.tagline")}
             </p>
-            <div className="mt-5">
-              <LanguageSwitcherBoundary />
+            <div className="mt-5 max-w-full overflow-x-auto">
+              <ServerLanguageSwitcher compact />
             </div>
             <div className="mt-4 flex flex-wrap gap-3">
-              <LocaleLink
+              <ServerLocaleLink
                 href={paths.login}
                 className="text-small text-muted hover:text-primary transition-colors"
               >
                 {t("nav.login")}
-              </LocaleLink>
+              </ServerLocaleLink>
               {hasSocial("linkedin") && (
                 <a
                   href={siteConfig.social.linkedin}
@@ -61,12 +70,12 @@ export function Footer() {
             <ul className="space-y-2">
               {footer.product.map((link) => (
                 <li key={link.href}>
-                  <LocaleLink
+                  <ServerLocaleLink
                     href={link.href}
                     className="text-small text-muted hover:text-foreground transition-colors"
                   >
                     {t(link.labelKey)}
-                  </LocaleLink>
+                  </ServerLocaleLink>
                 </li>
               ))}
             </ul>
@@ -77,12 +86,12 @@ export function Footer() {
             <ul className="space-y-2">
               {footer.company.map((link) => (
                 <li key={link.href}>
-                  <LocaleLink
+                  <ServerLocaleLink
                     href={link.href}
                     className="text-small text-muted hover:text-foreground transition-colors"
                   >
                     {t(link.labelKey)}
-                  </LocaleLink>
+                  </ServerLocaleLink>
                 </li>
               ))}
             </ul>
@@ -93,22 +102,18 @@ export function Footer() {
             <ul className="space-y-2">
               {footer.legal.map((link) => (
                 <li key={link.href}>
-                  <LocaleLink
+                  <ServerLocaleLink
                     href={link.href}
                     className="text-small text-muted hover:text-foreground transition-colors"
                   >
                     {t(link.labelKey)}
-                  </LocaleLink>
+                  </ServerLocaleLink>
                 </li>
               ))}
               <li>
-                <button
-                  type="button"
-                  onClick={openPreferences}
-                  className="text-small text-muted hover:text-foreground transition-colors"
-                >
-                  {t("footer.cookiePreferences")}
-                </button>
+                <FooterCookiePreferencesButton
+                  label={t("footer.cookiePreferences")}
+                />
               </li>
             </ul>
           </div>
@@ -123,17 +128,30 @@ export function Footer() {
               {[
                 siteConfig.company.kvk ? `KvK ${siteConfig.company.kvk}` : null,
                 siteConfig.company.vat ? `BTW ${siteConfig.company.vat}` : null,
-                siteConfig.company.phone || null,
               ]
                 .filter(Boolean)
-                .join(" · ") || (
+                .join(" · ")}
+              {siteConfig.company.phone ? (
+                <>
+                  {(siteConfig.company.kvk || siteConfig.company.vat) ? " · " : null}
+                  <a
+                    href={`tel:${siteConfig.company.phoneTel}`}
+                    className="hover:text-foreground transition-colors"
+                  >
+                    {siteConfig.company.phone}
+                  </a>
+                </>
+              ) : null}
+              {!siteConfig.company.kvk &&
+              !siteConfig.company.vat &&
+              !siteConfig.company.phone ? (
                 <a
                   href={`mailto:${siteConfig.contactEmail}`}
                   className="hover:text-foreground transition-colors"
                 >
                   {siteConfig.contactEmail}
                 </a>
-              )}
+              ) : null}
             </p>
           </div>
           {hasCompanyLocation() ? (

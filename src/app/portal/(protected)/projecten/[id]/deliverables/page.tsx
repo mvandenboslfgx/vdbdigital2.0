@@ -4,15 +4,18 @@ import {
   ApproveDeliverableForm,
   RejectDeliverableForm,
 } from "@/components/portal/project-customer-forms";
+import { projectFormLabels } from "@/lib/portal/form-labels";
 import { getPortalProject } from "@/server/repositories/portal";
 import { hasCustomerPermission } from "@/lib/auth/customer-permissions";
-import { DELIVERABLE_STATUS_NL, labelNl } from "@/lib/portal/labels";
+import { DELIVERABLE_STATUS_KEYS, labelFor } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
 
 export default async function PortalProjectDeliverablesPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { t } = await getDictionary();
   const { id } = await params;
   const bundle = await getPortalProject(id);
   if (!bundle.project) notFound();
@@ -21,16 +24,16 @@ export default async function PortalProjectDeliverablesPage({
     bundle.ctx.customerRole,
     "portal.projects.approve_deliverable",
   );
+  const formLabels = projectFormLabels(t);
 
   return (
     <PortalProjectTabShell projectId={id} active="deliverables">
       <p className="text-small text-muted">
-        Bestanden en downloads volgen in een latere documentenfase. Hier zie je
-        alleen gedeelde opleveringen en goedkeuringen.
+        {t("portal.projectDetail.deliverablesNote")}
       </p>
       {bundle.deliverables.length === 0 ? (
         <p className="text-muted text-small">
-          Er zijn nog geen opleveringen met je gedeeld.
+          {t("portal.projectDetail.noDeliverables")}
         </p>
       ) : (
         <ul className="space-y-4">
@@ -46,7 +49,7 @@ export default async function PortalProjectDeliverablesPage({
               <li key={d.id} className="rounded-xl border border-border p-4">
                 <p className="font-medium">{d.title}</p>
                 <p className="text-small text-muted mt-1">
-                  {labelNl(DELIVERABLE_STATUS_NL, d.status)}
+                  {labelFor(t, DELIVERABLE_STATUS_KEYS, d.status)}
                 </p>
                 {d.description ? (
                   <p className="text-small mt-2 whitespace-pre-wrap">
@@ -55,7 +58,9 @@ export default async function PortalProjectDeliverablesPage({
                 ) : null}
                 {d.rejection_reason ? (
                   <p className="text-small text-red-600 mt-2">
-                    Reden: {d.rejection_reason}
+                    {t("portal.projectDetail.rejectionReason", {
+                      reason: d.rejection_reason,
+                    })}
                   </p>
                 ) : null}
                 {canApprove && d.status === "SHARED" ? (
@@ -63,10 +68,12 @@ export default async function PortalProjectDeliverablesPage({
                     <ApproveDeliverableForm
                       deliverableId={d.id}
                       version={d.version}
+                      labels={formLabels}
                     />
                     <RejectDeliverableForm
                       deliverableId={d.id}
                       version={d.version}
+                      labels={formLabels}
                     />
                   </div>
                 ) : null}

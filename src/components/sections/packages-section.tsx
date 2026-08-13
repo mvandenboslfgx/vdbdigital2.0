@@ -6,8 +6,8 @@ import {
   getPackageCatalogItem,
 } from "@/config/commercial/website-packages";
 import { formatDualPrice } from "@/lib/utilities/commercial-price";
-import { LocaleLinkButton } from "@/components/ui/locale-link-button";
 import { paths } from "@/i18n/config";
+import { ServerLocaleLinkButton } from "@/components/ui/server-locale-link-button";
 
 function PriceBlock({
   price,
@@ -78,7 +78,7 @@ export async function PackagesSection() {
                   </div>
                 </div>
                 <div className="mt-auto pt-6" data-pricing-cta>
-                  <LocaleLinkButton
+                  <ServerLocaleLinkButton
                     href={
                       pkg.quoteOnly
                         ? `${paths.quote}?package=${pkg.slug}`
@@ -96,7 +96,7 @@ export async function PackagesSection() {
                       : locale === "nl"
                         ? "Plan een kennismaking"
                         : "Schedule an introduction"}
-                  </LocaleLinkButton>
+                  </ServerLocaleLinkButton>
                 </div>
               </Card>
             );

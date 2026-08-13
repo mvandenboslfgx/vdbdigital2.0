@@ -10,6 +10,7 @@ import {
   type InvoiceActionState,
 } from "@/server/actions/invoice-actions";
 import { invoiceHeaderTotals, lineTotals } from "@/lib/commerce/invoice-money";
+import type { InvoiceEditorLabels } from "@/lib/admin/line-item-editor-labels";
 
 type ItemDraft = {
   title: string;
@@ -50,9 +51,12 @@ export function InvoiceEditorForm({
   organizations,
   invoice,
   initialItems,
+  labels,
 }: {
   mode: "create" | "edit";
   organizations: { id: string; label: string }[];
+  /** Resolved server-side; this editor does no dictionary lookups. */
+  labels: InvoiceEditorLabels;
   invoice?: {
     id: string;
     version: number;
@@ -107,7 +111,7 @@ export function InvoiceEditorForm({
         {mode === "create" ? (
           <div>
             <label className="block text-small font-medium mb-1" htmlFor="organizationId">
-              Organisatie
+              {labels.organization}
             </label>
             <select
               id="organizationId"
@@ -117,7 +121,7 @@ export function InvoiceEditorForm({
               defaultValue=""
             >
               <option value="" disabled>
-                Kies organisatie
+                {labels.chooseOrganization}
               </option>
               {organizations.map((o) => (
                 <option key={o.id} value={o.id}>
@@ -131,7 +135,7 @@ export function InvoiceEditorForm({
         )}
         <div>
           <label className="block text-small font-medium mb-1" htmlFor="invoiceType">
-            Type
+            {labels.type}
           </label>
           <select
             id="invoiceType"
@@ -139,14 +143,14 @@ export function InvoiceEditorForm({
             className="w-full min-h-11 rounded-lg border border-border px-3 text-sm"
             defaultValue={invoice?.invoice_type ?? "INVOICE"}
           >
-            <option value="INVOICE">Factuur</option>
-            <option value="CREDIT_NOTE">Creditnota</option>
-            <option value="PROFORMA">Proforma</option>
+            <option value="INVOICE">{labels.invoiceType.INVOICE}</option>
+            <option value="CREDIT_NOTE">{labels.invoiceType.CREDIT_NOTE}</option>
+            <option value="PROFORMA">{labels.invoiceType.PROFORMA}</option>
           </select>
         </div>
         <div className="md:col-span-2">
           <label className="block text-small font-medium mb-1" htmlFor="title">
-            Titel
+            {labels.title}
           </label>
           <Input
             id="title"
@@ -158,7 +162,7 @@ export function InvoiceEditorForm({
         </div>
         <div className="md:col-span-2">
           <label className="block text-small font-medium mb-1" htmlFor="description">
-            Omschrijving
+            {labels.description}
           </label>
           <Textarea
             id="description"
@@ -170,7 +174,7 @@ export function InvoiceEditorForm({
         </div>
         <div>
           <label className="block text-small font-medium mb-1" htmlFor="issueDate">
-            Uitgiftedatum
+            {labels.issueDate}
           </label>
           <Input
             id="issueDate"
@@ -181,7 +185,7 @@ export function InvoiceEditorForm({
         </div>
         <div>
           <label className="block text-small font-medium mb-1" htmlFor="dueDate">
-            Vervaldatum
+            {labels.dueDate}
           </label>
           <Input
             id="dueDate"
@@ -192,7 +196,7 @@ export function InvoiceEditorForm({
         </div>
         <div>
           <label className="block text-small font-medium mb-1" htmlFor="projectId">
-            Project-ID (optioneel)
+            {labels.projectIdOptional}
           </label>
           <Input
             id="projectId"
@@ -203,7 +207,7 @@ export function InvoiceEditorForm({
         </div>
         <div>
           <label className="block text-small font-medium mb-1" htmlFor="quoteId">
-            Offerte-ID (optioneel)
+            {labels.quoteIdOptional}
           </label>
           <Input
             id="quoteId"
@@ -217,7 +221,7 @@ export function InvoiceEditorForm({
             className="block text-small font-medium mb-1"
             htmlFor="paymentInstruction"
           >
-            Betaalinstructie (zichtbaar voor klant na uitgifte)
+            {labels.paymentInstruction}
           </label>
           <Textarea
             id="paymentInstruction"
@@ -225,7 +229,7 @@ export function InvoiceEditorForm({
             rows={2}
             defaultValue={invoice?.payment_instruction ?? ""}
             maxLength={2000}
-            placeholder="IBAN / referentie — geen online betaling"
+            placeholder={labels.paymentInstructionPlaceholder}
           />
         </div>
         <div>
@@ -233,7 +237,7 @@ export function InvoiceEditorForm({
             className="block text-small font-medium mb-1"
             htmlFor="externalAccountingReference"
           >
-            Externe boekhoudreferentie
+            {labels.externalAccountingReference}
           </label>
           <Input
             id="externalAccountingReference"
@@ -244,7 +248,7 @@ export function InvoiceEditorForm({
         </div>
         <div>
           <label className="block text-small font-medium mb-1" htmlFor="discountEuros">
-            Kopkorting (EUR)
+            {labels.headerDiscount}
           </label>
           <Input
             id="discountEuros"
@@ -261,13 +265,13 @@ export function InvoiceEditorForm({
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-h3">Regels</h2>
+          <h2 className="text-h3">{labels.linesHeading}</h2>
           <Button
             type="button"
             variant="outline"
             onClick={() => setItems((prev) => [...prev, emptyItem()])}
           >
-            Regel toevoegen
+            {labels.addLine}
           </Button>
         </div>
         {items.map((item, index) => {
@@ -284,7 +288,7 @@ export function InvoiceEditorForm({
             >
               <Input
                 className="md:col-span-2"
-                placeholder="Titel"
+                placeholder={labels.title}
                 value={item.title}
                 onChange={(e) =>
                   setItems((prev) =>
@@ -295,7 +299,7 @@ export function InvoiceEditorForm({
                 }
               />
               <Input
-                placeholder="Aantal"
+                placeholder={labels.quantity}
                 type="number"
                 step="0.001"
                 value={item.quantity}
@@ -310,7 +314,7 @@ export function InvoiceEditorForm({
                 }
               />
               <Input
-                placeholder="Prijs EUR"
+                placeholder={labels.priceEur}
                 value={centsToEuros(item.unitPriceCents)}
                 onChange={(e) =>
                   setItems((prev) =>
@@ -323,7 +327,7 @@ export function InvoiceEditorForm({
                 }
               />
               <Input
-                placeholder="BTW bp"
+                placeholder={labels.vatBasisPoints}
                 type="number"
                 value={item.taxRateBasisPoints}
                 onChange={(e) =>
@@ -350,7 +354,7 @@ export function InvoiceEditorForm({
                     setItems((prev) => prev.filter((_, i) => i !== index))
                   }
                 >
-                  Verwijder
+                  {labels.remove}
                 </Button>
               </div>
             </div>
@@ -360,14 +364,16 @@ export function InvoiceEditorForm({
       </div>
 
       <div className="rounded-xl border border-border p-4 text-small space-y-1">
-        <p>Subtotaal (indicatief): {centsToEuros(liveTotals.subtotalCents)} EUR</p>
-        <p>BTW (indicatief): {centsToEuros(liveTotals.taxCents)} EUR</p>
+        <p>
+          {labels.subtotalIndicative}: {centsToEuros(liveTotals.subtotalCents)} EUR
+        </p>
+        <p>
+          {labels.vatIndicative}: {centsToEuros(liveTotals.taxCents)} EUR
+        </p>
         <p className="font-medium">
-          Totaal (indicatief): {centsToEuros(liveTotals.totalCents)} EUR
+          {labels.totalIndicative}: {centsToEuros(liveTotals.totalCents)} EUR
         </p>
-        <p className="text-muted">
-          Server herberekent bedragen. Geen Mollie / online betaling.
-        </p>
+        <p className="text-muted">{labels.serverRecalculates}</p>
       </div>
 
       {state.error ? (
@@ -382,7 +388,11 @@ export function InvoiceEditorForm({
       ) : null}
 
       <Button type="submit" disabled={pending}>
-        {pending ? "Opslaan…" : mode === "create" ? "Concept maken" : "Opslaan"}
+        {pending
+          ? labels.saving
+          : mode === "create"
+            ? labels.submitCreate
+            : labels.submitEdit}
       </Button>
     </form>
   );

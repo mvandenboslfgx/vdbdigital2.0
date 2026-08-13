@@ -1,7 +1,7 @@
 export default function Loading() {
   return (
     <div
-      className="section-dark min-h-[40vh] flex items-center justify-center px-4"
+      className="section-dark flex min-h-[calc(100dvh-4.5rem)] items-center justify-center px-4"
       role="status"
       aria-busy="true"
       aria-label="Loading"

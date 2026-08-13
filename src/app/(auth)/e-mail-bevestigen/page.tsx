@@ -1,23 +1,26 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { getDictionary } from "@/i18n/get-dictionary";
+import { ServerLocaleLink } from "@/i18n/server-locale-link";
 
-export const metadata: Metadata = {
-  title: "E-mail bevestigen",
-  robots: { index: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getDictionary();
+  return {
+    title: t("auth.confirmEmailTitle"),
+    robots: { index: false },
+  };
+}
 
-export default function EmailBevestigenPage() {
+export default async function EmailBevestigenPage() {
+  const { t } = await getDictionary();
+
   return (
     <>
-      <h1 className="text-h2 mb-2 text-center">E-mail bevestigen</h1>
-      <p className="text-muted text-small mb-6 text-center">
-        Open de bevestigingslink in je e-mail. Daarna kun je inloggen. Zonder
-        bevestiging krijg je geen toegang tot klantdata.
-      </p>
+      <h1 className="text-h2 mb-2 text-center">{t("auth.confirmEmailTitle")}</h1>
+      <p className="text-muted text-small mb-6 text-center">{t("auth.confirmEmailBody")}</p>
       <p className="text-small text-center">
-        <Link href="/inloggen" className="text-primary hover:underline">
-          Naar inloggen
-        </Link>
+        <ServerLocaleLink href="/inloggen" className="text-primary hover:underline">
+          {t("auth.confirmEmailGoToLogin")}
+        </ServerLocaleLink>
       </p>
     </>
   );

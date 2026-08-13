@@ -4,18 +4,25 @@ import { EmptyState } from "@/components/portal/empty-state";
 import { listAdminInvoices } from "@/server/repositories/admin-invoices";
 import { formatEuro } from "@/server/repositories/portal";
 import {
-  INVOICE_STATUS_NL,
-  INVOICE_TYPE_NL,
-  labelNl,
+  INVOICE_STATUS_KEYS,
+  INVOICE_TYPE_KEYS,
+  labelFor,
+  labelOptions,
 } from "@/lib/portal/labels";
+import { getDictionary } from "@/i18n/get-dictionary";
+import { withLocale } from "@/i18n/config";
 
-export const metadata: Metadata = { title: "Facturen", robots: { index: false } };
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getDictionary();
+  return { title: t("admin.page.invoices.title"), robots: { index: false } };
+}
 
 export default async function AdminInvoicesPage({
   searchParams,
 }: {
   searchParams: Promise<{ q?: string; status?: string; page?: string }>;
 }) {
+  const { t, locale } = await getDictionary();
   const sp = await searchParams;
   const { invoices, total, error } = await listAdminInvoices({
     q: sp.q,
@@ -27,17 +34,21 @@ export default async function AdminInvoicesPage({
     <div className="space-y-6">
       <div className="flex flex-wrap justify-between gap-3">
         <div>
-          <h1 className="text-h1">Facturen</h1>
+          <h1 className="text-h1">{t("admin.page.invoices.title")}</h1>
           <p className="text-muted text-small mt-1">
-            {total} factuur{total === 1 ? "" : "en"} · weergave & handmatige
-            registratie · geen Mollie
+            {t(
+              total === 1
+                ? "admin.page.invoices.countOne"
+                : "admin.page.invoices.countOther",
+              { count: total },
+            )}
           </p>
         </div>
         <Link
-          href="/admin/invoices/new"
+          href={withLocale("/admin/invoices/new", locale)}
           className="rounded-lg bg-primary text-white px-4 py-2 text-sm min-h-11 inline-flex items-center"
         >
-          Nieuwe factuur
+          {t("admin.page.invoices.newInvoice")}
         </Link>
       </div>
 
@@ -45,18 +56,20 @@ export default async function AdminInvoicesPage({
         <input
           name="q"
           defaultValue={sp.q ?? ""}
-          placeholder="Zoek nummer of titel"
+          placeholder={t("admin.page.invoices.searchPlaceholder")}
+          aria-label={t("admin.common.search")}
           className="min-h-11 px-3 rounded-lg border border-border text-sm"
         />
         <select
           name="status"
           defaultValue={sp.status ?? "ALL"}
+          aria-label={t("admin.common.colStatus")}
           className="min-h-11 px-3 rounded-lg border border-border text-sm"
         >
-          <option value="ALL">Alle statussen</option>
-          {Object.keys(INVOICE_STATUS_NL).map((s) => (
-            <option key={s} value={s}>
-              {INVOICE_STATUS_NL[s]}
+          <option value="ALL">{t("admin.common.allStatuses")}</option>
+          {labelOptions(t, INVOICE_STATUS_KEYS).map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
             </option>
           ))}
         </select>
@@ -64,7 +77,7 @@ export default async function AdminInvoicesPage({
           type="submit"
           className="min-h-11 px-4 rounded-lg border border-border text-sm"
         >
-          Filter
+          {t("admin.common.filter")}
         </button>
       </form>
 
@@ -72,21 +85,21 @@ export default async function AdminInvoicesPage({
 
       {invoices.length === 0 ? (
         <EmptyState
-          title="Nog geen facturen"
-          description="Maak een concept of zet een geaccepteerde offerte om naar een factuurconcept."
+          title={t("admin.page.invoices.emptyTitle")}
+          description={t("admin.page.invoices.emptyDescription")}
         />
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-small text-left">
             <thead>
               <tr className="border-b border-border text-muted">
-                <th className="py-2 pr-3">Nummer</th>
-                <th className="py-2 pr-3">Organisatie</th>
-                <th className="py-2 pr-3">Type</th>
-                <th className="py-2 pr-3">Status</th>
-                <th className="py-2 pr-3">Totaal</th>
-                <th className="py-2 pr-3">Openstaand</th>
-                <th className="py-2 pr-3">Verval</th>
+                <th className="py-2 pr-3">{t("admin.common.colNumber")}</th>
+                <th className="py-2 pr-3">{t("admin.common.colOrganization")}</th>
+                <th className="py-2 pr-3">{t("admin.common.colType")}</th>
+                <th className="py-2 pr-3">{t("admin.common.colStatus")}</th>
+                <th className="py-2 pr-3">{t("admin.common.colTotal")}</th>
+                <th className="py-2 pr-3">{t("admin.common.colOutstanding")}</th>
+                <th className="py-2 pr-3">{t("admin.common.colDue")}</th>
               </tr>
             </thead>
             <tbody>
@@ -99,7 +112,7 @@ export default async function AdminInvoicesPage({
                   <tr key={inv.id} className="border-b border-border/60">
                     <td className="py-3 pr-3">
                       <Link
-                        href={`/admin/invoices/${inv.id}`}
+                        href={withLocale(`/admin/invoices/${inv.id}`, locale)}
                         className="text-primary underline-offset-2 hover:underline"
                       >
                         {inv.invoice_number}
@@ -109,13 +122,17 @@ export default async function AdminInvoicesPage({
                       ) : null}
                     </td>
                     <td className="py-3 pr-3">
-                      {org?.trade_name || org?.legal_name || "—"}
+                      {org?.trade_name || org?.legal_name || t("admin.common.empty")}
                     </td>
                     <td className="py-3 pr-3">
-                      {labelNl(INVOICE_TYPE_NL, inv.invoice_type ?? "INVOICE")}
+                      {labelFor(
+                        t,
+                        INVOICE_TYPE_KEYS,
+                        inv.invoice_type ?? "INVOICE",
+                      )}
                     </td>
                     <td className="py-3 pr-3">
-                      {labelNl(INVOICE_STATUS_NL, inv.status)}
+                      {labelFor(t, INVOICE_STATUS_KEYS, inv.status)}
                     </td>
                     <td className="py-3 pr-3">
                       {formatEuro(inv.total_cents, inv.currency)}
@@ -129,7 +146,7 @@ export default async function AdminInvoicesPage({
                     </td>
                     <td className="py-3 pr-3">
                       {(inv as { due_date?: string | null }).due_date?.slice(0, 10) ||
-                        "—"}
+                        t("admin.common.empty")}
                     </td>
                   </tr>
                 );

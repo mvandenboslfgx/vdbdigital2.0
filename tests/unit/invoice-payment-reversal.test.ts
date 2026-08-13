@@ -184,16 +184,32 @@ describe("payment reversal — migration & action contracts", () => {
     expect(src.toLowerCase()).not.toContain("mollie.payments");
   });
 
+  /**
+   * The control used to carry the Dutch copy inline, which meant an English
+   * admin session could not read the "no provider refund" disclaimer at all.
+   * The copy now lives in the dictionaries, so the guardrail is asserted per
+   * locale instead of against the component source.
+   */
   it("admin UI shows reverse control copy and not refund wording as action", () => {
     const ui = readFileSync(
       "src/components/admin/reverse-payment-controls.tsx",
       "utf8",
     );
-    expect(ui).toContain("Betaling terugdraaien");
-    expect(ui).toContain(
+    expect(ui).toContain("labels.open");
+    expect(ui).toContain("labels.disclaimer");
+    expect(ui).not.toMatch(/Mollie|providerrefund|createRefund/i);
+
+    const nl = readFileSync("src/i18n/messages/nl.ts", "utf8");
+    expect(nl).toContain("Betaling terugdraaien");
+    expect(nl).toContain(
       "Deze actie draait alleen de administratieve betalingsregistratie terug",
     );
-    expect(ui).not.toMatch(/Mollie|providerrefund|createRefund/i);
+
+    const en = readFileSync("src/i18n/messages/en.ts", "utf8");
+    expect(en).toContain("Reverse payment");
+    expect(en).toContain(
+      "This only reverses the administrative payment record",
+    );
   });
 
   it("portal invoice page does not expose reversal reasons", () => {
@@ -203,8 +219,8 @@ describe("payment reversal — migration & action contracts", () => {
     );
     expect(portal).not.toContain("reversal_reason");
     expect(portal).not.toContain("Betaling terugdraaien");
-    expect(portal).toContain("Geregistreerd betaald");
-    expect(portal).toContain("Openstaand");
+    expect(portal).toContain("portal.invoicesPage.paidRegistered");
+    expect(portal).toContain("portal.invoicesPage.outstanding");
   });
 
   it("checkout remains off in this suite", () => {

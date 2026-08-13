@@ -1,0 +1,277 @@
+{
+  "fail": 0,
+  "pass": 53,
+  "total": 53,
+  "checks": [
+    {
+      "ok": true,
+      "name": "activation:aal1_denied",
+      "detail": "AAL2_REQUIRED"
+    },
+    {
+      "ok": true,
+      "name": "activation:block_codes_recorded",
+      "detail": "AGE_NOT_VERIFIED,IDENTITY_NOT_VERIFIED,AGREEMENT_NOT_ACCEPTED,PAYOUT_PROFILE_NOT_APPROVED"
+    },
+    {
+      "ok": true,
+      "name": "activation:business_requires_business_verification",
+      "detail": "{\"checks\": {\"age_verified\": true, \"not_suspended\": true, \"staff_approved\": true, \"identity_verified\": true, \"partner_type_known\": true, \"business_verified_or_na\": false, \"payout_profile_approved\": true, \"agreement_accepted_current\": false}, \"missing\": [\"BUSINE"
+    },
+    {
+      "ok": true,
+      "name": "activation:business_success",
+      "detail": "{\"id\": \"83d9971f-6a48-4ddd-8d53-d157133fe0a5\", \"status\": \"active\", \"audit_id\": \"9afd8c46-8760-4824-b9a2-f0c15ed8362c\", \"updated_at\": \"2026-07-29T05:34:22.962666+00:00\", \"partner_code\": \"P83D9971F\", \"schema_version\": \"2026.07.29.partner-identity-directory-rc5\","
+    },
+    {
+      "ok": true,
+      "name": "activation:checklist_denies_incomplete",
+      "detail": "{\"checks\": {\"age_verified\": false, \"not_suspended\": true, \"staff_approved\": true, \"identity_verified\": false, \"partner_type_known\": true, \"business_verified_or_na\": true, \"payout_profile_approved\": false, \"agreement_accepted_current\": false}, \"missing\": [\"AGE_"
+    },
+    {
+      "ok": true,
+      "name": "activation:idempotent_replay",
+      "detail": "{\"id\": \"83d9971f-6a48-4ddd-8d53-d157133fe0a5\", \"status\": \"active\", \"audit_id\": \"9afd8c46-8760-4824-b9a2-f0c15ed8362c\", \"updated_at\": \"2026-07-29T05:34:22.962666+00:00\", \"partner_code\": \"P83D9971F\", \"s"
+    },
+    {
+      "ok": true,
+      "name": "activation:individual_checklist_green",
+      "detail": "{\"checks\": {\"age_verified\": true, \"not_suspended\": true, \"staff_approved\": true, \"identity_verified\": true, \"partner_type_known\": true, \"business_verified_or_na\": true, \"payout_profile_approved\": true, \"agreement_accepted_current\": true}, \"missing\": [], \"partn"
+    },
+    {
+      "ok": true,
+      "name": "activation:individual_row_active",
+      "detail": "status=ACTIVE grandfathered=false (new partner is checklist-gated, not grandfathered)"
+    },
+    {
+      "ok": true,
+      "name": "activation:individual_success",
+      "detail": "{\"id\": \"4be9f581-7138-477e-b281-c9e6ca16e76a\", \"status\": \"active\", \"audit_id\": \"b0f5fd1d-a4fa-4d1c-aaa8-11cedd9669ef\", \"updated_at\": \"2026-07-29T05:34:22.962666+00:00\", \"partner_code\": \"P4BE9F581\", \"schema_version\": \"2026.07.29.partner-identity-directory-rc5\","
+    },
+    {
+      "ok": true,
+      "name": "activation:premature_denied",
+      "detail": "ACTIVATION_DENIED:AGE_NOT_VERIFIED"
+    },
+    {
+      "ok": true,
+      "name": "activation:staff_approval_alone_not_active",
+      "detail": "status=PENDING after staff approval, staff_approved_at set"
+    },
+    {
+      "ok": true,
+      "name": "agreement:individual_accepted",
+      "detail": "acceptance ledger row written"
+    },
+    {
+      "ok": true,
+      "name": "auth:jwt_simulation_resolves",
+      "detail": "auth.uid()=579162fe-5f55-427d-878e-31204d28a779 is_staff_admin=true"
+    },
+    {
+      "ok": true,
+      "name": "cleanup:synthetic_partners_removed",
+      "detail": "synthetic partner profiles deleted"
+    },
+    {
+      "ok": true,
+      "name": "deny:anon_admin_get_product",
+      "detail": "permission denied for function admin_get_product"
+    },
+    {
+      "ok": true,
+      "name": "deny:anon_grant_absent",
+      "detail": "anon EXECUTE revoked on every detail RPC"
+    },
+    {
+      "ok": true,
+      "name": "deny:customer_admin_get_product",
+      "detail": "FORBIDDEN"
+    },
+    {
+      "ok": true,
+      "name": "deny:partner_admin_get_product",
+      "detail": "FORBIDDEN"
+    },
+    {
+      "ok": true,
+      "name": "detail:admin_get_appointment",
+      "detail": "{\"id\": \"cccf87bb-c519-4db3-9365-4e60666cc58f\", \"title\": \"Synth RC5 Appointment\", \"status\": \"SCHEDULED\", \"ends_at\": \"2026-07-30T06:34:22.962666+00:00\", \"location\": \"Synth location\", \"timezone\": \"Europe"
+    },
+    {
+      "ok": true,
+      "name": "detail:admin_get_customer",
+      "detail": "{\"id\": \"295621e5-7d50-4234-84ab-11628988db52\", \"name\": \"Synth RC5 Trade\", \"type\": \"BUSINESS\", \"status\": \"ACTIVE\", \"created_at\": \"2026-07-29T05:34:22.962666+00:00\", \"legal_name\": \"Synth RC5 Org 19fac5d"
+    },
+    {
+      "ok": true,
+      "name": "detail:admin_get_invoice",
+      "detail": "{\"id\": \"06cd594c-c296-45d7-a4d5-422c6b791a11\", \"status\": \"DRAFT\", \"totals\": {\"vat_cents\": 21000, \"total_cents\": 121000, \"discount_cents\": 0, \"subtotal_cents\": 100000, \"amount_due_cents\": 121000, \"amou"
+    },
+    {
+      "ok": true,
+      "name": "detail:admin_get_partner",
+      "detail": "{\"id\": \"83d9971f-6a48-4ddd-8d53-d157133fe0a5\", \"status\": \"ACTIVE\", \"user_id\": \"a8271443-7a54-4951-ad0b-90e9540c5c6e\", \"created_at\": \"2026-07-29T05:34:22.962666+00:00\", \"legal_name\": \"Synth Business Partner BV\", \"updated_at\": \"2026-07-29T05:34:22.962666+00:00\","
+    },
+    {
+      "ok": true,
+      "name": "detail:admin_get_product",
+      "detail": "{\"id\": \"a90b1b13-8993-4916-9165-bc1224b55da2\", \"name\": \"Synth RC5 Product\", \"slug\": \"synth-rc5-product-19fac5de6f9f536e1\", \"status\": \"DRAFT\", \"summary\": \"Synthetic product for the rc.5 staging matrix."
+    },
+    {
+      "ok": true,
+      "name": "detail:admin_get_project",
+      "detail": "{\"id\": \"eae15a50-01e5-4e12-8546-a7a4c5c7f1ca\", \"name\": \"Synth RC5 Project\", \"status\": \"PLANNED\", \"priority\": \"NORMAL\", \"created_at\": \"2026-07-29T05:34:22.962666+00:00\", \"updated_at\": \"2026-07-29T05:34"
+    },
+    {
+      "ok": true,
+      "name": "detail:admin_get_quote",
+      "detail": "{\"id\": \"6a8b3f49-c355-4c74-97a5-c2323b33785c\", \"items\": [{\"id\": \"364ea36d-e366-442c-aac1-82bba76ee4dc\", \"label\": \"Synth RC5 line item\", \"quantity\": 1.000, \"total_cents\": 100000, \"unit_price_cents\": 10"
+    },
+    {
+      "ok": true,
+      "name": "detail:appointment_no_link_or_notes",
+      "detail": "meeting_link and internal notes withheld"
+    },
+    {
+      "ok": true,
+      "name": "detail:customer_no_pii",
+      "detail": "no email / phone / KvK / VAT / address"
+    },
+    {
+      "ok": true,
+      "name": "detail:not_found_contract",
+      "detail": "NOT_FOUND"
+    },
+    {
+      "ok": true,
+      "name": "detail:product_no_cost_or_supplier",
+      "detail": "cost_cents (42424) never returned"
+    },
+    {
+      "ok": true,
+      "name": "detail:quote_no_customer_note",
+      "detail": "customer_note withheld"
+    },
+    {
+      "ok": true,
+      "name": "env:staging_interlock",
+      "detail": "partner_compliance_fixtures enabled — staging-only fixtures surface present"
+    },
+    {
+      "ok": true,
+      "name": "fixtures:individual_applied",
+      "detail": "fixtures never change status or payout_eligible"
+    },
+    {
+      "ok": true,
+      "name": "flag:fixtures_and_notes_enabled",
+      "detail": "staging operator flags on"
+    },
+    {
+      "ok": true,
+      "name": "flag:internal_notes_off_denies",
+      "detail": "FEATURE_DISABLED"
+    },
+    {
+      "ok": true,
+      "name": "flag:internal_notes_restored",
+      "detail": "support_internal_notes_rpc=t"
+    },
+    {
+      "ok": true,
+      "name": "flag:partner_payouts_false",
+      "detail": "partner_payouts=f"
+    },
+    {
+      "ok": true,
+      "name": "intake:business_bad_kvk_rejected",
+      "detail": "VALIDATION_FAILED"
+    },
+    {
+      "ok": true,
+      "name": "intake:business_submit_pending",
+      "detail": "BUSINESS intake maps to BUSINESS_PARTNER agreement"
+    },
+    {
+      "ok": true,
+      "name": "intake:individual_no_kvk_stored",
+      "detail": "particulier intake stores no KvK number"
+    },
+    {
+      "ok": true,
+      "name": "intake:individual_submit_pending",
+      "detail": "status=PENDING partner_type=INDIVIDUAL classification=KNOWN agreement=INDIVIDUAL_PARTNER"
+    },
+    {
+      "ok": true,
+      "name": "intake:individual_with_kvk_rejected",
+      "detail": "VALIDATION_FAILED"
+    },
+    {
+      "ok": true,
+      "name": "legacy:active_population_restored",
+      "detail": "ACTIVE partners before=3 after=3"
+    },
+    {
+      "ok": true,
+      "name": "legacy:pre_active_all_grandfathered",
+      "detail": "pre-existing ACTIVE partners = 3, all grandfathered"
+    },
+    {
+      "ok": true,
+      "name": "legacy:pre_active_still_active",
+      "detail": "3/3 pre-existing ACTIVE grandfathered partners still ACTIVE"
+    },
+    {
+      "ok": true,
+      "name": "legacy:review_required_preserved",
+      "detail": "legacy rows still await staff classification (REVIEW_REQUIRED)"
+    },
+    {
+      "ok": true,
+      "name": "notes:customer_list_excludes_internal",
+      "detail": "customer sees 1 public replies, zero internal"
+    },
+    {
+      "ok": true,
+      "name": "notes:non_member_forbidden",
+      "detail": "FORBIDDEN"
+    },
+    {
+      "ok": true,
+      "name": "notes:staff_add_internal_note",
+      "detail": "reply id=ca12ae1c-9bb2-4a0c-9db2-f330b6d6a507 is_internal=true"
+    },
+    {
+      "ok": true,
+      "name": "notes:staff_list_includes_internal",
+      "detail": "staff sees 2 replies incl. internal"
+    },
+    {
+      "ok": true,
+      "name": "verify:messaging",
+      "detail": "pass=33 fail=0"
+    },
+    {
+      "ok": true,
+      "name": "verify:partner_admin",
+      "detail": "pass=30 fail=0"
+    },
+    {
+      "ok": true,
+      "name": "verify:rc4",
+      "detail": "pass=40 fail=0"
+    },
+    {
+      "ok": true,
+      "name": "verify:rc5",
+      "detail": "pass=53 fail=0"
+    }
+  ],
+  "matrix": "partner-identity-directory-rc5-staging",
+  "failing": [],
+  "project_ref": "qzekuvmgfekzsowdecyk",
+  "generated_at": "2026-07-29T05:34:22.962666+00:00",
+  "schema_version": "2026.07.29.partner-identity-directory-rc5"
+}

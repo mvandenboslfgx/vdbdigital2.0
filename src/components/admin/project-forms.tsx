@@ -11,6 +11,12 @@ import {
   shareDeliverableAction,
   type ProjectActionState,
 } from "@/server/actions/project-actions";
+import type {
+  ActionFormLabels,
+  DeliverableFormLabels,
+  MilestoneFormLabels,
+  ShareDeliverableLabels,
+} from "@/lib/admin/project-forms-labels";
 
 function FormMessage({ state }: { state: ProjectActionState }) {
   if (state.error) {
@@ -30,80 +36,96 @@ function FormMessage({ state }: { state: ProjectActionState }) {
   return null;
 }
 
-export function CreateMilestoneForm({ projectId }: { projectId: string }) {
+export function CreateMilestoneForm({
+  projectId,
+  labels,
+}: {
+  projectId: string;
+  labels: MilestoneFormLabels;
+}) {
   const [state, action, pending] = useActionState(createMilestoneAction, {});
   return (
     <form action={action} className="space-y-3 rounded-xl border border-border p-4">
-      <h3 className="font-medium">Mijlpaal toevoegen</h3>
+      <h3 className="font-medium">{labels.heading}</h3>
       <FormMessage state={state} />
       <input type="hidden" name="projectId" value={projectId} />
-      <Input name="title" placeholder="Titel" required maxLength={200} />
-      <Textarea name="description" placeholder="Omschrijving (intern of zichtbaar)" rows={2} />
+      <Input name="title" placeholder={labels.title} required maxLength={200} />
+      <Textarea name="description" placeholder={labels.description} rows={2} />
       <Input name="dueDate" type="date" />
       <Input name="sortOrder" type="number" min={0} defaultValue={0} />
       <label className="flex gap-2 text-small items-center">
         <input type="checkbox" name="customerVisible" value="1" />
-        Zichtbaar voor klant
+        {labels.customerVisible}
       </label>
       <label className="flex gap-2 text-small items-center">
         <input type="checkbox" name="requiresCustomerAction" value="1" />
-        Vereist klantactie
+        {labels.requiresCustomerAction}
       </label>
       <Button type="submit" disabled={pending}>
-        {pending ? "Opslaan…" : "Mijlpaal opslaan"}
+        {pending ? labels.saving : labels.submit}
       </Button>
     </form>
   );
 }
 
-export function CreateActionForm({ projectId }: { projectId: string }) {
+export function CreateActionForm({
+  projectId,
+  labels,
+}: {
+  projectId: string;
+  labels: ActionFormLabels;
+}) {
   const [state, action, pending] = useActionState(createActionItemAction, {});
   return (
     <form action={action} className="space-y-3 rounded-xl border border-border p-4">
-      <h3 className="font-medium">Actie toevoegen</h3>
+      <h3 className="font-medium">{labels.heading}</h3>
       <FormMessage state={state} />
       <input type="hidden" name="projectId" value={projectId} />
-      <Input name="title" placeholder="Titel" required maxLength={200} />
-      <Textarea name="description" placeholder="Omschrijving" rows={2} />
+      <Input name="title" placeholder={labels.title} required maxLength={200} />
+      <Textarea name="description" placeholder={labels.description} rows={2} />
       <select
         name="assignedToType"
         className="w-full min-h-11 px-3 rounded-lg border border-border bg-background text-sm"
         defaultValue="INTERNAL"
       >
-        <option value="INTERNAL">Intern</option>
-        <option value="CUSTOMER">Klant</option>
-        <option value="UNASSIGNED">Niet toegewezen</option>
+        <option value="INTERNAL">{labels.assignedInternal}</option>
+        <option value="CUSTOMER">{labels.assignedCustomer}</option>
+        <option value="UNASSIGNED">{labels.assignedUnassigned}</option>
       </select>
       <Input name="dueDate" type="date" />
       <label className="flex gap-2 text-small items-center">
         <input type="checkbox" name="customerVisible" value="1" />
-        Klantzichtbaar (verplicht bij klantactie)
+        {labels.customerVisible}
       </label>
       <Button type="submit" disabled={pending}>
-        {pending ? "Opslaan…" : "Actie opslaan"}
+        {pending ? labels.saving : labels.submit}
       </Button>
     </form>
   );
 }
 
-export function CreateDeliverableForm({ projectId }: { projectId: string }) {
+export function CreateDeliverableForm({
+  projectId,
+  labels,
+}: {
+  projectId: string;
+  labels: DeliverableFormLabels;
+}) {
   const [state, action, pending] = useActionState(createDeliverableAction, {});
   return (
     <form action={action} className="space-y-3 rounded-xl border border-border p-4">
-      <h3 className="font-medium">Oplevering (metadata)</h3>
-      <p className="text-small text-muted">
-        Bestanden volgen in de documentenfase. Hier alleen titel en goedkeuringsstatus.
-      </p>
+      <h3 className="font-medium">{labels.heading}</h3>
+      <p className="text-small text-muted">{labels.note}</p>
       <FormMessage state={state} />
       <input type="hidden" name="projectId" value={projectId} />
-      <Input name="title" placeholder="Titel" required maxLength={200} />
-      <Textarea name="description" placeholder="Omschrijving" rows={2} />
+      <Input name="title" placeholder={labels.title} required maxLength={200} />
+      <Textarea name="description" placeholder={labels.description} rows={2} />
       <label className="flex gap-2 text-small items-center">
         <input type="checkbox" name="requiresApproval" value="1" defaultChecked />
-        Vereist klantgoedkeuring
+        {labels.requiresApproval}
       </label>
       <Button type="submit" disabled={pending}>
-        {pending ? "Opslaan…" : "Concept opslaan"}
+        {pending ? labels.saving : labels.submit}
       </Button>
     </form>
   );
@@ -112,9 +134,11 @@ export function CreateDeliverableForm({ projectId }: { projectId: string }) {
 export function ShareDeliverableButton({
   deliverableId,
   version,
+  labels,
 }: {
   deliverableId: string;
   version: number;
+  labels: ShareDeliverableLabels;
 }) {
   const [state, action, pending] = useActionState(shareDeliverableAction, {});
   return (
@@ -122,7 +146,7 @@ export function ShareDeliverableButton({
       <input type="hidden" name="deliverableId" value={deliverableId} />
       <input type="hidden" name="expectedVersion" value={version} />
       <Button type="submit" size="sm" disabled={pending}>
-        {pending ? "Delen…" : "Deel met klant"}
+        {pending ? labels.sharing : labels.submit}
       </Button>
       <FormMessage state={state} />
     </form>

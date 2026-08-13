@@ -1,0 +1,155 @@
+{
+  "passed": 37,
+  "failed": 0,
+  "results": [
+    {
+      "name": "verify:all_pass",
+      "ok": true
+    },
+    {
+      "name": "stats:customer_deny",
+      "ok": true
+    },
+    {
+      "name": "stats:partner_deny",
+      "ok": true
+    },
+    {
+      "name": "stats:anon_deny",
+      "ok": true
+    },
+    {
+      "name": "stats:staff_success",
+      "ok": true
+    },
+    {
+      "name": "stats:admin_success",
+      "ok": true
+    },
+    {
+      "name": "stats:owner_success",
+      "ok": true
+    },
+    {
+      "name": "stats:stable_shape",
+      "ok": true
+    },
+    {
+      "name": "helper_get:customer_deny",
+      "ok": true
+    },
+    {
+      "name": "helper_put:customer_deny",
+      "ok": true
+    },
+    {
+      "name": "helper_get:partner_deny",
+      "ok": true
+    },
+    {
+      "name": "helper_put:partner_deny",
+      "ok": true
+    },
+    {
+      "name": "helper_get:staff_deny",
+      "ok": true
+    },
+    {
+      "name": "helper_put:staff_deny",
+      "ok": true
+    },
+    {
+      "name": "helper_get:admin_deny",
+      "ok": true
+    },
+    {
+      "name": "helper_put:admin_deny",
+      "ok": true
+    },
+    {
+      "name": "helper_get:anon_deny",
+      "ok": true
+    },
+    {
+      "name": "helper:denied_writes_no_rows",
+      "ok": true
+    },
+    {
+      "name": "queue:staff_success",
+      "ok": true
+    },
+    {
+      "name": "queue:customer_deny",
+      "ok": true
+    },
+    {
+      "name": "commission:staff_deny",
+      "ok": true
+    },
+    {
+      "name": "commission:aal1_deny",
+      "ok": true
+    },
+    {
+      "name": "commission:admin_aal2_success",
+      "ok": true
+    },
+    {
+      "name": "commission:idempotent_replay",
+      "ok": true
+    },
+    {
+      "name": "commission:invalid_transition",
+      "ok": true
+    },
+    {
+      "name": "commission:owner_reject_success",
+      "ok": true
+    },
+    {
+      "name": "suspend:staff_deny",
+      "ok": true
+    },
+    {
+      "name": "suspend:aal1_deny",
+      "ok": true
+    },
+    {
+      "name": "suspend:admin_success",
+      "ok": true
+    },
+    {
+      "name": "suspend:status_suspended",
+      "ok": true
+    },
+    {
+      "name": "lead:suspended_deny",
+      "ok": true
+    },
+    {
+      "name": "reactivate:owner_success",
+      "ok": true
+    },
+    {
+      "name": "dir:products",
+      "ok": true
+    },
+    {
+      "name": "dir:partner_deny",
+      "ok": true
+    },
+    {
+      "name": "settings:no_secrets",
+      "ok": true
+    },
+    {
+      "name": "security:aal1_step_up",
+      "ok": true
+    },
+    {
+      "name": "ticket:alias_exists",
+      "ok": true
+    }
+  ],
+  "schemaVersion": "2026.07.29.admin-control-surface-rc4"
+}

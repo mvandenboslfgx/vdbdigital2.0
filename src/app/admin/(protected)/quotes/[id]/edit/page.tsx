@@ -4,17 +4,20 @@ import { notFound, redirect } from "next/navigation";
 import { QuoteEditorForm } from "@/components/admin/quote-editor-form";
 import { getAdminQuote } from "@/server/repositories/admin-quotes";
 import { listAdminOrganizations } from "@/server/repositories/admin-portal";
+import { getDictionary } from "@/i18n/get-dictionary";
+import { buildQuoteEditorLabels } from "@/lib/admin/line-item-editor-labels";
 
-export const metadata: Metadata = {
-  title: "Offerte bewerken",
-  robots: { index: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getDictionary();
+  return { title: t("admin.page.quotes.editTitle"), robots: { index: false } };
+}
 
 export default async function AdminQuoteEditPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { t } = await getDictionary();
   const { id } = await params;
   const bundle = await getAdminQuote(id);
   if (!bundle) notFound();
@@ -31,9 +34,9 @@ export default async function AdminQuoteEditPage({
           href={`/admin/quotes/${id}`}
           className="text-small text-primary hover:underline"
         >
-          ← Offerte
+          {t("admin.page.quotes.backToQuote")}
         </Link>
-        <h1 className="text-h1 mt-2">Offerte bewerken</h1>
+        <h1 className="text-h1 mt-2">{t("admin.page.quotes.editTitle")}</h1>
       </div>
       <QuoteEditorForm
         mode="edit"
@@ -82,6 +85,7 @@ export default async function AdminQuoteEditPage({
             sortOrder: i.sort_order,
           }),
         )}
+        labels={buildQuoteEditorLabels(t)}
       />
     </div>
   );

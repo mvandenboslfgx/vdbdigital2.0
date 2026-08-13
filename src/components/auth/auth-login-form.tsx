@@ -1,14 +1,16 @@
 "use client";
 
 import { useActionState } from "react";
-import Link from "next/link";
 import { loginAction, type AuthActionState } from "@/server/actions/auth-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useT } from "@/i18n/provider";
+import { LocaleLink } from "@/i18n/locale-link";
 
 const initialState: AuthActionState = {};
 
 export function AuthLoginForm({ next }: { next?: string }) {
+  const t = useT();
   const [state, formAction, pending] = useActionState(loginAction, initialState);
 
   return (
@@ -16,7 +18,7 @@ export function AuthLoginForm({ next }: { next?: string }) {
       {next ? <input type="hidden" name="next" value={next} /> : null}
       <div>
         <label htmlFor="email" className="block text-small font-medium mb-1">
-          E-mailadres
+          {t("auth.emailLabel")}
         </label>
         <Input
           id="email"
@@ -29,7 +31,7 @@ export function AuthLoginForm({ next }: { next?: string }) {
       </div>
       <div>
         <label htmlFor="password" className="block text-small font-medium mb-1">
-          Wachtwoord
+          {t("auth.passwordLabel")}
         </label>
         <Input
           id="password"
@@ -47,16 +49,16 @@ export function AuthLoginForm({ next }: { next?: string }) {
         </p>
       )}
       <Button type="submit" disabled={pending} className="w-full">
-        {pending ? "Bezig met inloggen…" : "Inloggen"}
+        {pending ? t("auth.loginPending") : t("auth.loginButton")}
       </Button>
       <p className="text-small text-muted text-center">
-        <Link href="/wachtwoord-vergeten" className="text-primary hover:underline">
-          Wachtwoord vergeten?
-        </Link>
+        <LocaleLink href="/wachtwoord-vergeten" className="text-primary hover:underline">
+          {t("auth.forgotPassword")}
+        </LocaleLink>
         {" · "}
-        <Link href="/account-aanmaken" className="text-primary hover:underline">
-          Account aanvragen
-        </Link>
+        <LocaleLink href="/account-aanmaken" className="text-primary hover:underline">
+          {t("auth.requestAccount")}
+        </LocaleLink>
       </p>
     </form>
   );

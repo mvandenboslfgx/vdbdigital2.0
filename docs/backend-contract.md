@@ -1,5 +1,17 @@
 # Backend Contract — VDB Digital Platform
 
+**Current shared local+staging target:** `vdb-backend-contract@0.2.0-rc.5` / `schemaVersion` `2026.07.29.partner-identity-directory-rc5`
+**Bundle:** `contracts/releases/vdb-backend-contract-0.2.0-rc.5/`
+**Previous shared target:** `vdb-backend-contract@0.2.0-rc.4` / `schemaVersion` `2026.07.29.admin-control-surface-rc4` (bundle `contracts/releases/vdb-backend-contract-0.2.0-rc.4/`)
+**Superseded shared target:** `vdb-backend-contract@0.2.0-rc.3` / `schemaVersion` `2026.07.25.messaging-support-appointments-rc3`
+**Local status:** `OWNER ADMIN RPC LOCAL PASS — STAGING APPLY IN GATE`
+**Staging operator readiness:** `docs/evidence/admin-rpc-staging-gate-2026-07-29/`
+**Surface audit:** `docs/owner-contract-surface-audit.md`
+**Messaging map:** `docs/messaging-support-appointments-map.md`
+**Convergence notes:** `docs/contract-convergence-rc2.md`
+**Git freeze baseline:** `93ab6cc4e61c19da072fe41bba7361397bd8bed0`
+**Partner work branch:** `phase/shared-partner-backend` (additive; not in exact-17 production apply)
+
 **Publisher:** VDB Digital 2.0 (`CANONICAL_BACKEND_OWNER`)
 **Historical freeze (not staging target):** `vdb-backend-contract@0.1.0` / `schemaVersion` `2026.07.22.freeze`
 **Partner RC1 (embedded, non-breaking):** `vdb-backend-contract@0.2.0-rc.1` / `schemaVersion` `2026.07.22.partner-rc1`
@@ -56,8 +68,9 @@ Clients must not invent parallel role systems.
 | Identity | `auth.users`, profiles / membership |
 | Orgs | `organizations`, `organization_members`, invitations |
 | Projects | `portal_projects`, members, milestones, deliverables, actions, activity, feedback |
-| Messaging | conversations, participants, messages |
-| Support | tickets, replies, notifications |
+| Messaging | `portal_conversations`, `portal_conversation_participants`, `portal_messages`, `portal_message_attachments` |
+| Support | `portal_support_tickets`, `portal_support_replies` (Mobile: `support_messages` → replies) |
+| Appointments | `portal_appointments`, `portal_appointment_participants` |
 | Documents | `portal_files`, download events, private Storage buckets |
 | Quotes | `portal_quotes`, items, versions, acceptances + RPCs |
 | Invoices | `portal_invoices`, items, versions, payment records + RPCs |
@@ -84,11 +97,28 @@ Clients call only documented, granted RPCs. Examples already in canonical migrat
 
 - Payment integrity / rate-limit helpers (service-role oriented)
 - `accept_portal_quote` / `decline_portal_quote`
+- Messaging/support/appointments RPCs (`create_portal_conversation`, `send_portal_message`, `reply_portal_support_ticket`, `book_portal_appointment`, …) — see `docs/messaging-support-appointments-map.md`
 - `issue_portal_invoice` / `record_portal_invoice_payment` / `reverse_portal_invoice_payment`
 - `verify_partner_admin_contracts` + partner mutation RPCs (see shared-partner-rpc-contract)
-- Contract verifiers (`verify_*_contracts`, `catalog_verify_admin_contracts`, `p05_verify_payment_contracts`)
+- Contract verifiers (`verify_*_contracts`, `verify_messaging_support_appointments_contracts`, `catalog_verify_admin_contracts`, `p05_verify_payment_contracts`)
 
 **Contract rule:** privilege checks belong in RPC + RLS, not only in one client’s UI. Known hardening items from forensic audit (staff scope / invoice grants) must be fixed in **this** repo before partner/mobile rely on them in staging.
+
+---
+
+## rc.5 — partner identity + admin directory detail
+
+Full detail: `contracts/releases/vdb-backend-contract-0.2.0-rc.5/RELEASE_NOTES.md`.
+
+**Breaking:** `submit_partner_application` now takes `p_partner_type` (`'INDIVIDUAL'` | `'BUSINESS'`) as its **first** argument; the untyped 6-argument overload is dropped. `INDIVIDUAL` must not supply a KvK, `BUSINESS` requires a company name and an 8-digit KvK, and partner type is never inferred from a KvK number.
+
+**Safe activation:** a partner reaches `ACTIVE` only through `partner_try_activate` when `partner_activation_checklist.can_activate` is true (type known, staff approval, 18+ and identity verified, type-bound business verification, current agreement accepted, `payout_profile_status = APPROVED`, not suspended). Staff approval alone no longer activates. Failures raise `ACTIVATION_DENIED:<code>`. `payout_eligible` follows `payout_profile_status = APPROVED` only. Partners already `ACTIVE` before rc.5 are marked `legacy_activation_grandfathered` and keep rc.4 behaviour.
+
+**Additive staff reads:** `admin_get_product` / `admin_get_partner` / `admin_get_customer` / `admin_get_project` / `admin_get_quote` / `admin_get_invoice` / `admin_get_appointment`, plus `list_portal_support_ticket_replies` (staff see internal notes, org members do not).
+
+**Flags:** `partner_compliance_fixtures` is new, fail-closed and **staging only**. `support_internal_notes_rpc` stays fail-closed by default; staging may enable it after the ACL matrix is proven.
+
+**Legal review required:** seeded partner agreement bodies are placeholders with `legal_review_status = REQUIRED` and are not binding legal texts.
 
 ---
 

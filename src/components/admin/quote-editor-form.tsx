@@ -10,6 +10,7 @@ import {
   type QuoteActionState,
 } from "@/server/actions/quote-actions";
 import { lineTotals, quoteHeaderTotals } from "@/lib/commerce/quote-money";
+import type { QuoteEditorLabels } from "@/lib/admin/line-item-editor-labels";
 
 type ItemDraft = {
   title: string;
@@ -52,9 +53,12 @@ export function QuoteEditorForm({
   organizations,
   quote,
   initialItems,
+  labels,
 }: {
   mode: "create" | "edit";
   organizations: { id: string; label: string }[];
+  /** Resolved server-side; this editor does no dictionary lookups. */
+  labels: QuoteEditorLabels;
   quote?: {
     id: string;
     version: number;
@@ -123,7 +127,7 @@ export function QuoteEditorForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className="block text-small font-medium mb-1" htmlFor="organizationId">
-            Organisatie
+            {labels.organization}
           </label>
           <select
             id="organizationId"
@@ -142,26 +146,26 @@ export function QuoteEditorForm({
         </div>
         <div>
           <label className="block text-small font-medium mb-1" htmlFor="projectId">
-            Project (optioneel)
+            {labels.projectOptional}
           </label>
           <Input
             id="projectId"
             name="projectId"
             defaultValue={quote?.project_id ?? ""}
-            placeholder="Project-UUID"
+            placeholder={labels.projectPlaceholder}
           />
         </div>
       </div>
 
       <div>
         <label className="block text-small font-medium mb-1" htmlFor="title">
-          Titel
+          {labels.title}
         </label>
         <Input id="title" name="title" required defaultValue={quote?.title} maxLength={200} />
       </div>
       <div>
         <label className="block text-small font-medium mb-1" htmlFor="description">
-          Omschrijving
+          {labels.description}
         </label>
         <Textarea
           id="description"
@@ -173,7 +177,7 @@ export function QuoteEditorForm({
       <div className="grid gap-4 sm:grid-cols-3">
         <div>
           <label className="block text-small font-medium mb-1" htmlFor="validUntil">
-            Geldig tot
+            {labels.validUntil}
           </label>
           <Input
             id="validUntil"
@@ -184,7 +188,7 @@ export function QuoteEditorForm({
         </div>
         <div>
           <label className="block text-small font-medium mb-1" htmlFor="termsVersion">
-            Voorwaardenversie
+            {labels.termsVersion}
           </label>
           <Input
             id="termsVersion"
@@ -195,7 +199,7 @@ export function QuoteEditorForm({
         </div>
         <div>
           <label className="block text-small font-medium mb-1" htmlFor="headerDiscount">
-            Kortingsbedrag (€)
+            {labels.discountAmount}
           </label>
           <Input
             id="headerDiscount"
@@ -207,14 +211,14 @@ export function QuoteEditorForm({
 
       <section className="space-y-3">
         <div className="flex justify-between items-center">
-          <h2 className="text-h3">Regels</h2>
+          <h2 className="text-h3">{labels.linesHeading}</h2>
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={() => setItems((prev) => [...prev, emptyItem()])}
           >
-            Regel toevoegen
+            {labels.addLine}
           </Button>
         </div>
         {items.map((item, idx) => {
@@ -225,7 +229,7 @@ export function QuoteEditorForm({
               className="rounded-xl border border-border p-4 grid gap-3 sm:grid-cols-2"
             >
               <Input
-                placeholder="Titel"
+                placeholder={labels.title}
                 value={item.title}
                 onChange={(e) => {
                   const v = e.target.value;
@@ -244,11 +248,11 @@ export function QuoteEditorForm({
                   );
                 }}
               >
-                <option value="SERVICE">Dienst</option>
-                <option value="PRODUCT">Product</option>
-                <option value="ADDON">Add-on</option>
-                <option value="CUSTOM">Custom</option>
-                <option value="DISCOUNT">Korting</option>
+                <option value="SERVICE">{labels.itemType.SERVICE}</option>
+                <option value="PRODUCT">{labels.itemType.PRODUCT}</option>
+                <option value="ADDON">{labels.itemType.ADDON}</option>
+                <option value="CUSTOM">{labels.itemType.CUSTOM}</option>
+                <option value="DISCOUNT">{labels.itemType.DISCOUNT}</option>
               </select>
               <Input
                 type="number"
@@ -274,7 +278,7 @@ export function QuoteEditorForm({
                     ),
                   );
                 }}
-                placeholder="Prijs excl. BTW (€)"
+                placeholder={labels.priceExclVat}
               />
               <label className="flex items-center gap-2 text-small sm:col-span-2">
                 <input
@@ -289,11 +293,13 @@ export function QuoteEditorForm({
                     );
                   }}
                 />
-                Optionele regel
+                {labels.optionalLine}
               </label>
               <p className="text-small text-muted sm:col-span-2">
-                Regel totaal (indicatief): €{centsToEuros(t.totalCents)} (server
-                herberekent)
+                {labels.lineTotalTemplate.replace(
+                  "{amount}",
+                  centsToEuros(t.totalCents),
+                )}
               </p>
               <Button
                 type="button"
@@ -303,7 +309,7 @@ export function QuoteEditorForm({
                   setItems((prev) => prev.filter((_, i) => i !== idx))
                 }
               >
-                Verwijderen
+                {labels.remove}
               </Button>
             </div>
           );
@@ -311,18 +317,24 @@ export function QuoteEditorForm({
       </section>
 
       <div className="rounded-xl border border-border p-4 text-small space-y-1">
-        <p>Subtotaal (preview): €{centsToEuros(preview.subtotalCents)}</p>
-        <p>BTW (preview): €{centsToEuros(preview.taxCents)}</p>
+        <p>
+          {labels.subtotalPreview}: €{centsToEuros(preview.subtotalCents)}
+        </p>
+        <p>
+          {labels.vatPreview}: €{centsToEuros(preview.taxCents)}
+        </p>
         <p className="font-semibold">
-          Totaal (preview): €{centsToEuros(preview.totalCents)}
+          {labels.totalPreview}: €{centsToEuros(preview.totalCents)}
         </p>
-        <p className="text-muted">
-          Preview is niet-authoritatief. Server herberekent alle bedragen.
-        </p>
+        <p className="text-muted">{labels.previewNotAuthoritative}</p>
       </div>
 
       <Button type="submit" disabled={pending || items.length === 0}>
-        {pending ? "Opslaan…" : mode === "create" ? "Concept opslaan" : "Wijzigingen opslaan"}
+        {pending
+          ? labels.saving
+          : mode === "create"
+            ? labels.submitCreate
+            : labels.submitEdit}
       </Button>
     </form>
   );

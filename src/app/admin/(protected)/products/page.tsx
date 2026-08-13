@@ -16,18 +16,21 @@ import {
   isLegacyTawkProduct,
   LEGACY_TAWK_ADMIN_STATUS_LABEL,
 } from "@/lib/commerce/tawk-legacy-blocklist";
+import { getDictionary } from "@/i18n/get-dictionary";
+import { buildProductsTableLabels } from "@/lib/admin/products-table-labels";
 import type { BillingType, PriceMode, ProductStatus } from "@/types";
 
-export const metadata: Metadata = {
-  title: "Producten",
-  robots: { index: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getDictionary();
+  return { title: t("admin.page.products.title"), robots: { index: false } };
+}
 
 export default async function AdminProductsPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const { t, locale } = await getDictionary();
   const params = await searchParams;
   const access = await checkAdminAccess();
   const role = access.context?.role ?? "SUPPORT";
@@ -47,6 +50,14 @@ export default async function AdminProductsPage({
       | "B2C"
       | "BOTH"
       | "ALL",
+    partnerHealth: (typeof params.partnerHealth === "string"
+      ? params.partnerHealth
+      : "ALL") as
+      | "ALL"
+      | "COMMISSION_CONFIGURATION_REQUIRED"
+      | "LEGAL_REVIEW_REQUIRED"
+      | "OWN_SERVICES_READY"
+      | "HIDDEN_BLOCKED",
     sort: (typeof params.sort === "string" ? params.sort : "sort_order") as
       | "updated_at"
       | "name"
@@ -76,7 +87,7 @@ export default async function AdminProductsPage({
   });
 
   return (
-    <Suspense fallback={<p className="text-muted">Producten laden…</p>}>
+    <Suspense fallback={<p className="text-muted">{t("admin.page.products.loading")}</p>}>
       <AdminProductsTable
         rows={rows}
         total={list.total}
@@ -88,6 +99,7 @@ export default async function AdminProductsPage({
         canBulk={hasPermission(role, "products.update")}
         schemaExtended={list.schemaExtended}
         error={list.error}
+        labels={buildProductsTableLabels(t, locale)}
       />
     </Suspense>
   );

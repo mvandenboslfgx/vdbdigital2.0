@@ -1,32 +1,30 @@
 import "server-only";
-import { cookies, headers } from "next/headers";
 import { defaultLocale, isLocale, type Locale } from "./config";
 import { createT, type TranslateFn } from "./create-t";
-import en from "./messages/en";
-import nl from "./messages/nl";
+import { getCatalog } from "./catalogs";
+import { resolveRequestLocale } from "./resolve-locale";
 import type { Messages } from "./messages/en";
-
-const catalogs: Record<Locale, Messages> = { en, nl };
 
 export type { TranslateFn };
 
+/** Compatibility locale resolver; next-intl request config uses the same source. */
 export async function getLocale(): Promise<Locale> {
-  const headerStore = await headers();
-  const fromHeader = headerStore.get("x-locale");
-  if (fromHeader && isLocale(fromHeader)) return fromHeader;
-
-  const cookieStore = await cookies();
-  const fromCookie = cookieStore.get("NEXT_LOCALE")?.value;
-  if (fromCookie && isLocale(fromCookie)) return fromCookie;
-
-  return defaultLocale;
+  try {
+    return await resolveRequestLocale();
+  } catch {
+    return defaultLocale;
+  }
 }
 
 export async function getMessages(locale?: Locale): Promise<Messages> {
   const resolved = locale ?? (await getLocale());
-  return catalogs[resolved];
+  return getCatalog(isLocale(resolved) ? resolved : defaultLocale);
 }
 
+/**
+ * Compatibility dictionary API used by existing server components.
+ * Runtime catalogs are shared with next-intl (`src/i18n/request.ts`).
+ */
 export async function getDictionary(locale?: Locale) {
   const resolved = locale ?? (await getLocale());
   const messages = await getMessages(resolved);

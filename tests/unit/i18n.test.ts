@@ -9,6 +9,7 @@ import {
   paths,
 } from "@/i18n/config";
 import {
+  buildLanguageSwitchHref,
   filterSearchParams,
   parseFormLocale,
   SAFE_QUERY_KEYS,
@@ -104,6 +105,54 @@ describe("language switcher query filtering", () => {
   });
 });
 
+describe("buildLanguageSwitchHref (shared switcher href builder)", () => {
+  it("switches locale while preserving the route (every route is served under both locales)", () => {
+    const toNl = buildLanguageSwitchHref("/shop/starter-website", new URLSearchParams(), "nl");
+    expect(toNl).toEqual({ href: "/nl/shop/starter-website", isFallback: false });
+
+    const toEn = buildLanguageSwitchHref(
+      "/nl/shop/starter-website",
+      new URLSearchParams(),
+      "en",
+    );
+    expect(toEn).toEqual({ href: "/shop/starter-website", isFallback: false });
+  });
+
+  it("switches the home route without ever producing a double-slash or /nl/ suffix", () => {
+    expect(buildLanguageSwitchHref("/", new URLSearchParams(), "nl")).toEqual({
+      href: "/nl",
+      isFallback: false,
+    });
+    expect(buildLanguageSwitchHref("/nl", new URLSearchParams(), "en")).toEqual({
+      href: "/",
+      isFallback: false,
+    });
+  });
+
+  it("preserves safe query params and strips sensitive ones across the switch", () => {
+    const { href } = buildLanguageSwitchHref(
+      "/shop",
+      new URLSearchParams("category=websites&token=abc123"),
+      "nl",
+    );
+    expect(href).toBe("/nl/shop?category=websites");
+  });
+
+  it.each([null, undefined, "", "   "])(
+    "falls back safely to the target locale's home page for a missing/blank pathname (%j)",
+    (pathname) => {
+      const result = buildLanguageSwitchHref(pathname, new URLSearchParams(), "nl");
+      expect(result).toEqual({ href: "/nl", isFallback: true });
+    },
+  );
+
+  it("never marks a normal, non-empty route as a fallback", () => {
+    expect(buildLanguageSwitchHref("/contact", new URLSearchParams(), "nl").isFallback).toBe(
+      false,
+    );
+  });
+});
+
 describe("form locale validation", () => {
   it("accepts only en|nl", () => {
     expect(parseFormLocale("en")).toBe("en");
@@ -165,6 +214,73 @@ describe("product localization parity", () => {
     const nl = localizeProduct(starter, "nl");
     expect(nl.name).toMatch(/Starter|Website/i);
     expect(nl.shortDescription.length).toBeGreaterThan(20);
+  });
+});
+
+describe("localizeProduct: DB translation vs. products-nl.ts fallback (Phase 4)", () => {
+  const starter = seedProducts.find((p) => p.slug === "starter-website")!;
+
+  function nlTranslation(overrides: Partial<Parameters<typeof localizeProduct>[2]> = {}) {
+    return {
+      locale: "nl" as const,
+      name: "DB Naam NL",
+      slug: null,
+      shortDescription: "DB korte omschrijving uit product_translations",
+      fullDescription: "DB volledige omschrijving",
+      benefits: [],
+      includedItems: [],
+      excludedItems: [],
+      ctaLabel: null,
+      quoteCtaLabel: null,
+      seoTitle: null,
+      seoDescription: null,
+      deliveryTime: null,
+      targetAudience: null,
+      workflow: null,
+      warnings: null,
+      status: "published" as const,
+      ...overrides,
+    };
+  }
+
+  it("prefers a published DB translation over the static products-nl.ts overlay", () => {
+    const localized = localizeProduct(starter, "nl", nlTranslation());
+    expect(localized.name).toBe("DB Naam NL");
+    expect(localized.shortDescription).toBe(
+      "DB korte omschrijving uit product_translations",
+    );
+  });
+
+  it("falls back to products-nl.ts when there is no DB row", () => {
+    const withoutDbRow = localizeProduct(starter, "nl", null);
+    const staticOnly = localizeProduct(starter, "nl");
+    expect(withoutDbRow.name).toEqual(staticOnly.name);
+    expect(withoutDbRow.name).not.toBe("DB Naam NL");
+  });
+
+  it("falls back to products-nl.ts when the DB row is not publishable (e.g. draft/needs_review)", () => {
+    const draft = localizeProduct(starter, "nl", nlTranslation({ status: "draft" }));
+    const needsReview = localizeProduct(
+      starter,
+      "nl",
+      nlTranslation({ status: "needs_review" }),
+    );
+    const machineTranslated = localizeProduct(
+      starter,
+      "nl",
+      nlTranslation({ status: "machine_translated" }),
+    );
+    const staticOnly = localizeProduct(starter, "nl");
+
+    for (const localized of [draft, needsReview, machineTranslated]) {
+      expect(localized.name).toBe(staticOnly.name);
+      expect(localized.name).not.toBe("DB Naam NL");
+    }
+  });
+
+  it("does not affect English locale regardless of DB translation", () => {
+    const en = localizeProduct(starter, "en", nlTranslation());
+    expect(en).toBe(starter);
   });
 });
 

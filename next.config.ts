@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 import {
   validatePreviewBuildEnv,
   validateProductionEnv,
@@ -7,6 +8,8 @@ import {
   assertProductionAppUrl,
   isLocalhostUrl,
 } from "./src/lib/url/app-url";
+
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const onVercel = process.env.VERCEL === "1";
 const vercelEnv = process.env.VERCEL_ENV;
@@ -78,6 +81,9 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [],
   },
+  experimental: {
+    optimizePackageImports: ["lucide-react"],
+  },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

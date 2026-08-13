@@ -13,6 +13,8 @@ import {
 } from "@/components/admin/catalog-badges";
 import { formatPriceLabel } from "@/lib/utilities/money";
 import { bulkProductAction, exportProductsCsvAction } from "@/server/actions/catalog-actions";
+import { formatDate } from "@/i18n/format-date";
+import type { ProductsTableLabels } from "@/lib/admin/products-table-labels";
 import type { Product } from "@/types";
 
 export interface ProductListRow extends Product {
@@ -36,6 +38,7 @@ interface Props {
   canBulk: boolean;
   schemaExtended: boolean;
   error?: string;
+  labels: ProductsTableLabels;
 }
 
 export function AdminProductsTable({
@@ -49,6 +52,7 @@ export function AdminProductsTable({
   canBulk,
   schemaExtended,
   error,
+  labels,
 }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -66,6 +70,7 @@ export function AdminProductsTable({
       billingType: searchParams.get("billingType") ?? "ALL",
       audience: searchParams.get("audience") ?? "ALL",
       categoryId: searchParams.get("categoryId") ?? "",
+      partnerHealth: searchParams.get("partnerHealth") ?? "ALL",
       sort: searchParams.get("sort") ?? "sort_order",
     }),
     [searchParams],
@@ -99,7 +104,7 @@ export function AdminProductsTable({
         }),
       );
       const result = await bulkProductAction({}, fd);
-      setMessage(result.error ?? "Bulkactie uitgevoerd.");
+      setMessage(result.error ?? labels.bulkDone);
       if (result.success) {
         setSelected([]);
         router.refresh();
@@ -111,14 +116,14 @@ export function AdminProductsTable({
     startTransition(async () => {
       const result = await exportProductsCsvAction();
       if (result.error || !result.csv) {
-        setMessage(result.error ?? "Export mislukt");
+        setMessage(result.error ?? labels.exportFailed);
         return;
       }
       const blob = new Blob([result.csv], { type: "text/csv;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `producten-export-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.download = `${labels.exportFileStem}-${new Date().toISOString().slice(0, 10)}.csv`;
       a.click();
       URL.revokeObjectURL(url);
     });
@@ -128,16 +133,13 @@ export function AdminProductsTable({
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-h1 mb-1">Producten</h1>
-          <p className="text-muted text-small max-w-2xl">
-            Beheer catalogus, prijzen en zichtbaarheid. Directe checkout is momenteel algemeen
-            uitgeschakeld.
-          </p>
+          <h1 className="text-h1 mb-1">{labels.title}</h1>
+          <p className="text-muted text-small max-w-2xl">{labels.subtitle}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           {canExport && (
             <Button type="button" variant="outline" disabled={pending} onClick={onExport}>
-              Exporteer CSV
+              {labels.exportCsv}
             </Button>
           )}
           {canCreate && (
@@ -145,7 +147,7 @@ export function AdminProductsTable({
               href="/admin/products/new"
               className="inline-flex items-center justify-center gap-2 font-medium min-h-11 px-5 py-2.5 text-sm rounded-lg bg-primary text-white hover:bg-primary-hover"
             >
-              Nieuw product
+              {labels.newProduct}
             </Link>
           )}
         </div>
@@ -153,8 +155,7 @@ export function AdminProductsTable({
 
       {!schemaExtended && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-small text-amber-950">
-          Catalogusmigratie is nog niet toegepast. Basisvelden werken; uitgebreide filters,
-          juridische goedkeuring en media vereisen de migratie (niet live toepassen zonder gate).
+          {labels.migrationNotApplied}
         </div>
       )}
 
@@ -182,54 +183,79 @@ export function AdminProductsTable({
             billingType: String(fd.get("billingType") ?? "ALL"),
             audience: String(fd.get("audience") ?? "ALL"),
             categoryId: String(fd.get("categoryId") ?? ""),
+            partnerHealth: String(fd.get("partnerHealth") ?? "ALL"),
             sort: String(fd.get("sort") ?? "sort_order"),
           });
         }}
       >
-        <Input name="q" label="Zoeken" defaultValue={queryDefaults.q} placeholder="Naam, SKU, slug" />
+        <Input
+          name="q"
+          label={labels.search}
+          defaultValue={queryDefaults.q}
+          placeholder={labels.searchPlaceholder}
+        />
         <label className="space-y-1.5 text-small font-medium">
-          Status
+          {labels.status}
           <select name="status" defaultValue={queryDefaults.status} className="w-full min-h-11 rounded-lg border border-border bg-surface px-3">
-            <option value="ALL">Alle</option>
-            <option value="DRAFT">Concept</option>
-            <option value="REVIEW">In review</option>
-            <option value="PUBLISHED">Gepubliceerd</option>
-            <option value="HIDDEN">Verborgen</option>
-            <option value="ARCHIVED">Gearchiveerd</option>
+            <option value="ALL">{labels.all}</option>
+            {labels.statusOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
         </label>
         <label className="space-y-1.5 text-small font-medium">
-          Prijstype
+          {labels.priceMode}
           <select name="priceMode" defaultValue={queryDefaults.priceMode} className="w-full min-h-11 rounded-lg border border-border bg-surface px-3">
-            <option value="ALL">Alle</option>
-            <option value="FIXED">Vaste prijs</option>
-            <option value="STARTING_FROM">Vanaf-prijs</option>
-            <option value="QUOTE_ONLY">Alleen offerte</option>
+            <option value="ALL">{labels.all}</option>
+            {labels.priceModeOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
         </label>
         <label className="space-y-1.5 text-small font-medium">
-          Billingmodel
+          {labels.billingType}
           <select name="billingType" defaultValue={queryDefaults.billingType} className="w-full min-h-11 rounded-lg border border-border bg-surface px-3">
-            <option value="ALL">Alle</option>
-            <option value="ONE_TIME">Eenmalig</option>
-            <option value="MONTHLY">Maandelijks</option>
-            <option value="YEARLY">Jaarlijks</option>
-            <option value="QUOTE_ONLY">Offerte</option>
+            <option value="ALL">{labels.all}</option>
+            {labels.billingTypeOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
         </label>
         <label className="space-y-1.5 text-small font-medium">
-          Doelgroep
+          {labels.audience}
           <select name="audience" defaultValue={queryDefaults.audience} className="w-full min-h-11 rounded-lg border border-border bg-surface px-3">
-            <option value="ALL">Alle</option>
+            <option value="ALL">{labels.all}</option>
             <option value="B2B">B2B</option>
             <option value="B2C">B2C</option>
-            <option value="BOTH">Beide</option>
+            <option value="BOTH">{labels.audienceBoth}</option>
           </select>
         </label>
         <label className="space-y-1.5 text-small font-medium">
-          Categorie
+          {labels.partnerHealth}
+          <select
+            name="partnerHealth"
+            defaultValue={queryDefaults.partnerHealth}
+            className="w-full min-h-11 rounded-lg border border-border bg-surface px-3"
+          >
+            <option value="ALL">{labels.all}</option>
+            <option value="COMMISSION_CONFIGURATION_REQUIRED">
+              COMMISSION_CONFIGURATION_REQUIRED
+            </option>
+            <option value="LEGAL_REVIEW_REQUIRED">LEGAL_REVIEW_REQUIRED</option>
+            <option value="OWN_SERVICES_READY">OWN_SERVICES_READY</option>
+            <option value="HIDDEN_BLOCKED">HIDDEN / BLOCKED</option>
+          </select>
+        </label>
+        <label className="space-y-1.5 text-small font-medium">
+          {labels.category}
           <select name="categoryId" defaultValue={queryDefaults.categoryId} className="w-full min-h-11 rounded-lg border border-border bg-surface px-3">
-            <option value="">Alle</option>
+            <option value="">{labels.all}</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -239,7 +265,7 @@ export function AdminProductsTable({
         </label>
         <div className="md:col-span-3 xl:col-span-6 flex gap-2">
           <Button type="submit" variant="secondary">
-            Filteren
+            {labels.filter}
           </Button>
           <input type="hidden" name="sort" value={queryDefaults.sort} />
         </div>
@@ -247,12 +273,14 @@ export function AdminProductsTable({
 
       {canBulk && selected.length > 0 && (
         <div className="flex flex-wrap gap-2 items-center rounded-lg border border-border bg-surface px-3 py-2">
-          <span className="text-small text-muted">{selected.length} geselecteerd</span>
+          <span className="text-small text-muted">
+            {labels.selectedCount.replace("{count}", String(selected.length))}
+          </span>
           <Button type="button" size="sm" variant="outline" disabled={pending} onClick={() => runBulk("hide")}>
-            Verbergen
+            {labels.hide}
           </Button>
           <Button type="button" size="sm" variant="outline" disabled={pending} onClick={() => runBulk("archive")}>
-            Archiveren
+            {labels.archive}
           </Button>
           {categories[0] && (
             <Button
@@ -262,7 +290,7 @@ export function AdminProductsTable({
               disabled={pending}
               onClick={() => runBulk("set_category", categories[0].id)}
             >
-              Categorie → {categories[0].name}
+              {labels.setCategory.replace("{name}", categories[0].name)}
             </Button>
           )}
         </div>
@@ -270,11 +298,11 @@ export function AdminProductsTable({
 
       {rows.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border px-6 py-16 text-center">
-          <p className="font-medium mb-1">Geen producten gevonden</p>
-          <p className="text-small text-muted mb-4">Pas filters aan of maak een nieuw product aan.</p>
+          <p className="font-medium mb-1">{labels.emptyTitle}</p>
+          <p className="text-small text-muted mb-4">{labels.emptyDescription}</p>
           {canCreate && (
             <Link href="/admin/products/new" className="text-primary text-small font-medium">
-              Nieuw product
+              {labels.newProduct}
             </Link>
           )}
         </div>
@@ -285,19 +313,19 @@ export function AdminProductsTable({
               <thead className="bg-surface-elevated text-left">
                 <tr>
                   <th className="p-3 w-10">
-                    <input type="checkbox" aria-label="Alles selecteren" onChange={toggleAll} checked={selected.length === rows.length && rows.length > 0} />
+                    <input type="checkbox" aria-label={labels.selectAll} onChange={toggleAll} checked={selected.length === rows.length && rows.length > 0} />
                   </th>
-                  <th className="p-3">Product</th>
-                  <th className="p-3">SKU</th>
-                  <th className="p-3">Categorie</th>
-                  <th className="p-3">Prijs</th>
-                  <th className="p-3">Type</th>
-                  <th className="p-3">Billing</th>
-                  <th className="p-3">B2B/B2C</th>
-                  <th className="p-3">Status</th>
-                  <th className="p-3">Checkout</th>
-                  <th className="p-3">Gewijzigd</th>
-                  <th className="p-3">Acties</th>
+                  <th className="p-3">{labels.colProduct}</th>
+                  <th className="p-3">{labels.colSku}</th>
+                  <th className="p-3">{labels.colCategory}</th>
+                  <th className="p-3">{labels.colPrice}</th>
+                  <th className="p-3">{labels.colType}</th>
+                  <th className="p-3">{labels.colBilling}</th>
+                  <th className="p-3">{labels.colAudience}</th>
+                  <th className="p-3">{labels.colStatus}</th>
+                  <th className="p-3">{labels.colCheckout}</th>
+                  <th className="p-3">{labels.colChanged}</th>
+                  <th className="p-3">{labels.colActions}</th>
                 </tr>
               </thead>
               <tbody>
@@ -312,17 +340,22 @@ export function AdminProductsTable({
                             prev.includes(row.id) ? prev.filter((id) => id !== row.id) : [...prev, row.id],
                           )
                         }
-                        aria-label={`Selecteer ${row.name}`}
+                        aria-label={labels.selectRow.replace("{name}", row.name)}
                       />
                     </td>
                     <td className="p-3 font-medium">{row.name}</td>
-                    <td className="p-3 text-muted">{row.internalSku ?? "—"}</td>
-                    <td className="p-3">{row.categoryName || "—"}</td>
+                    <td className="p-3 text-muted">{row.internalSku ?? labels.empty}</td>
+                    <td className="p-3">{row.categoryName || labels.empty}</td>
                     <td className="p-3">
-                      {formatPriceLabel(row.priceCents, row.fromPriceCents, row.billingType, "nl")}
+                      {formatPriceLabel(
+                        row.priceCents,
+                        row.fromPriceCents,
+                        row.billingType,
+                        labels.locale,
+                      )}
                     </td>
                     <td className="p-3">
-                      <PriceModeBadge mode={row.priceModeLabel} />
+                      <PriceModeBadge mode={row.priceModeLabel} labels={labels.badges} />
                     </td>
                     <td className="p-3">{row.billingType}</td>
                     <td className="p-3">
@@ -331,6 +364,7 @@ export function AdminProductsTable({
                         b2c={row.audienceB2c ?? false}
                         b2bLegal={row.b2bLegal}
                         b2cLegal={row.b2cLegal}
+                        labels={labels.badges}
                       />
                     </td>
                     <td className="p-3">
@@ -339,11 +373,14 @@ export function AdminProductsTable({
                           {row.legacyStatusLabel}
                         </span>
                       ) : (
-                        <StatusBadge status={row.status} />
+                        <StatusBadge status={row.status} labels={labels.badges} />
                       )}
                     </td>
                     <td className="p-3">
-                      <EligibilityBadge sellable={row.directlySellable} />
+                      <EligibilityBadge
+                        sellable={row.directlySellable}
+                        labels={labels.badges}
+                      />
                       <ul className="mt-1 text-[11px] text-muted space-y-0.5 max-w-[14rem]">
                         {row.checkoutBlockedReasons.slice(0, 3).map((r) => (
                           <li key={r}>• {r}</li>
@@ -351,13 +388,11 @@ export function AdminProductsTable({
                       </ul>
                     </td>
                     <td className="p-3 text-muted whitespace-nowrap">
-                      {row.updatedAt
-                        ? new Date(row.updatedAt).toLocaleDateString("nl-NL")
-                        : "—"}
+                      {formatDate(row.updatedAt, labels.locale, labels.empty)}
                     </td>
                     <td className="p-3">
                       <Link href={`/admin/products/${row.id}`} className="text-primary font-medium">
-                        Bewerken
+                        {labels.edit}
                       </Link>
                     </td>
                   </tr>
@@ -376,23 +411,32 @@ export function AdminProductsTable({
                       {row.legacyStatusLabel}
                     </span>
                   ) : (
-                    <StatusBadge status={row.status} />
+                    <StatusBadge status={row.status} labels={labels.badges} />
                   )}
                 </div>
                 <p className="text-small text-muted">
-                  {row.categoryName || "Geen categorie"} · {row.internalSku ?? "geen SKU"}
+                  {row.categoryName || labels.noCategory} ·{" "}
+                  {row.internalSku ?? labels.noSku}
                 </p>
                 <p className="text-small">
-                  {formatPriceLabel(row.priceCents, row.fromPriceCents, row.billingType, "nl")}
+                  {formatPriceLabel(
+                    row.priceCents,
+                    row.fromPriceCents,
+                    row.billingType,
+                    labels.locale,
+                  )}
                 </p>
-                <EligibilityBadge sellable={row.directlySellable} />
+                <EligibilityBadge
+                  sellable={row.directlySellable}
+                  labels={labels.badges}
+                />
                 <ul className="text-[11px] text-muted space-y-0.5">
                   {row.checkoutBlockedReasons.slice(0, 4).map((r) => (
                     <li key={r}>• {r}</li>
                   ))}
                 </ul>
                 <Link href={`/admin/products/${row.id}`} className="inline-block text-primary text-small font-medium">
-                  Bewerken
+                  {labels.edit}
                 </Link>
               </article>
             ))}
@@ -402,7 +446,10 @@ export function AdminProductsTable({
 
       <div className="flex items-center justify-between text-small">
         <p className="text-muted">
-          {total} product{total === 1 ? "" : "en"} · pagina {page} / {totalPages}
+          {(total === 1 ? labels.countOne : labels.countOther)
+            .replace("{count}", String(total))
+            .replace("{page}", String(page))
+            .replace("{totalPages}", String(totalPages))}
         </p>
         <div className="flex gap-2">
           <Button
@@ -416,7 +463,7 @@ export function AdminProductsTable({
               router.push(`/admin/products?${params.toString()}`);
             }}
           >
-            Vorige
+            {labels.previous}
           </Button>
           <Button
             type="button"
@@ -429,7 +476,7 @@ export function AdminProductsTable({
               router.push(`/admin/products?${params.toString()}`);
             }}
           >
-            Volgende
+            {labels.next}
           </Button>
         </div>
       </div>

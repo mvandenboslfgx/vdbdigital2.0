@@ -5,9 +5,14 @@ import type { Locale } from "@/i18n/config";
 import { escapeHtml } from "@/lib/utilities/escape-html";
 import {
   getCustomerMailPreview,
+  resolveMailLocale,
   type CustomerMailFamily,
-  type MailBody,
 } from "@/lib/email/templates";
+import {
+  createNotificationLocaleEvent,
+  type LocaleSource,
+  type NotificationLocaleEvent,
+} from "@/lib/notifications/locale-event";
 
 export function isEmailConfigured(): boolean {
   return Boolean(process.env.RESEND_API_KEY && process.env.EMAIL_FROM);
@@ -25,10 +30,32 @@ const admin = () => process.env.EMAIL_ADMIN ?? siteConfig.contactEmail;
 
 async function sendCustomerMail(
   to: string,
-  body: MailBody,
-): Promise<{ sent: boolean; reason?: string }> {
+  family: CustomerMailFamily,
+  locale: Locale | undefined,
+  templateArgument: string,
+  localeSource: LocaleSource = locale ? "form" : "default",
+): Promise<{
+  sent: boolean;
+  reason?: string;
+  localeEvent: NotificationLocaleEvent;
+}> {
+  const recipientLocale = resolveMailLocale(locale);
+  const localeEvent = createNotificationLocaleEvent({
+    eventType: `customer.${family}`,
+    templateVersion: "web-customer-v1",
+    recipientLocale,
+    localeSource,
+    data: { templateArgument },
+  });
+  const body = pick(family, recipientLocale, templateArgument);
   const resend = getResend();
-  if (!resend) return { sent: false, reason: "Email is not configured" };
+  if (!resend) {
+    return {
+      sent: false,
+      reason: "Email is not configured",
+      localeEvent,
+    };
+  }
 
   await resend.emails.send({
     from: from(),
@@ -37,7 +64,7 @@ async function sendCustomerMail(
     text: body.text,
     html: body.html,
   });
-  return { sent: true };
+  return { sent: true, localeEvent };
 }
 
 function pick(family: CustomerMailFamily, locale: Locale | undefined, arg: string) {
@@ -49,7 +76,7 @@ export async function sendContactConfirmation(
   name: string,
   locale?: Locale,
 ) {
-  return sendCustomerMail(to, pick("contact", locale, name));
+  return sendCustomerMail(to, "contact", locale, name);
 }
 
 export async function sendContactNotification(data: {
@@ -83,7 +110,7 @@ export async function sendQuoteConfirmation(
   name: string,
   locale?: Locale,
 ) {
-  return sendCustomerMail(to, pick("quote", locale, name));
+  return sendCustomerMail(to, "quote", locale, name);
 }
 
 export async function sendQuoteNotification(data: {
@@ -111,7 +138,15 @@ export async function sendOrderConfirmation(
   orderNumber: string,
   locale?: Locale,
 ) {
-  return sendCustomerMail(to, pick("orderReceived", locale, orderNumber));
+  // Orders don't persist a locale column yet — callers resolve this from the
+  // buyer's session cookie at submit time (see order-service.ts createOrder).
+  return sendCustomerMail(
+    to,
+    "orderReceived",
+    locale,
+    orderNumber,
+    locale ? "cookie" : "default",
+  );
 }
 
 export async function sendPaymentSuccess(
@@ -119,7 +154,7 @@ export async function sendPaymentSuccess(
   orderNumber: string,
   locale?: Locale,
 ) {
-  return sendCustomerMail(to, pick("paymentSuccess", locale, orderNumber));
+  return sendCustomerMail(to, "paymentSuccess", locale, orderNumber);
 }
 
 export async function sendPaymentFailed(
@@ -127,7 +162,7 @@ export async function sendPaymentFailed(
   orderNumber: string,
   locale?: Locale,
 ) {
-  return sendCustomerMail(to, pick("paymentFailed", locale, orderNumber));
+  return sendCustomerMail(to, "paymentFailed", locale, orderNumber);
 }
 
 export async function sendOrderCancelled(
@@ -135,7 +170,7 @@ export async function sendOrderCancelled(
   orderNumber: string,
   locale?: Locale,
 ) {
-  return sendCustomerMail(to, pick("orderCancelled", locale, orderNumber));
+  return sendCustomerMail(to, "orderCancelled", locale, orderNumber);
 }
 
 export async function sendSupportConfirmation(
@@ -143,7 +178,7 @@ export async function sendSupportConfirmation(
   name: string,
   locale?: Locale,
 ) {
-  return sendCustomerMail(to, pick("support", locale, name));
+  return sendCustomerMail(to, "support", locale, name);
 }
 
 export async function sendTestEmail(to?: string) {

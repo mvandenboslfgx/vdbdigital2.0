@@ -2,15 +2,18 @@ import type { Metadata } from "next";
 import { Container, Section } from "@/components/ui/container";
 import { ProcessSection } from "@/components/sections/process-section";
 import { CtaSection } from "@/components/sections/cta-section";
-import { getDictionary } from "@/i18n/get-dictionary";
+import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import { paths } from "@/i18n/config";
+import { buildLocaleAlternates, openGraphLocale } from "@/i18n/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { t } = await getDictionary();
+  const locale = await getLocale();
+  const { t } = await getDictionary(locale);
   return {
     title: t("process.title"),
     description: t("process.intro"),
-    alternates: { canonical: paths.process },
+    alternates: buildLocaleAlternates(paths.process, locale),
+    openGraph: { locale: openGraphLocale(locale) },
   };
 }
 

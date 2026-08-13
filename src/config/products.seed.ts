@@ -35,6 +35,19 @@ function product(
     targetAudience: partial.targetAudience ?? "SMEs looking to grow professionally online.",
     workflow: partial.workflow ?? "Intake → design → build → delivery → aftercare.",
     requiredInput: partial.requiredInput ?? ["Company name", "Target audience", "Required functionality"],
+    // Dev/seed defaults so local + e2e public shop gates can render without DB commercial rows.
+    legalStatus: partial.legalStatus ?? "APPROVED_FOR_BOTH",
+    priceStatus: partial.priceStatus ?? "APPROVED",
+    publicationReady: partial.publicationReady ?? true,
+    primaryImagePath:
+      partial.primaryImagePath ?? "/products/packages/website.svg",
+    priceMode:
+      partial.priceMode ??
+      (partial.fromPriceCents != null && partial.priceCents == null
+        ? "STARTING_FROM"
+        : partial.priceCents != null
+          ? "FIXED"
+          : "QUOTE_ONLY"),
   };
 }
 
