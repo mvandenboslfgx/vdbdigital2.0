@@ -31,10 +31,10 @@ export default async function HomePage() {
   return (
     <>
       <HeroSection />
-      <CasePreviewSection />
       <SolutionsGridSection />
-      <ProcessStepsSection />
       <PackagesSection />
+      <CasePreviewSection />
+      <ProcessStepsSection />
       <ProblemsSection />
       <CtaSection />
     </>

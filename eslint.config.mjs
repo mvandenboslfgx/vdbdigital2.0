@@ -15,6 +15,8 @@ const eslintConfig = defineConfig([
     // Generated live-readiness operator evidence + one-shot scratch scripts
     // (logs/JSON/_*.js under docs/artifacts only — not app/source).
     "docs/artifacts/live-readiness/**",
+    // Node operator scripts (CommonJS)
+    "scripts/**/*.cjs",
   ]),
 ]);
 
