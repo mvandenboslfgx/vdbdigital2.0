@@ -34,8 +34,6 @@ export const paths = {
   liveChat: "/solutions/live-chat",
   reviewFlows: "/solutions/review-flows",
   shop: "/shop",
-  /** Website / services packages — separate from software license catalog */
-  packages: "/packages",
   forBusiness: "/for-business",
   cases: "/cases",
   process: "/process",

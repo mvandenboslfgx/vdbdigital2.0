@@ -4,8 +4,8 @@ import { Container, Section, Card } from "@/components/ui/container";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import { buildLocaleAlternates, openGraphLocale } from "@/i18n/seo";
 import { seoPaths } from "@/config/seo-routes";
-import { ServerLocaleLink } from "@/i18n/server-locale-link";
-import { ServerLocaleLinkButton } from "@/components/ui/server-locale-link-button";
+import { LocaleLink } from "@/i18n/locale-link";
+import { LocaleLinkButton } from "@/components/ui/locale-link-button";
 import { paths } from "@/i18n/config";
 
 /** Planned knowledge base topics — architecture only, no thin auto-generated articles. */
@@ -111,12 +111,12 @@ export default async function KennisbankPage() {
                 <p className="text-small text-light-muted mb-4">
                   Artikel in voorbereiding — bekijk intussen onze dienstpagina.
                 </p>
-                <ServerLocaleLink
+                <LocaleLink
                   href={topic.href}
                   className="text-small text-primary underline-offset-2 hover:underline"
                 >
                   Naar dienstpagina →
-                </ServerLocaleLink>
+                </LocaleLink>
               </Card>
             ))}
           </div>
@@ -124,9 +124,9 @@ export default async function KennisbankPage() {
             <p className="text-muted mb-4">
               Staat jouw vraag er niet bij? Plan een kennismaking — we denken graag mee.
             </p>
-            <ServerLocaleLinkButton href={`${paths.contact}?intent=introduction`} size="lg">
+            <LocaleLinkButton href={`${paths.contact}?intent=introduction`} size="lg">
               {t("nav.scheduleIntro")}
-            </ServerLocaleLinkButton>
+            </LocaleLinkButton>
           </div>
         </Container>
       </Section>
