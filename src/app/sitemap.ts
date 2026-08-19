@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { siteConfig } from "@/config/site";
 import { withLocale } from "@/i18n/config";
+import { getAllSeoSitemapPaths, seoEnglishEquivalent } from "@/config/seo-routes";
 
 const staticRoutes = [
   "/",
@@ -11,7 +12,13 @@ const staticRoutes = [
   "/solutions/whatsapp-ai",
   "/solutions/livechat",
   "/solutions/reviewflows",
+  "/solutions/appointment-automation",
+  "/solutions/website-maintenance",
+  "/solutions/technical-support",
+  "/solutions/conversion-optimisation",
+  "/solutions/custom-software",
   "/shop",
+  "/packages",
   "/cases",
   "/process",
   "/about",
@@ -65,6 +72,44 @@ function bilingualEntries(
   ];
 }
 
+/** Dutch SEO landing pages — NL canonical only; EN alternate points to solution equivalent. */
+function resolveSeoEnEquivalent(path: string): string {
+  if (seoEnglishEquivalent[path]) return seoEnglishEquivalent[path];
+  const segments = path.split("/").filter(Boolean);
+  if (segments.length > 1) {
+    const parent = `/${segments.slice(0, -1).join("/")}`;
+    return seoEnglishEquivalent[parent] ?? parent;
+  }
+  return path;
+}
+
+function nlSeoEntries(
+  path: string,
+  opts: { changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]; priority: number },
+): MetadataRoute.Sitemap {
+  const base = siteConfig.url.replace(/\/$/, "");
+  const nlPath = withLocale(path, "nl");
+  const nlUrl = `${base}${nlPath}`;
+  const enEquivalent = resolveSeoEnEquivalent(path);
+  const enUrl = `${base}${enEquivalent === "/" ? "" : enEquivalent}` || base;
+
+  return [
+    {
+      url: nlUrl,
+      lastModified: new Date(),
+      changeFrequency: opts.changeFrequency,
+      priority: opts.priority,
+      alternates: {
+        languages: {
+          nl: nlUrl,
+          en: enUrl,
+          "x-default": enUrl,
+        },
+      },
+    },
+  ];
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const { getAllProducts } = await import("@/server/repositories/products");
   const products = await getAllProducts();
@@ -89,6 +134,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       bilingualEntries(route, {
         changeFrequency: "weekly",
         priority: route === "/" ? 1 : 0.8,
+      }),
+    ),
+    ...getAllSeoSitemapPaths().flatMap((route) =>
+      nlSeoEntries(route, {
+        changeFrequency: "monthly",
+        priority: route.split("/").length > 2 ? 0.7 : 0.85,
       }),
     ),
     ...caseSlugs.flatMap((slug) =>

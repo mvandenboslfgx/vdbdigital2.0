@@ -45,6 +45,12 @@ const en = {
     products: "Products",
     company: "Company",
     legal: "Legal",
+    seo: "Services",
+    seoWebsite: "Custom websites",
+    seoWebdesign: "Web design",
+    seoWebshop: "Online stores",
+    seoAi: "AI automation",
+    seoKennisbank: "Knowledge base",
     cookiePreferences: "Cookie preferences",
     rights: "All rights reserved.",
   },
@@ -75,6 +81,9 @@ const en = {
     nl: "Dutch",
   },
   home: {
+    metaTitle: "Custom websites, AI automation & software | VDB Digital",
+    metaDescription:
+      "VDB Digital builds professional websites, online stores and practical AI automation for growing businesses — scoped clearly from introduction to launch.",
     heroTitle: "Websites and digital systems that turn visitors into enquiries.",
     heroBody:
       "From clear websites to WhatsApp AI and maintenance — scoped after a short introduction.",

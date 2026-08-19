@@ -47,6 +47,12 @@ const nl: Messages = {
     products: "Producten",
     company: "Bedrijf",
     legal: "Juridisch",
+    seo: "Diensten",
+    seoWebsite: "Website laten maken",
+    seoWebdesign: "Webdesign",
+    seoWebshop: "Webshop laten maken",
+    seoAi: "AI automatisering",
+    seoKennisbank: "Kennisbank",
     cookiePreferences: "Cookievoorkeuren",
     rights: "Alle rechten voorbehouden.",
   },
@@ -78,9 +84,12 @@ const nl: Messages = {
     nl: "Nederlands",
   },
   home: {
-    heroTitle: "Websites en digitale systemen die bezoekers omzetten in aanvragen.",
+    metaTitle: "Website laten maken | Webdesign & AI automatisering | VDB Digital",
+    metaDescription:
+      "VDB Digital bouwt professionele websites en digitale systemen voor bedrijven — van webdesign en webshops tot AI automatisering. Meer aanvragen, minder handmatig werk.",
+    heroTitle: "Professionele website laten maken voor jouw bedrijf",
     heroBody:
-      "Van heldere websites tot WhatsApp AI en onderhoud — afgestemd na een korte kennismaking.",
+      "Wij bouwen websites, webshops en slimme automatisering voor Nederlandse ondernemers — helder, snel en gericht op aanvragen. Van kennismaking tot livegang.",
     ctaIntro: "Plan een kennismaking",
     ctaSolutions: "Bekijk onze oplossingen",
     ctaQuote: "Vraag een voorstel aan",

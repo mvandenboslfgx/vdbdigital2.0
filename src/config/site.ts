@@ -28,7 +28,15 @@ export const siteConfig = {
     address: envOrEmpty(process.env.NEXT_PUBLIC_COMPANY_ADDRESS),
     city: envOrEmpty(process.env.NEXT_PUBLIC_COMPANY_CITY),
     country: "Netherlands",
-    phone: envOrEmpty(process.env.NEXT_PUBLIC_COMPANY_PHONE),
+    /**
+     * Display phone. Env override allowed; default keeps public belpad available.
+     * Format for humans: 06 286 00 727
+     */
+    phone:
+      envOrEmpty(process.env.NEXT_PUBLIC_COMPANY_PHONE) || "06 286 00 727",
+    /** E.164 for tel: links */
+    phoneTel:
+      envOrEmpty(process.env.NEXT_PUBLIC_COMPANY_PHONE_TEL) || "+31628600727",
   },
   social: {
     linkedin: envOrEmpty(process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN),
@@ -38,9 +46,12 @@ export const siteConfig = {
   navigation: {
     main: [
       { labelKey: "nav.solutions", href: paths.solutions },
+      { labelKey: "nav.packages", href: paths.packages },
       { labelKey: "nav.shop", href: paths.shop },
       { labelKey: "nav.cases", href: paths.cases },
       { labelKey: "nav.process", href: paths.process },
+    ],
+    company: [
       { labelKey: "nav.about", href: paths.about },
       { labelKey: "nav.support", href: paths.support },
     ],
@@ -57,13 +68,14 @@ export const siteConfig = {
       { labelKey: "solutions.technicalSupport", href: paths.technicalSupport },
       { labelKey: "solutions.conversionOptimisation", href: paths.conversionOptimisation },
     ],
-      mobile: {
+    mobile: {
       solutionsOverview: {
         labelKey: "nav.allSolutions",
         href: paths.solutions,
       },
       business: [{ labelKey: "nav.quote", href: paths.quote }],
       primaryLinks: [
+        { labelKey: "nav.packages", href: paths.packages },
         { labelKey: "nav.shop", href: paths.shop },
         { labelKey: "nav.cases", href: paths.cases },
         { labelKey: "nav.process", href: paths.process },
@@ -74,6 +86,7 @@ export const siteConfig = {
     },
     footer: {
       product: [
+        { labelKey: "nav.packages", href: paths.packages },
         { labelKey: "nav.shop", href: paths.shop },
         { labelKey: "nav.quote", href: paths.quote },
         { labelKey: "nav.process", href: paths.process },
@@ -84,6 +97,13 @@ export const siteConfig = {
         { labelKey: "nav.cases", href: paths.cases },
         { labelKey: "nav.contact", href: paths.contact },
         { labelKey: "nav.support", href: paths.support },
+      ],
+      seo: [
+        { labelKey: "footer.seoWebsite", href: paths.websiteLatenMaken },
+        { labelKey: "footer.seoWebdesign", href: paths.webdesign },
+        { labelKey: "footer.seoWebshop", href: paths.webshopLatenMaken },
+        { labelKey: "footer.seoAi", href: paths.aiAutomatisering },
+        { labelKey: "footer.seoKennisbank", href: paths.kennisbank },
       ],
       legal: [
         { labelKey: "legal.privacy", href: paths.privacy },
@@ -97,14 +117,14 @@ export const siteConfig = {
     privacyContact:
       envOrEmpty(process.env.NEXT_PUBLIC_PRIVACY_EMAIL) || "privacy@vdbdigital.nl",
     dpo: envOrEmpty(process.env.NEXT_PUBLIC_DPO_CONTACT),
-    lastUpdated: "2026-07-15",
+    lastUpdated: "2026-07-24",
   },
   brand: {
     /** Square mark for schema.org / fallback icon consumers */
     logo: "/brand/vdb-logo-mark-light.svg",
     logoAlt: "VDB Digital Software",
-    openGraphImage: "/brand/opengraph-image.jpg",
-    twitterImage: "/brand/twitter-image.jpg",
+    openGraphImage: "/brand/opengraph-image.svg",
+    twitterImage: "/brand/opengraph-image.svg",
     themeColor: "#08090B",
   },
 } as const;
