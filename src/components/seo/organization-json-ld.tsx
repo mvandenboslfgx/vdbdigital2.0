@@ -23,7 +23,8 @@ export function OrganizationJsonLd() {
         "@type": "ContactPoint",
         contactType: "customer service",
         email: siteConfig.contactEmail,
-        availableLanguage: ["Dutch", "nl"],
+        telephone: siteConfig.company.phoneTel,
+        availableLanguage: ["Dutch", "English", "nl", "en"],
       },
     ],
   };
