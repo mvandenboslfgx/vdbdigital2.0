@@ -12,12 +12,13 @@ import { paths } from "@/i18n/config";
 export function Footer() {
   const { footer } = siteConfig.navigation;
   const { openPreferences } = useConsent();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const showSeoLinks = locale === "nl" && "seo" in footer;
 
   return (
     <footer data-surface="dark" className="border-t border-border bg-surface section-dark">
       <Container className="py-12 sm:py-16 pb-[max(3rem,env(safe-area-inset-bottom))]">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 sm:gap-10">
           <div className="lg:col-span-1">
             <BrandLink variant="light" logoClassName="h-11 w-auto" />
             <p className="mt-4 text-small text-muted prose-width">
@@ -87,6 +88,24 @@ export function Footer() {
               ))}
             </ul>
           </div>
+
+          {showSeoLinks && footer.seo ? (
+            <div>
+              <h3 className="text-label text-muted mb-4">{t("footer.seo")}</h3>
+              <ul className="space-y-2">
+                {footer.seo.map((link) => (
+                  <li key={link.href}>
+                    <LocaleLink
+                      href={link.href}
+                      className="text-small text-muted hover:text-foreground transition-colors"
+                    >
+                      {t(link.labelKey)}
+                    </LocaleLink>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
 
           <div>
             <h3 className="text-label text-muted mb-4">{t("footer.legal")}</h3>

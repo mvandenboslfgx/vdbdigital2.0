@@ -5,6 +5,7 @@ import { LocaleLinkButton } from "@/components/ui/locale-link-button";
 import { LocaleLink } from "@/i18n/locale-link";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import { paths } from "@/i18n/config";
+import { buildLocaleAlternates, openGraphLocale } from "@/i18n/seo";
 import { BookingCta } from "@/components/commercial/booking-cta";
 
 export interface SolutionPageSections {
@@ -272,16 +273,22 @@ export async function SolutionPageContent(props: SolutionPageSections) {
   );
 }
 
-export function createSolutionMetadata(
+export async function createSolutionMetadata(
   title: string,
   description: string,
   path: string,
-): Metadata {
+): Promise<Metadata> {
+  const locale = await getLocale();
   const pageTitle = title.replace(/\s*\|\s*VDB Digital Software\s*$/i, "").trim();
+
   return {
     title: pageTitle,
     description,
-    alternates: { canonical: path },
-    openGraph: { title: pageTitle, description },
+    alternates: buildLocaleAlternates(path, locale),
+    openGraph: {
+      title: pageTitle,
+      description,
+      locale: openGraphLocale(locale),
+    },
   };
 }
