@@ -67,6 +67,8 @@ export const quoteFormSchema = z
       .max(200),
     packageSlug: z.string().trim().max(100).optional(),
     productSlug: z.string().trim().max(100).optional(),
+    requestIntent: z.string().trim().max(100).optional(),
+    softwareSlug: z.string().trim().max(120).optional(),
     currentWebsite: optionalTrimmed,
     goals: z
       .string()

@@ -34,6 +34,7 @@ export const paths = {
   liveChat: "/solutions/live-chat",
   reviewFlows: "/solutions/review-flows",
   shop: "/shop",
+  shopSoftware: "/shop/software",
   forBusiness: "/for-business",
   cases: "/cases",
   process: "/process",

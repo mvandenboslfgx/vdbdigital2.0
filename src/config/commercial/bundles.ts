@@ -25,6 +25,10 @@ export interface BundleDefinition {
   sortOrder: number;
   featureCount: number;
   includedRefs: string[];
+  /** Months of care included in bundle — null until business decision is recorded */
+  includedCareMonths: number | null;
+  /** False until includedCareMonths and bundle pricing delta are formally defined */
+  careInclusionDefined: boolean;
 }
 
 export const commercialBundles: BundleDefinition[] = [
@@ -40,6 +44,8 @@ export const commercialBundles: BundleDefinition[] = [
     sortOrder: 1,
     featureCount: 5,
     includedRefs: ["launch-website", "essential-care"],
+    includedCareMonths: null,
+    careInclusionDefined: false,
   },
   {
     id: "business-growth",
@@ -53,6 +59,8 @@ export const commercialBundles: BundleDefinition[] = [
     sortOrder: 2,
     featureCount: 6,
     includedRefs: ["growth-website", "business-care"],
+    includedCareMonths: null,
+    careInclusionDefined: false,
   },
   {
     id: "webshop-launch",
@@ -66,6 +74,8 @@ export const commercialBundles: BundleDefinition[] = [
     sortOrder: 3,
     featureCount: 5,
     includedRefs: ["webshop-launch"],
+    includedCareMonths: null,
+    careInclusionDefined: true,
   },
   {
     id: "automation",
@@ -79,6 +89,8 @@ export const commercialBundles: BundleDefinition[] = [
     sortOrder: 4,
     featureCount: 6,
     includedRefs: [],
+    includedCareMonths: null,
+    careInclusionDefined: true,
   },
   {
     id: "digital-partner",
@@ -92,6 +104,8 @@ export const commercialBundles: BundleDefinition[] = [
     sortOrder: 5,
     featureCount: 6,
     includedRefs: ["digital-partner"],
+    includedCareMonths: null,
+    careInclusionDefined: true,
   },
 ];
 

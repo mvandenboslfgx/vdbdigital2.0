@@ -75,6 +75,7 @@ export const siteConfig = {
     footer: {
       product: [
         { labelKey: "nav.shop", href: paths.shop },
+        { labelKey: "pillarNav.software", href: paths.shopSoftware },
         { labelKey: "nav.quote", href: paths.quote },
         { labelKey: "nav.process", href: paths.process },
         { labelKey: "nav.solutions", href: paths.solutions },

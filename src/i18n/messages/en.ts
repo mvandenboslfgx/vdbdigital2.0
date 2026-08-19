@@ -230,6 +230,39 @@ const en = {
       "Prices shown as stored; packages use excl/incl VAT clarity.",
     deliveryTime: "Delivery",
     noSearchResults: "No products match your search.",
+    pillarIntro: "Explore VDB by capability area — build, automate, grow, and curated software licensing.",
+  },
+  pillarNav: {
+    build: "Build",
+    automate: "Automate",
+    grow: "Grow",
+    software: "Software licenses",
+  },
+  softwareShop: {
+    metaTitle: "Business software licenses",
+    metaDescription:
+      "Curated business software licensing and procurement through VDB Digital — verified quotes, no keyshop listings.",
+    eyebrow: "License procurement",
+    title: "Curated business software",
+    intro:
+      "VDB supports business software licensing as a secondary service — procurement with verified supplier checks, not bulk key reselling.",
+    secondaryNote:
+      "Only fully verified licenses appear below. Everything else is available on request after supplier confirmation.",
+    searchPlaceholder: "Search verified licenses…",
+    searchLabel: "Search",
+    procurementTitle: "License procurement on request",
+    procurementBody:
+      "Our curated catalogue is being verified SKU by SKU. Request a license and we confirm edition, platform, supplier and pricing before you commit.",
+    procurementCuratedNote:
+      "{count} business-relevant SKUs are in review — none are published until verification is complete.",
+    procurementStats:
+      "{public} verified public · {curated} curated candidates in review",
+    requestLicense: "Request a license",
+    otherSoftware: "Need other software?",
+    priceOnRequest: "Verified quote",
+    specifications: "Specifications",
+    backToCatalog: "Back to software catalogue",
+    pageOf: "Page {page} of {total}",
   },
   cart: {
     title: "Cart",
@@ -301,6 +334,10 @@ const en = {
     scheduleIntroduction: "Schedule an introduction →",
     productPrefill: "You asked about {product}. Complete the form — we will include this in the quote.",
     packagePrefill: "You selected package {package}. Complete the form — we will include this in the quote.",
+    softwareLicensePrefill:
+      "Software license request: {software}. We verify supplier, edition and pricing before quoting.",
+    softwareLicenseGeneral: "custom business software",
+    softwareLicenseProjectType: "Software license procurement — {software}",
     productInterest: "Product interest: {product}",
     packageInterest: "Package interest: {package}",
     quoteSteps: "Quote form steps",
