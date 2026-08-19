@@ -17,6 +17,9 @@ const eslintConfig = defineConfig([
     "docs/artifacts/live-readiness/**",
     // Node operator scripts (CommonJS)
     "scripts/**/*.cjs",
+    // Local operator evidence (never commit)
+    ".local-mfa-evidence/**",
+    ".local-catalog-source/**",
   ]),
 ]);
 
