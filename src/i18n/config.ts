@@ -34,6 +34,8 @@ export const paths = {
   liveChat: "/solutions/live-chat",
   reviewFlows: "/solutions/review-flows",
   shop: "/shop",
+  /** Website / services packages — separate from software license catalog */
+  packages: "/packages",
   forBusiness: "/for-business",
   cases: "/cases",
   process: "/process",
@@ -50,6 +52,16 @@ export const paths = {
   cookies: "/cookies",
   terms: "/terms",
   refundPolicy: "/refund-policy",
+  /** Dutch SEO landing pages (NL primary) */
+  websiteLatenMaken: "/website-laten-maken",
+  webdesign: "/webdesign",
+  webshopLatenMaken: "/webshop-laten-maken",
+  aiAutomatisering: "/ai-automatisering",
+  aiChatbot: "/ai-chatbot",
+  whatsappAutomatisering: "/whatsapp-automatisering",
+  maatwerkSoftware: "/maatwerk-software",
+  klantportaalLatenMaken: "/klantportaal-laten-maken",
+  kennisbank: "/kennisbank",
 } as const;
 
 export type PathKey = keyof typeof paths;
@@ -69,12 +81,16 @@ export const legacyRedirects: Record<string, string> = {
   "/oplossingen/conversie-optimalisatie": paths.conversionOptimisation,
   "/oplossingen/maatwerksoftware": paths.customSoftware,
   "/oplossingen/maatwerkwebsites": paths.websites,
+  "/solutions/live-chat": paths.livechat,
+  "/solutions/review-flows": paths.reviewflows,
+  "/solutions/custom-websites": paths.websites,
   "/over-ons": paths.about,
   "/werkwijze": paths.process,
   "/offerte": paths.quote,
   "/winkelwagen": paths.cart,
   "/algemene-voorwaarden": paths.terms,
   "/refundbeleid": paths.refundPolicy,
+  "/login": paths.login,
   "/checkout/succes": paths.checkoutSuccess,
   "/checkout/geannuleerd": paths.checkoutCancelled,
   "/admin/producten": "/admin/products",
