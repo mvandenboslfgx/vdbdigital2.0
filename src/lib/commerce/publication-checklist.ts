@@ -7,7 +7,7 @@ import {
   resolveStoredOrDerivedPriceMode,
   billingWarningNl,
 } from "@/lib/commerce/catalog-admin-eligibility";
-import { canPublishForB2b, canPublishForB2c } from "@/config/commercial/pricing";
+import { canPublishForB2b, canPublishForB2c } from "@/lib/commerce/catalog-approval";
 import { resolveCommercialItemForProduct } from "@/lib/commerce/catalog-admin-eligibility";
 import { isDirectCheckoutEnabled } from "@/config/features";
 
@@ -38,7 +38,9 @@ export function buildPublicationChecklist(product: Product): PublicationCheckIte
     });
   }
   if (!product.categoryId && !product.categorySlug) {
-    items.push({ code: "CATEGORY", severity: "warning", message: "Categorie ontbreekt" });
+    items.push({ code: "CATEGORY", severity: "error", message: "Actieve categorie ontbreekt" });
+  } else if (product.categoryActive === false) {
+    items.push({ code: "CATEGORY_ACTIVE", severity: "error", message: "Categorie is niet actief" });
   }
 
   const mode = resolveStoredOrDerivedPriceMode(product);
@@ -73,7 +75,7 @@ export function buildPublicationChecklist(product: Product): PublicationCheckIte
   if (!en.complete) {
     items.push({
       code: "EN",
-      severity: "warning",
+      severity: "error",
       message: `Engelse vertaling incompleet: ${en.missing.join(", ")}`,
     });
   }
@@ -81,16 +83,34 @@ export function buildPublicationChecklist(product: Product): PublicationCheckIte
   if (!nl.complete) {
     items.push({
       code: "NL",
-      severity: "warning",
+      severity: "error",
       message: `Nederlandse vertaling incompleet: ${nl.missing.join(", ")}`,
     });
   }
 
-  if (!product.primaryImagePath && (!product.media || product.media.length === 0)) {
+  if (
+    !product.primaryImagePath ||
+    !product.media?.some(
+      (media) => media.isPrimary && media.storagePath === product.primaryImagePath,
+    )
+  ) {
     items.push({
       code: "IMAGE",
-      severity: "warning",
+      severity: "error",
       message: "Geen productafbeelding",
+    });
+  }
+
+  if (
+    !Number.isInteger(product.minQuantity) ||
+    !Number.isInteger(product.maxQuantity) ||
+    (product.minQuantity ?? 0) < 1 ||
+    (product.maxQuantity ?? 0) < (product.minQuantity ?? 1)
+  ) {
+    items.push({
+      code: "QUANTITY",
+      severity: "error",
+      message: "Aantal/licentiegrenzen zijn ongeldig",
     });
   }
 
@@ -106,20 +126,20 @@ export function buildPublicationChecklist(product: Product): PublicationCheckIte
   if (!commercial) {
     items.push({
       code: "COMMERCIAL",
-      severity: "warning",
+      severity: "error",
       message: "Geen commercieel goedkeuringsrecord — juridische publicatie niet bevestigd",
     });
   } else {
     items.push({
       code: "B2B_LEGAL",
-      severity: canPublishForB2b(commercial) ? "info" : "warning",
+      severity: canPublishForB2b(commercial) || !product.audienceB2b ? "info" : "error",
       message: canPublishForB2b(commercial)
         ? "B2B juridisch toegestaan"
         : "B2B-goedkeuring ontbreekt of niet publicatieklaar",
     });
     items.push({
       code: "B2C_LEGAL",
-      severity: canPublishForB2c(commercial) ? "info" : "warning",
+      severity: canPublishForB2c(commercial) || !product.audienceB2c ? "info" : "error",
       message: canPublishForB2c(commercial)
         ? "B2C juridisch toegestaan"
         : "B2C-goedkeuring ontbreekt of niet publicatieklaar",

@@ -1,9 +1,7 @@
 import type { Locale } from "@/i18n/config";
 import type { Product } from "@/types";
 import { formatCents, formatPriceLabel } from "@/lib/utilities/money";
-import { websitePackages } from "@/config/commercial/website-packages";
-import { carePackages } from "@/config/commercial/care-packages";
-import { commercialBundles } from "@/config/commercial/bundles";
+import { assertProductTranslationComplete } from "@/i18n/localize-product";
 
 /** Products that must never appear publicly even if a row exists. */
 const BLOCKED_SLUG_FRAGMENTS = [
@@ -19,20 +17,8 @@ const BLOCKED_SLUG_FRAGMENTS = [
   "android-tv",
 ] as const;
 
-/**
- * Slugs owned by commercial SSOT sections (packages / care / bundles).
- * Keep them out of the generic product grid so pricing/copy cannot diverge.
- */
-export const COMMERCIAL_SSOT_PUBLIC_SLUGS: ReadonlySet<string> = new Set([
-  ...websitePackages.map((p) => p.slug),
-  ...websitePackages.map((p) => p.catalogSlug),
-  ...carePackages.map((p) => p.slug),
-  ...carePackages.map((p) => p.catalogSlug),
-  ...commercialBundles.map((b) => b.slug),
-  ...commercialBundles.map((b) => b.catalogSlug),
-  // Care catalog slug aliases that still exist as legacy product rows
-  "digital-partner",
-]);
+/** Legacy export kept empty: Supabase is now the only commercial catalog. */
+export const COMMERCIAL_SSOT_PUBLIC_SLUGS: ReadonlySet<string> = new Set();
 
 export function isCommercialSsotPublicSlug(slug: string): boolean {
   return COMMERCIAL_SSOT_PUBLIC_SLUGS.has(slug.toLowerCase());
@@ -47,8 +33,10 @@ export function isBlockedPublicShopSlug(slug: string): boolean {
 /** Public gate: published + legal/commercial approval + complete copy/image. */
 export function isPublicShopProduct(product: Product): boolean {
   if (product.status !== "PUBLISHED") return false;
+  if (product.isActive !== true) return false;
+  if (product.categoryActive !== true) return false;
   if (product.isConcept) return false;
-  if (product.publicationReady === false) return false;
+  if (product.publicationReady !== true) return false;
   if (isBlockedPublicShopSlug(product.slug)) return false;
   const legal = product.legalStatus;
   if (
@@ -64,6 +52,26 @@ export function isPublicShopProduct(product: Product): boolean {
   if (!product.shortDescription?.trim()) return false;
   if (!product.fullDescription?.trim()) return false;
   if (!product.primaryImagePath?.trim()) return false;
+  if ((product.minQuantity ?? 0) < 1) return false;
+  if ((product.maxQuantity ?? 0) < (product.minQuantity ?? 1)) return false;
+  for (const locale of ["nl", "en"] as const) {
+    if (!assertProductTranslationComplete(product, locale).complete) return false;
+  }
+  const primaryMedia = product.media?.find((media) => media.isPrimary);
+  if (!primaryMedia?.altTextNl?.trim() || !primaryMedia.altTextEn?.trim()) return false;
+  if (product.priceMode === "FIXED" && (product.priceCents ?? 0) <= 0) return false;
+  if (
+    product.priceMode === "STARTING_FROM" &&
+    (product.fromPriceCents ?? product.priceCents ?? 0) <= 0
+  ) {
+    return false;
+  }
+  if (
+    product.priceMode === "QUOTE_ONLY" &&
+    product.billingType !== "QUOTE_ONLY"
+  ) {
+    return false;
+  }
   return true;
 }
 

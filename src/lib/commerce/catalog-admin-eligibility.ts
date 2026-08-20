@@ -2,10 +2,9 @@ import type { BillingType, PriceMode, Product, ProductStatus } from "@/types";
 import {
   canPublishForB2b,
   canPublishForB2c,
-} from "@/config/commercial/pricing";
+} from "@/lib/commerce/catalog-approval";
 import {
   commercialItemFromProductRow,
-  findCommercialCatalogItem,
   isRecurringBilling,
   resolvePriceMode,
 } from "@/lib/commerce/checkout-eligibility";
@@ -52,10 +51,7 @@ export function resolveStoredOrDerivedPriceMode(product: Product): PriceMode {
 }
 
 export function resolveCommercialItemForProduct(product: Product) {
-  return (
-    commercialItemFromProductRow(product) ??
-    findCommercialCatalogItem(product.slug)
-  );
+  return commercialItemFromProductRow(product);
 }
 
 export function getCheckoutBlockReasons(

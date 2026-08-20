@@ -15,6 +15,7 @@ import {
   restoreProductAction,
   duplicateProductAction,
   deleteProductAction,
+  registerProductMediaAction,
   type CatalogActionState,
 } from "@/server/actions/catalog-actions";
 import { billingWarningNl } from "@/lib/commerce/catalog-admin-eligibility";
@@ -75,9 +76,14 @@ export function ProductEditorForm({
     updateLegalApprovalAction,
     initialState,
   );
+  const [mediaState, mediaAction, mediaPending] = useActionState(
+    registerProductMediaAction,
+    initialState,
+  );
 
   const state = mode === "create" ? createState : updateState;
-  const pending = createPending || updatePending || publishPending || legalPending;
+  const pending =
+    createPending || updatePending || publishPending || legalPending || mediaPending;
 
   const [priceMode, setPriceMode] = useState<PriceMode>(
     product?.priceMode ??
@@ -107,10 +113,10 @@ export function ProductEditorForm({
   useEffect(() => {
     if (createState.success && createState.productId) {
       router.push(`/admin/products/${createState.productId}`);
-    } else if (updateState.success) {
+    } else if (updateState.success || mediaState.success) {
       router.refresh();
     }
-  }, [createState.success, createState.productId, updateState.success, router]);
+  }, [createState.success, createState.productId, updateState.success, mediaState.success, router]);
 
   function buildPayload(form: HTMLFormElement) {
     const fd = new FormData(form);
@@ -155,6 +161,10 @@ export function ProductEditorForm({
       seoDescription: String(fd.get("seoDescription") ?? ""),
       audienceB2b: fd.get("audienceB2b") === "on",
       audienceB2c: fd.get("audienceB2c") === "on",
+      minQuantity: Number(fd.get("minQuantity") ?? 1),
+      maxQuantity: Number(fd.get("maxQuantity") ?? 99),
+      quantityLabelNl: String(fd.get("quantityLabelNl") ?? "licentie"),
+      quantityLabelEn: String(fd.get("quantityLabelEn") ?? "license"),
       translations: [
         {
           locale: "nl" as const,
@@ -269,12 +279,12 @@ export function ProductEditorForm({
         automatisch gezet door alleen B2B/B2C te kiezen.
       </div>
 
-      {(state.error || publishState.error || legalState.error) && (
+      {(state.error || publishState.error || legalState.error || mediaState.error) && (
         <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-small text-rose-900" role="alert">
-          {state.error || publishState.error || legalState.error}
+          {state.error || publishState.error || legalState.error || mediaState.error}
         </div>
       )}
-      {(state.success || publishState.success || legalState.success) && (
+      {(state.success || publishState.success || legalState.success || mediaState.success) && (
         <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-small text-emerald-900">
           Opgeslagen.
           {(publishState.warnings ?? state.warnings)?.map((w) => (
@@ -416,6 +426,34 @@ export function ProductEditorForm({
               Alleen FIXED kan ooit direct checkout-eligible zijn. Dit product blijft offertegericht.
             </p>
           )}
+          <div className="grid gap-4 md:grid-cols-2">
+            <Input
+              name="minQuantity"
+              label="Minimumaantal"
+              type="number"
+              min={1}
+              max={999}
+              defaultValue={product?.minQuantity ?? 1}
+            />
+            <Input
+              name="maxQuantity"
+              label="Maximumaantal"
+              type="number"
+              min={1}
+              max={999}
+              defaultValue={product?.maxQuantity ?? 99}
+            />
+            <Input
+              name="quantityLabelNl"
+              label="Eenheid NL"
+              defaultValue={product?.quantityLabelNl ?? "licentie"}
+            />
+            <Input
+              name="quantityLabelEn"
+              label="Eenheid EN"
+              defaultValue={product?.quantityLabelEn ?? "license"}
+            />
+          </div>
         </section>
 
         <section className="space-y-4">
@@ -502,6 +540,49 @@ export function ProductEditorForm({
           </Link>
         </div>
       </form>
+
+      {mode === "edit" && product ? (
+        <section className="space-y-4 rounded-lg border border-border p-4">
+          <h2 className="text-lg font-semibold font-display">Productafbeelding</h2>
+          <p className="text-small text-muted">
+            Bestanden worden in de private Supabase Storage-bucket opgeslagen. Alleen de primaire
+            afbeelding van een volledig gepubliceerd product krijgt publieke leesrechten.
+          </p>
+          {product.media?.length ? (
+            <ul className="space-y-1 text-small text-muted">
+              {product.media.map((media) => (
+                <li key={media.id}>
+                  {media.isPrimary ? "Primair · " : ""}{media.storagePath}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          <form action={mediaAction} className="grid gap-4 md:grid-cols-2">
+            <input type="hidden" name="productId" value={product.id} />
+            <label className="space-y-1.5 text-small font-medium md:col-span-2">
+              Afbeelding (JPEG, PNG, WebP of GIF; maximaal 5 MiB)
+              <input
+                name="image"
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                required
+                className="block w-full rounded-lg border border-border bg-surface px-3 py-2"
+              />
+            </label>
+            <Input name="altTextNl" label="Alternatieve tekst NL" required />
+            <Input name="altTextEn" label="Alternative text EN" required />
+            <label className="flex items-center gap-2 text-small">
+              <input type="checkbox" name="isPrimary" defaultChecked />
+              Instellen als primaire afbeelding
+            </label>
+            <div>
+              <Button type="submit" disabled={mediaPending}>
+                {mediaPending ? "Uploaden…" : "Uploaden naar Supabase"}
+              </Button>
+            </div>
+          </form>
+        </section>
+      ) : null}
 
       {mode === "edit" && product && (
         <>

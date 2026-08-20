@@ -12,9 +12,12 @@ import { buildLocaleAlternates } from "@/i18n/seo";
 import { paths } from "@/i18n/config";
 import { productAllowsAddToCart } from "@/lib/commerce/product-checkout-ui";
 import { publicShopPriceDisplay } from "@/lib/commerce/public-shop-gates";
+import { ProductImage } from "@/components/shop/product-image";
+import { formatCents } from "@/lib/utilities/money";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ quantity?: string }>;
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
@@ -31,8 +34,9 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   };
 }
 
-export default async function ProductPage({ params }: ProductPageProps) {
+export default async function ProductPage({ params, searchParams }: ProductPageProps) {
   const { slug } = await params;
+  const query = searchParams ? await searchParams : {};
   const locale = await getLocale();
   const { t } = await getDictionary(locale);
   const raw = await getPublicShopProductBySlug(slug);
@@ -42,21 +46,44 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const whatsappMessage = t("product.whatsappMessage", { product: product.name });
   const canAddToCart = productAllowsAddToCart(raw);
   const price = publicShopPriceDisplay(product, locale);
+  const minQuantity = product.minQuantity ?? 1;
+  const maxQuantity = product.maxQuantity ?? 99;
+  const requestedQuantity = Number(query.quantity ?? minQuantity);
+  const quantity = Number.isInteger(requestedQuantity)
+    ? Math.min(Math.max(requestedQuantity, minQuantity), maxQuantity)
+    : minQuantity;
+  const quantityLabel =
+    locale === "nl" ? product.quantityLabelNl || "licentie" : product.quantityLabelEn || "license";
+  const totalLabel =
+    product.priceMode === "FIXED" && product.priceCents
+      ? formatCents(product.priceCents * quantity, locale)
+      : null;
 
   return (
     <>
       <Section variant="dark" className="pt-12">
         <Container>
-          <p className="text-label text-primary mb-3">{product.categoryName}</p>
-          <h1 className="text-h1 mb-4">{product.name}</h1>
-          <p className="text-body-lg text-muted prose-width mb-6">{product.shortDescription}</p>
-          <div className="flex flex-wrap items-center gap-4">
-            <span className="text-2xl font-semibold text-primary">{price.label}</span>
-            {price.mode !== "on_request" ? (
-              <span className="text-small text-muted">
-                {t("product.billing")}: {billingPeriodLabel(product.billingType, locale)}
-              </span>
-            ) : null}
+          <div className="grid items-center gap-8 lg:grid-cols-2">
+            <div>
+              <p className="text-label text-primary mb-3">{product.categoryName}</p>
+              <h1 className="text-h1 mb-4">{product.name}</h1>
+              <p className="text-body-lg text-muted prose-width mb-6">{product.shortDescription}</p>
+              <div className="flex flex-wrap items-center gap-4">
+                <span className="text-2xl font-semibold text-primary">{price.label}</span>
+                {price.mode !== "on_request" ? (
+                  <span className="text-small text-muted">
+                    {locale === "nl" ? `per ${quantityLabel}` : `per ${quantityLabel}`} ·{" "}
+                    {billingPeriodLabel(product.billingType, locale)}
+                  </span>
+                ) : null}
+              </div>
+            </div>
+            <ProductImage
+              src={product.imageUrl}
+              alt={product.imageAlt || product.name}
+              priority
+              className="rounded-2xl border border-white/10"
+            />
           </div>
         </Container>
       </Section>
@@ -70,31 +97,27 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 <p className="text-light-muted">{product.fullDescription}</p>
               </div>
 
-              {product.includedItems.length > 0 ? (
-                <div>
-                  <h2 className="text-h2 text-light-foreground mb-4">{t("product.whatYouGet")}</h2>
-                  <ul className="space-y-2">
-                    {product.includedItems.map((item) => (
-                      <li key={item} className="flex gap-2 text-light-muted">
-                        <span className="text-primary">✓</span> {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
+              <div>
+                <h2 className="text-h2 text-light-foreground mb-4">{t("product.whatYouGet")}</h2>
+                <ul className="space-y-2">
+                  {product.includedItems.map((item) => (
+                    <li key={item} className="flex gap-2 text-light-muted">
+                      <span className="text-primary">✓</span> {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-              {product.excludedItems.length > 0 ? (
-                <div>
-                  <h2 className="text-h2 text-light-foreground mb-4">{t("product.notIncluded")}</h2>
-                  <ul className="space-y-2">
-                    {product.excludedItems.map((item) => (
-                      <li key={item} className="flex gap-2 text-light-muted">
-                        <span className="text-light-muted">—</span> {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
+              <div>
+                <h2 className="text-h2 text-light-foreground mb-4">{t("product.notIncluded")}</h2>
+                <ul className="space-y-2">
+                  {product.excludedItems.map((item) => (
+                    <li key={item} className="flex gap-2 text-light-muted">
+                      <span className="text-light-muted">—</span> {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
               {product.extensions.length > 0 && (
                 <div>
@@ -126,38 +149,68 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
             <div>
               <Card variant="light" className="sticky top-24 space-y-4">
-                {product.deliveryTime?.trim() ? (
-                  <div>
-                    <p className="text-label text-light-muted mb-1">{t("product.deliveryTime")}</p>
-                    <p className="font-medium text-light-foreground">{product.deliveryTime}</p>
-                  </div>
-                ) : null}
-                {product.targetAudience?.trim() ? (
-                  <div>
-                    <p className="text-label text-light-muted mb-1">{t("product.targetAudience")}</p>
-                    <p className="text-small text-light-muted">{product.targetAudience}</p>
-                  </div>
-                ) : null}
-                {product.workflow?.trim() ? (
-                  <div>
-                    <p className="text-label text-light-muted mb-1">{t("product.workflow")}</p>
-                    <p className="text-small text-light-muted">{product.workflow}</p>
-                  </div>
-                ) : null}
+                <div>
+                  <p className="text-label text-light-muted mb-1">{t("product.deliveryTime")}</p>
+                  <p className="font-medium text-light-foreground">{product.deliveryTime}</p>
+                </div>
+                <div>
+                  <p className="text-label text-light-muted mb-1">{t("product.targetAudience")}</p>
+                  <p className="text-small text-light-muted">{product.targetAudience}</p>
+                </div>
+                <div>
+                  <p className="text-label text-light-muted mb-1">{t("product.workflow")}</p>
+                  <p className="text-small text-light-muted">{product.workflow}</p>
+                </div>
                 <div className="pt-4 border-t border-light-border space-y-3">
-                  {canAddToCart && <AddToCartButton productSlug={product.slug} />}
+                  <form method="get" className="space-y-2">
+                    <label className="text-label text-light-muted" htmlFor="product-quantity">
+                      {locale === "nl" ? "Aantal licenties" : "Number of licences"}
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        id="product-quantity"
+                        name="quantity"
+                        type="number"
+                        min={minQuantity}
+                        max={maxQuantity}
+                        defaultValue={quantity}
+                        className="min-h-11 min-w-0 flex-1 rounded-lg border border-light-border bg-light-surface px-3 text-light-foreground"
+                      />
+                      <button
+                        type="submit"
+                        className="min-h-11 rounded-lg border border-light-border px-3 text-small font-medium text-light-foreground"
+                      >
+                        {locale === "nl" ? "Bereken" : "Calculate"}
+                      </button>
+                    </div>
+                    <p className="text-xs text-light-muted">
+                      {locale === "nl"
+                        ? `Toegestaan: ${minQuantity}–${maxQuantity}`
+                        : `Allowed: ${minQuantity}–${maxQuantity}`}
+                    </p>
+                  </form>
+                  {totalLabel ? (
+                    <div className="rounded-lg bg-light-surface p-3">
+                      <p className="text-label text-light-muted">
+                        {locale === "nl" ? "Totaal voor deze periode" : "Total for this period"}
+                      </p>
+                      <p className="text-xl font-semibold text-primary">{totalLabel}</p>
+                    </div>
+                  ) : null}
+                  {canAddToCart && (
+                    <AddToCartButton
+                      productSlug={product.slug}
+                      quantity={quantity}
+                      minQuantity={minQuantity}
+                      maxQuantity={maxQuantity}
+                    />
+                  )}
                   <LocaleLinkButton
-                    href={`${paths.quote}?product=${product.slug}&intent=${
-                      price.mode === "on_request" ? "configure" : "order"
-                    }`}
-                    variant={canAddToCart ? "outline" : "primary"}
+                    href={`${paths.quote}?product=${product.slug}&quantity=${quantity}`}
+                    variant="outline"
                     className="w-full"
                   >
-                    {price.mode === "on_request"
-                      ? t("shop.configureRequest")
-                      : canAddToCart
-                        ? t("shop.discussFirst")
-                        : t("shop.orderNow")}
+                    {t("shop.requestQuote")}
                   </LocaleLinkButton>
                   <WhatsAppButton message={whatsappMessage} className="w-full justify-center" />
                 </div>

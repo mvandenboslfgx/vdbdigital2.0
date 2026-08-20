@@ -134,6 +134,7 @@ export interface Product {
   categoryId?: string | null;
   categorySlug: string;
   categoryName: string;
+  categoryNameNl?: string | null;
   priceCents: number | null;
   fromPriceCents: number | null;
   billingType: BillingType;
@@ -179,6 +180,14 @@ export interface Product {
   updatedAt?: string;
   createdAt?: string;
   primaryImagePath?: string | null;
+  imageUrl?: string | null;
+  imageAlt?: string | null;
+  isActive?: boolean;
+  categoryActive?: boolean;
+  minQuantity?: number;
+  maxQuantity?: number;
+  quantityLabelNl?: string;
+  quantityLabelEn?: string;
   isConcept?: boolean;
   translations?: ProductTranslation[];
   media?: ProductMedia[];
@@ -239,6 +248,7 @@ export interface OrderLine {
   unitPriceCents: number;
   billingType: BillingType;
   totalCents: number;
+  productSnapshot: Record<string, unknown>;
 }
 
 export interface OrderTotals {

@@ -1,7 +1,7 @@
 import type { Locale } from "@/i18n/config";
 import { formatCents } from "@/lib/utilities/money";
-import type { CommercialCatalogItem, CommercialPrice } from "@/config/commercial/pricing";
-import { priceFromExclEuros } from "@/config/commercial/pricing";
+import type { CatalogApprovalItem, CommercialPrice } from "@/lib/commerce/catalog-approval";
+import { catalogPriceFromExclEuros } from "@/lib/commerce/catalog-approval";
 
 /**
  * Layered commercial price display (max 4 visual layers).
@@ -59,7 +59,7 @@ const labels = {
 } as const;
 
 export function formatDualPrice(
-  item: CommercialCatalogItem,
+  item: CatalogApprovalItem,
   locale: Locale,
 ): DualPriceDisplay {
   const copy = labels[locale];
@@ -112,6 +112,6 @@ export function formatFoundingPrice(
   monthly = false,
 ): DualPriceDisplay {
   const euros = foundingExclVatCents / 100;
-  const pricing = priceFromExclEuros(euros, monthly ? "monthly" : "fixed");
+  const pricing = catalogPriceFromExclEuros(euros, monthly ? "monthly" : "fixed");
   return formatPricePair(pricing, locale, false);
 }

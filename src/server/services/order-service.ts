@@ -51,6 +51,7 @@ async function createOrderViaRpc(
       unit_price_cents: line.unitPriceCents,
       total_cents: line.totalCents,
       billing_type: line.billingType,
+      product_snapshot: line.productSnapshot,
     })),
   });
   return !error;
@@ -90,6 +91,7 @@ async function createOrderSequential(
       unit_price_cents: line.unitPriceCents,
       total_cents: line.totalCents,
       billing_type: line.billingType,
+      product_snapshot: line.productSnapshot,
     })),
   );
 

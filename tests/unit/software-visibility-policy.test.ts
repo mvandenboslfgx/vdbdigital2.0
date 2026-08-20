@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   querySoftwareCatalog,
@@ -7,7 +9,6 @@ import {
   isPublicVerifiedSoftwareItem,
   isSoftwareItemPublic,
 } from "@/config/software-catalog/verification";
-import { queryPublicSoftwareCatalog } from "@/server/repositories/software-public-catalog";
 
 describe("software visibility policy", () => {
   it("never exposes BLOCKED, LEGACY_REQUEST_ONLY or CANDIDATE_REVIEW in browse", () => {
@@ -27,9 +28,7 @@ describe("software visibility policy", () => {
     }
 
     const page = querySoftwareCatalog("nl", { pageSize: 48 });
-    const publicPage = queryPublicSoftwareCatalog("nl", { pageSize: 48 });
     expect(page.total).toBe(0);
-    expect(publicPage.total).toBe(0);
     expect(page.items).toHaveLength(0);
   });
 
@@ -55,5 +54,14 @@ describe("software empty catalog procurement state", () => {
   it("reports zero public verified SKUs for procurement UI", () => {
     const stats = softwareCatalogItems.filter(isPublicVerifiedSoftwareItem);
     expect(stats.length).toBe(0);
+  });
+
+  it("has no legacy runtime repository or legacy product-grid component", () => {
+    expect(
+      existsSync(resolve("src/server/repositories/software-public-catalog.ts")),
+    ).toBe(false);
+    expect(
+      existsSync(resolve("src/components/shop/software-catalog-grid.tsx")),
+    ).toBe(false);
   });
 });

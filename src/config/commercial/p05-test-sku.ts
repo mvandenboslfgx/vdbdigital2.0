@@ -2,8 +2,8 @@
  * P0.5 fixture — eligibility-chain test SKU only.
  * Not a public shop product. Never set publicationReady=true in production catalog.
  */
-import type { CommercialCatalogItem } from "@/config/commercial/pricing";
-import { priceFromExclEuros } from "@/config/commercial/pricing";
+import type { CatalogApprovalItem } from "@/lib/commerce/catalog-approval";
+import { catalogPriceFromExclEuros } from "@/lib/commerce/catalog-approval";
 import type { BillingType, Product } from "@/types";
 import type { CheckoutCustomerType } from "@/lib/commerce/checkout-eligibility";
 
@@ -11,7 +11,7 @@ export const P05_TEST_SKU_SLUG = "p05-gate-fixed-test";
 
 export function buildP05CommercialItem(
   approval: "none" | "b2b" | "b2c" | "both" = "none",
-): CommercialCatalogItem {
+): CatalogApprovalItem {
   const legalStatus =
     approval === "both"
       ? "APPROVED_FOR_BOTH"
@@ -29,7 +29,7 @@ export function buildP05CommercialItem(
     category: "support",
     nameEn: "P0.5 Gate FIXED Test SKU",
     nameNl: "P0.5 Gate FIXED Test SKU",
-    pricing: priceFromExclEuros(100, "fixed"),
+    pricing: catalogPriceFromExclEuros(100, "fixed"),
     quoteOnly: false,
     oneTime: true,
     monthly: false,

@@ -56,13 +56,12 @@ for (const vp of viewports) {
     await page.goto("/nl", { waitUntil: "networkidle" });
     await dismissCookies(page);
 
-    const section = page.locator('[data-pricing-section="packages"]');
+    const section = page.locator('[data-pricing-section="supabase-catalog"]');
     await section.scrollIntoViewIfNeeded();
     await expect(section).toBeVisible();
 
-    const cards = section.locator("[data-pricing-card]");
+    const cards = section.locator("[data-catalog-product-card]");
     const cardCount = await cards.count();
-    expect(cardCount).toBeGreaterThanOrEqual(3);
 
     const docOverflow = await page.evaluate(() => {
       const el = document.documentElement;
@@ -70,18 +69,24 @@ for (const vp of viewports) {
     });
     expect(docOverflow).toBeLessThanOrEqual(1);
 
+    if (cardCount === 0) {
+      await expect(section).toContainText(
+        /geen volledig goedgekeurde websiteproducten|no fully approved website products/i,
+      );
+    }
+
     for (let i = 0; i < cardCount; i++) {
       const card = cards.nth(i);
       await expect(card).toBeVisible();
 
-      const cta = card.locator("[data-pricing-cta] a").first();
+      const cta = card.locator("[data-catalog-product-cta]").first();
       await cta.scrollIntoViewIfNeeded();
       await expect(cta).toBeVisible();
 
       const metrics = await cta.evaluate((el) => {
         const style = getComputedStyle(el);
         const rect = el.getBoundingClientRect();
-        const cardEl = el.closest("[data-pricing-card]");
+        const cardEl = el.closest("[data-catalog-product-card]");
         const cardRect = cardEl?.getBoundingClientRect();
 
         const isTransparent = (rgb: string) => {
@@ -149,7 +154,7 @@ for (const vp of viewports) {
       await section.scrollIntoViewIfNeeded();
       const alignedTops = await cards.evaluateAll((nodes) =>
         nodes.map((card) => {
-          const cta = card.querySelector("[data-pricing-cta] a");
+          const cta = card.querySelector("[data-catalog-product-cta]");
           return cta?.getBoundingClientRect().top ?? 0;
         }),
       );
@@ -196,7 +201,7 @@ test("visual system shell screenshots", async ({ page }) => {
 
   await page.goto("/", { waitUntil: "networkidle" });
   await dismissCookies(page);
-  const section = page.locator('[data-pricing-section="packages"]');
+  const section = page.locator('[data-pricing-section="supabase-catalog"]');
   await section.scrollIntoViewIfNeeded();
   const box = await section.boundingBox();
   if (box) {

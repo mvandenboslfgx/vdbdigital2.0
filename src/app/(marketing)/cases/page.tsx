@@ -14,7 +14,7 @@ import {
 import { paths } from "@/i18n/config";
 import { cn } from "@/lib/utilities/cn";
 
-export const caseTypes = [
+const caseTypes = [
   {
     slug: "conversie-website",
     key: "ConversionWebsite",

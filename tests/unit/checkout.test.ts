@@ -13,6 +13,7 @@ describe("Checkout rules", () => {
         unitPriceCents: 100000,
         billingType: "ONE_TIME",
         totalCents: 100000,
+        productSnapshot: {},
       },
     ];
     expect(canCheckoutTogether(lines)).toBe(true);
@@ -28,6 +29,7 @@ describe("Checkout rules", () => {
         unitPriceCents: 0,
         billingType: "QUOTE_ONLY",
         totalCents: 0,
+        productSnapshot: {},
       },
       {
         productId: "2",
@@ -37,6 +39,7 @@ describe("Checkout rules", () => {
         unitPriceCents: 100000,
         billingType: "ONE_TIME",
         totalCents: 100000,
+        productSnapshot: {},
       },
     ];
     expect(canCheckoutTogether(lines)).toBe(false);

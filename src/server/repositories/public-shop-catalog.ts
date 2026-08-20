@@ -20,12 +20,14 @@ const PAGE_SIZE = 12;
 export type PublicShopCategory = {
   slug: string;
   name: string;
+  nameNl?: string | null;
   count: number;
 };
 
 export type PublicShopQuery = {
   q?: string;
   category?: string | "all";
+  billing?: "all" | "one-time" | "recurring" | "quote-only";
   page?: number;
   pageSize?: number;
 };
@@ -90,6 +92,7 @@ export async function queryPublicShopCatalog(
     .map((c) => ({
       slug: c.slug,
       name: c.name,
+      nameNl: c.nameNl,
       count: countBySlug.get(c.slug) ?? 0,
     }))
     .filter((c) => c.count > 0)
@@ -99,6 +102,15 @@ export async function queryPublicShopCatalog(
   if (category !== "all") {
     filtered = filtered.filter((p) => p.categorySlug === category);
   }
+  if (query.billing === "one-time") {
+    filtered = filtered.filter((product) => product.billingType === "ONE_TIME");
+  } else if (query.billing === "recurring") {
+    filtered = filtered.filter(
+      (product) => product.billingType === "MONTHLY" || product.billingType === "YEARLY",
+    );
+  } else if (query.billing === "quote-only") {
+    filtered = filtered.filter((product) => product.billingType === "QUOTE_ONLY");
+  }
   if (q) {
     filtered = filtered.filter((p) => {
       const hay = [
@@ -107,6 +119,11 @@ export async function queryPublicShopCatalog(
         p.categoryName,
         p.slug,
         ...(p.tags ?? []),
+        ...(p.translations ?? []).flatMap((translation) => [
+          translation.name,
+          translation.shortDescription,
+          translation.fullDescription,
+        ]),
       ]
         .join(" ")
         .toLowerCase();

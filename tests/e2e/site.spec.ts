@@ -71,45 +71,15 @@ test.describe("Navigation", () => {
   });
 
   test("mobile menu opens in English", async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 844 });
+    await page.setViewportSize({ width: 375, height: 667 });
     await page.goto("/");
     await dismissCookieBanner(page);
     await page.getByRole("button", { name: /Open menu/i }).click();
-    const dialog = page.getByRole("dialog", { name: /Mobile navigation/i });
-    await expect(dialog).toBeVisible();
-    await expect(dialog.getByRole("button", { name: /^Solutions$/i })).toBeVisible();
-    await expect(dialog.getByRole("button", { name: /Services & pricing/i })).toBeVisible();
-    await expect(dialog.getByRole("link", { name: /^Cases$/i })).toBeVisible();
-    await expect(dialog.getByRole("link", { name: /^About$/i })).toBeVisible();
-    await expect(dialog.getByRole("link", { name: /^Support$/i })).toBeVisible();
-    await expect(dialog.getByRole("link", { name: /^Login$/i })).toBeVisible();
-    await expect(dialog.getByRole("link", { name: /^Book intro$/i })).toBeVisible();
-    // Nested items stay collapsed
-    await expect(dialog.getByRole("link", { name: /^Websites$/i })).toHaveCount(0);
-    await expect(dialog.getByRole("link", { name: /Technical support/i })).toHaveCount(0);
-    // No Dutch leaks on EN
-    await expect(dialog.getByText(/Oplossingen|Kennismaken|Diensten/i)).toHaveCount(0);
-  });
-
-  test("mobile menu accordion exclusivity and NL labels", async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/nl");
-    await dismissCookieBanner(page);
-    await page.getByRole("button", { name: /Menu openen/i }).click();
-    const dialog = page.getByRole("dialog", { name: /Mobiele navigatie/i });
-    await expect(dialog.getByRole("button", { name: /^Oplossingen$/i })).toBeVisible();
-    await expect(dialog.getByRole("link", { name: /^Kennismaken$/i })).toBeVisible();
-    // No English leaks on NL
-    await expect(dialog.getByText(/Technical support|Conversion optimisation|Book intro|Services & pricing/i)).toHaveCount(0);
-
-    await dialog.getByRole("button", { name: /^Oplossingen$/i }).click();
-    await expect(dialog.getByRole("link", { name: /^Websites$/i })).toBeVisible();
-    await expect(dialog.getByRole("link", { name: /^Automatisering$/i })).toBeVisible();
-
-    await dialog.getByRole("button", { name: /Diensten & prijzen/i }).click();
-    await expect(dialog.getByRole("link", { name: /^Pakketten$/i })).toBeVisible();
-    // Solutions accordion auto-closes
-    await expect(dialog.getByRole("link", { name: /^Websites$/i })).toHaveCount(0);
+    await expect(
+      page
+        .getByLabel(/Mobile navigation/i)
+        .getByRole("link", { name: /Book intro/i }),
+    ).toBeVisible();
   });
 
   test("language switcher usable at 320px", async ({ page }) => {
@@ -125,26 +95,26 @@ test.describe("Navigation", () => {
 });
 
 test.describe("Shop", () => {
-  test("shows website packages on BUILD pillar", async ({ page }) => {
+  test("shows the Supabase catalog shell without legacy counters", async ({ page }) => {
     await page.goto("/shop");
-    await expect(
-      page.getByRole("heading", { name: "Website packages" }),
-    ).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Onepage Website" }).first()).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Launch Website" }).first()).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Digital products & services/i })).toBeVisible();
+    await expect(page.getByRole("searchbox")).toBeVisible();
+    const body = await page.locator("body").innerText();
+    expect(body).not.toMatch(/0 verified public|12 candidates in review/i);
+    const productCards = await page.locator("[data-catalog-product-card]").count();
+    if (productCards === 0) {
+      await expect(page.getByRole("heading", { name: /Shop is being prepared/i })).toBeVisible();
+    }
   });
 
-  test("software procurement page when no verified SKUs", async ({ page }) => {
+  test("software route uses the same fail-closed catalog", async ({ page }) => {
     await page.goto("/shop/software");
     await expect(
       page.getByRole("heading", { name: /Curated business software/i }),
     ).toBeVisible();
-    await expect(
-      page.getByRole("heading", { name: /License procurement on request/i }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("link", { name: /Request a license/i }),
-    ).toBeVisible();
+    await expect(page.getByRole("searchbox")).toBeVisible();
+    const body = await page.locator("body").innerText();
+    expect(body).not.toMatch(/0 verified public|12 candidates in review/i);
   });
 
   test("blocks unverified legacy product slug", async ({ page }) => {

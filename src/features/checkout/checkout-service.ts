@@ -34,15 +34,35 @@ export async function validateCheckout(
     return { success: false, errors: ["Your cart is empty"] };
   }
 
-  const lines: OrderLine[] = items.map((item) => ({
-    productId: item.productId,
-    productName: item.name,
-    productSlug: item.productSlug,
-    quantity: item.quantity,
-    unitPriceCents: item.validatedPriceCents,
-    billingType: item.billingType,
-    totalCents: item.validatedPriceCents * item.quantity,
-  }));
+  const lines: OrderLine[] = items.map((item) => {
+    const product = item.validatedProduct;
+    return {
+      productId: product.id,
+      productName: product.name,
+      productSlug: product.slug,
+      quantity: item.quantity,
+      unitPriceCents: item.validatedPriceCents,
+      billingType: product.billingType,
+      totalCents: item.validatedPriceCents * item.quantity,
+      productSnapshot: {
+        productId: product.id,
+        sku: product.internalSku ?? null,
+        slug: product.slug,
+        name: product.name,
+        categoryId: product.categoryId ?? null,
+        categorySlug: product.categorySlug,
+        priceMode: product.priceMode ?? null,
+        unitPriceCents: item.validatedPriceCents,
+        currency: product.currency ?? "EUR",
+        vatPercent: product.vatPercent ?? 21,
+        priceIncludesVat: product.priceIncludesVat ?? false,
+        billingType: product.billingType,
+        quantity: item.quantity,
+        productVersion: product.version ?? 1,
+        imageStoragePath: product.primaryImagePath ?? null,
+      },
+    };
+  });
 
   const subtotalCents = sumLineItems(
     lines.map((l) => ({ unitPriceCents: l.unitPriceCents, quantity: l.quantity })),

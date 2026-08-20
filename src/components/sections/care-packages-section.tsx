@@ -1,106 +1,53 @@
-import { Container, Section, Card } from "@/components/ui/container";
-import { getLocale } from "@/i18n/get-dictionary";
-import { getCommercialContent } from "@/i18n/content/commercial";
-import {
-  carePackages,
-  getCareCatalogItem,
-} from "@/config/commercial/care-packages";
-import { formatDualPrice } from "@/lib/utilities/commercial-price";
+import { CatalogProductGrid } from "@/components/shop/catalog-product-grid";
+import { Container, Section } from "@/components/ui/container";
 import { LocaleLinkButton } from "@/components/ui/locale-link-button";
-import {
-  commercialCtaLabel,
-  commercialPackageCtaHref,
-  resolveCommercialCtaKind,
-} from "@/lib/commerce/commercial-cta";
-
-function PriceBlock({
-  price,
-  fallback,
-}: {
-  price: ReturnType<typeof formatDualPrice> | null;
-  fallback?: string;
-}) {
-  if (!price) {
-    return fallback ? (
-      <p className="text-lg font-semibold text-primary">{fallback}</p>
-    ) : null;
-  }
-
-  return (
-    <div className="space-y-1.5">
-      <p className="text-xl font-semibold tracking-tight text-primary">
-        {price.amountLabel}
-      </p>
-      {price.vatExclNote ? (
-        <p className="text-sm text-muted">{price.vatExclNote}</p>
-      ) : null}
-      {price.inclAmountLabel ? (
-        <p className="text-sm text-muted">{price.inclAmountLabel}</p>
-      ) : null}
-      {price.scopeNote ? (
-        <p className="text-xs leading-relaxed text-muted">{price.scopeNote}</p>
-      ) : null}
-    </div>
-  );
-}
+import { getCommercialContent } from "@/i18n/content/commercial";
+import { getLocale } from "@/i18n/get-dictionary";
+import { paths } from "@/i18n/config";
+import { listPublicShopProducts } from "@/server/repositories/public-shop-catalog";
 
 export async function CarePackagesSection() {
   const locale = await getLocale();
-  const c = getCommercialContent(locale);
+  const content = getCommercialContent(locale);
+  const products = (await listPublicShopProducts())
+    .filter((product) => {
+      const value = [product.categorySlug, ...(product.tags ?? [])].join(" ").toLowerCase();
+      return (
+        value.includes("care") ||
+        value.includes("support") ||
+        value.includes("maintenance") ||
+        value.includes("onderhoud")
+      );
+    })
+    .slice(0, 4);
 
   return (
-    <Section variant="dark" data-pricing-section="care">
-      <Container>
-        <div className="mb-10 max-w-2xl">
-          <p className="text-label text-primary mb-3">{c.care.eyebrow}</p>
-          <h2 className="text-h2 mb-4">{c.care.title}</h2>
-          <p className="text-body text-muted">{c.care.body}</p>
+    <Section variant="dark" data-pricing-section="supabase-catalog-care">
+      <Container className="space-y-8">
+        <div className="max-w-2xl">
+          <p className="text-label mb-3 text-primary">{content.care.eyebrow}</p>
+          <h2 className="text-h2 mb-4">{content.care.title}</h2>
+          <p className="text-body text-muted">{content.care.body}</p>
         </div>
-        <div
-          className="grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-4"
-          data-pricing-grid
-        >
-          {carePackages.map((pkg) => {
-            const copy = c.care[pkg.i18nKey];
-            const catalog = getCareCatalogItem(pkg);
-            const price = catalog ? formatDualPrice(catalog, locale) : null;
-
-            return (
-              <Card
-                key={pkg.id}
-                data-pricing-card={pkg.slug}
-                className="flex h-full min-w-0 flex-col"
-              >
-                <div className="flex min-h-0 flex-1 flex-col">
-                  <h3 className="text-h3 mb-2">{copy.name}</h3>
-                  <p className="text-small mb-6 flex-1 text-muted">{copy.summary}</p>
-                  <div data-pricing-amount className="mb-2">
-                    <PriceBlock price={price} fallback={copy.price} />
-                  </div>
-                </div>
-                <div className="mt-auto pt-6" data-pricing-cta>
-                  {(() => {
-                    const kind = resolveCommercialCtaKind({
-                      quoteOnly: pkg.quoteOnly,
-                      monthly: true,
-                    });
-                    return (
-                      <LocaleLinkButton
-                        href={commercialPackageCtaHref({ slug: pkg.slug, kind })}
-                        variant={kind === "configure" ? "outline" : "primary"}
-                        tone="dark"
-                        size="sm"
-                        className="w-full justify-center"
-                      >
-                        {commercialCtaLabel(kind, locale)}
-                      </LocaleLinkButton>
-                    );
-                  })()}
-                </div>
-              </Card>
-            );
-          })}
-        </div>
+        {products.length ? (
+          <CatalogProductGrid
+            products={products}
+            locale={locale}
+            recommendedLabel={locale === "nl" ? "Aanbevolen" : "Recommended"}
+            viewLabel={locale === "nl" ? "Bekijk product" : "View product"}
+          />
+        ) : (
+          <div className="rounded-xl border border-white/10 p-6 text-muted">
+            <p className="mb-4">
+              {locale === "nl"
+                ? "Er zijn nog geen volledig goedgekeurde supportproducten gepubliceerd."
+                : "No fully approved support products have been published yet."}
+            </p>
+            <LocaleLinkButton href={paths.shop} variant="outline" tone="dark">
+              {locale === "nl" ? "Bekijk de catalogus" : "View catalogue"}
+            </LocaleLinkButton>
+          </div>
+        )}
       </Container>
     </Section>
   );

@@ -1,6 +1,6 @@
 import { paths } from "@/i18n/config";
 import type { SoftwareCatalogGroup } from "@/config/software-catalog/types";
-import type { CommercialCatalogItem } from "@/config/commercial/pricing";
+import type { CatalogApprovalItem } from "@/lib/commerce/catalog-approval";
 
 /** Central product pillar taxonomy — presentation layer over existing models */
 export type CatalogPillar = "BUILD" | "AUTOMATE" | "GROW" | "SOFTWARE";
@@ -150,7 +150,7 @@ export function categorySlugsForPillar(pillar: CatalogPillar): string[] {
 }
 
 export function isCommercialInPillar(
-  item: Pick<CommercialCatalogItem, "slug" | "category">,
+  item: Pick<CatalogApprovalItem, "slug" | "category">,
   pillar: CatalogPillar,
 ): boolean {
   const def = getPillarById(pillar);

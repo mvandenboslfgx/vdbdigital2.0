@@ -51,7 +51,7 @@ export interface AdminProductListResult {
   error?: string;
 }
 
-const BASE_SELECT = "*, category:categories(id, slug, name)";
+const BASE_SELECT = "*, category:categories(id, slug, name, name_nl, is_active)";
 
 export async function getAdminProductList(
   filters: AdminProductListFilters = {},

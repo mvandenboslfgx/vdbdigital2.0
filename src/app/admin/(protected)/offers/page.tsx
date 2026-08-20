@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import { Card, Badge } from "@/components/ui/container";
 import { foundingClientOfferConfig } from "@/config/commercial/founding-client-offer";
-import { websitePackages } from "@/config/commercial/website-packages";
-import { commercialBundles } from "@/config/commercial/bundles";
 import { getFoundingClientState } from "@/server/services/founding-client-service";
 import { formatCents } from "@/lib/utilities/money";
+import { listPublicShopProducts } from "@/server/repositories/public-shop-catalog";
 
 export const metadata: Metadata = {
   title: "Offers",
@@ -12,7 +11,10 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminOffersPage() {
-  const state = await getFoundingClientState();
+  const [state, catalogProducts] = await Promise.all([
+    getFoundingClientState(),
+    listPublicShopProducts(),
+  ]);
   const cfg = foundingClientOfferConfig;
 
   return (
@@ -99,50 +101,30 @@ export default async function AdminOffersPage() {
         </Card>
       </div>
 
-      <Card className="mb-6 space-y-4">
-        <h2 className="text-h3">Package founding eligibility</h2>
-        <ul className="space-y-2">
-          {websitePackages.map((pkg) => (
-            <li
-              key={pkg.id}
-              className="flex flex-wrap items-center justify-between gap-2 text-small border-b border-border pb-2 last:border-0"
-            >
-              <span>
-                {pkg.slug}{" "}
-                <span className="text-muted">({pkg.id})</span>
-              </span>
-              <Badge>
-                {pkg.foundingEligible ? "Founding eligible" : "Not eligible"}
-              </Badge>
-            </li>
-          ))}
-        </ul>
-      </Card>
-
       <Card className="space-y-4">
-        <h2 className="text-h3">Bundles</h2>
+        <h2 className="text-h3">Live Supabase catalog</h2>
+        <p className="text-small text-muted">
+          Read-only projection of products that currently pass every public catalog gate.
+        </p>
         <ul className="space-y-2">
-          {commercialBundles.map((bundle) => (
+          {catalogProducts.map((product) => (
             <li
-              key={bundle.id}
+              key={product.id}
               className="flex flex-wrap items-center justify-between gap-2 text-small border-b border-border pb-2 last:border-0"
             >
               <span>
-                {bundle.slug}{" "}
-                <span className="text-muted">· {bundle.billingModel}</span>
+                {product.name}{" "}
+                <span className="text-muted">({product.slug})</span>
               </span>
               <div className="flex gap-2">
-                <Badge>
-                  {bundle.foundingEligible ? "Founding eligible" : "Not eligible"}
-                </Badge>
-                <Badge>
-                  {bundle.b2b ? "B2B" : ""}
-                  {bundle.b2b && bundle.b2c ? " / " : ""}
-                  {bundle.b2c ? "B2C" : ""}
-                </Badge>
+                <Badge>{product.billingType}</Badge>
+                <Badge>{product.priceMode ?? "QUOTE_ONLY"}</Badge>
               </div>
             </li>
           ))}
+          {catalogProducts.length === 0 ? (
+            <li className="text-small text-muted">No ACTIVE/PUBLISHED products pass all gates.</li>
+          ) : null}
         </ul>
       </Card>
     </div>

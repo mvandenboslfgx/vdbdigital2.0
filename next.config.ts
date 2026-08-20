@@ -76,7 +76,18 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_APP_URL: resolvedPublicAppUrl,
   },
   images: {
-    remotePatterns: [],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
+        pathname: "/storage/v1/object/sign/product-media/**",
+      },
+      {
+        protocol: "http",
+        hostname: "127.0.0.1",
+        pathname: "/storage/v1/object/sign/product-media/**",
+      },
+    ],
   },
   async redirects() {
     return [

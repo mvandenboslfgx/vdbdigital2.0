@@ -19,7 +19,13 @@ function asStringArray(value: unknown): string[] {
 }
 
 export function mapDbProductRow(row: Record<string, unknown>): Product {
-  const category = row.category as { id?: string; slug?: string; name?: string } | null;
+  const category = row.category as {
+    id?: string;
+    slug?: string;
+    name?: string;
+    name_nl?: string | null;
+    is_active?: boolean;
+  } | null;
 
   return {
     id: row.id as string,
@@ -30,6 +36,7 @@ export function mapDbProductRow(row: Record<string, unknown>): Product {
     categoryId: (row.category_id as string | null) ?? category?.id ?? null,
     categorySlug: category?.slug ?? "",
     categoryName: category?.name ?? "",
+    categoryNameNl: category?.name_nl ?? null,
     priceCents: row.price_cents as number | null,
     fromPriceCents: row.from_price_cents as number | null,
     billingType: row.billing_type as BillingType,
@@ -74,6 +81,14 @@ export function mapDbProductRow(row: Record<string, unknown>): Product {
     updatedAt: row.updated_at as string | undefined,
     createdAt: row.created_at as string | undefined,
     primaryImagePath: (row.primary_image_path as string | null | undefined) ?? null,
+    imageUrl: (row.image_url as string | null | undefined) ?? null,
+    imageAlt: (row.image_alt as string | null | undefined) ?? null,
+    isActive: (row.is_active as boolean | undefined) ?? false,
+    categoryActive: category?.is_active ?? false,
+    minQuantity: (row.min_quantity as number | undefined) ?? 1,
+    maxQuantity: (row.max_quantity as number | undefined) ?? 99,
+    quantityLabelNl: (row.quantity_label_nl as string | undefined) ?? "licentie",
+    quantityLabelEn: (row.quantity_label_en as string | undefined) ?? "license",
     isConcept: (row.is_concept as boolean | undefined) ?? false,
   };
 }

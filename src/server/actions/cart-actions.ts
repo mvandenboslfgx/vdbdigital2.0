@@ -7,8 +7,8 @@ import {
   updateCartQuantity,
 } from "@/features/cart/cart-service";
 
-export async function addToCartAction(productSlug: string) {
-  await addToCart(productSlug);
+export async function addToCartAction(productSlug: string, quantity = 1) {
+  await addToCart(productSlug, quantity);
   revalidatePath("/", "layout");
   revalidatePath("/cart");
   revalidatePath("/shop");

@@ -11,7 +11,7 @@ import {
   resolveStoredOrDerivedPriceMode,
   resolveCommercialItemForProduct,
 } from "@/lib/commerce/catalog-admin-eligibility";
-import { canPublishForB2b, canPublishForB2c } from "@/config/commercial/pricing";
+import { canPublishForB2b, canPublishForB2c } from "@/lib/commerce/catalog-approval";
 import {
   isLegacyTawkProduct,
   LEGACY_TAWK_ADMIN_STATUS_LABEL,

@@ -15,10 +15,11 @@ describe("software catalog route isolation", () => {
     expect(home).not.toMatch(/querySoftwareCatalog|softwareCatalogItems/);
   });
 
-  it("software shop uses dedicated server repository", () => {
+  it("software shop uses the shared Supabase public catalog repository", () => {
     const page = read("src/app/(shop)/shop/software/page.tsx");
-    expect(page).toMatch(/software-public-catalog/);
+    expect(page).toMatch(/public-shop-catalog/);
     expect(page).not.toMatch(/softwareCatalogItems/);
+    expect(page).not.toMatch(/procurementStats/);
   });
 
   it("main shop uses public-shop-catalog for DB products", () => {

@@ -205,10 +205,13 @@ describe("checkout eligibility admin blockers", () => {
 });
 
 describe("publication checklist", () => {
-  it("staat marketingpublicatie toe zonder checkout eligibility", () => {
+  it("blokkeert publicatie zonder vertalingen, media en commerciële goedkeuring", () => {
     const p = baseProduct({ status: "DRAFT", priceMode: "QUOTE_ONLY", priceCents: null });
     expect(canPublishAsMarketing(p)).toBe(true);
-    expect(publicationBlockingErrors(p).length).toBe(0);
+    const blockers = publicationBlockingErrors(p);
+    expect(blockers.some((item) => item.code === "EN")).toBe(true);
+    expect(blockers.some((item) => item.code === "NL")).toBe(true);
+    expect(blockers.some((item) => item.code === "IMAGE")).toBe(true);
   });
 
   it("blokkeert publicatie bij ontbrekende prijs voor FIXED", () => {

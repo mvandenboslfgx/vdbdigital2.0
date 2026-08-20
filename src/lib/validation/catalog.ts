@@ -73,6 +73,10 @@ export const productContentSchema = z.object({
   seoDescription: z.string().max(500).default(""),
   audienceB2b: z.boolean().default(true),
   audienceB2c: z.boolean().default(false),
+  minQuantity: z.number().int().min(1).max(999).default(1),
+  maxQuantity: z.number().int().min(1).max(999).default(99),
+  quantityLabelNl: z.string().min(1).max(40).default("licentie"),
+  quantityLabelEn: z.string().min(1).max(40).default("license"),
   translations: z.array(productTranslationSchema).max(2).optional(),
 });
 

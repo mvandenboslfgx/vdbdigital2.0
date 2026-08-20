@@ -2,11 +2,10 @@ import type { BillingType, Product } from "@/types";
 import {
   canPublishForB2b,
   canPublishForB2c,
-  commercialCatalog,
-  type CommercialCatalogItem,
+  type CatalogApprovalItem,
   type LegalApprovalStatus,
   type PriceApprovalStatus,
-} from "@/config/commercial/pricing";
+} from "@/lib/commerce/catalog-approval";
 import { isDirectCheckoutEnabled } from "@/config/features";
 import {
   buildP05CommercialItem,
@@ -21,7 +20,7 @@ import {
 export type CheckoutPriceMode = "FIXED" | "STARTING_FROM" | "QUOTE_ONLY";
 export type CheckoutCustomerType = "B2B" | "B2C";
 
-function testOnlyCatalogExtras(): CommercialCatalogItem[] {
+function testOnlyCatalogExtras(): CatalogApprovalItem[] {
   if (process.env.NODE_ENV !== "test") return [];
   if (process.env.P05_INCLUDE_APPROVED_SKU !== "1") return [];
   const mode = (process.env.P05_APPROVAL_MODE ?? "both") as
@@ -58,23 +57,18 @@ export function isRecurringBilling(billingType: BillingType): boolean {
 
 export function findCommercialCatalogItem(
   productSlug: string,
-): CommercialCatalogItem | undefined {
-  const extras = testOnlyCatalogExtras();
-  return (
-    extras.find((item) => item.slug === productSlug) ??
-    commercialCatalog.find((item) => item.slug === productSlug)
-  );
+): CatalogApprovalItem | undefined {
+  return testOnlyCatalogExtras().find((item) => item.slug === productSlug);
 }
 
 export { canPublishForB2b, canPublishForB2c, P05_TEST_SKU_SLUG };
 
 /**
- * Prefer DB commercial fields when present; otherwise undefined so callers
- * fall back to the central commercial catalog config.
+ * Convert the Supabase row into the existing eligibility shape.
  */
 export function commercialItemFromProductRow(
   product: Product,
-): CommercialCatalogItem | undefined {
+): CatalogApprovalItem | undefined {
   const hasDbCommercial =
     product.priceStatus !== undefined ||
     product.legalStatus !== undefined ||
@@ -85,7 +79,7 @@ export function commercialItemFromProductRow(
   const mode = resolvePriceMode(product);
   const vatPercent = product.vatPercent ?? 21;
   const vatRate = vatPercent / 100;
-  let pricing: CommercialCatalogItem["pricing"] = null;
+  let pricing: CatalogApprovalItem["pricing"] = null;
 
   if (mode !== "QUOTE_ONLY" && product.priceCents !== null) {
     const stored = product.priceCents;
@@ -147,7 +141,9 @@ export function hasLegalApprovalForCheckout(
 ): boolean {
   const item =
     commercialItemFromProductRow(product) ??
-    findCommercialCatalogItem(product.slug);
+    (process.env.NODE_ENV === "test"
+      ? findCommercialCatalogItem(product.slug)
+      : undefined);
   if (!item) {
     return false;
   }
@@ -202,7 +198,7 @@ export function assertCheckoutAllowedForCustomer(
 export function hasLegallyApprovedFixedSku(
   customerType: CheckoutCustomerType = "B2B",
 ): boolean {
-  return commercialCatalog.some((item) => {
+  return testOnlyCatalogExtras().some((item) => {
     if (item.quoteOnly || item.monthly) return false;
     if (!item.pricing || item.pricing.mode !== "fixed") return false;
     if (customerType === "B2C") return canPublishForB2c(item);

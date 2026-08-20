@@ -1,7 +1,7 @@
 /**
- * Software catalog — import/policy module.
- * Public software routes consume via `@/server/repositories/software-public-catalog`.
- * DB shop products consume via `@/server/repositories/public-shop-catalog`.
+ * Historical software import/review inventory only.
+ * Public routes must never import this module; Supabase products are projected
+ * exclusively through `@/server/repositories/public-shop-catalog`.
  */export type {
   SoftwareCatalogBlockedRef,
   SoftwareCatalogGroup,

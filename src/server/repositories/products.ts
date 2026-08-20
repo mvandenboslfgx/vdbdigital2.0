@@ -1,12 +1,14 @@
 import "server-only";
 import type { Category, Product } from "@/types";
-import { categories, getSeedProductBySlug, seedProducts } from "@/config/products.seed";
 import {
   createServiceRoleClient,
   isSupabaseDatabaseReady,
 } from "@/lib/database/server";
-import { allowDevFallback } from "@/lib/runtime/environment";
-import { mapDbProductRow } from "@/server/repositories/map-product";
+import {
+  mapDbMediaRow,
+  mapDbProductRow,
+  mapDbTranslationRow,
+} from "@/server/repositories/map-product";
 import {
   isLegacyTawkCategorySlug,
   isLegacyTawkProduct,
@@ -24,52 +26,95 @@ function excludeLegacyTawkCategories(cats: Category[]): Category[] {
   return cats.filter((c) => !isLegacyTawkCategorySlug(c.slug));
 }
 
-function getDevSeedProducts(): Product[] {
-  if (!allowDevFallback()) {
-    return [];
-  }
-  return excludeLegacyTawkProducts(
-    seedProducts.filter((p) => p.status === "PUBLISHED"),
-  );
-}
+type CatalogClient = NonNullable<ReturnType<typeof createServiceRoleClient>>;
 
-function getDevSeedProduct(slug: string): Product | null {
-  if (!allowDevFallback()) {
-    return null;
+async function hydrateCatalogRelations(
+  supabase: CatalogClient,
+  products: Product[],
+): Promise<Product[]> {
+  if (products.length === 0) return products;
+  const ids = products.map((product) => product.id);
+  const [{ data: translationRows, error: translationError }, { data: mediaRows, error: mediaError }] =
+    await Promise.all([
+      supabase.from("product_translations").select("*").in("product_id", ids),
+      supabase
+        .from("product_media")
+        .select("*")
+        .in("product_id", ids)
+        .order("sort_order"),
+    ]);
+
+  if (translationError || mediaError) return [];
+
+  const translationsByProduct = new Map<string, Product["translations"]>();
+  for (const row of translationRows ?? []) {
+    const productId = String(row.product_id);
+    const list = translationsByProduct.get(productId) ?? [];
+    list.push(mapDbTranslationRow(row as Record<string, unknown>));
+    translationsByProduct.set(productId, list);
   }
-  if (isLegacyTawkProduct({ slug })) return null;
-  return getSeedProductBySlug(slug) ?? null;
+
+  const mediaByProduct = new Map<string, Product["media"]>();
+  for (const row of mediaRows ?? []) {
+    const productId = String(row.product_id);
+    const list = mediaByProduct.get(productId) ?? [];
+    list.push(mapDbMediaRow(row as Record<string, unknown>));
+    mediaByProduct.set(productId, list);
+  }
+
+  const primaryPaths = products
+    .map((product) =>
+      mediaByProduct.get(product.id)?.find((media) => media.isPrimary)?.storagePath,
+    )
+    .filter((path): path is string => Boolean(path));
+  const signedUrlByPath = new Map<string, string>();
+  if (primaryPaths.length > 0) {
+    const { data: signedRows } = await supabase.storage
+      .from("product-media")
+      .createSignedUrls(primaryPaths, 60 * 60);
+    for (const row of signedRows ?? []) {
+      if (row.path && row.signedUrl) signedUrlByPath.set(row.path, row.signedUrl);
+    }
+  }
+
+  return products.map((product) => {
+    const media = mediaByProduct.get(product.id) ?? [];
+    const primary = media.find((item) => item.isPrimary);
+    return {
+      ...product,
+      translations: translationsByProduct.get(product.id) ?? [],
+      media,
+      primaryImagePath: primary?.storagePath ?? null,
+      imageUrl: primary ? signedUrlByPath.get(primary.storagePath) ?? null : null,
+    };
+  });
 }
 
 export async function getAllProducts(): Promise<Product[]> {
   if (!isSupabaseDatabaseReady()) {
-    return getDevSeedProducts();
+    return [];
   }
 
   const supabase = createServiceRoleClient();
   if (!supabase) {
-    return getDevSeedProducts();
+    return [];
   }
 
   const { data, error } = await supabase
     .from("products")
-    .select("*, category:categories(slug, name)")
+    .select("*, category:categories(id, slug, name, name_nl, is_active)")
     .eq("status", "PUBLISHED")
+    .eq("is_active", true)
     .eq("is_concept", false)
     .order("sort_order");
 
   if (error || !data) {
-    if (allowDevFallback()) {
-      return getDevSeedProducts();
-    }
     return [];
   }
 
-  if (data.length === 0 && allowDevFallback()) {
-    return getDevSeedProducts();
-  }
-
-  return excludeLegacyTawkProducts(data.map(mapDbProduct));
+  return excludeLegacyTawkProducts(
+    await hydrateCatalogRelations(supabase, data.map(mapDbProduct)),
+  );
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
@@ -77,30 +122,14 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
     return null;
   }
 
-  if (!isSupabaseDatabaseReady()) {
-    return getDevSeedProduct(slug);
-  }
-
-  const supabase = createServiceRoleClient();
-  if (!supabase) {
-    return getDevSeedProduct(slug);
-  }
-
-  const { data, error } = await supabase
-    .from("products")
-    .select("*, category:categories(slug, name)")
-    .eq("slug", slug)
-    .eq("status", "PUBLISHED")
-    .eq("is_concept", false)
-    .single();
-
-  if (error || !data) {
-    return getDevSeedProduct(slug);
-  }
-
-  const product = mapDbProduct(data);
-  if (isLegacyTawkProduct(product)) return null;
-  return product;
+  const products = await getAllProducts();
+  return (
+    products.find(
+      (product) =>
+        product.slug === slug ||
+        product.translations?.some((translation) => translation.slug === slug),
+    ) ?? null
+  );
 }
 
 export async function getFeaturedProductsList(): Promise<Product[]> {
@@ -110,21 +139,22 @@ export async function getFeaturedProductsList(): Promise<Product[]> {
 
 export async function getAllCategories(): Promise<Category[]> {
   if (!isSupabaseDatabaseReady()) {
-    return allowDevFallback() ? excludeLegacyTawkCategories(categories) : [];
+    return [];
   }
 
   const supabase = createServiceRoleClient();
   if (!supabase) {
-    return allowDevFallback() ? excludeLegacyTawkCategories(categories) : [];
+    return [];
   }
 
   const { data, error } = await supabase
     .from("categories")
     .select("*")
+    .eq("is_active", true)
     .order("sort_order");
 
   if (error || !data) {
-    return allowDevFallback() ? excludeLegacyTawkCategories(categories) : [];
+    return [];
   }
 
   return excludeLegacyTawkCategories(
@@ -134,6 +164,10 @@ export async function getAllCategories(): Promise<Category[]> {
       name: row.name as string,
       description: row.description as string,
       sortOrder: row.sort_order as number,
+      nameNl: (row.name_nl as string | null) ?? null,
+      descriptionNl: (row.description_nl as string | null) ?? null,
+      imagePath: (row.image_path as string | null) ?? null,
+      isActive: Boolean(row.is_active),
     })),
   );
 }

@@ -28,6 +28,10 @@ function baseProduct(overrides: Partial<Product> = {}): Product {
     fromPriceCents: null,
     priceLabel: null,
     primaryImagePath: "/images/sample.webp",
+    isActive: true,
+    categoryActive: true,
+    minQuantity: 1,
+    maxQuantity: 99,
     categorySlug: "websites",
     categoryName: "Websites",
     featured: false,
@@ -42,6 +46,42 @@ function baseProduct(overrides: Partial<Product> = {}): Product {
     deliveryTime: null,
     seoTitle: "Sample",
     seoDescription: "Sample",
+    translations: [
+      {
+        locale: "nl",
+        name: "Voorbeeld",
+        shortDescription: "Kort",
+        fullDescription: "Volledige omschrijving",
+        benefits: [],
+        includedItems: ["A"],
+        excludedItems: [],
+        seoTitle: "Voorbeeld",
+        seoDescription: "Voorbeeldomschrijving",
+      },
+      {
+        locale: "en",
+        name: "Sample",
+        shortDescription: "Short",
+        fullDescription: "Full description",
+        benefits: [],
+        includedItems: ["A"],
+        excludedItems: [],
+        seoTitle: "Sample",
+        seoDescription: "Sample description",
+      },
+    ],
+    media: [
+      {
+        id: "m1",
+        storagePath: "/images/sample.webp",
+        mimeType: "image/webp",
+        byteSize: 1000,
+        sortOrder: 0,
+        isPrimary: true,
+        altTextNl: "Voorbeeldproduct",
+        altTextEn: "Sample product",
+      },
+    ],
     ctaLabel: null,
     quoteCtaLabel: null,
     ...overrides,
@@ -49,17 +89,18 @@ function baseProduct(overrides: Partial<Product> = {}): Product {
 }
 
 describe("public shop gates", () => {
-  it("blocks commercial SSOT slugs including digital-partner", () => {
-    expect(isBlockedPublicShopSlug("digital-partner")).toBe(true);
-    expect(isBlockedPublicShopSlug("launch-website")).toBe(true);
-    expect(isBlockedPublicShopSlug("website-launch-system")).toBe(true);
+  it("uses Supabase for commercial slugs but keeps prohibited brand/content fragments blocked", () => {
+    expect(isBlockedPublicShopSlug("digital-partner")).toBe(false);
+    expect(isBlockedPublicShopSlug("launch-website")).toBe(false);
+    expect(isBlockedPublicShopSlug("iptv-reseller")).toBe(true);
+    expect(isBlockedPublicShopSlug("netflix-license")).toBe(true);
     expect(isBlockedPublicShopSlug("unrelated-tool")).toBe(false);
   });
 
   it("excludes blocked slugs from public shop even when published", () => {
     const product = baseProduct({
-      slug: "digital-partner",
-      name: "Digital Partner",
+      slug: "iptv-reseller",
+      name: "IPTV Reseller",
       categorySlug: "maatwerk",
       categoryName: "Maatwerk",
       priceMode: "QUOTE_ONLY",
@@ -92,11 +133,12 @@ describe("category localization", () => {
     expect(localizeCategoryName("maatwerk", "Maatwerk", "nl")).toBe("Maatwerk");
   });
 
-  it("does not leak Dutch category names on EN products", () => {
+  it("uses database category translations without a hardcoded overlay", () => {
     const localized = localizeProduct(
       baseProduct({
         categorySlug: "maatwerk",
-        categoryName: "Maatwerk",
+        categoryName: "Custom work",
+        categoryNameNl: "Maatwerk",
       }),
       "en",
     );

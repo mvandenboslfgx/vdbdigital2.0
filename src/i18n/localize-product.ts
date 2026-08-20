@@ -1,17 +1,5 @@
 import type { Locale } from "@/i18n/config";
-import { productsNl } from "@/i18n/content/products-nl";
-import { localizeCategoryName } from "@/i18n/localize-category";
 import type { Product } from "@/types";
-
-const COPY_FIELDS = [
-  "name",
-  "shortDescription",
-  "fullDescription",
-  "seoTitle",
-  "seoDescription",
-] as const;
-
-type CopyField = (typeof COPY_FIELDS)[number];
 
 export type PublicationAdvice =
   | "READY_FOR_CONTENT_REVIEW"
@@ -23,37 +11,36 @@ export type PublicationAdvice =
 type ProductWithConcept = Product & { is_concept?: boolean };
 
 export function localizeProduct(product: Product, locale: Locale): Product {
-  const categoryName = localizeCategoryName(
-    product.categorySlug,
-    product.categoryName,
-    locale,
-  );
+  const translation = product.translations?.find((item) => item.locale === locale);
+  const categoryName =
+    locale === "nl"
+      ? product.categoryNameNl?.trim() || product.categoryName
+      : product.categoryName;
 
-  if (locale === "en") {
-    return { ...product, categoryName };
-  }
-
-  const overlay = productsNl[product.slug];
-  if (!overlay) {
-    return { ...product, categoryName };
-  }
+  if (!translation) return { ...product, categoryName };
 
   return {
     ...product,
-    name: overlay.name,
-    shortDescription: overlay.shortDescription,
-    fullDescription: overlay.fullDescription,
-    categoryName: overlay.categoryName || categoryName,
-    deliveryTime: overlay.deliveryTime,
-    includedItems: overlay.includedItems,
-    excludedItems: overlay.excludedItems,
-    extensions: overlay.extensions,
-    requiredInput: overlay.requiredInput,
-    targetAudience: overlay.targetAudience,
-    workflow: overlay.workflow,
-    faqs: overlay.faqs,
-    seoTitle: overlay.seoTitle,
-    seoDescription: overlay.seoDescription,
+    name: translation.name,
+    slug: translation.slug?.trim() || product.slug,
+    shortDescription: translation.shortDescription,
+    fullDescription: translation.fullDescription,
+    categoryName,
+    deliveryTime: translation.deliveryTime?.trim() || product.deliveryTime,
+    includedItems: translation.includedItems,
+    excludedItems: translation.excludedItems,
+    benefits: translation.benefits,
+    ctaLabel: translation.ctaLabel ?? product.ctaLabel,
+    quoteCtaLabel: translation.quoteCtaLabel ?? product.quoteCtaLabel,
+    targetAudience: translation.targetAudience ?? product.targetAudience,
+    workflow: translation.workflow ?? product.workflow,
+    warnings: translation.warnings ?? product.warnings,
+    seoTitle: translation.seoTitle?.trim() || product.seoTitle,
+    seoDescription: translation.seoDescription?.trim() || product.seoDescription,
+    imageAlt:
+      product.media?.find((media) => media.isPrimary)?.[
+        locale === "nl" ? "altTextNl" : "altTextEn"
+      ] ?? product.imageAlt,
   };
 }
 
@@ -61,17 +48,33 @@ export function assertProductTranslationComplete(
   product: Product,
   locale: Locale,
 ): { complete: boolean; missing: string[] } {
-  const localized = localizeProduct(product, locale);
-  const missing: string[] = [];
-
-  for (const field of COPY_FIELDS) {
-    const value = localized[field as CopyField];
-    if (!value || value.trim().length === 0) {
-      missing.push(field);
-    }
+  const translation = product.translations?.find((item) => item.locale === locale);
+  if (!translation) {
+    return {
+      complete: false,
+      missing: [
+        "translation",
+        "name",
+        "shortDescription",
+        "fullDescription",
+        "seoTitle",
+        "seoDescription",
+        "includedItems",
+      ],
+    };
   }
-
-  if (!localized.includedItems || localized.includedItems.length === 0) {
+  const missing: string[] = [];
+  const fields = {
+    name: translation.name,
+    shortDescription: translation.shortDescription,
+    fullDescription: translation.fullDescription,
+    seoTitle: translation.seoTitle,
+    seoDescription: translation.seoDescription,
+  };
+  for (const [field, value] of Object.entries(fields)) {
+    if (!value?.trim()) missing.push(field);
+  }
+  if (translation.includedItems.length === 0) {
     missing.push("includedItems");
   }
 

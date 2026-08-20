@@ -27,7 +27,11 @@ import {
   canPublishAsMarketing,
   publicationBlockingErrors,
 } from "@/lib/commerce/publication-checklist";
-import { mapDbProductRow } from "@/server/repositories/map-product";
+import {
+  mapDbMediaRow,
+  mapDbProductRow,
+  mapDbTranslationRow,
+} from "@/server/repositories/map-product";
 import {
   csvRow,
   FORBIDDEN_IMPORT_HEADERS,
@@ -57,6 +61,12 @@ function deny(): CatalogActionState {
 
 function mapZodError(error: { issues: Array<{ message: string; path: PropertyKey[] }> }): string {
   return error.issues.map((i) => i.message).join("; ");
+}
+
+function quantityBoundsError(data: { minQuantity: number; maxQuantity: number }): string | null {
+  return data.maxQuantity < data.minQuantity
+    ? "Maximumaantal moet minimaal gelijk zijn aan het minimumaantal."
+    : null;
 }
 
 function buildProductInsert(data: CreateProductInput, userId: string) {
@@ -101,6 +111,10 @@ function buildProductInsert(data: CreateProductInput, userId: string) {
     seo_description: data.seoDescription,
     audience_b2b: data.audienceB2b,
     audience_b2c: data.audienceB2c,
+    min_quantity: data.minQuantity,
+    max_quantity: data.maxQuantity,
+    quantity_label_nl: sanitizePlainText(data.quantityLabelNl, 40),
+    quantity_label_en: sanitizePlainText(data.quantityLabelEn, 40),
     // Fail-closed commercial defaults — never auto-approve
     price_status: "DRAFT",
     legal_status: "NOT_REVIEWED",
@@ -162,6 +176,8 @@ export async function createProductAction(
     if (!parsed.success) {
       return { error: mapZodError(parsed.error) };
     }
+    const quantityError = quantityBoundsError(parsed.data);
+    if (quantityError) return { error: quantityError };
 
     if (
       isLegacyTawkProduct({
@@ -225,6 +241,8 @@ export async function updateProductAction(
     const raw = JSON.parse(String(formData.get("payload") ?? "{}")) as unknown;
     const parsed = updateProductSchema.safeParse(raw);
     if (!parsed.success) return { error: mapZodError(parsed.error) };
+    const quantityError = quantityBoundsError(parsed.data);
+    if (quantityError) return { error: quantityError };
 
     const existing = await authorizeCatalogProduct(ctx, parsed.data.id, "products.update");
 
@@ -285,6 +303,12 @@ export async function updateProductAction(
       .from("products")
       .update({
         ...safeUpdate,
+        status: "REVIEW",
+        is_active: false,
+        is_concept: true,
+        publication_ready: false,
+        legal_status: "NOT_REVIEWED",
+        ...(priceChanged ? { price_status: "DRAFT" } : {}),
         version: parsed.data.expectedVersion + 1,
         updated_at: new Date().toISOString(),
       })
@@ -359,12 +383,26 @@ export async function publishProductAction(
 
     const { data: full } = await supabase
       .from("products")
-      .select("*, category:categories(id, slug, name)")
+      .select("*, category:categories(id, slug, name, name_nl, is_active)")
       .eq("id", parsed.data.id)
       .single();
 
     if (!full) return { error: "Product niet gevonden." };
     const product = mapDbProductRow(full);
+    const [{ data: translations, error: translationError }, { data: media, error: mediaError }] =
+      await Promise.all([
+        supabase.from("product_translations").select("*").eq("product_id", product.id),
+        supabase.from("product_media").select("*").eq("product_id", product.id),
+      ]);
+    if (translationError || mediaError) {
+      return { error: "Vertalingen of media konden niet worden gecontroleerd." };
+    }
+    product.translations = (translations ?? []).map((row) =>
+      mapDbTranslationRow(row as Record<string, unknown>),
+    );
+    product.media = (media ?? []).map((row) =>
+      mapDbMediaRow(row as Record<string, unknown>),
+    );
 
     if (isLegacyTawkProduct(product)) {
       return { error: LEGACY_BLOCKED };
@@ -385,6 +423,7 @@ export async function publishProductAction(
       .from("products")
       .update({
         status: parsed.data.targetStatus,
+        is_active: parsed.data.targetStatus === "PUBLISHED",
         is_concept: isConcept,
         version: parsed.data.expectedVersion + 1,
         updated_by: ctx.user.id,
@@ -471,6 +510,9 @@ export async function updateLegalApprovalAction(
       parsed.data.legalStatus === "APPROVED_FOR_B2B" ||
       parsed.data.legalStatus === "APPROVED_FOR_B2C" ||
       parsed.data.legalStatus === "APPROVED_FOR_BOTH";
+    const priceApproved =
+      parsed.data.priceStatus === "APPROVED" ||
+      parsed.data.priceStatus === "PUBLISHED";
 
     const { data, error } = await supabase
       .from("products")
@@ -478,6 +520,10 @@ export async function updateLegalApprovalAction(
         legal_status: parsed.data.legalStatus,
         price_status: parsed.data.priceStatus,
         publication_ready: parsed.data.publicationReady,
+        is_active:
+          approved && priceApproved && parsed.data.publicationReady
+            ? Boolean(existing.is_active)
+            : false,
         legal_terms_version: parsed.data.legalTermsVersion ?? null,
         legal_internal_note: parsed.data.legalInternalNote
           ? sanitizePlainText(parsed.data.legalInternalNote, 2000)
@@ -966,14 +1012,17 @@ export async function bulkProductAction(
         break;
       case "hide":
         update.status = "HIDDEN";
+        update.is_active = false;
         update.is_concept = true;
         break;
       case "unhide":
         update.status = "DRAFT";
+        update.is_active = false;
         update.is_concept = true;
         break;
       case "archive":
         update.status = "ARCHIVED";
+        update.is_active = false;
         update.is_concept = true;
         break;
       case "set_badge":
@@ -1020,8 +1069,19 @@ export async function registerProductMediaAction(
   try {
     const ctx = await requireAdmin();
     await requirePermission(ctx, "products.manage_media");
-    const raw = JSON.parse(String(formData.get("payload") ?? "{}")) as unknown;
-    const parsed = mediaUploadMetaSchema.safeParse(raw);
+    const image = formData.get("image");
+    if (!(image instanceof File) || image.size === 0) {
+      return { error: "Kies een afbeelding om te uploaden." };
+    }
+    const parsed = mediaUploadMetaSchema.safeParse({
+      productId: String(formData.get("productId") ?? ""),
+      mimeType: image.type,
+      byteSize: image.size,
+      fileName: image.name,
+      altTextNl: String(formData.get("altTextNl") ?? "").trim() || undefined,
+      altTextEn: String(formData.get("altTextEn") ?? "").trim() || undefined,
+      isPrimary: formData.get("isPrimary") === "on",
+    });
     if (!parsed.success) return { error: mapZodError(parsed.error) };
 
     await authorizeCatalogProduct(ctx, parsed.data.productId, "products.update");
@@ -1038,11 +1098,23 @@ export async function registerProductMediaAction(
     const safeName = parsed.data.fileName
       .toLowerCase()
       .replace(/[^a-z0-9._-]/g, "-")
-      .slice(0, 80);
+      .replace(/\.[a-z0-9]+$/, "")
+      .slice(0, 72);
     const storagePath = `products/${parsed.data.productId}/${Date.now()}-${safeName || "image"}.${ext}`;
 
     const supabase = createServiceRoleClient();
     if (!supabase) return { error: "Database is niet geconfigureerd." };
+
+    const { error: uploadError } = await supabase.storage
+      .from("product-media")
+      .upload(storagePath, image, {
+        contentType: parsed.data.mimeType,
+        cacheControl: "31536000",
+        upsert: false,
+      });
+    if (uploadError) {
+      return { error: `Upload naar Supabase Storage mislukt: ${uploadError.message}` };
+    }
 
     const { data, error } = await supabase
       .from("product_media")
@@ -1061,6 +1133,7 @@ export async function registerProductMediaAction(
       .single();
 
     if (error) {
+      await supabase.storage.from("product-media").remove([storagePath]);
       return {
         error: error.message.includes("does not exist")
           ? "Catalogusmigratie (media) is nog niet toegepast."
@@ -1089,10 +1162,11 @@ export async function registerProductMediaAction(
     });
 
     revalidatePath(`/admin/products/${parsed.data.productId}`);
+    revalidatePath("/shop", "layout");
     return { success: true, productId: data.storage_path };
   } catch (e) {
     if (e instanceof AuthError) return { error: "Geen toestemming voor media." };
-    return { error: "Media registreren mislukt." };
+    return { error: "Media uploaden mislukt." };
   }
 }
 

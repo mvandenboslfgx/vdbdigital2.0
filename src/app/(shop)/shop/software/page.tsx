@@ -1,20 +1,14 @@
 import type { Metadata } from "next";
-import { Container, Section } from "@/components/ui/container";
-import { PillarNav } from "@/components/shop/pillar-nav";
-import { SoftwareProcurementPanel } from "@/components/shop/software-procurement-panel";
-import { SoftwareCatalogGrid } from "@/components/shop/software-catalog-grid";
+import { CatalogProductGrid } from "@/components/shop/catalog-product-grid";
+import { Card, Container, Section } from "@/components/ui/container";
+import { LocaleLinkButton } from "@/components/ui/locale-link-button";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import { buildLocaleAlternates, openGraphLocale } from "@/i18n/seo";
 import { paths } from "@/i18n/config";
-import { queryPublicSoftwareCatalog } from "@/server/repositories/software-public-catalog";
-import type { SoftwareCatalogGroup } from "@/config/software-catalog";
+import { queryPublicShopCatalog } from "@/server/repositories/public-shop-catalog";
 
 interface SoftwareShopPageProps {
-  searchParams: Promise<{
-    q?: string;
-    group?: string;
-    page?: string;
-  }>;
+  searchParams: Promise<{ q?: string }>;
 }
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -25,109 +19,76 @@ export async function generateMetadata(): Promise<Metadata> {
     description: t("softwareShop.metaDescription"),
     alternates: buildLocaleAlternates(paths.shopSoftware, locale),
     openGraph: { locale: openGraphLocale(locale) },
-    robots: { index: true, follow: true },
   };
 }
 
-const VALID_GROUPS = new Set<SoftwareCatalogGroup>([
-  "windows",
-  "security",
-  "tools",
-  "professional",
-]);
-
-export default async function SoftwareShopPage({
-  searchParams,
-}: SoftwareShopPageProps) {
+export default async function SoftwareShopPage({ searchParams }: SoftwareShopPageProps) {
   const locale = await getLocale();
   const { t } = await getDictionary(locale);
-  const params = await searchParams;
-  const q = params.q?.trim();
-  const groupRaw = params.group ?? "all";
-  const group =
-    groupRaw !== "all" && VALID_GROUPS.has(groupRaw as SoftwareCatalogGroup)
-      ? (groupRaw as SoftwareCatalogGroup)
-      : "all";
-  const page = Math.max(Number(params.page ?? 1) || 1, 1);
-
-  const catalog = queryPublicSoftwareCatalog(locale, {
-    q,
-    group,
-    page,
-    pageSize: 12,
+  const { q = "" } = await searchParams;
+  const catalog = await queryPublicShopCatalog({ q: q.trim(), pageSize: 24 });
+  const products = catalog.items.filter((product) => {
+    const searchable = [product.categorySlug, ...(product.tags ?? [])].join(" ").toLowerCase();
+    return searchable.includes("software") || searchable.includes("licen");
   });
-
-  const pillarLabels = {
-    build: t("pillarNav.build"),
-    automate: t("pillarNav.automate"),
-    grow: t("pillarNav.grow"),
-    software: t("pillarNav.software"),
-  };
 
   return (
     <>
-      <Section variant="dark" className="pt-12 pb-10">
+      <Section variant="dark" className="pb-10 pt-12">
         <Container>
-          <p className="text-label text-primary mb-3">{t("softwareShop.eyebrow")}</p>
+          <p className="text-label mb-3 text-primary">{t("softwareShop.eyebrow")}</p>
           <h1 className="text-h1 mb-4">{t("softwareShop.title")}</h1>
-          <p className="text-body-lg text-muted prose-width max-w-3xl">
+          <p className="text-body-lg prose-width max-w-3xl text-muted">
             {t("softwareShop.intro")}
-          </p>
-          <p className="text-small text-muted mt-4 max-w-2xl">
-            {t("softwareShop.secondaryNote")}
           </p>
         </Container>
       </Section>
-
       <Section variant="light">
-        <Container className="space-y-10">
-          <PillarNav activePillar="SOFTWARE" labels={pillarLabels} />
-
-          <form method="get" className="flex flex-col sm:flex-row gap-3 max-w-xl">
-            <label className="sr-only" htmlFor="software-q">
+        <Container className="space-y-8">
+          <form method="get" className="flex max-w-xl flex-col gap-3 sm:flex-row">
+            <label className="sr-only" htmlFor="software-search">
               {t("softwareShop.searchLabel")}
             </label>
             <input
-              id="software-q"
+              id="software-search"
               name="q"
               type="search"
-              defaultValue={q ?? ""}
+              defaultValue={q}
               placeholder={t("softwareShop.searchPlaceholder")}
-              className="w-full min-h-11 px-4 py-3 text-base rounded-lg border border-light-border bg-light-surface text-light-foreground"
+              className="min-h-11 w-full rounded-lg border border-light-border bg-light-surface px-4 py-3 text-base text-light-foreground"
             />
             <button
               type="submit"
-              className="min-h-11 px-5 rounded-lg bg-primary text-white text-small font-medium shrink-0"
+              className="min-h-11 shrink-0 rounded-lg bg-primary px-5 text-small font-medium text-white"
             >
               {t("softwareShop.searchLabel")}
             </button>
           </form>
 
-          {catalog.items.length === 0 ? (
-            <SoftwareProcurementPanel
-              title={t("softwareShop.procurementTitle")}
-              body={t("softwareShop.procurementBody")}
-              curatedNote={t("softwareShop.procurementCuratedNote")}
-              requestCta={t("softwareShop.requestLicense")}
-              introCta={t("nav.scheduleIntro")}
-              eyebrow={t("softwareShop.procurementEyebrow")}
+          {products.length ? (
+            <CatalogProductGrid
+              products={products}
+              locale={locale}
+              recommendedLabel={t("shop.recommended")}
+              viewLabel={locale === "nl" ? "Bekijk licentie" : "View license"}
             />
           ) : (
-            <SoftwareCatalogGrid
-              items={catalog.items}
-              requestLabel={t("softwareShop.otherSoftware")}
-              onRequestLabel={t("softwareShop.priceOnRequest")}
-            />
+            <Card variant="light" className="px-6 py-14 text-center">
+              <h2 className="text-h3 mb-3 text-light-foreground">
+                {locale === "nl"
+                  ? "Nog geen geverifieerde softwarelicenties gepubliceerd"
+                  : "No verified software licences published yet"}
+              </h2>
+              <p className="text-body mx-auto mb-6 max-w-2xl text-light-muted">
+                {locale === "nl"
+                  ? "Deze lijst komt rechtstreeks uit Supabase. Alleen ACTIVE/PUBLISHED-producten met geldige prijs, tekst, juridische goedkeuring en afbeelding verschijnen hier."
+                  : "This list is loaded directly from Supabase. Only ACTIVE/PUBLISHED products with valid pricing, copy, legal approval and an image appear here."}
+              </p>
+              <LocaleLinkButton href={`${paths.quote}?intent=software-license`}>
+                {t("softwareShop.requestLicense")}
+              </LocaleLinkButton>
+            </Card>
           )}
-
-          {catalog.totalPages > 1 ? (
-            <p className="text-small text-light-muted text-center">
-              {t("softwareShop.pageOf", {
-                page: String(catalog.page),
-                total: String(catalog.totalPages),
-              })}
-            </p>
-          ) : null}
         </Container>
       </Section>
     </>

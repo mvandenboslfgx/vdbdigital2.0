@@ -10,7 +10,7 @@ import {
 import type { CheckoutCustomerType } from "@/lib/commerce/checkout-eligibility";
 
 const CART_COOKIE = "vdb_cart";
-const MAX_QUANTITY = 99;
+const ABSOLUTE_MAX_QUANTITY = 999;
 
 function parseCart(raw: string | undefined): Cart {
   if (!raw) {
@@ -43,13 +43,18 @@ export async function addToCart(productSlug: string, quantity = 1): Promise<Cart
   if (!isDirectCheckoutEnabled()) {
     throw new Error("Direct checkout is temporarily disabled");
   }
-  if (quantity < 1 || quantity > MAX_QUANTITY) {
+  if (quantity < 1 || quantity > ABSOLUTE_MAX_QUANTITY) {
     throw new Error("Invalid quantity");
   }
 
   const product = await getProductForCheckout(productSlug);
   if (!product) {
     throw new Error("Product cannot be added to cart");
+  }
+  const minQuantity = product.minQuantity ?? 1;
+  const maxQuantity = product.maxQuantity ?? 99;
+  if (quantity < minQuantity || quantity > maxQuantity) {
+    throw new Error("Quantity is outside the allowed range for this product");
   }
   if (resolvePriceMode(product) !== "FIXED" || product.priceCents === null) {
     throw new Error("Product has no fixed checkout price");
@@ -60,7 +65,11 @@ export async function addToCart(productSlug: string, quantity = 1): Promise<Cart
   const existing = cart.items.find((i) => i.productId === product.id);
 
   if (existing) {
-    existing.quantity += quantity;
+    const nextQuantity = existing.quantity + quantity;
+    if (nextQuantity > maxQuantity) {
+      throw new Error("Maximum quantity exceeded");
+    }
+    existing.quantity = nextQuantity;
   } else {
     const item: CartItem = {
       productId: product.id,
@@ -97,8 +106,17 @@ export async function updateCartQuantity(
   if (quantity <= 0) {
     return removeFromCart(productId);
   }
-  if (quantity > MAX_QUANTITY) {
+  if (quantity > ABSOLUTE_MAX_QUANTITY) {
     throw new Error("Maximum quantity exceeded");
+  }
+
+  const product = await getProductForCheckout(item.productSlug);
+  if (
+    !product ||
+    quantity < (product.minQuantity ?? 1) ||
+    quantity > (product.maxQuantity ?? 99)
+  ) {
+    throw new Error("Quantity is outside the allowed range for this product");
   }
 
   item.quantity = quantity;
@@ -117,11 +135,13 @@ export async function validateCartItems(
   cart: Cart,
   customerType?: CheckoutCustomerType,
 ): Promise<{
-  items: Array<CartItem & { validatedPriceCents: number }>;
+  items: Array<CartItem & { validatedPriceCents: number; validatedProduct: Product }>;
   errors: string[];
 }> {
   const errors: string[] = [];
-  const items: Array<CartItem & { validatedPriceCents: number }> = [];
+  const items: Array<
+    CartItem & { validatedPriceCents: number; validatedProduct: Product }
+  > = [];
 
   if (!isDirectCheckoutEnabled()) {
     return {
@@ -131,7 +151,7 @@ export async function validateCartItems(
   }
 
   for (const item of cart.items) {
-    if (item.quantity < 1 || item.quantity > MAX_QUANTITY) {
+    if (item.quantity < 1 || item.quantity > ABSOLUTE_MAX_QUANTITY) {
       errors.push(`Invalid quantity for ${item.name}`);
       continue;
     }
@@ -139,6 +159,13 @@ export async function validateCartItems(
     const product = await getProductForCheckout(item.productSlug);
     if (!product) {
       errors.push(`${item.name} is no longer available for checkout`);
+      continue;
+    }
+    if (
+      item.quantity < (product.minQuantity ?? 1) ||
+      item.quantity > (product.maxQuantity ?? 99)
+    ) {
+      errors.push(`${item.name} has an invalid licence quantity`);
       continue;
     }
 
@@ -157,9 +184,14 @@ export async function validateCartItems(
 
     items.push({
       ...item,
+      productId: product.id,
+      productSlug: product.slug,
+      name: product.name,
+      billingType: product.billingType,
       validatedPriceCents: product.priceCents,
       priceCents: product.priceCents,
       quantity: item.quantity,
+      validatedProduct: product,
     });
   }
 
