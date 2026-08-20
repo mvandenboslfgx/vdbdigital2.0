@@ -6,10 +6,7 @@ import { SoftwareCatalogGrid } from "@/components/shop/software-catalog-grid";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import { buildLocaleAlternates, openGraphLocale } from "@/i18n/seo";
 import { paths } from "@/i18n/config";
-import {
-  getSoftwareCatalogPublicStats,
-  queryPublicSoftwareCatalog,
-} from "@/server/repositories/software-public-catalog";
+import { queryPublicSoftwareCatalog } from "@/server/repositories/software-public-catalog";
 import type { SoftwareCatalogGroup } from "@/config/software-catalog";
 
 interface SoftwareShopPageProps {
@@ -59,7 +56,6 @@ export default async function SoftwareShopPage({
     page,
     pageSize: 12,
   });
-  const stats = getSoftwareCatalogPublicStats();
 
   const pillarLabels = {
     build: t("pillarNav.build"),
@@ -111,15 +107,10 @@ export default async function SoftwareShopPage({
             <SoftwareProcurementPanel
               title={t("softwareShop.procurementTitle")}
               body={t("softwareShop.procurementBody")}
-              curatedNote={t("softwareShop.procurementCuratedNote", {
-                count: String(stats.curatedCandidateCount),
-              })}
+              curatedNote={t("softwareShop.procurementCuratedNote")}
               requestCta={t("softwareShop.requestLicense")}
               introCta={t("nav.scheduleIntro")}
-              statsLine={t("softwareShop.procurementStats", {
-                public: String(stats.publicVerifiedCount),
-                curated: String(stats.curatedCandidateCount),
-              })}
+              eyebrow={t("softwareShop.procurementEyebrow")}
             />
           ) : (
             <SoftwareCatalogGrid

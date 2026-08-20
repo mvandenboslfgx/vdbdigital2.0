@@ -226,6 +226,10 @@ const nl: Messages = {
     emptyCategoryBody: "Probeer een andere categorie of bekijk het volledige aanbod.",
     allProducts: "Alle producten",
     requestQuote: "Offerte aanvragen",
+    orderNow: "Bestellen",
+    subscribeNow: "Abonneren",
+    configureRequest: "Configureer aanvraag",
+    discussFirst: "Eerst overleggen",
     contactUs: "Contact opnemen",
     popular: "Populaire producten",
     popularEmptyTitle: "Shopaanbod volgt",
@@ -234,7 +238,7 @@ const nl: Messages = {
     recommended: "Aanbevolen",
     addToCart: "In winkelwagen",
     adding: "Toevoegen…",
-    quoteOnly: "Offerte aanvragen",
+    quoteOnly: "Configureer aanvraag",
     categories: "Categorieën",
     metaDescription:
       "Premium digitale producten en diensten van VDB Digital — websites, webshops, automatisering en support.",
@@ -275,11 +279,10 @@ const nl: Messages = {
     searchLabel: "Zoeken",
     procurementTitle: "Licentie-procurement op aanvraag",
     procurementBody:
-      "Onze gecureerde catalogus wordt SKU voor SKU geverifieerd. Vraag een licentie aan — wij bevestigen editie, platform, supplier en prijs vóór je commit.",
+      "Vraag de software aan die je nodig hebt. Wij bevestigen editie, platform, leverancier en prijs vóór je commit — geen bulk keyshop.",
     procurementCuratedNote:
-      "{count} zakelijk relevante SKU's staan in review — geen publicatie zonder verificatie.",
-    procurementStats:
-      "{public} geverifieerd publiek · {curated} gecureerde kandidaten in review",
+      "Geverifieerde licenties verschijnen hier zodra ze klaar zijn. Tot die tijd behandelen we elke aanvraag als persoonlijke offerte.",
+    procurementEyebrow: "Op aanvraag",
     requestLicense: "Licentie aanvragen",
     otherSoftware: "Andere software nodig?",
     priceOnRequest: "Geverifieerde offerte",

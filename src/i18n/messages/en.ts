@@ -223,6 +223,10 @@ const en = {
     emptyCategoryBody: "Try another category or browse the full catalogue.",
     allProducts: "All products",
     requestQuote: "Request a quote",
+    orderNow: "Order",
+    subscribeNow: "Subscribe",
+    configureRequest: "Configure request",
+    discussFirst: "Talk first",
     contactUs: "Contact us",
     popular: "Popular products",
     popularEmptyTitle: "Shop catalogue coming soon",
@@ -231,7 +235,7 @@ const en = {
     recommended: "Recommended",
     addToCart: "Add to cart",
     adding: "Adding…",
-    quoteOnly: "Request a quote",
+    quoteOnly: "Configure request",
     categories: "Categories",
     metaDescription:
       "Premium digital products and services from VDB Digital — websites, online stores, automation and support.",
@@ -271,11 +275,10 @@ const en = {
     searchLabel: "Search",
     procurementTitle: "License procurement on request",
     procurementBody:
-      "Our curated catalogue is being verified SKU by SKU. Request a license and we confirm edition, platform, supplier and pricing before you commit.",
+      "Request the software you need. We confirm edition, platform, supplier and pricing before you commit — no bulk keyshop listings.",
     procurementCuratedNote:
-      "{count} business-relevant SKUs are in review — none are published until verification is complete.",
-    procurementStats:
-      "{public} verified public · {curated} curated candidates in review",
+      "Verified licenses appear here when ready. Until then, every request is handled as a personal quote.",
+    procurementEyebrow: "On request",
     requestLicense: "Request a license",
     otherSoftware: "Need other software?",
     priceOnRequest: "Verified quote",
