@@ -31,10 +31,15 @@ Set-Location c:\Users\XXX\vdbdigital2.0
 $env:BOOTSTRAP_USER_ID = "00000000-0000-0000-0000-000000000000"
 npm run db:bootstrap-owner
 
-# Optie B: via e-mail
-$env:BOOTSTRAP_USER_EMAIL = "admin@voorbeeld.nl"
+# Optie B: via e-mail (aanbevolen bootstrap / recovery owner)
+$env:BOOTSTRAP_USER_EMAIL = "algemeen@vdbdigital.nl"
 npm run db:bootstrap-owner
 ```
+
+> **Productieregel:** `algemeen@vdbdigital.nl` is de vaste bootstrap/recovery OWNER.
+> Andere accounts worden nooit automatisch ADMIN/OWNER. Staff-rollen (ADMIN/SUPPORT/CONTENT)
+> worden alleen door OWNER toegekend via `/admin/users` (AAL2 + `roles.manage`).
+> De bootstrap-owner mag niet via normale adminacties gedegradeerd of verwijderd worden.
 
 ## Stap 3 — Verifiëren
 

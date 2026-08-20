@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { EmptyState } from "@/components/portal/empty-state";
+import { AdminUsersRoleManager } from "@/components/admin/admin-users-role-manager";
 import { requireAdmin } from "@/server/auth/require-admin";
 import { requirePermission } from "@/server/auth/require-permission";
 import { createServiceRoleClient } from "@/lib/database/server";
+import { isBootstrapOwnerEmail } from "@/lib/auth/bootstrap-owner";
 
 export const metadata: Metadata = { title: "Gebruikers", robots: { index: false } };
 
@@ -17,34 +19,36 @@ export default async function AdminUsersPage() {
         .order("created_at", { ascending: false })
     : { data: [] };
 
-  const rows = data ?? [];
+  const rows = (data ?? []).map((r) => {
+    const rawProfile = (r as { profile?: unknown }).profile;
+    const profile = (Array.isArray(rawProfile) ? rawProfile[0] : rawProfile) as
+      | { email: string; full_name: string | null; is_active: boolean }
+      | null
+      | undefined;
+    return {
+      userId: r.user_id as string,
+      role: r.role as string,
+      email: profile?.email ?? null,
+      fullName: profile?.full_name ?? null,
+      isActive: profile?.is_active !== false,
+      isBootstrap: isBootstrapOwnerEmail(profile?.email),
+    };
+  });
+
   return (
     <div className="space-y-6">
       <h1 className="text-h1">Gebruikers</h1>
       <p className="text-muted text-small">
-        Alleen OWNER mag OWNER/ADMIN-rollen toekennen of intrekken.
+        Autorisatie via <code>admin_roles</code> (server-side). Alleen OWNER mag ADMIN/SUPPORT/CONTENT
+        toekennen of intrekken. Bootstrap-owner is beschermd tegen degradatie.
       </p>
       {rows.length === 0 ? (
         <EmptyState
           title="Geen staff-gebruikers gevonden"
-          description="Adminrollen komen uit admin_roles + profiles."
+          description="Adminrollen komen uit admin_roles + profiles. Bootstrap OWNER via db:bootstrap-owner."
         />
       ) : (
-        <ul className="space-y-2">
-          {rows.map((r) => {
-            const rawProfile = (r as { profile?: unknown }).profile;
-            const profile = (Array.isArray(rawProfile) ? rawProfile[0] : rawProfile) as
-              | { email: string; full_name: string | null; is_active: boolean }
-              | null
-              | undefined;
-            return (
-              <li key={r.user_id} className="rounded-lg border border-border p-4 text-small">
-                {profile?.full_name || profile?.email || r.user_id} · {r.role}
-                {profile?.is_active === false ? " · geblokkeerd" : ""}
-              </li>
-            );
-          })}
-        </ul>
+        <AdminUsersRoleManager rows={rows} actorIsOwner={ctx.role === "OWNER"} />
       )}
     </div>
   );

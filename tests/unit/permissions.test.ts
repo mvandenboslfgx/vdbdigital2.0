@@ -7,6 +7,11 @@ import {
   SENSITIVE_PERMISSIONS,
   getPermissionsForRole,
 } from "@/lib/auth/permissions";
+import {
+  BOOTSTRAP_OWNER_EMAIL,
+  isBootstrapOwnerEmail,
+  normalizeEmail,
+} from "@/lib/auth/bootstrap-owner";
 
 describe("RBAC permissions", () => {
   it("CONTENT can update product text but not publish or change price", () => {
@@ -92,5 +97,21 @@ describe("Role permission sets", () => {
     for (const role of ["CONTENT", "SUPPORT", "ADMIN", "OWNER"] as const) {
       expect(getPermissionsForRole(role).length).toBeGreaterThan(0);
     }
+  });
+});
+
+describe("Bootstrap owner identity", () => {
+  it("recognizes algemeen@vdbdigital.nl as protected bootstrap email", () => {
+    expect(BOOTSTRAP_OWNER_EMAIL).toBe("algemeen@vdbdigital.nl");
+    expect(isBootstrapOwnerEmail("algemeen@vdbdigital.nl")).toBe(true);
+    expect(isBootstrapOwnerEmail("  Algemeen@VdbDigital.nl ")).toBe(true);
+    expect(isBootstrapOwnerEmail("other@vdbdigital.nl")).toBe(false);
+    expect(normalizeEmail("  Foo@Bar.COM ")).toBe("foo@bar.com");
+  });
+
+  it("ADMIN still cannot assign OWNER even with bootstrap email knowledge", () => {
+    expect(canAssignRole("ADMIN", "OWNER")).toBe(false);
+    expect(canAssignRole("OWNER", "ADMIN")).toBe(true);
+    expect(canAssignRole("OWNER", "OWNER")).toBe(true);
   });
 });
