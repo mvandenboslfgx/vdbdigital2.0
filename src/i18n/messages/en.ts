@@ -24,6 +24,16 @@ const en = {
     mobileNav: "Mobile navigation",
     mainNav: "Main navigation",
     skipToContent: "Skip to main content",
+    mobileMenu: {
+      packages: "Packages",
+      forBusiness: "For business",
+      requestQuote: "Request a quote",
+      websites: "Websites",
+      automation: "Automation",
+      conversion: "Conversion",
+      software: "Software",
+      technicalSupport: "Technical support",
+    },
   },
   solutions: {
     websites: "Websites",

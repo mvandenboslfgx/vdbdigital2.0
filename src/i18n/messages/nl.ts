@@ -26,6 +26,16 @@ const nl: Messages = {
     mobileNav: "Mobiele navigatie",
     mainNav: "Hoofdnavigatie",
     skipToContent: "Naar hoofdinhoud",
+    mobileMenu: {
+      packages: "Pakketten",
+      forBusiness: "Voor bedrijven",
+      requestQuote: "Offerte aanvragen",
+      websites: "Websites",
+      automation: "Automatisering",
+      conversion: "Conversie",
+      software: "Software",
+      technicalSupport: "Technische support",
+    },
   },
   solutions: {
     websites: "Websites",
