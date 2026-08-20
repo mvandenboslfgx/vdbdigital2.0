@@ -70,27 +70,31 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 <p className="text-light-muted">{product.fullDescription}</p>
               </div>
 
-              <div>
-                <h2 className="text-h2 text-light-foreground mb-4">{t("product.whatYouGet")}</h2>
-                <ul className="space-y-2">
-                  {product.includedItems.map((item) => (
-                    <li key={item} className="flex gap-2 text-light-muted">
-                      <span className="text-primary">✓</span> {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              {product.includedItems.length > 0 ? (
+                <div>
+                  <h2 className="text-h2 text-light-foreground mb-4">{t("product.whatYouGet")}</h2>
+                  <ul className="space-y-2">
+                    {product.includedItems.map((item) => (
+                      <li key={item} className="flex gap-2 text-light-muted">
+                        <span className="text-primary">✓</span> {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
 
-              <div>
-                <h2 className="text-h2 text-light-foreground mb-4">{t("product.notIncluded")}</h2>
-                <ul className="space-y-2">
-                  {product.excludedItems.map((item) => (
-                    <li key={item} className="flex gap-2 text-light-muted">
-                      <span className="text-light-muted">—</span> {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              {product.excludedItems.length > 0 ? (
+                <div>
+                  <h2 className="text-h2 text-light-foreground mb-4">{t("product.notIncluded")}</h2>
+                  <ul className="space-y-2">
+                    {product.excludedItems.map((item) => (
+                      <li key={item} className="flex gap-2 text-light-muted">
+                        <span className="text-light-muted">—</span> {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
 
               {product.extensions.length > 0 && (
                 <div>
@@ -122,26 +126,38 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
             <div>
               <Card variant="light" className="sticky top-24 space-y-4">
-                <div>
-                  <p className="text-label text-light-muted mb-1">{t("product.deliveryTime")}</p>
-                  <p className="font-medium text-light-foreground">{product.deliveryTime}</p>
-                </div>
-                <div>
-                  <p className="text-label text-light-muted mb-1">{t("product.targetAudience")}</p>
-                  <p className="text-small text-light-muted">{product.targetAudience}</p>
-                </div>
-                <div>
-                  <p className="text-label text-light-muted mb-1">{t("product.workflow")}</p>
-                  <p className="text-small text-light-muted">{product.workflow}</p>
-                </div>
+                {product.deliveryTime?.trim() ? (
+                  <div>
+                    <p className="text-label text-light-muted mb-1">{t("product.deliveryTime")}</p>
+                    <p className="font-medium text-light-foreground">{product.deliveryTime}</p>
+                  </div>
+                ) : null}
+                {product.targetAudience?.trim() ? (
+                  <div>
+                    <p className="text-label text-light-muted mb-1">{t("product.targetAudience")}</p>
+                    <p className="text-small text-light-muted">{product.targetAudience}</p>
+                  </div>
+                ) : null}
+                {product.workflow?.trim() ? (
+                  <div>
+                    <p className="text-label text-light-muted mb-1">{t("product.workflow")}</p>
+                    <p className="text-small text-light-muted">{product.workflow}</p>
+                  </div>
+                ) : null}
                 <div className="pt-4 border-t border-light-border space-y-3">
                   {canAddToCart && <AddToCartButton productSlug={product.slug} />}
                   <LocaleLinkButton
-                    href={`${paths.quote}?product=${product.slug}`}
-                    variant="outline"
+                    href={`${paths.quote}?product=${product.slug}&intent=${
+                      price.mode === "on_request" ? "configure" : "order"
+                    }`}
+                    variant={canAddToCart ? "outline" : "primary"}
                     className="w-full"
                   >
-                    {t("shop.requestQuote")}
+                    {price.mode === "on_request"
+                      ? t("shop.configureRequest")
+                      : canAddToCart
+                        ? t("shop.discussFirst")
+                        : t("shop.orderNow")}
                   </LocaleLinkButton>
                   <WhatsAppButton message={whatsappMessage} className="w-full justify-center" />
                 </div>

@@ -31,6 +31,11 @@ import {
 import {
   publicShopPriceDisplay,
 } from "@/lib/commerce/public-shop-gates";
+import {
+  commercialCtaLabel,
+  commercialPackageCtaHref,
+  resolveCommercialCtaKind,
+} from "@/lib/commerce/commercial-cta";
 import { queryPublicShopCatalog } from "@/server/repositories/public-shop-catalog";
 
 type BillingFilter = "all" | "one-time" | "monthly" | "quote-only";
@@ -327,15 +332,22 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                       ) : null}
                     </div>
                     <div className="mt-auto pt-6">
-                      <LocaleLinkButton
-                        href={`${paths.quote}?package=${pkg.slug}`}
-                        variant="outline"
-                        tone="light"
-                        size="sm"
-                        className="w-full justify-center"
-                      >
-                        {t("shop.requestQuote")}
-                      </LocaleLinkButton>
+                      {(() => {
+                        const kind = resolveCommercialCtaKind({
+                          quoteOnly: pkg.quoteOnly,
+                        });
+                        return (
+                          <LocaleLinkButton
+                            href={commercialPackageCtaHref({ slug: pkg.slug, kind })}
+                            variant={kind === "configure" ? "outline" : "primary"}
+                            tone="light"
+                            size="sm"
+                            className="w-full justify-center"
+                          >
+                            {commercialCtaLabel(kind, locale)}
+                          </LocaleLinkButton>
+                        );
+                      })()}
                     </div>
                   </Card>
                 );
@@ -388,15 +400,22 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                       ) : null}
                     </div>
                     <div className="mt-auto pt-6">
-                      <LocaleLinkButton
-                        href={`${paths.quote}?package=${bundle.slug}`}
-                        variant="outline"
-                        tone="light"
-                        size="sm"
-                        className="w-full justify-center"
-                      >
-                        {t("shop.requestQuote")}
-                      </LocaleLinkButton>
+                      {(() => {
+                        const kind = resolveCommercialCtaKind({
+                          quoteOnly: bundle.billingModel === "proposal_only",
+                        });
+                        return (
+                          <LocaleLinkButton
+                            href={commercialPackageCtaHref({ slug: bundle.slug, kind })}
+                            variant={kind === "configure" ? "outline" : "primary"}
+                            tone="light"
+                            size="sm"
+                            className="w-full justify-center"
+                          >
+                            {commercialCtaLabel(kind, locale)}
+                          </LocaleLinkButton>
+                        );
+                      })()}
                     </div>
                   </Card>
                 );
@@ -428,15 +447,23 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                         ) : null}
                       </div>
                       <div className="mt-auto pt-6">
-                        <LocaleLinkButton
-                          href={`${paths.quote}?package=${pkg.slug}`}
-                          variant="outline"
-                          tone="light"
-                          size="sm"
-                          className="w-full justify-center"
-                        >
-                          {t("shop.requestQuote")}
-                        </LocaleLinkButton>
+                        {(() => {
+                          const kind = resolveCommercialCtaKind({
+                            quoteOnly: pkg.quoteOnly,
+                            monthly: true,
+                          });
+                          return (
+                            <LocaleLinkButton
+                              href={commercialPackageCtaHref({ slug: pkg.slug, kind })}
+                              variant={kind === "configure" ? "outline" : "primary"}
+                              tone="light"
+                              size="sm"
+                              className="w-full justify-center"
+                            >
+                              {commercialCtaLabel(kind, locale)}
+                            </LocaleLinkButton>
+                          );
+                        })()}
                       </div>
                     </Card>
                   );

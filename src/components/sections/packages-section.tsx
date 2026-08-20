@@ -7,7 +7,11 @@ import {
 } from "@/config/commercial/website-packages";
 import { formatDualPrice } from "@/lib/utilities/commercial-price";
 import { LocaleLinkButton } from "@/components/ui/locale-link-button";
-import { paths } from "@/i18n/config";
+import {
+  commercialCtaLabel,
+  commercialPackageCtaHref,
+  resolveCommercialCtaKind,
+} from "@/lib/commerce/commercial-cta";
 
 function PriceBlock({
   price,
@@ -78,25 +82,22 @@ export async function PackagesSection() {
                   </div>
                 </div>
                 <div className="mt-auto pt-6" data-pricing-cta>
-                  <LocaleLinkButton
-                    href={
-                      pkg.quoteOnly
-                        ? `${paths.quote}?package=${pkg.slug}`
-                        : `${paths.contact}?intent=introduction&package=${pkg.slug}`
-                    }
-                    variant="outline"
-                    tone="light"
-                    size="sm"
-                    className="w-full justify-center"
-                  >
-                    {pkg.quoteOnly
-                      ? locale === "nl"
-                        ? "Vraag een voorstel aan"
-                        : "Request a proposal"
-                      : locale === "nl"
-                        ? "Plan een kennismaking"
-                        : "Schedule an introduction"}
-                  </LocaleLinkButton>
+                  {(() => {
+                    const kind = resolveCommercialCtaKind({
+                      quoteOnly: pkg.quoteOnly,
+                    });
+                    return (
+                      <LocaleLinkButton
+                        href={commercialPackageCtaHref({ slug: pkg.slug, kind })}
+                        variant={kind === "configure" ? "outline" : "primary"}
+                        tone="light"
+                        size="sm"
+                        className="w-full justify-center"
+                      >
+                        {commercialCtaLabel(kind, locale)}
+                      </LocaleLinkButton>
+                    );
+                  })()}
                 </div>
               </Card>
             );

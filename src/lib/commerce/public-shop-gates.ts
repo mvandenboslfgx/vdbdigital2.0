@@ -142,7 +142,13 @@ export function publicShopCtaLabel(product: Product, locale: Locale): string {
   if (product.quoteCtaLabel?.trim()) return product.quoteCtaLabel;
   if (product.ctaLabel?.trim()) return product.ctaLabel;
   if (product.priceMode === "QUOTE_ONLY" || product.billingType === "QUOTE_ONLY") {
-    return locale === "nl" ? "Offerte aanvragen" : "Request a quote";
+    return locale === "nl" ? "Configureer aanvraag" : "Configure request";
   }
-  return locale === "nl" ? "Beschikbaarheid aanvragen" : "Request availability";
+  if (product.billingType === "MONTHLY" || product.billingType === "YEARLY") {
+    return locale === "nl" ? "Abonneren" : "Subscribe";
+  }
+  if (product.priceMode === "FIXED" || product.priceCents != null) {
+    return locale === "nl" ? "Bestellen" : "Order";
+  }
+  return locale === "nl" ? "Configureer aanvraag" : "Configure request";
 }
