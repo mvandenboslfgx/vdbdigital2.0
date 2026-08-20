@@ -7,7 +7,7 @@ const en = {
   },
   nav: {
     solutions: "Solutions",
-    shop: "Packages & pricing",
+    shop: "Services & pricing",
     forBusiness: "For business",
     cases: "Cases",
     process: "Process",
@@ -15,8 +15,8 @@ const en = {
     support: "Support",
     contact: "Contact",
     quote: "Request a proposal",
-    scheduleIntro: "Schedule an introduction",
-    login: "Client login",
+    scheduleIntro: "Book intro",
+    login: "Login",
     cart: "Cart",
     allSolutions: "All solutions",
     openMenu: "Open menu",
@@ -439,7 +439,7 @@ const en = {
     interestTitle: "Interested in this solution?",
     interestBody:
       "Get in touch or request a no-obligation quote. We help you choose the right approach for your situation.",
-    viewShop: "View packages & pricing",
+    viewShop: "View services & pricing",
   },
   product: {
     description: "Description",

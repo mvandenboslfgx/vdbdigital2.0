@@ -65,7 +65,7 @@ test.describe("Navigation", () => {
     await dismissCookieBanner(page);
     await page
       .getByRole("navigation", { name: /Main navigation/i })
-      .getByRole("link", { name: "Packages & pricing", exact: true })
+      .getByRole("link", { name: "Services & pricing", exact: true })
       .click();
     await expect(page).toHaveURL("/shop");
   });
@@ -78,7 +78,7 @@ test.describe("Navigation", () => {
     await expect(
       page
         .getByLabel(/Mobile navigation/i)
-        .getByRole("link", { name: /Schedule an introduction/i }),
+        .getByRole("link", { name: /Book intro/i }),
     ).toBeVisible();
   });
 

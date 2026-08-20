@@ -15,6 +15,10 @@ interface HeaderProps {
   cartItemCount?: number;
 }
 
+/** Desktop nav labels must never wrap mid-word (body uses aggressive overflow-wrap). */
+const navLinkClass =
+  "shrink-0 whitespace-nowrap [word-break:normal] [overflow-wrap:normal]";
+
 function useLockBody(locked: boolean) {
   useEffect(() => {
     if (!locked) return;
@@ -102,19 +106,37 @@ export function Header({ cartItemCount = 0 }: HeaderProps) {
       data-surface="dark"
       className="sticky top-0 z-50 border-b border-border/80 bg-background/95 backdrop-blur-md pt-[env(safe-area-inset-top,0px)]"
     >
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 page-pad-x sm:h-16">
-        <BrandLink variant="light" priority />
+      <div
+        className={cn(
+          "mx-auto flex h-14 items-center sm:h-16",
+          "max-w-[1440px] px-4 sm:px-6 lg:px-8",
+          "gap-4 lg:gap-6",
+        )}
+      >
+        <BrandLink
+          variant="light"
+          priority
+          className="shrink-0"
+          logoClassName="h-9 w-auto max-w-[min(10rem,calc(100vw-11rem))] object-contain object-left sm:h-10 sm:max-w-[12rem] lg:h-11 lg:max-w-none"
+        />
 
-        <nav className="hidden lg:flex items-center gap-0.5" aria-label={t("nav.mainNav")}>
+        {/* ≥1024: desktop nav; ≥1280: fuller gaps; never wrap labels */}
+        <nav
+          className="hidden min-w-0 flex-1 items-center justify-center gap-5 lg:flex xl:gap-7"
+          aria-label={t("nav.mainNav")}
+        >
           {siteConfig.navigation.main.map((item) => {
             const active =
               pathname === item.href || pathname.startsWith(`${item.href}/`);
+            const compactHide = item.href === paths.about;
             return (
               <LocaleLink
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "px-3 py-2 text-sm rounded-md transition-colors",
+                  navLinkClass,
+                  "px-1 py-2 text-sm font-medium transition-colors",
+                  compactHide && "hidden xl:inline-flex",
                   active ? "text-primary" : "text-muted hover:text-foreground",
                 )}
               >
@@ -124,18 +146,24 @@ export function Header({ cartItemCount = 0 }: HeaderProps) {
           })}
         </nav>
 
-        <div className="flex items-center gap-1 sm:gap-2">
-          <LanguageSwitcherBoundary className="hidden md:inline-flex" />
+        <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
+          <LanguageSwitcherBoundary
+            size="compact"
+            className="hidden lg:inline-flex"
+          />
           <LocaleLink
             href={paths.login}
-            className="hidden sm:inline-flex min-h-10 items-center px-2.5 py-2 text-sm text-muted hover:text-foreground"
+            className={cn(
+              navLinkClass,
+              "hidden lg:inline-flex items-center py-2 text-sm text-muted hover:text-foreground",
+            )}
           >
             {t("nav.login")}
           </LocaleLink>
           {showCart ? (
             <LocaleLink
               href={paths.cart}
-              className="relative flex h-11 w-11 items-center justify-center rounded-lg hover:bg-surface-elevated transition-colors"
+              className="relative flex h-10 w-10 items-center justify-center rounded-lg hover:bg-surface-elevated transition-colors"
               aria-label={
                 cartItemCount > 0
                   ? `${t("nav.cart")}, ${cartItemCount}`
@@ -153,20 +181,17 @@ export function Header({ cartItemCount = 0 }: HeaderProps) {
 
           <LocaleLink
             href={`${paths.contact}?intent=introduction`}
-            className="hidden lg:inline-flex min-h-10 items-center px-3.5 py-2 text-sm rounded-md bg-primary text-white hover:bg-primary-hover"
+            className={cn(
+              navLinkClass,
+              "hidden lg:inline-flex min-h-10 items-center rounded-lg bg-primary px-4 text-sm font-medium text-white hover:bg-primary-hover",
+            )}
           >
             {t("nav.scheduleIntro")}
-          </LocaleLink>
-          <LocaleLink
-            href={paths.quote}
-            className="hidden xl:inline-flex min-h-10 items-center px-3.5 py-2 text-sm rounded-md border border-border hover:border-primary hover:text-primary"
-          >
-            {t("nav.quote")}
           </LocaleLink>
 
           <button
             type="button"
-            className="lg:hidden flex h-11 w-11 items-center justify-center rounded-lg hover:bg-surface-elevated"
+            className="flex h-11 w-11 items-center justify-center rounded-lg hover:bg-surface-elevated lg:hidden"
             onClick={() => setMobileOpen((open) => !open)}
             aria-expanded={mobileOpen}
             aria-controls={panelId}
@@ -192,7 +217,7 @@ export function Header({ cartItemCount = 0 }: HeaderProps) {
             aria-modal="true"
             aria-label={t("nav.mobileNav")}
           >
-            <div className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border page-pad-x">
+            <div className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border px-4 sm:px-6">
               <BrandLink
                 variant="light"
                 logoClassName="h-9 w-auto max-w-[min(10rem,calc(100vw-11rem))] object-contain object-left"
@@ -212,7 +237,7 @@ export function Header({ cartItemCount = 0 }: HeaderProps) {
             </div>
 
             <nav
-              className="flex-1 overflow-y-auto overscroll-contain page-pad-x py-2 pb-[max(1.25rem,env(safe-area-inset-bottom))]"
+              className="flex-1 overflow-y-auto overscroll-contain px-4 py-2 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-6"
               aria-label={t("nav.mobileNav")}
             >
               <AccordionGroup title={t("nav.solutions")} defaultOpen>
@@ -284,7 +309,7 @@ export function Header({ cartItemCount = 0 }: HeaderProps) {
                 {t("nav.login")}
               </LocaleLink>
 
-              <div className="pt-5 space-y-2">
+              <div className="space-y-2 pt-5">
                 <LocaleLink
                   href={siteConfig.navigation.mobile.introHref}
                   onClick={closeMenu}
