@@ -15,6 +15,7 @@ import {
   toLegacyPaymentStatus,
 } from "@/lib/payments/mollie-status";
 import type { PaymentStatus } from "@/types";
+import { processDeliveryReleased } from "@/server/services/fulfillment/engine";
 
 const inMemoryOrders = new Map<string, Record<string, unknown>>();
 const inMemoryWebhookEvents = new Set<string>();
@@ -441,6 +442,15 @@ export async function updateOrderPaymentStatus(
           providerStatus: transition.providerStatus,
         },
       });
+      if (transition.releaseDelivery && !rpcResult.alreadyProcessed) {
+        await processDeliveryReleased({
+          orderId,
+          paymentId,
+          alreadyProcessed: false,
+        }).catch(() => {
+          /* fulfillment must not break payment confirmation */
+        });
+      }
       return {
         alreadyProcessed: Boolean(rpcResult.alreadyProcessed),
         order,
@@ -514,6 +524,16 @@ export async function updateOrderPaymentStatus(
         },
       });
 
+      if (transition.releaseDelivery) {
+        await processDeliveryReleased({
+          orderId,
+          paymentId,
+          alreadyProcessed: false,
+        }).catch(() => {
+          /* fulfillment must not break payment confirmation */
+        });
+      }
+
       return {
         alreadyProcessed: false,
         order: {
@@ -554,6 +574,16 @@ export async function updateOrderPaymentStatus(
   }
   if (transition.releaseDelivery) order.delivery_released = true;
   if (transition.revokeDelivery) order.delivery_released = false;
+
+  if (transition.releaseDelivery) {
+    await processDeliveryReleased({
+      orderId,
+      paymentId,
+      alreadyProcessed: false,
+    }).catch(() => {
+      /* fulfillment must not break payment confirmation */
+    });
+  }
 
   return {
     alreadyProcessed: false,
