@@ -71,15 +71,45 @@ test.describe("Navigation", () => {
   });
 
   test("mobile menu opens in English", async ({ page }) => {
-    await page.setViewportSize({ width: 375, height: 667 });
+    await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");
     await dismissCookieBanner(page);
     await page.getByRole("button", { name: /Open menu/i }).click();
-    await expect(
-      page
-        .getByLabel(/Mobile navigation/i)
-        .getByRole("link", { name: /Book intro/i }),
-    ).toBeVisible();
+    const dialog = page.getByRole("dialog", { name: /Mobile navigation/i });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole("button", { name: /^Solutions$/i })).toBeVisible();
+    await expect(dialog.getByRole("button", { name: /Services & pricing/i })).toBeVisible();
+    await expect(dialog.getByRole("link", { name: /^Cases$/i })).toBeVisible();
+    await expect(dialog.getByRole("link", { name: /^About$/i })).toBeVisible();
+    await expect(dialog.getByRole("link", { name: /^Support$/i })).toBeVisible();
+    await expect(dialog.getByRole("link", { name: /^Login$/i })).toBeVisible();
+    await expect(dialog.getByRole("link", { name: /^Book intro$/i })).toBeVisible();
+    // Nested items stay collapsed
+    await expect(dialog.getByRole("link", { name: /^Websites$/i })).toHaveCount(0);
+    await expect(dialog.getByRole("link", { name: /Technical support/i })).toHaveCount(0);
+    // No Dutch leaks on EN
+    await expect(dialog.getByText(/Oplossingen|Kennismaken|Diensten/i)).toHaveCount(0);
+  });
+
+  test("mobile menu accordion exclusivity and NL labels", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/nl");
+    await dismissCookieBanner(page);
+    await page.getByRole("button", { name: /Menu openen/i }).click();
+    const dialog = page.getByRole("dialog", { name: /Mobiele navigatie/i });
+    await expect(dialog.getByRole("button", { name: /^Oplossingen$/i })).toBeVisible();
+    await expect(dialog.getByRole("link", { name: /^Kennismaken$/i })).toBeVisible();
+    // No English leaks on NL
+    await expect(dialog.getByText(/Technical support|Conversion optimisation|Book intro|Services & pricing/i)).toHaveCount(0);
+
+    await dialog.getByRole("button", { name: /^Oplossingen$/i }).click();
+    await expect(dialog.getByRole("link", { name: /^Websites$/i })).toBeVisible();
+    await expect(dialog.getByRole("link", { name: /^Automatisering$/i })).toBeVisible();
+
+    await dialog.getByRole("button", { name: /Diensten & prijzen/i }).click();
+    await expect(dialog.getByRole("link", { name: /^Pakketten$/i })).toBeVisible();
+    // Solutions accordion auto-closes
+    await expect(dialog.getByRole("link", { name: /^Websites$/i })).toHaveCount(0);
   });
 
   test("language switcher usable at 320px", async ({ page }) => {
