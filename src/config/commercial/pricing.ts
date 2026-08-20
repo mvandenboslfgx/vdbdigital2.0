@@ -304,7 +304,8 @@ export const commercialCatalog: CommercialCatalogItem[] = [
     category: "care",
     nameEn: "Digital Partner",
     nameNl: "Digital Partner",
-    pricing: priceFromExclEuros(500, "monthly"),
+    // Public SSOT: proposal only — never surface a from-price alongside quoteOnly
+    pricing: null,
     quoteOnly: true,
     oneTime: false,
     monthly: true,

@@ -30,7 +30,9 @@ interface FoundingClientBarProps {
 
 /** Dismissible announcement bar — no fake scarcity or urgency timers */
 export function FoundingClientBar({ message, ctaLabel, dismissLabel }: FoundingClientBarProps) {
-  const dismissed = useSyncExternalStore(subscribe, isDismissed, () => true);
+  // Server snapshot must match first paint for undismissed visitors.
+  // Returning `true` here hid the bar in SSR and showed it after hydrate → CLS.
+  const dismissed = useSyncExternalStore(subscribe, isDismissed, () => false);
 
   if (dismissed) return null;
 

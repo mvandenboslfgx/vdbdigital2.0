@@ -1,5 +1,6 @@
 import type { Locale } from "@/i18n/config";
 import { productsNl } from "@/i18n/content/products-nl";
+import { localizeCategoryName } from "@/i18n/localize-category";
 import type { Product } from "@/types";
 
 const COPY_FIELDS = [
@@ -22,13 +23,19 @@ export type PublicationAdvice =
 type ProductWithConcept = Product & { is_concept?: boolean };
 
 export function localizeProduct(product: Product, locale: Locale): Product {
+  const categoryName = localizeCategoryName(
+    product.categorySlug,
+    product.categoryName,
+    locale,
+  );
+
   if (locale === "en") {
-    return product;
+    return { ...product, categoryName };
   }
 
   const overlay = productsNl[product.slug];
   if (!overlay) {
-    return product;
+    return { ...product, categoryName };
   }
 
   return {
@@ -36,7 +43,7 @@ export function localizeProduct(product: Product, locale: Locale): Product {
     name: overlay.name,
     shortDescription: overlay.shortDescription,
     fullDescription: overlay.fullDescription,
-    categoryName: overlay.categoryName,
+    categoryName: overlay.categoryName || categoryName,
     deliveryTime: overlay.deliveryTime,
     includedItems: overlay.includedItems,
     excludedItems: overlay.excludedItems,

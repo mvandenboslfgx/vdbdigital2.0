@@ -78,6 +78,31 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [],
   },
+  async redirects() {
+    return [
+      // Legacy commercial URL — shop is the single public pricing surface
+      {
+        source: "/packages",
+        destination: "/shop",
+        permanent: true,
+      },
+      {
+        source: "/nl/packages",
+        destination: "/nl/shop",
+        permanent: true,
+      },
+      {
+        source: "/packages/:path*",
+        destination: "/shop",
+        permanent: true,
+      },
+      {
+        source: "/nl/packages/:path*",
+        destination: "/nl/shop",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -1,11 +1,11 @@
 import { Container, Card, Section } from "@/components/ui/container";
-import { formatPriceLabel } from "@/lib/utilities/money";
 import type { Product } from "@/types";
 import { LocaleLinkButton } from "@/components/ui/locale-link-button";
 import { LocaleLink } from "@/i18n/locale-link";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import { localizeProduct } from "@/i18n/localize-product";
 import { paths } from "@/i18n/config";
+import { publicShopPriceDisplay } from "@/lib/commerce/public-shop-gates";
 
 interface PopularProductsSectionProps {
   products: Product[];
@@ -37,27 +37,23 @@ export async function PopularProductsSection({ products }: PopularProductsSectio
           </Card>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featured.map((product) => (
-              <LocaleLink key={product.id} href={`${paths.shop}/${product.slug}`}>
-                <Card className="h-full hover:border-primary/40 transition-colors group">
-                  <p className="text-label text-muted mb-2">{product.categoryName}</p>
-                  <h3 className="text-h3 mb-2 group-hover:text-primary transition-colors">
-                    {product.name}
-                  </h3>
-                  <p className="text-small text-muted mb-4 line-clamp-2">
-                    {product.shortDescription}
-                  </p>
-                  <p className="text-body font-semibold text-primary">
-                    {formatPriceLabel(
-                      product.priceCents,
-                      product.fromPriceCents,
-                      product.billingType,
-                      locale,
-                    )}
-                  </p>
-                </Card>
-              </LocaleLink>
-            ))}
+            {featured.map((product) => {
+              const price = publicShopPriceDisplay(product, locale);
+              return (
+                <LocaleLink key={product.id} href={`${paths.shop}/${product.slug}`}>
+                  <Card className="h-full hover:border-primary/40 transition-colors group">
+                    <p className="text-label text-muted mb-2">{product.categoryName}</p>
+                    <h3 className="text-h3 mb-2 group-hover:text-primary transition-colors">
+                      {product.name}
+                    </h3>
+                    <p className="text-small text-muted mb-4 line-clamp-2">
+                      {product.shortDescription}
+                    </p>
+                    <p className="text-body font-semibold text-primary">{price.label}</p>
+                  </Card>
+                </LocaleLink>
+              );
+            })}
           </div>
         )}
       </Container>
