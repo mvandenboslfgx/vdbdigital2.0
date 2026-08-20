@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Container, Section, Card } from "@/components/ui/container";
 import { getPublicShopProductBySlug } from "@/server/repositories/public-shop-catalog";
-import { formatPriceLabel, billingPeriodLabel } from "@/lib/utilities/money";
+import { billingPeriodLabel } from "@/lib/utilities/money";
 import { LocaleLinkButton } from "@/components/ui/locale-link-button";
 import { WhatsAppButton } from "@/components/chat/whatsapp-button";
 import { AddToCartButton } from "@/components/shop/add-to-cart-button";
@@ -11,6 +11,7 @@ import { localizeProduct } from "@/i18n/localize-product";
 import { buildLocaleAlternates } from "@/i18n/seo";
 import { paths } from "@/i18n/config";
 import { productAllowsAddToCart } from "@/lib/commerce/product-checkout-ui";
+import { publicShopPriceDisplay } from "@/lib/commerce/public-shop-gates";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -40,6 +41,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const whatsappMessage = t("product.whatsappMessage", { product: product.name });
   const canAddToCart = productAllowsAddToCart(raw);
+  const price = publicShopPriceDisplay(product, locale);
 
   return (
     <>
@@ -49,17 +51,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <h1 className="text-h1 mb-4">{product.name}</h1>
           <p className="text-body-lg text-muted prose-width mb-6">{product.shortDescription}</p>
           <div className="flex flex-wrap items-center gap-4">
-            <span className="text-2xl font-semibold text-primary">
-              {formatPriceLabel(
-                product.priceCents,
-                product.fromPriceCents,
-                product.billingType,
-                locale,
-              )}
-            </span>
-            <span className="text-small text-muted">
-              {t("product.billing")}: {billingPeriodLabel(product.billingType, locale)}
-            </span>
+            <span className="text-2xl font-semibold text-primary">{price.label}</span>
+            {price.mode !== "on_request" ? (
+              <span className="text-small text-muted">
+                {t("product.billing")}: {billingPeriodLabel(product.billingType, locale)}
+              </span>
+            ) : null}
           </div>
         </Container>
       </Section>

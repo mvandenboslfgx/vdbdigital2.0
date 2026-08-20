@@ -3,9 +3,10 @@ import { redirect } from "next/navigation";
 import { cn } from "@/lib/utilities/cn";
 import { Container, Section, Card, Badge } from "@/components/ui/container";
 import { PillarNav } from "@/components/shop/pillar-nav";
-import { formatPriceLabel, billingPeriodLabel } from "@/lib/utilities/money";
+import { billingPeriodLabel } from "@/lib/utilities/money";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import { localizeProduct } from "@/i18n/localize-product";
+import { localizeCategoryName } from "@/i18n/localize-category";
 import { buildLocaleAlternates, openGraphLocale } from "@/i18n/seo";
 import { paths, withLocale } from "@/i18n/config";
 import { LocaleLink } from "@/i18n/locale-link";
@@ -27,6 +28,9 @@ import {
   getPillarBySlug,
   type CatalogPillar,
 } from "@/config/catalog";
+import {
+  publicShopPriceDisplay,
+} from "@/lib/commerce/public-shop-gates";
 import { queryPublicShopCatalog } from "@/server/repositories/public-shop-catalog";
 
 type BillingFilter = "all" | "one-time" | "monthly" | "quote-only";
@@ -184,7 +188,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
               : "border-light-border text-light-muted hover:border-primary hover:text-primary",
           )}
         >
-          {cat.name}
+          {localizeCategoryName(cat.slug, cat.name, locale)}
         </LocaleLink>
       ))}
     </div>
@@ -476,6 +480,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
               ) : (
                 products.map((product) => {
                   const highlights = (product.includedItems ?? []).slice(0, 3);
+                  const price = publicShopPriceDisplay(product, locale);
                   return (
                     <LocaleLink key={product.id} href={`${paths.shop}/${product.slug}`}>
                       <Card
@@ -509,20 +514,19 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                           </ul>
                         ) : null}
                         <div className="mt-auto space-y-1">
-                          <p className="font-semibold text-primary">
-                            {formatPriceLabel(
-                              product.priceCents,
-                              product.fromPriceCents,
-                              product.billingType,
-                              locale,
-                            )}
-                          </p>
-                          <p className="text-xs text-light-muted">
-                            {billingPeriodLabel(product.billingType, locale)}
-                            {product.deliveryTime
-                              ? ` · ${t("shop.deliveryTime")}: ${product.deliveryTime}`
-                              : null}
-                          </p>
+                          <p className="font-semibold text-primary">{price.label}</p>
+                          {price.mode !== "on_request" ? (
+                            <p className="text-xs text-light-muted">
+                              {billingPeriodLabel(product.billingType, locale)}
+                              {product.deliveryTime
+                                ? ` · ${t("shop.deliveryTime")}: ${product.deliveryTime}`
+                                : null}
+                            </p>
+                          ) : product.deliveryTime ? (
+                            <p className="text-xs text-light-muted">
+                              {t("shop.deliveryTime")}: {product.deliveryTime}
+                            </p>
+                          ) : null}
                         </div>
                       </Card>
                     </LocaleLink>

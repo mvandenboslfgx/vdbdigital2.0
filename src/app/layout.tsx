@@ -15,19 +15,23 @@ export const viewport: Viewport = {
 const bodyFont = Plus_Jakarta_Sans({
   variable: "--font-body",
   subsets: ["latin"],
-  display: "swap",
+  // optional: avoid font-swap CLS on LCP text; fallback metrics stay stable
+  display: "optional",
+  adjustFontFallback: true,
 });
 
 const displayFont = Sora({
   variable: "--font-display",
   subsets: ["latin"],
-  display: "swap",
+  display: "optional",
+  adjustFontFallback: true,
 });
 
 const monoFont = JetBrains_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
-  display: "swap",
+  display: "optional",
+  adjustFontFallback: true,
 });
 
 export async function generateMetadata(): Promise<Metadata> {

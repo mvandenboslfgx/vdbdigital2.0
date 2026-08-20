@@ -79,16 +79,16 @@ export const commercialContent = {
       "website-launch": {
         name: "Website Launch System",
         summary:
-          "Launch website bundled with Essential Care — care inclusion period still to be confirmed in your quote.",
+          "Launch website scoped with optional Essential Care — care months are not included until confirmed in your quote.",
         careNote:
-          "One-time website fee and monthly Essential Care are quoted separately until bundle terms are finalised.",
+          "One-time website fee and monthly Essential Care are always quoted separately until bundle terms are finalised.",
       },
       "business-growth": {
         name: "Business Growth System",
         summary:
-          "Growth website with Business Care — included care months and recurring fee after bundle still to be confirmed.",
+          "Growth website scoped with optional Business Care — included care months are not defined until confirmed in your quote.",
         careNote:
-          "One-time project fee and monthly Business Care are quoted separately until bundle terms are finalised.",
+          "One-time project fee and monthly Business Care are always quoted separately until bundle terms are finalised.",
       },
       automation: {
         name: "Automation System",
@@ -441,16 +441,16 @@ export const commercialContent = {
       "website-launch": {
         name: "Website Launch System",
         summary:
-          "Launch-website gebundeld met Essential Care — looptijd care-inclusie wordt in offerte bevestigd.",
+          "Launch-website met optionele Essential Care — care-maanden zijn niet inbegrepen tot bevestiging in de offerte.",
         careNote:
-          "Eenmalige websitekosten en maandelijkse Essential Care worden apart geoffreerd tot bundelvoorwaarden definitief zijn.",
+          "Eenmalige websitekosten en maandelijkse Essential Care worden altijd apart geoffreerd tot bundelvoorwaarden definitief zijn.",
       },
       "business-growth": {
         name: "Business Growth System",
         summary:
-          "Growth-website met Business Care — inbegrepen care-maanden en tarief daarna worden in offerte bevestigd.",
+          "Growth-website met optionele Business Care — inbegrepen care-maanden zijn niet vastgelegd tot bevestiging in de offerte.",
         careNote:
-          "Eenmalige projectkosten en maandelijkse Business Care worden apart geoffreerd tot bundelvoorwaarden definitief zijn.",
+          "Eenmalige projectkosten en maandelijkse Business Care worden altijd apart geoffreerd tot bundelvoorwaarden definitief zijn.",
       },
       automation: {
         name: "Automation System",

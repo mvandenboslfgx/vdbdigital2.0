@@ -30,7 +30,13 @@ export default async function QuotePage() {
         <Container className="max-w-2xl">
           <Card variant="light">
             <Suspense
-              fallback={<p className="text-small text-light-muted">{t("forms.formLoading")}</p>}
+              fallback={
+                <div
+                  className="h-48 animate-pulse rounded-lg bg-light-border/60"
+                  role="status"
+                  aria-busy="true"
+                />
+              }
             >
               <QuoteForm />
             </Suspense>

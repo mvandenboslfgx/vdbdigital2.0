@@ -110,7 +110,11 @@ export async function SolutionPageContent(props: SolutionPageSections) {
                 </LocaleLinkButton>
               </div>
             </div>
-            {visual ? <div className="lg:col-span-5 min-w-0">{visual}</div> : null}
+            {visual ? (
+              <div className="lg:col-span-5 min-w-0 min-h-[16rem] sm:min-h-[18rem] lg:min-h-[20rem]">
+                {visual}
+              </div>
+            ) : null}
           </div>
         </Container>
       </Section>
