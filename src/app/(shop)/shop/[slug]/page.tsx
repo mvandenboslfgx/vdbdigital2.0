@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Container, Section, Card } from "@/components/ui/container";
-import { getProductBySlug } from "@/server/repositories/products";
+import { getPublicShopProductBySlug } from "@/server/repositories/public-shop-catalog";
 import { formatPriceLabel, billingPeriodLabel } from "@/lib/utilities/money";
 import { LocaleLinkButton } from "@/components/ui/locale-link-button";
 import { WhatsAppButton } from "@/components/chat/whatsapp-button";
@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   const { slug } = await params;
   const locale = await getLocale();
   const { t } = await getDictionary(locale);
-  const raw = await getProductBySlug(slug);
+  const raw = await getPublicShopProductBySlug(slug);
   if (!raw) return { title: t("product.notFound") };
   const product = localizeProduct(raw, locale);
   return {
@@ -34,7 +34,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
   const locale = await getLocale();
   const { t } = await getDictionary(locale);
-  const raw = await getProductBySlug(slug);
+  const raw = await getPublicShopProductBySlug(slug);
   if (!raw) notFound();
   const product = localizeProduct(raw, locale);
 

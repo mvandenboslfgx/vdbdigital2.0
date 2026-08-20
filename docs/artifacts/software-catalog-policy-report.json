@@ -1,0 +1,423 @@
+{
+  "generatedAt": "2026-08-19T22:15:45.929Z",
+  "stats": {
+    "totalSourceRows": 468,
+    "greenCount": 72,
+    "redCount": 396,
+    "missingPriceSourceAmongGreen": 63,
+    "selectionPct": 15.384615384615385,
+    "publicEligibleCount": 0,
+    "archivedCount": 11,
+    "legacyCount": 4,
+    "curatedCandidateCount": 12
+  },
+  "policyReport": {
+    "archived": [
+      {
+        "sourceNr": 20,
+        "label": "Home Upgrade Pro"
+      },
+      {
+        "sourceNr": 22,
+        "label": "IDM Internet Download Manager 1 year"
+      },
+      {
+        "sourceNr": 23,
+        "label": "IDM Internet Download Manager Lifetime"
+      },
+      {
+        "sourceNr": 24,
+        "label": "CCleaner Pro Key 1 year 1pc"
+      },
+      {
+        "sourceNr": 25,
+        "label": "CCleaner Pro Key 1 year 3pc"
+      },
+      {
+        "sourceNr": 26,
+        "label": "parallels desktop 19"
+      },
+      {
+        "sourceNr": 27,
+        "label": "parallels desktop 20"
+      },
+      {
+        "sourceNr": 54,
+        "label": "cleanmymacx MAC"
+      },
+      {
+        "sourceNr": 56,
+        "label": "Disk Drill Pro Lifetime"
+      },
+      {
+        "sourceNr": 57,
+        "label": "Affinity V2 Full Set MAc+Win+lpad"
+      },
+      {
+        "sourceNr": 58,
+        "label": "Voicemod PRO Lifetime"
+      }
+    ],
+    "legacy": [
+      {
+        "sourceNr": 2,
+        "label": "Win 10 Pro Retail"
+      },
+      {
+        "sourceNr": 5,
+        "label": "win 10 home retail"
+      },
+      {
+        "sourceNr": 7,
+        "label": "Win 10 Pro OEM"
+      },
+      {
+        "sourceNr": 21,
+        "label": "Win 10 Home OEM"
+      }
+    ],
+    "reviewRequired": [
+      {
+        "sourceNr": 11,
+        "label": "Norton 360 Premium 1 year 1PC",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 13,
+        "label": "Norton 360 Premium 1 year 3PC",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 16,
+        "label": "McAfee Total Protection 1 year 1pc",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 17,
+        "label": "ESET Home Security Essential 1Year 1PC",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 19,
+        "label": "Acronis Cyber Protect Home Office"
+      },
+      {
+        "sourceNr": 28,
+        "label": "Trend Micro Maximum Security 3 Year 10PC",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 29,
+        "label": "Trend Micro Maximum Security 3 Year 5PC",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 30,
+        "label": "Trend Micro Maximum Security 3 Year 3PC",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 31,
+        "label": "Avira Prime 1Year 25PC",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 32,
+        "label": "Trend Micro Maximum Security 3 Year 1PC",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 33,
+        "label": "Avira Antivirus Pro 2Year 5PC",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 34,
+        "label": "Avira Antivirus Pro 2Year 3PC",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 35,
+        "label": "Trend Micro Maximum Security 1 Year 3PC",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 36,
+        "label": "Avira Internet Security 2Year 5PC",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 37,
+        "label": "Avira Internet Security 2Year 3PC",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 38,
+        "label": "Avira Antivirus Pro 2Year 1PC",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 39,
+        "label": "AVG Internet Security 1 year 3pc",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 40,
+        "label": "Avira Internet Security 2Year 1PC",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 41,
+        "label": "Avira Antivirus Pro 1Year 5PC",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 42,
+        "label": "Avira Prime 1Year 5PC",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 43,
+        "label": "Avira Antivirus Pro 1Year 3PC",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 44,
+        "label": "Avira Internet Security 1Year 5PC",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 45,
+        "label": "Avast Ultimate 1 year 1pc",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 46,
+        "label": "AVG TuneUp 1 year 1PC",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 47,
+        "label": "Avira Internet Security 1Year 3PC",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 48,
+        "label": "AVG Ultimate 1 year 1pc",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 49,
+        "label": "AVG Internet Security 1 year 1pc",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 50,
+        "label": "Avira Antivirus Pro 1Year 1PC",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 51,
+        "label": "Avira Internet Security 1Year 1PC",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 53,
+        "label": "Nitro Pro 14"
+      },
+      {
+        "sourceNr": 55,
+        "label": "PDF Expert 3 Mac iOS 1 year"
+      },
+      {
+        "sourceNr": 59,
+        "label": "RoboForm Everywhere 1 year"
+      },
+      {
+        "sourceNr": 60,
+        "label": "Beyond Compare 5 Mac/Win"
+      },
+      {
+        "sourceNr": 61,
+        "label": "Process Lasso Pro 1 PC",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 62,
+        "label": "CleanShot X Mac",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 63,
+        "label": "Little Snitch 6 Mac",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 64,
+        "label": "Wise Care 365 Pro 1 Device 1 Year",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 65,
+        "label": "Wise Care 365 Pro 1 Device Lifetime",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 66,
+        "label": "Alfred 5 MAC Lifetime",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 67,
+        "label": "FastStone Capture 10.5/9.7 Life time",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 68,
+        "label": "1pc Sandboxie-Plus lifetime",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 69,
+        "label": "BetterZip 5 For Mac Life time",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 70,
+        "label": "Tuxera NTFS for Mac",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 71,
+        "label": "BetterDisplay 3 lifetime Mac 1pc",
+        "reason": "non-curated security/utility"
+      },
+      {
+        "sourceNr": 72,
+        "label": "Uninstall Tool 3",
+        "reason": "non-curated security/utility"
+      }
+    ],
+    "curatedCandidates": [
+      {
+        "sourceNr": 1,
+        "label": "Win 11 Pro Retail",
+        "passesGate": false,
+        "publicationStatus": "CANDIDATE_REVIEW"
+      },
+      {
+        "sourceNr": 3,
+        "label": "Win 11 Pro OEM",
+        "passesGate": false,
+        "publicationStatus": "CANDIDATE_REVIEW"
+      },
+      {
+        "sourceNr": 4,
+        "label": "win 11 home retail",
+        "passesGate": false,
+        "publicationStatus": "CANDIDATE_REVIEW"
+      },
+      {
+        "sourceNr": 6,
+        "label": "Win 11 Home OEM",
+        "passesGate": false,
+        "publicationStatus": "CANDIDATE_REVIEW"
+      },
+      {
+        "sourceNr": 8,
+        "label": "McAfee Internet Security 1 year 10pc",
+        "passesGate": false,
+        "publicationStatus": "CANDIDATE_REVIEW"
+      },
+      {
+        "sourceNr": 9,
+        "label": "McAfee Total Protection 1 year 10pc",
+        "passesGate": false,
+        "publicationStatus": "CANDIDATE_REVIEW"
+      },
+      {
+        "sourceNr": 10,
+        "label": "Norton 360 Premium 1 year 10PC",
+        "passesGate": false,
+        "publicationStatus": "CANDIDATE_REVIEW"
+      },
+      {
+        "sourceNr": 12,
+        "label": "Norton 360 Premium 1 year 5PC",
+        "passesGate": false,
+        "publicationStatus": "CANDIDATE_REVIEW"
+      },
+      {
+        "sourceNr": 14,
+        "label": "Bitdefender Total Security 1 year 1pc",
+        "passesGate": false,
+        "publicationStatus": "CANDIDATE_REVIEW"
+      },
+      {
+        "sourceNr": 15,
+        "label": "ESET NOD32 Antivirus 1 Year 1PC",
+        "passesGate": false,
+        "publicationStatus": "CANDIDATE_REVIEW"
+      },
+      {
+        "sourceNr": 18,
+        "label": "McAfee LiveSafe Unlimited Device 1 Year Subscription",
+        "passesGate": false,
+        "publicationStatus": "CANDIDATE_REVIEW"
+      },
+      {
+        "sourceNr": 52,
+        "label": "Avast Premium Security 1 year 1pc",
+        "passesGate": false,
+        "publicationStatus": "CANDIDATE_REVIEW"
+      }
+    ],
+    "publicEligible": [],
+    "blocked": [
+      {
+        "sourceNr": 20,
+        "label": "Home Upgrade Pro"
+      },
+      {
+        "sourceNr": 22,
+        "label": "IDM Internet Download Manager 1 year"
+      },
+      {
+        "sourceNr": 23,
+        "label": "IDM Internet Download Manager Lifetime"
+      },
+      {
+        "sourceNr": 24,
+        "label": "CCleaner Pro Key 1 year 1pc"
+      },
+      {
+        "sourceNr": 25,
+        "label": "CCleaner Pro Key 1 year 3pc"
+      },
+      {
+        "sourceNr": 26,
+        "label": "parallels desktop 19"
+      },
+      {
+        "sourceNr": 27,
+        "label": "parallels desktop 20"
+      },
+      {
+        "sourceNr": 54,
+        "label": "cleanmymacx MAC"
+      },
+      {
+        "sourceNr": 56,
+        "label": "Disk Drill Pro Lifetime"
+      },
+      {
+        "sourceNr": 57,
+        "label": "Affinity V2 Full Set MAc+Win+lpad"
+      },
+      {
+        "sourceNr": 58,
+        "label": "Voicemod PRO Lifetime"
+      }
+    ]
+  }
+}

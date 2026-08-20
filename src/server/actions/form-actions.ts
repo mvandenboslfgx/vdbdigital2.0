@@ -68,6 +68,8 @@ function buildQuoteDescription(
     customerType: string;
     packageSlug?: string;
     productSlug?: string;
+    requestIntent?: string;
+    softwareSlug?: string;
     description?: string;
   },
 ): string {
@@ -97,6 +99,8 @@ function buildQuoteDescription(
   }
   if (data.packageSlug?.trim()) meta.push(`Package: ${data.packageSlug.trim()}`);
   if (data.productSlug?.trim()) meta.push(`Product: ${data.productSlug.trim()}`);
+  if (data.requestIntent?.trim()) meta.push(`Intent: ${data.requestIntent.trim()}`);
+  if (data.softwareSlug?.trim()) meta.push(`Software SKU: ${data.softwareSlug.trim()}`);
   if (data.companyWebsite?.trim()) {
     meta.push(`Company website: ${data.companyWebsite.trim()}`);
   }

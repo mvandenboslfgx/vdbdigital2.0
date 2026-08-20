@@ -6,3 +6,12 @@ export * from "./founding-client-offer";
 export * from "./cases";
 export * from "./pricing";
 export * from "./site-readiness";
+export {
+  getCommercialOfferingBySlug,
+  resolveCanonicalOfferingRef,
+  resolvePillarForProductCategory,
+  listCommercialOfferingsByPillar,
+  formatOfferingRefForLead,
+  type CanonicalOfferingKind,
+  type CanonicalOfferingRef,
+} from "@/lib/commerce/catalog-ssot";

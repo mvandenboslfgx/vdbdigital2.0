@@ -23,6 +23,7 @@ const routes = [
   { name: "websites", path: "/solutions/websites" },
   { name: "webshops", path: "/solutions/webshops" },
   { name: "shop", path: "/shop" },
+  { name: "shop-software", path: "/shop/software" },
   { name: "quote", path: "/quote" },
   { name: "contact", path: "/contact" },
   { name: "cases", path: "/cases" },

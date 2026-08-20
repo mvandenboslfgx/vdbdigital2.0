@@ -31,6 +31,8 @@ export function QuoteForm() {
   const searchParams = useSearchParams();
   const productPrefill = searchParams.get("product")?.trim() ?? "";
   const packagePrefill = searchParams.get("package")?.trim() ?? "";
+  const intentPrefill = searchParams.get("intent")?.trim() ?? "";
+  const softwarePrefill = searchParams.get("software")?.trim() ?? "";
   const [state, action, pending] = useActionState(submitQuoteAction, null);
   const [stepIndex, setStepIndex] = useState(0);
   const [customerType, setCustomerType] = useState<"business" | "consumer" | "">("");
@@ -110,12 +112,18 @@ export function QuoteForm() {
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="productSlug" value={val("productSlug", productPrefill)} />
       <input type="hidden" name="packageSlug" value={val("packageSlug", packagePrefill)} />
+      <input type="hidden" name="requestIntent" value={val("requestIntent", intentPrefill)} />
+      <input type="hidden" name="softwareSlug" value={val("softwareSlug", softwarePrefill)} />
 
-      {(productPrefill || packagePrefill) && (
+      {(productPrefill || packagePrefill || intentPrefill === "software-license") && (
         <p className="text-small rounded-lg border border-light-border bg-primary-soft px-3 py-2 text-light-foreground">
-          {productPrefill
-            ? t("forms.productPrefill", { product: productPrefill })
-            : t("forms.packagePrefill", { package: packagePrefill })}
+          {intentPrefill === "software-license"
+            ? t("forms.softwareLicensePrefill", {
+                software: softwarePrefill || t("forms.softwareLicenseGeneral"),
+              })
+            : productPrefill
+              ? t("forms.productPrefill", { product: productPrefill })
+              : t("forms.packagePrefill", { package: packagePrefill })}
         </p>
       )}
 
@@ -284,11 +292,15 @@ export function QuoteForm() {
           required
           defaultValue={val(
             "projectType",
-            productPrefill
-              ? t("forms.productInterest", { product: productPrefill })
-              : packagePrefill
-                ? t("forms.packageInterest", { package: packagePrefill })
-                : "",
+            intentPrefill === "software-license"
+              ? t("forms.softwareLicenseProjectType", {
+                  software: softwarePrefill || t("forms.softwareLicenseGeneral"),
+                })
+              : productPrefill
+                ? t("forms.productInterest", { product: productPrefill })
+                : packagePrefill
+                  ? t("forms.packageInterest", { package: packagePrefill })
+                  : "",
           )}
           placeholder={t("forms.projectTypePlaceholder")}
           className={fieldClass}

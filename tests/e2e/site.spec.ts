@@ -2,12 +2,20 @@ import { test, expect } from "@playwright/test";
 
 const TRANSLATION_KEY_RE = /\b(?:nav|forms|checkout|shop|cart|common)\.[a-zA-Z0-9_.]+\b/;
 
+async function dismissCookieBanner(page: import("@playwright/test").Page) {
+  const accept = page.getByRole("button", { name: /Accept all|Alles accepteren/i });
+  if (await accept.isVisible().catch(() => false)) {
+    await accept.click();
+  }
+}
+
 test.describe("Homepage (English default)", () => {
   test("loads with English hero headline", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
     await expect(
       page.getByRole("heading", {
+        level: 1,
         name: /Custom software, websites and automation built around your business/i,
       }),
     ).toBeVisible();
@@ -31,7 +39,8 @@ test.describe("Dutch locale (/nl)", () => {
     await expect(page.locator("html")).toHaveAttribute("lang", "nl");
     await expect(
       page.getByRole("heading", {
-        name: /Maatwerksoftware, websites en automatisering die rond jouw bedrijf worden gebouwd/i,
+        level: 1,
+        name: /Professionele website laten maken voor jouw bedrijf/i,
       }),
     ).toBeVisible();
   });
@@ -51,10 +60,12 @@ test.describe("Dutch locale (/nl)", () => {
 });
 
 test.describe("Navigation", () => {
-  test("navigates to shop", async ({ page }) => {
+  test("navigates to packages shop", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("navigation", { name: /Main navigation/i })
-      .getByRole("link", { name: "Shop", exact: true })
+    await dismissCookieBanner(page);
+    await page
+      .getByRole("navigation", { name: /Main navigation/i })
+      .getByRole("link", { name: "Packages & pricing", exact: true })
       .click();
     await expect(page).toHaveURL("/shop");
   });
@@ -62,6 +73,7 @@ test.describe("Navigation", () => {
   test("mobile menu opens in English", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto("/");
+    await dismissCookieBanner(page);
     await page.getByRole("button", { name: /Open menu/i }).click();
     await expect(
       page
@@ -73,7 +85,9 @@ test.describe("Navigation", () => {
   test("language switcher usable at 320px", async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 568 });
     await page.goto("/");
-    const switcher = page.getByRole("group", { name: /Language/i });
+    await dismissCookieBanner(page);
+    await page.getByRole("button", { name: /Open menu/i }).click();
+    const switcher = page.getByRole("dialog").getByRole("group", { name: /Language/i });
     await expect(switcher).toBeVisible();
     const box = await switcher.boundingBox();
     expect(box?.width).toBeGreaterThan(40);
@@ -81,19 +95,39 @@ test.describe("Navigation", () => {
 });
 
 test.describe("Shop", () => {
-  test("shows products", async ({ page }) => {
+  test("shows website packages on BUILD pillar", async ({ page }) => {
     await page.goto("/shop");
-    await expect(page.getByRole("heading", { name: "Starter Website" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Website packages" }),
+    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Onepage Website" }).first()).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Launch Website" }).first()).toBeVisible();
   });
 
-  test("product page loads", async ({ page }) => {
-    await page.goto("/shop/starter-website");
-    await expect(page.getByRole("heading", { name: "Starter Website" })).toBeVisible();
+  test("software procurement page when no verified SKUs", async ({ page }) => {
+    await page.goto("/shop/software");
+    await expect(
+      page.getByRole("heading", { name: /Curated business software/i }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /License procurement on request/i }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: /Request a license/i }),
+    ).toBeVisible();
   });
 
-  test("Dutch shop shows localized product name", async ({ page }) => {
-    await page.goto("/nl/shop/starter-website");
-    await expect(page.getByRole("heading").first()).toBeVisible();
+  test("blocks unverified legacy product slug", async ({ page }) => {
+    const response = await page.goto("/shop/starter-website");
+    expect(response?.status()).toBe(404);
+  });
+
+  test("Dutch software procurement page loads", async ({ page }) => {
+    await page.goto("/nl/shop/software");
+    await expect(page.locator("html")).toHaveAttribute("lang", "nl");
+    await expect(
+      page.getByRole("heading", { name: /Geselecteerde zakelijke software/i }),
+    ).toBeVisible();
   });
 });
 
@@ -130,7 +164,7 @@ test.describe("Legal", () => {
 test.describe("Admin", () => {
   test("blocks unauthenticated admin access", async ({ page }) => {
     await page.goto("/admin");
-    await expect(page).toHaveURL(/\/admin\/login/);
+    await expect(page).toHaveURL(/\/(admin\/login|inloggen)/);
   });
 });
 
@@ -151,11 +185,10 @@ test.describe("Cookie consent & contact FAB", () => {
 
   test("floating contact CTA links to contact page", async ({ page }) => {
     await page.goto("/");
-    const fab = page.getByRole("link", { name: /contact/i }).filter({
-      has: page.locator("svg"),
-    });
-    await expect(fab.first()).toBeVisible();
-    await expect(fab.first()).toHaveAttribute("href", /contact/);
+    await dismissCookieBanner(page);
+    const fab = page.getByLabel("Contact", { exact: true });
+    await expect(fab).toBeVisible();
+    await expect(fab).toHaveAttribute("href", /contact/);
     await expect(page.getByText(/WhatsApp.*not configured/i)).toHaveCount(0);
   });
 });
@@ -184,11 +217,7 @@ test.describe("Brand identity", () => {
       await expect(
         page.getByRole("banner").getByRole("link", { name: /VDB Digital Software/i }),
       ).toBeVisible();
-      // Dismiss cookie dialog if present — it can inflate scrollWidth during assert.
-      const accept = page.getByRole("button", { name: /Accept all|Alles accepteren/i });
-      if (await accept.isVisible().catch(() => false)) {
-        await accept.click();
-      }
+      await dismissCookieBanner(page);
       const overflow = await page.evaluate(() => {
         const doc = document.documentElement;
         return doc.scrollWidth > doc.clientWidth + 1;

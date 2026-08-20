@@ -78,11 +78,17 @@ export const commercialContent = {
       body: "Website, care and automation packaged together where it makes sense.",
       "website-launch": {
         name: "Website Launch System",
-        summary: "Launch website with essential care to start strong.",
+        summary:
+          "Launch website bundled with Essential Care — care inclusion period still to be confirmed in your quote.",
+        careNote:
+          "One-time website fee and monthly Essential Care are quoted separately until bundle terms are finalised.",
       },
       "business-growth": {
         name: "Business Growth System",
-        summary: "Growth website with business care for expanding companies.",
+        summary:
+          "Growth website with Business Care — included care months and recurring fee after bundle still to be confirmed.",
+        careNote:
+          "One-time project fee and monthly Business Care are quoted separately until bundle terms are finalised.",
       },
       automation: {
         name: "Automation System",
@@ -113,6 +119,31 @@ export const commercialContent = {
       whatsapp: "WhatsApp AI",
       reviews: "Review Flows",
       maintenance: "Maintenance & Support",
+    },
+    pillarsGrid: {
+      eyebrow: "How we help",
+      title: "Build, automate, grow — software when you need it",
+      body: "VDB is a digital systems partner first. Software licensing is a curated support service, not a keyshop.",
+      build: {
+        label: "Build",
+        title: "Websites & platforms",
+        summary: "Websites, webshops, portals and custom software foundations.",
+      },
+      automate: {
+        label: "Automate",
+        title: "AI & workflows",
+        summary: "WhatsApp AI, appointment flows, reviews and business automation.",
+      },
+      grow: {
+        label: "Grow",
+        title: "Care & optimisation",
+        summary: "Maintenance, support, conversion and ongoing partnership.",
+      },
+      software: {
+        label: "Software",
+        title: "License procurement",
+        summary: "Curated business licenses on verified quote — secondary to our core services.",
+      },
     },
     processSteps: {
       step1: "Introduction",
@@ -409,11 +440,17 @@ export const commercialContent = {
       body: "Website, care en automatisering samengebracht waar dat zinvol is.",
       "website-launch": {
         name: "Website Launch System",
-        summary: "Launch-website met essential care om sterk te starten.",
+        summary:
+          "Launch-website gebundeld met Essential Care — looptijd care-inclusie wordt in offerte bevestigd.",
+        careNote:
+          "Eenmalige websitekosten en maandelijkse Essential Care worden apart geoffreerd tot bundelvoorwaarden definitief zijn.",
       },
       "business-growth": {
         name: "Business Growth System",
-        summary: "Growth-website met business care voor groeiende bedrijven.",
+        summary:
+          "Growth-website met Business Care — inbegrepen care-maanden en tarief daarna worden in offerte bevestigd.",
+        careNote:
+          "Eenmalige projectkosten en maandelijkse Business Care worden apart geoffreerd tot bundelvoorwaarden definitief zijn.",
       },
       automation: {
         name: "Automation System",
@@ -444,6 +481,31 @@ export const commercialContent = {
       whatsapp: "WhatsApp AI",
       reviews: "Reviewflows",
       maintenance: "Onderhoud & support",
+    },
+    pillarsGrid: {
+      eyebrow: "Hoe we helpen",
+      title: "Bouwen, automatiseren, groeien — software waar nodig",
+      body: "VDB is primair digitaal systeempartner. Softwarelicenties zijn een gecureerde ondersteunende dienst, geen keyshop.",
+      build: {
+        label: "Bouwen",
+        title: "Websites & platformen",
+        summary: "Websites, webshops, portalen en maatwerksoftware-fundamenten.",
+      },
+      automate: {
+        label: "Automatiseren",
+        title: "AI & workflows",
+        summary: "WhatsApp AI, afspraakflows, reviews en bedrijfsautomatisering.",
+      },
+      grow: {
+        label: "Groeien",
+        title: "Care & optimalisatie",
+        summary: "Onderhoud, support, conversie en doorlopend partnerschap.",
+      },
+      software: {
+        label: "Software",
+        title: "Licentie-procurement",
+        summary: "Geselecteerde zakelijke licenties op geverifieerde offerte — secundair aan onze kern.",
+      },
     },
     processSteps: {
       step1: "Kennismaking",

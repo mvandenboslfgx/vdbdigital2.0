@@ -11,6 +11,7 @@ import {
   isCaseSearchIndexable,
 } from "@/config/commercial/cases";
 import { paths } from "@/i18n/config";
+import { buildLocaleAlternates, openGraphLocale } from "@/i18n/seo";
 import { WhatsAppAiChatVisual } from "@/components/visuals/whatsapp-ai-chat-visual";
 import { AutomationFlowVisual } from "@/components/visuals/automation-flow-visual";
 import { VermeulenCasePage } from "@/components/cases/vermeulen-case-page";
@@ -72,12 +73,13 @@ export async function generateMetadata({
     return {
       title: copy.seoTitle,
       description: copy.seoDescription,
-      alternates: { canonical: `${paths.cases}/${slug}` },
+      alternates: buildLocaleAlternates(`${paths.cases}/${slug}`, locale),
       openGraph: {
         title: copy.seoTitle,
         description: copy.seoDescription,
         images: [{ url: ogImage, width: 1440, height: 1100 }],
         type: "article",
+        locale: openGraphLocale(locale),
       },
       robots: { index: indexable, follow: true },
     };
@@ -88,7 +90,7 @@ export async function generateMetadata({
     return {
       title: copy.title,
       description: copy.summary,
-      alternates: { canonical: `${paths.cases}/${slug}` },
+      alternates: buildLocaleAlternates(`${paths.cases}/${slug}`, locale),
     };
   }
   const key = legacySlugs[slug as keyof typeof legacySlugs];
@@ -96,7 +98,7 @@ export async function generateMetadata({
   return {
     title: t(`cases.item${key}Title`),
     description: t(`cases.detail${key}Content`).slice(0, 160),
-    alternates: { canonical: `${paths.cases}/${slug}` },
+    alternates: buildLocaleAlternates(`${paths.cases}/${slug}`, locale),
   };
 }
 

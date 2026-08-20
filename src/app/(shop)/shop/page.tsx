@@ -2,11 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { cn } from "@/lib/utilities/cn";
 import { Container, Section, Card, Badge } from "@/components/ui/container";
-import {
-  getAllProducts,
-  getAllCategories,
-  getProductsByCategory,
-} from "@/server/repositories/products";
+import { PillarNav } from "@/components/shop/pillar-nav";
 import { formatPriceLabel, billingPeriodLabel } from "@/lib/utilities/money";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import { localizeProduct } from "@/i18n/localize-product";
@@ -23,7 +19,15 @@ import {
   commercialBundles,
   getBundleCatalogItem,
 } from "@/config/commercial/bundles";
+import { carePackages, getCareCatalogItem } from "@/config/commercial/care-packages";
 import { formatDualPrice } from "@/lib/utilities/commercial-price";
+import {
+  categorySlugsForPillar,
+  getPillarById,
+  getPillarBySlug,
+  type CatalogPillar,
+} from "@/config/catalog";
+import { queryPublicShopCatalog } from "@/server/repositories/public-shop-catalog";
 
 type BillingFilter = "all" | "one-time" | "monthly" | "quote-only";
 
@@ -33,6 +37,7 @@ interface ShopPageProps {
     categorie?: string;
     q?: string;
     billing?: string;
+    pillar?: string;
   }>;
 }
 
@@ -59,8 +64,10 @@ function buildShopHref(opts: {
   category?: string;
   q?: string;
   billing?: BillingFilter;
+  pillar?: string;
 }): string {
   const params = new URLSearchParams();
+  if (opts.pillar) params.set("pillar", opts.pillar);
   if (opts.category) params.set("category", opts.category);
   if (opts.q) params.set("q", opts.q);
   if (opts.billing && opts.billing !== "all") params.set("billing", opts.billing);
@@ -77,10 +84,20 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   if (params.categorie && !params.category) {
     const qs = new URLSearchParams();
     qs.set("category", params.categorie);
+    if (params.pillar) qs.set("pillar", params.pillar);
     if (params.q) qs.set("q", params.q);
     if (params.billing) qs.set("billing", params.billing);
     redirect(withLocale(`${paths.shop}?${qs.toString()}`, locale));
   }
+
+  const pillarParam = params.pillar?.trim().toLowerCase();
+  if (pillarParam === "software") {
+    redirect(withLocale(paths.shopSoftware, locale));
+  }
+
+  const activePillar: CatalogPillar =
+    getPillarBySlug(pillarParam ?? "build")?.id ?? "BUILD";
+  const pillarCategorySlugs = new Set(categorySlugsForPillar(activePillar));
 
   const categorySlug = params.category ?? params.categorie;
   const query = (params.q ?? "").trim().toLowerCase();
@@ -92,20 +109,36 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
       ? billingRaw
       : "all";
 
-  const categories = await getAllCategories();
-  const activeCategory = categories.find((c) => c.slug === categorySlug)?.slug;
-  const rawProducts = activeCategory
-    ? await getProductsByCategory(activeCategory)
-    : await getAllProducts();
+  const activeCategory =
+    categorySlug && pillarCategorySlugs.has(categorySlug) ? categorySlug : undefined;
 
-  const products = rawProducts
+  const catalog = await queryPublicShopCatalog({
+    q: query || undefined,
+    category: activeCategory ?? "all",
+    page: 1,
+    pageSize: 48,
+  });
+
+  const products = catalog.items
     .map((product) => localizeProduct(product, locale))
-    .filter((product) => matchesBilling(product.billingType, billingFilter))
-    .filter((product) => {
-      if (!query) return true;
-      const haystack = `${product.name} ${product.shortDescription}`.toLowerCase();
-      return haystack.includes(query);
-    });
+    .filter((product) =>
+      product.categorySlug ? pillarCategorySlugs.has(product.categorySlug) : false,
+    )
+    .filter((product) => matchesBilling(product.billingType, billingFilter));
+
+  const categories = catalog.categories.filter((c) =>
+    pillarCategorySlugs.has(c.slug),
+  );
+
+  const pillarLabels = {
+    build: t("pillarNav.build"),
+    automate: t("pillarNav.automate"),
+    grow: t("pillarNav.grow"),
+    software: t("pillarNav.software"),
+  };
+
+  const showBuildSections = activePillar === "BUILD";
+  const showGrowSections = activePillar === "GROW";
 
   const filterChips: { id: BillingFilter; label: string }[] = [
     { id: "all", label: t("shop.billingAll") },
@@ -121,7 +154,11 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
       aria-label={t("shop.categories")}
     >
       <LocaleLink
-        href={buildShopHref({ q: query || undefined, billing: billingFilter })}
+        href={buildShopHref({
+          pillar: getPillarById(activePillar).slug,
+          q: query || undefined,
+          billing: billingFilter,
+        })}
         className={cn(
           "shrink-0 px-4 py-2.5 rounded-lg text-small border transition-colors min-h-10 inline-flex items-center",
           !activeCategory
@@ -135,6 +172,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         <LocaleLink
           key={cat.slug}
           href={buildShopHref({
+            pillar: getPillarById(activePillar).slug,
             category: cat.slug,
             q: query || undefined,
             billing: billingFilter,
@@ -162,6 +200,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         <LocaleLink
           key={chip.id}
           href={buildShopHref({
+            pillar: getPillarById(activePillar).slug,
             category: activeCategory,
             q: query || undefined,
             billing: chip.id,
@@ -186,12 +225,16 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           <p className="text-label text-primary mb-3">{t("nav.shop")}</p>
           <h1 className="text-h1 mb-4">{t("shop.title")}</h1>
           <p className="text-body-lg text-muted prose-width">{t("shop.intro")}</p>
+          <p className="text-small text-muted mt-3 max-w-2xl">{t("shop.pillarIntro")}</p>
         </Container>
       </Section>
 
       <Section variant="light">
         <Container className="space-y-12">
+          <PillarNav activePillar={activePillar} labels={pillarLabels} />
+
           <form method="get" className="flex flex-col sm:flex-row gap-3">
+            <input type="hidden" name="pillar" value={getPillarById(activePillar).slug} />
             {activeCategory ? (
               <input type="hidden" name="category" value={activeCategory} />
             ) : null}
@@ -236,6 +279,8 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
 
           <p className="text-xs text-light-muted">{t("shop.vatNote")}</p>
 
+          {showBuildSections ? (
+          <>
           <div>
             <h2 className="text-h2 text-light-foreground mb-6">
               {t("shop.websitePackages")}
@@ -332,6 +377,11 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                           ) : null}
                         </div>
                       ) : null}
+                      {"careNote" in copy && copy.careNote ? (
+                        <p className="text-xs leading-relaxed text-amber-800/90">
+                          {copy.careNote}
+                        </p>
+                      ) : null}
                     </div>
                     <div className="mt-auto pt-6">
                       <LocaleLinkButton
@@ -349,6 +399,47 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
               })}
             </div>
           </div>
+          </>
+          ) : null}
+
+          {showGrowSections ? (
+            <div>
+              <h2 className="text-h2 text-light-foreground mb-6">
+                {commercial.care.title}
+              </h2>
+              <div className="grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                {carePackages.map((pkg) => {
+                  const copy = commercial.care[pkg.i18nKey];
+                  const catalog = getCareCatalogItem(pkg);
+                  const price = catalog ? formatDualPrice(catalog, locale) : null;
+                  return (
+                    <Card key={pkg.id} variant="light" className="flex h-full min-w-0 flex-col">
+                      <div className="flex min-h-0 flex-1 flex-col">
+                        <h3 className="text-h3 text-light-foreground mb-2">{copy.name}</h3>
+                        <p className="text-small mb-6 flex-1 text-light-muted">{copy.summary}</p>
+                        {price ? (
+                          <p className="text-xl font-semibold tracking-tight text-primary">
+                            {price.amountLabel}
+                          </p>
+                        ) : null}
+                      </div>
+                      <div className="mt-auto pt-6">
+                        <LocaleLinkButton
+                          href={`${paths.quote}?package=${pkg.slug}`}
+                          variant="outline"
+                          tone="light"
+                          size="sm"
+                          className="w-full justify-center"
+                        >
+                          {t("shop.requestQuote")}
+                        </LocaleLinkButton>
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
 
           <div>
             <h2 className="text-h2 text-light-foreground mb-6">

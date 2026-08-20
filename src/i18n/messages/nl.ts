@@ -44,6 +44,12 @@ const nl: Messages = {
     products: "Producten",
     company: "Bedrijf",
     legal: "Juridisch",
+    seo: "Diensten",
+    seoWebsite: "Website laten maken",
+    seoWebdesign: "Webdesign",
+    seoWebshop: "Webshop laten maken",
+    seoAi: "AI automatisering",
+    seoKennisbank: "Kennisbank",
     cookiePreferences: "Cookievoorkeuren",
     rights: "Alle rechten voorbehouden.",
   },
@@ -75,9 +81,12 @@ const nl: Messages = {
     nl: "Nederlands",
   },
   home: {
-    heroTitle: "Maatwerksoftware, websites en automatisering die rond jouw bedrijf worden gebouwd.",
+    metaTitle: "Website laten maken | Webdesign & AI automatisering | VDB Digital",
+    metaDescription:
+      "VDB Digital bouwt professionele websites en digitale systemen voor bedrijven — van webdesign en webshops tot AI automatisering. Meer aanvragen, minder handmatig werk.",
+    heroTitle: "Professionele website laten maken voor jouw bedrijf",
     heroBody:
-      "VDB Digital Software bouwt snelle en schaalbare digitale systemen voor bedrijven, ondernemers en ambitieuze ideeën.",
+      "Wij bouwen websites, webshops en slimme automatisering voor Nederlandse ondernemers — helder, snel en gericht op aanvragen. Van kennismaking tot livegang.",
     ctaIntro: "Plan een kennismaking",
     ctaSolutions: "Bekijk onze oplossingen",
     ctaQuote: "Vraag een voorstel aan",
@@ -233,6 +242,40 @@ const nl: Messages = {
       "Prijzen zoals opgeslagen; pakketten tonen excl./incl. btw duidelijkheid.",
     deliveryTime: "Levering",
     noSearchResults: "Geen producten gevonden voor je zoekopdracht.",
+    pillarIntro:
+      "Ontdek VDB per capability — bouwen, automatiseren, groeien en zakelijke softwarelicenties.",
+  },
+  pillarNav: {
+    build: "Bouwen",
+    automate: "Automatiseren",
+    grow: "Groeien",
+    software: "Softwarelicenties",
+  },
+  softwareShop: {
+    metaTitle: "Zakelijke softwarelicenties",
+    metaDescription:
+      "Geselecteerde zakelijke softwarelicenties en procurement via VDB Digital — geverifieerde offertes, geen keyshop.",
+    eyebrow: "Licentie-procurement",
+    title: "Geselecteerde zakelijke software",
+    intro:
+      "VDB ondersteunt softwarelicenties als secundaire dienst — procurement met supplier-verificatie, geen bulk key-reselling.",
+    secondaryNote:
+      "Alleen volledig geverifieerde licenties verschijnen hieronder. Overige aanvragen lopen via offerte na supplier-bevestiging.",
+    searchPlaceholder: "Zoek geverifieerde licenties…",
+    searchLabel: "Zoeken",
+    procurementTitle: "Licentie-procurement op aanvraag",
+    procurementBody:
+      "Onze gecureerde catalogus wordt SKU voor SKU geverifieerd. Vraag een licentie aan — wij bevestigen editie, platform, supplier en prijs vóór je commit.",
+    procurementCuratedNote:
+      "{count} zakelijk relevante SKU's staan in review — geen publicatie zonder verificatie.",
+    procurementStats:
+      "{public} geverifieerd publiek · {curated} gecureerde kandidaten in review",
+    requestLicense: "Licentie aanvragen",
+    otherSoftware: "Andere software nodig?",
+    priceOnRequest: "Geverifieerde offerte",
+    specifications: "Specificaties",
+    backToCatalog: "Terug naar softwarecatalogus",
+    pageOf: "Pagina {page} van {total}",
   },
   cart: {
     title: "Winkelwagen",
@@ -307,6 +350,10 @@ const nl: Messages = {
       "Je vroeg informatie over {product}. Vul het formulier aan — we nemen dit mee in de offerte.",
     packagePrefill:
       "Je koos pakket {package}. Vul het formulier aan — we nemen dit mee in de offerte.",
+    softwareLicensePrefill:
+      "Softwarelicentie-aanvraag: {software}. Wij verifiëren supplier, editie en prijs vóór offerte.",
+    softwareLicenseGeneral: "overige zakelijke software",
+    softwareLicenseProjectType: "Softwarelicentie-procurement — {software}",
     productInterest: "Productinteresse: {product}",
     packageInterest: "Pakketinteresse: {package}",
     quoteSteps: "Stappen offerteformulier",
