@@ -9,7 +9,7 @@ const nl: Messages = {
   },
   nav: {
     solutions: "Oplossingen",
-    shop: "Pakketten & prijzen",
+    shop: "Diensten & prijzen",
     forBusiness: "Voor bedrijven",
     cases: "Cases",
     process: "Werkwijze",
@@ -17,8 +17,8 @@ const nl: Messages = {
     support: "Support",
     contact: "Contact",
     quote: "Vraag een voorstel aan",
-    scheduleIntro: "Plan een kennismaking",
-    login: "Klantlogin",
+    scheduleIntro: "Kennismaken",
+    login: "Login",
     cart: "Winkelwagen",
     allSolutions: "Alle oplossingen",
     openMenu: "Menu openen",
@@ -446,7 +446,7 @@ const nl: Messages = {
     interestTitle: "Interesse in deze oplossing?",
     interestBody:
       "Neem contact op of vraag een vrijblijvende offerte aan. We helpen je de juiste aanpak te kiezen.",
-    viewShop: "Bekijk pakketten & prijzen",
+    viewShop: "Bekijk diensten & prijzen",
   },
   product: {
     description: "Beschrijving",
