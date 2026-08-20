@@ -48,7 +48,13 @@ async function collectPageErrors(page: Page) {
 
 async function dismissCookies(page: Page) {
   const accept = page.getByRole("button", { name: /Accept all|Alles accepteren/i });
-  if (await accept.isVisible().catch(() => false)) await accept.click();
+  try {
+    if (await accept.isVisible({ timeout: 1500 })) {
+      await accept.click({ timeout: 3000 });
+    }
+  } catch {
+    /* banner absent or already dismissed */
+  }
 }
 
 const routes = [

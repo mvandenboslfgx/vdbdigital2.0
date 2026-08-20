@@ -72,14 +72,46 @@ PHONE PHASE untouched.
 
 ## G. PERFORMANCE (Lighthouse, live)
 
+### Pre-polish (release baseline)
+
 | Page | Perf | A11y | Best Practices | SEO | LCP | CLS | TBT | FCP |
 |------|------|------|----------------|-----|-----|-----|-----|-----|
 | `/` homepage | **86** | 96 | 100 | 100 | 3.4s | 0 | 230ms | 1.8s |
 | `/website-laten-maken` | **61** | 97 | 100 | 92 | 4.2s | **0.372** | 290ms | 1.9s |
 
-Artifacts: `test-results/prod-smoke/lighthouse-*.json`
+### Post-polish (`c5aa9ed`, 2026-08-20 evening)
 
-**Open P1:** improve LCP/CLS on SEO landing (CLS 0.372 fails CWV good threshold).
+| Page | Form factor | Perf | A11y | BP | SEO | LCP | CLS | TBT | FCP |
+|------|-------------|------|------|----|-----|-----|-----|-----|-----|
+| `/` | mobile | **87** | 96 | 100 | 100 | 3.6s | **0** | 180ms | 1.8s |
+| `/website-laten-maken` | mobile | **86** | 97 | 100 | 92 | 3.5s | **0** | 190ms | 1.8s |
+| `/shop` | mobile | **82** | 97 | 100 | 92 | 3.4s | **0** | 340ms | 1.9s |
+| `/shop/software` | mobile | **85** | 97 | 100 | 92 | 3.4s | **0** | 270ms | 1.8s |
+| `/` | desktop | **99** | 96 | 100 | 100 | 0.8s | **0** | 0ms | 0.5s |
+| `/website-laten-maken` | desktop | **98** | 97 | 100 | 92 | 0.8s | **0** | 0ms | 0.5s |
+| `/shop` | desktop | **99** | 97 | 100 | 92 | 0.8s | **0** | 0ms | 0.5s |
+| `/shop/software` | desktop | **99** | 97 | 100 | 92 | 0.8s | **0** | 0ms | 0.5s |
+
+Artifacts: `test-results/prod-smoke/lh-*.report.json`
+
+**CLS:** fixed (0.372 → **0** on `/website-laten-maken`).  
+**Mobile perf:** improved (61 → **86** on SEO landing) but still shy of a hard 90+ target — remaining headroom is mostly LCP/TBT under mobile throttle, not layout shift.
+
+---
+
+## G2. FINAL POLISH (PR #4 → `c5aa9ed`)
+
+| Item | Status |
+|------|--------|
+| `/packages` → `/shop` (308) | **PASS** (also `/nl/packages` → `/nl/shop`) |
+| Digital Partner: proposal-only (no €500 public) | **PASS** on `/shop` + `/support` |
+| EN category “Maatwerk” leak | **PASS** (`Custom work`) |
+| Crawlable `Loading` placeholders | **PASS** (marketing loading route removed; quote Suspense skeleton) |
+| Commercial SSOT slugs blocked from product grid | **PASS** |
+| Prod smoke route crawl | **PASS** (20 routes) |
+| Form smoke (contact/quote/software) | **PASS** (re-run after polish deploy) |
+
+Live production after polish: `dpl_9hiPE9nAVNbp9QUV9e2uHmFnNcVo` @ `c5aa9ed`.
 
 ---
 
@@ -130,9 +162,11 @@ Unchanged: care months, care inclusions, per-SKU supplier verification before pu
 |---|------|
 | ~~P0 production promote~~ | **DONE** |
 | ~~P0 form smoke~~ | **DONE** (Supabase evidence) |
-| P1 | CLS/LCP on `/website-laten-maken` (and other SEO landings) |
+| ~~P1 CLS on `/website-laten-maken`~~ | **DONE** (CLS 0; mobile perf 86) |
+| P1 | Mobile LCP/TBT toward hard 90+ Performance (optional next) |
 | P2 | Fix Preview env on `vdb-digital-staging` GitHub check noise |
-| P2 | Optional Resend delivery log audit (UI success + DB write proven; mailbox not polled) |
+| P2 | Optional Resend delivery log audit (UI success + DB write proven; mailbox not polled)
+| P2 | More real customer cases (business, not code) |
 
 ---
 
@@ -140,9 +174,9 @@ Unchanged: care months, care inclusions, per-SKU supplier verification before pu
 
 | | |
 |-|-|
-| **Rollback target** | `dpl_GdVE5vgt6TZ7cBxTACgxWAGqj8FN` @ `6cd41021` |
-| **Command** | `npx vercel rollback dpl_GdVE5vgt6TZ7cBxTACgxWAGqj8FN --scope matthijs-projects-301cd812` (or Dashboard → Promote previous) |
-| **Current live** | `dpl_tJ4v3D1U9LF3XJtmG3RbbYV2gWD7` @ `0ca30121` |
+| **Rollback target** | `dpl_tJ4v3D1U9LF3XJtmG3RbbYV2gWD7` @ `0ca30121` (pre-polish website merge) |
+| **Command** | `npx vercel rollback dpl_tJ4v3D1U9LF3XJtmG3RbbYV2gWD7 --scope matthijs-projects-301cd812` (or Dashboard → Promote previous) |
+| **Current live** | `dpl_9hiPE9nAVNbp9QUV9e2uHmFnNcVo` @ `c5aa9ed` (polish PR #4) |
 
 ### Production env inventory (read-only summary)
 
