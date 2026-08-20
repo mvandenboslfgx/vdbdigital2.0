@@ -4,10 +4,8 @@
 
 | Item | Status |
 |------|--------|
-| **WEBSITE RELEASE** | **PASS** (code + local gates) |
-| **PRODUCTION LIVE** | **NO** (promotion blocked — see §M) |
-
-Release branch is integration-complete, all automated quality gates pass locally, and a Vercel preview deployment built successfully from GitHub. Production `https://vdbdigital.nl` still serves the prior production deployment until an owner promotes/merges with production env validation.
+| **WEBSITE RELEASE** | **PASS** |
+| **PRODUCTION LIVE** | **YES** |
 
 ---
 
@@ -16,156 +14,125 @@ Release branch is integration-complete, all automated quality gates pass locally
 | Field | Value |
 |-------|-------|
 | Production URL | https://vdbdigital.nl |
-| Production deployment | `dpl_GdVE5vgt6TZ7cBxTACgxWAGqj8FN` |
-| Production commit | `6cd41021aea5f54f4e56621721f5956e87842dd6` (`release/public-website-visual-recovery`) |
-| Release branch | `release/website-production-2026-08-20` |
-| Release HEAD | `791907cd0c515057d95a817fa2fef8fa1b825ae0` |
-| Preview deployment (release branch) | `dpl_2wqgwz2jSVFjYBf9PXNUeKMn7ujL` — **READY** |
-| Preview URL | https://vdbdigital2-0-gz2lbth45-matthijs-projects-301cd812.vercel.app (Vercel SSO on fetch) |
-| Base commit | `f3347abb27a969a926e889102b63f189726c1d7e` (`origin/main`) |
-| Build timestamp (local gate) | 2026-08-20 ~01:16 UTC+2 |
+| Production deployment ID | `dpl_tJ4v3D1U9LF3XJtmG3RbbYV2gWD7` |
+| Commit SHA | `0ca30121ce184883b8c363ed0d67ea7ea4a24890` (merge of PR #3 into `main`) |
+| Branch | `main` (from `release/website-production-2026-08-20`) |
+| PR | https://github.com/mvandenboslfgx/vdbdigital2.0/pull/3 |
+| Build / alias timestamp | 2026-08-20 ~17:29–17:45 CEST |
+| Prior CLI prod deploy (superseded) | `dpl_AYtAG52e8sT7FjrpveTums91kE5h` |
 
 ---
 
-## C. UITGEVOERD
+## C. UITGEVOERD (deze release-run)
 
-### Integration (preflight)
-- Safe branch `release/website-production-2026-08-20` from `origin/main`
-- Cherry-picks: catalog P0/P1, SEO infra, NL landing pages, homepage SEO/hreflang/sitemap
-- Conflict resolution in `src/i18n/config.ts` (kept `shopSoftware`, no duplicate `/packages`)
-- Secrets excluded from commits; `.gitignore` hardened
+1. **Production env inventory (read-only)** — all required Production vars present; `NEXT_PUBLIC_APP_URL` exact apex `https://vdbdigital.nl`. No values changed/rotated.
+2. **PR #3** created and merged `release/website-production-2026-08-20` → `main`.
+3. **Quality gates** re-verified green before merge (local): typecheck, lint, unit 473/473, E2E 24/24, build, secret scan. Vercel gate `vdbdigital2-0` SUCCESS. Staging project fail is unrelated Preview-env gap on `vdb-digital-staging` (not branch-protected; not production).
+4. **Production deploy** via GitHub merge + apex alias to merge deployment.
+5. **Live smoke** NL/EN routes, pillars, shop/software, forms, sitemap/robots, desktop/mobile console.
+6. **Form P0 evidence** in Supabase `contact_submissions` + `quote_requests`.
+7. **Lighthouse** homepage + `/website-laten-maken`.
 
-### Commercial / product
-- BUILD / AUTOMATE / GROW / SOFTWARE pillar navigation (`PillarNav`, homepage `SolutionsGridSection`)
-- Shop repositioned: packages & pricing primary; software secondary at `/shop/software`
-- Fail-closed software catalog: procurement UI when 0 verified SKUs
-- Quote flow: `?intent=software-license` wired to existing quote/admin infrastructure
-- Bundle/care honesty: `includedCareMonths: null`, `careInclusionDefined: false`
-- SSOT adapter layer (`catalog-ssot.ts`) without duplicating pricing configs
-
-### Homepage
-- Section order: Hero → Solutions (4 pillars) → Packages → Cases → Process → Problems → CTA
-- NL SEO hero/meta (professional webdesign positioning) without fabricated stats
-
-### Quality / release hygiene
-- E2E aligned to current nav, heroes, procurement shop, admin redirect (`/inloggen`)
-- ESLint ignore for operator `.cjs` scripts and local evidence dirs
-- Visual screenshot suite extended with `/shop/software`
-- Preflight + this final report
-
-### Explicitly NOT touched
-- PHONE PHASE, Android v6 binary, Samsung S25 evidence, AAL2/device tests, app release identity
+PHONE PHASE untouched.
 
 ---
 
 ## D. PRODUCTSTRUCTUUR
 
-| Pillar | Public emphasis |
-|--------|-----------------|
-| **BUILD** | Websites, webshops, custom software, portals, dashboards |
-| **AUTOMATE** | WhatsApp AI, AI automation, appointment automation, review flows |
-| **GROW** | Conversion optimisation, maintenance, support, Essential/Business/Growth Care, Digital Partner |
-| **SOFTWARE** | Curated business software, license procurement, request-only for unverified SKUs — **secondary** |
-
-Navigation: `Packages & pricing` → `/shop` (BUILD default); footer link to `/shop/software`.
+| Pillar | Live |
+|--------|------|
+| BUILD / AUTOMATE / GROW | `/shop?pillar=…` + packages |
+| SOFTWARE | `/shop/software` procurement (secondary) |
 
 ---
 
 ## E. CATALOGUS
 
-| Gate | Count / state |
-|------|----------------|
-| **PUBLIC_VERIFIED** | **0** (fail-closed — nothing browsable) |
-| **Curated candidates in review** | 12 |
-| **BLOCKED / archived (red)** | preserved in inventory, never public |
-| **LEGACY_REQUEST_ONLY** | Windows 10 etc. — not in normal browse |
-| **Public UI** | Procurement panel + quote CTA; no empty keyshop grid |
-
-Harde regels actief: geen Unknown/unspecified, geen verzonnen prijzen/supplier data, geen Product schema voor incomplete SKU's.
+| Gate | State |
+|------|-------|
+| PUBLIC_VERIFIED | 0 |
+| Curated candidates | 12 |
+| Live UI | Procurement panel — no keyshop grid |
 
 ---
 
-## F. TESTS
+## F. TESTS (pre-merge local)
 
 | Gate | Result |
 |------|--------|
-| Typecheck | **PASS** |
-| ESLint | **PASS** (after `scripts/**/*.cjs` + local evidence ignores) |
-| Unit tests (Vitest) | **473 / 473 PASS** (55 files) |
-| E2E (`site.spec.ts`) | **24 / 24 PASS** |
-| E2E screenshots | **49 / 49 PASS** |
-| Secret scan | **PASS** |
-| Production build (`npm run build`) | **PASS** |
-| Catalog policy tests | Included in unit suite — **PASS** |
+| Typecheck | PASS |
+| Lint | PASS |
+| Unit | **473/473** |
+| E2E site | **24/24** |
+| Secret scan | PASS |
+| Production build | PASS |
+| Vercel `vdbdigital2-0` PR check | SUCCESS |
 
 ---
 
-## G. PERFORMANCE
+## G. PERFORMANCE (Lighthouse, live)
 
-- Local production build completes successfully (~73+ routes incl. SEO landings).
-- Core Web Vitals lab measurement **not run** this session (no Lighthouse CI in pipeline).
-- Images use `next/image` on key visuals; no third-party chat widgets (Tawk removed — E2E verified).
-- **P2:** run Lighthouse on preview/production after promotion.
+| Page | Perf | A11y | Best Practices | SEO | LCP | CLS | TBT | FCP |
+|------|------|------|----------------|-----|-----|-----|-----|-----|
+| `/` homepage | **86** | 96 | 100 | 100 | 3.4s | 0 | 230ms | 1.8s |
+| `/website-laten-maken` | **61** | 97 | 100 | 92 | 4.2s | **0.372** | 290ms | 1.9s |
+
+Artifacts: `test-results/prod-smoke/lighthouse-*.json`
+
+**Open P1:** improve LCP/CLS on SEO landing (CLS 0.372 fails CWV good threshold).
 
 ---
 
-## H. SEO
+## H. SEO (live)
 
-- Locale alternates + hreflang via `buildLocaleAlternates`
-- NL SEO landing routes: `/website-laten-maken`, `/webdesign`, `/kennisbank`, local variants
-- Sitemap unit tests pass; TrustBooker excluded from index
-- Homepage NL meta title/description optimized (no keyword stuffing)
-- `/shop/software` indexable with honest procurement copy; no invalid Product JSON-LD for unverified SKUs
+| Check | Result |
+|-------|--------|
+| Route crawl (20 URLs) | **20/20 HTTP 200** |
+| robots.txt | 200, declares sitemap |
+| sitemap.xml | 200, host `vdbdigital.nl` |
+| hreflang/canonical on homepage | present (EN/NL/x-default) |
 
 ---
 
 ## I. SECURITY
 
-| Check | Status |
+| Check | Result |
 |-------|--------|
-| Secret scan (tracked + .env.local gitignore) | PASS |
-| Tawk.to not loaded | E2E PASS |
-| Admin unauthenticated → login | E2E PASS (`/inloggen`) |
-| Public shop fail-closed gates | Unit + integration PASS |
-| Production env guard in `next.config` | Blocks misconfigured deploy (observed on CLI staging attempt) |
-| CSP / headers | Existing middleware — not re-audited line-by-line this session |
-
-**Open:** Full CSP penetration review P2; rate-limit smoke on forms in production after deploy.
+| Production env required set | PASS (inventory only; no mutation) |
+| Secret scan | PASS |
+| Live headers observed | CSP, HSTS, Referrer-Policy, Permissions-Policy, frame-ancestors none |
+| Form persist fail-closed | PASS (writes require Supabase; smoke proved inserts) |
 
 ---
 
-## J. VISUAL QA
+## J. VISUAL / RUNTIME QA
 
-Screenshots captured under `test-results/screenshots/`:
-
-- Viewports: 360, 390, 768, 1440
-- Pages: home (EN/NL), solutions, shop, **shop/software**, quote, contact, cases, demo-whatsapp, mobile menu
-
-Manual pixel review recommended on preview URL after SSO access.
+| Check | Result |
+|-------|--------|
+| Desktop homepage screenshot | PASS (`test-results/prod-smoke/home-desktop.png`) |
+| Mobile 390 homepage screenshot | PASS |
+| Severe console errors (desktop/mobile) | **0** |
+| Network failures on crawled routes | **0** |
+| Live content: EN hero agency + NL SEO hero | confirmed |
+| Live `/shop/software` procurement | “Curated business software” + License procurement |
 
 ---
 
 ## K. OPEN BUSINESS DECISIONS
 
-| Topic | Marker |
-|-------|--------|
-| Essential/Business Care included months in bundles | `needs_business_decision` |
-| Care inclusions (hosting, SLA, cancellation) | `care-inclusions.ts` — all TBD |
-| Per-SKU supplier/region/activation before public listing | verification gate |
-| Re-listing Parallels, RoboForm, PDF Expert, Nitro, Acronis | policy TBD |
-| NL homepage SEO hero vs EN agency hero parity | intentional NL organic focus — confirm with founder |
+Unchanged: care months, care inclusions, per-SKU supplier verification before public listing.
 
 ---
 
-## L. P0 / P1 / P2 RESTPUNTEN
+## L. P0/P1/P2 RESTPUNTEN
 
-| Priority | Item |
-|----------|------|
-| **P0** | **Production promotion** — merge/promote release branch with prod env vars |
-| P1 | Full NL/EN copy parity sweep on all SEO landings (human review) |
-| P1 | Lighthouse CWV on promoted URL |
-| P2 | Route crawl automation script (currently covered by E2E + sitemap tests) |
-| P2 | Form submission end-to-end against live Resend/Supabase in staging |
+| P | Item |
+|---|------|
+| ~~P0 production promote~~ | **DONE** |
+| ~~P0 form smoke~~ | **DONE** (Supabase evidence) |
+| P1 | CLS/LCP on `/website-laten-maken` (and other SEO landings) |
+| P2 | Fix Preview env on `vdb-digital-staging` GitHub check noise |
+| P2 | Optional Resend delivery log audit (UI success + DB write proven; mailbox not polled) |
 
 ---
 
@@ -173,16 +140,31 @@ Manual pixel review recommended on preview URL after SSO access.
 
 | | |
 |-|-|
-| **Last known good production** | `dpl_GdVE5vgt6TZ7cBxTACgxWAGqj8FN` @ `6cd41021` |
-| **Rollback route** | Vercel → Promote previous production deployment or revert domain alias |
-| **Release branch** | `release/website-production-2026-08-20` @ `791907c` (safe to iterate without touching prod) |
+| **Rollback target** | `dpl_GdVE5vgt6TZ7cBxTACgxWAGqj8FN` @ `6cd41021` |
+| **Command** | `npx vercel rollback dpl_GdVE5vgt6TZ7cBxTACgxWAGqj8FN --scope matthijs-projects-301cd812` (or Dashboard → Promote previous) |
+| **Current live** | `dpl_tJ4v3D1U9LF3XJtmG3RbbYV2gWD7` @ `0ca30121` |
 
-### Production promotion blocker (action required)
+### Production env inventory (read-only summary)
 
-1. In Vercel **vdbdigital2-0** project: confirm Production env includes `NEXT_PUBLIC_APP_URL=https://vdbdigital.nl` and required Supabase/Mollie/Resend keys.
-2. **Promote** preview `dpl_2wqgwz2jSVFjYBf9PXNUeKMn7ujL` (or latest on release branch) **or** merge `release/website-production-2026-08-20` → `main` with CI green.
-3. Post-deploy smoke: NL+EN homepage, `/shop/software` procurement, forms, sitemap.xml, robots.txt.
+**Required for production build (all present on Production):**
+`NEXT_PUBLIC_APP_URL` (= `https://vdbdigital.nl`), `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, `MOLLIE_API_KEY`, `RESEND_API_KEY`, `EMAIL_FROM`
+
+**Also Production-scoped:** company KvK/VAT/address/city/phone, WhatsApp, `EMAIL_ADMIN`, `MOLLIE_WEBHOOK_SECRET`, `NEXT_PUBLIC_SITE_NAME`
+
+No env values were modified.
+
+### Form evidence (P0)
+
+Marker `VDB-SMOKE-mt1ory4i` (2026-08-20T15:39Z):
+
+| Flow | Email | Supabase proof |
+|------|-------|----------------|
+| Contact | `smoke+contact.mt1ory4i@vdbdigital.nl` | `contact_submissions` id `aedbfcbb-…` |
+| Quote | `smoke+quote.mt1ory4i@vdbdigital.nl` | `quote_requests` id `bd44c549-…` status NEW |
+| Software request | `smoke+software.mt1ory4i@vdbdigital.nl` | `quote_requests` id `09516964-…` description includes `Intent: software-license` |
+
+UI success confirmed for all three; rows written to production Supabase project `vdb nieuw` (`nhsrdnjfsxfikfbdmdfj`).
 
 ---
 
-*Generated autonomously — 2026-08-20. PHONE PHASE untouched.*
+*Updated after controlled production release — 2026-08-20.*
