@@ -422,32 +422,73 @@ export async function getAdminPortalDashboardCounts() {
       openQuotes: 0,
       openTickets: 0,
       openLeads: 0,
+      openOrders: 0,
+      pendingPayments: 0,
+      failedJobs: 0,
+      websiteJobsQueued: 0,
+      pendingCommissions: 0,
+      pendingPayouts: 0,
     };
   }
 
-  const [customers, projects, openQuotes, openTickets, openLeads] =
-    await Promise.all([
-      supabase
-        .from("organizations")
-        .select("id", { count: "exact", head: true })
-        .neq("status", "ARCHIVED"),
-      supabase
-        .from("portal_projects")
-        .select("id", { count: "exact", head: true })
-        .in("status", ["PLANNED", "IN_PROGRESS", "WAITING_FOR_CUSTOMER", "REVIEW"]),
-      supabase
-        .from("portal_quotes")
-        .select("id", { count: "exact", head: true })
-        .in("status", ["SENT", "VIEWED"]),
-      supabase
-        .from("portal_support_tickets")
-        .select("id", { count: "exact", head: true })
-        .in("status", ["OPEN", "IN_PROGRESS", "WAITING_FOR_VDB"]),
-      supabase
-        .from("leads")
-        .select("id", { count: "exact", head: true })
-        .eq("status", "NEW"),
-    ]);
+  const [
+    customers,
+    projects,
+    openQuotes,
+    openTickets,
+    openLeads,
+    openOrders,
+    pendingPayments,
+    failedJobs,
+    websiteJobsQueued,
+    pendingCommissions,
+    pendingPayouts,
+  ] = await Promise.all([
+    supabase
+      .from("organizations")
+      .select("id", { count: "exact", head: true })
+      .neq("status", "ARCHIVED"),
+    supabase
+      .from("portal_projects")
+      .select("id", { count: "exact", head: true })
+      .in("status", ["PLANNED", "IN_PROGRESS", "WAITING_FOR_CUSTOMER", "REVIEW"]),
+    supabase
+      .from("portal_quotes")
+      .select("id", { count: "exact", head: true })
+      .in("status", ["SENT", "VIEWED"]),
+    supabase
+      .from("portal_support_tickets")
+      .select("id", { count: "exact", head: true })
+      .in("status", ["OPEN", "IN_PROGRESS", "WAITING_FOR_VDB"]),
+    supabase
+      .from("leads")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "NEW"),
+    supabase
+      .from("orders")
+      .select("id", { count: "exact", head: true })
+      .in("status", ["PENDING", "PAID"]),
+    supabase
+      .from("payments")
+      .select("id", { count: "exact", head: true })
+      .in("status", ["OPEN", "PENDING"]),
+    supabase
+      .from("fulfillment_jobs")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "failed"),
+    supabase
+      .from("website_production_jobs")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "queued"),
+    supabase
+      .from("partner_commissions")
+      .select("id", { count: "exact", head: true })
+      .in("status", ["PENDING", "ELIGIBLE", "APPROVED"]),
+    supabase
+      .from("partner_payout_requests")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "REQUESTED"),
+  ]);
 
   void ctx;
   return {
@@ -456,6 +497,12 @@ export async function getAdminPortalDashboardCounts() {
     openQuotes: openQuotes.count ?? 0,
     openTickets: openTickets.count ?? 0,
     openLeads: openLeads.count ?? 0,
+    openOrders: openOrders.count ?? 0,
+    pendingPayments: pendingPayments.count ?? 0,
+    failedJobs: failedJobs.count ?? 0,
+    websiteJobsQueued: websiteJobsQueued.count ?? 0,
+    pendingCommissions: pendingCommissions.count ?? 0,
+    pendingPayouts: pendingPayouts.count ?? 0,
   };
 }
 

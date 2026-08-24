@@ -3,8 +3,8 @@
 **Audience:** Mobile app repository engineers  
 **Backend repo:** `vdbdigital2.0`  
 **Contract pin:** `vdb-backend-contract@0.2.0-rc.3` (**unpublished** — do not treat as production-published)  
-**Updated:** 2026-08-24  
-**Verdict:** `WEB/BACKEND COMMERCE — READY FOR MOBILE INTEGRATION` for catalog/quote/auth/portal contracts. Live invitation/payout E2E and Mollie checkout remain owner-gated.
+**Updated:** 2026-08-25  
+**Verdict:** `WEB/BACKEND COMMERCE — READY FOR MOBILE INTEGRATION` for catalog/quote/auth/portal/project-intake contracts. Live invitation/payout E2E, Mollie live, and a dedicated partner **web** portal remain owner-gated or live in the partner repo.
 
 This document describes what the mobile app **can** integrate today. No secrets.
 
@@ -27,7 +27,11 @@ App loads products/categories/prices from this backend only. Public shop is Supa
 | Server price-quote API | EXISTS | `POST /api/commerce/quote` — preview only; server is source of truth |
 | Mollie one-time checkout | EXISTS, FAIL-CLOSED | Website cart/checkout; `CHECKOUT_ENABLED` off by default; test-mode only |
 | Catalog version / ETag API | EXISTS | `GET /api/catalog/version` |
-| Fulfillment jobs | EXISTS | Persist + admin `/admin/jobs`; adapters fail closed to manual review |
+| Fulfillment jobs | EXISTS | Persist + admin `/admin/jobs`; website packages auto-create project |
+| Website project from paid order | EXISTS | Idempotent `createProjectFromOrder`; `portal_projects.source_order_id` |
+| Website intake | EXISTS | `website_intakes` + customer `/portal/intake` |
+| Website production jobs | EXISTS | `website_production_jobs`; lifecycle in `spec.lifecycle`; **no auto production deploy** |
+| Platform events | EXISTS | `platform_events` idempotent log |
 | Subscriptions / renewals | PREPARED | Yearly quantity/billing/entitlement modelled; not ACTIVE without supplier rights |
 | Invoices from paid orders | PARTIAL | Portal invoices exist; shop auto-invoice still fail-closed without org mapping |
 
@@ -106,6 +110,36 @@ Payment return / login deep links must land on authenticated handlers that re-ch
 - Price shown in UI ≠ trusted for payment (server recalculates)
 - Offline cache respects catalog version once API exists
 - Logout clears tokens
+
+---
+
+## 6b. Website project lifecycle (after paid website order)
+
+Paid website SKU (`fulfillment_type = WEBSITE_PROJECT` or slug containing website/webshop/onepage/catalog-probe):
+
+1. Payment webhook marks order paid and releases delivery.
+2. `createProjectFromOrder(orderId)` (idempotent on `portal_projects.source_order_id`):
+   - resolves/creates `organizations` from order email/company
+   - links `orders.organization_id`
+   - upserts ACTIVE `organization_members` when a matching profile email exists
+   - creates milestones + customer/internal tasks
+   - creates `website_intakes` (`NOT_STARTED`)
+   - queues `website_production_jobs` (`WEBSITE_GENERATE`, `spec.productionDeployAllowed = false`)
+3. Customer completes `/portal/intake`.
+4. Review uses `portal_project_feedback` (`APPROVE` / changes). Production deploy is never automatic.
+
+`spec.lifecycle` values: `READY_FOR_BUILD` → `BUILDING` → `PREVIEW_READY` → `REVIEW_REQUIRED` → `APPROVED` → `READY_TO_DEPLOY` → `DEPLOYED`.
+
+Customer is **not** implied by auth user, profile, OWNER/ADMIN/PARTNER, or project visibility. Customer user = ACTIVE `organization_members` on a non-BLOCKED/ARCHIVED/SUSPENDED organization.
+
+Deep links:
+
+- Customer projects: `/portal/projecten`
+- Intake: `/portal/intake`
+- Admin website jobs: `/admin/website-production`
+- Admin automation events: `/admin/automation`
+
+Partner **web** portal is not in this repo (backend RPCs + mobile/partner app). Admin can list partners/applications/commissions/payouts.
 
 ---
 

@@ -11,11 +11,13 @@ export function AddToCartButton({
   quantity,
   minQuantity,
   maxQuantity,
+  label,
 }: {
   productSlug: string;
   quantity: number;
   minQuantity: number;
   maxQuantity: number;
+  label?: string;
 }) {
   const [pending, startTransition] = useTransition();
   const t = useT();
@@ -27,7 +29,7 @@ export function AddToCartButton({
       onClick={() => startTransition(() => addToCartAction(productSlug, quantity))}
     >
       <ShoppingCart className="h-4 w-4" />
-      {pending ? t("shop.adding") : t("shop.addToCart")}
+      {pending ? t("shop.adding") : label ?? t("shop.orderNow")}
     </Button>
   );
 }

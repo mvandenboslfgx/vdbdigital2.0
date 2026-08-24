@@ -7,6 +7,7 @@ export const dynamic = "force-dynamic";
 const portalNav = [
   { label: "Overzicht", href: "/portal" },
   { label: "Projecten", href: "/portal/projecten" },
+  { label: "Intake", href: "/portal/intake" },
   { label: "Offertes", href: "/portal/offertes" },
   { label: "Facturen", href: "/portal/facturen" },
   { label: "Documenten", href: "/portal/documenten" },

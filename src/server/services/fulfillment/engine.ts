@@ -1,16 +1,18 @@
 import "server-only";
 import { writeAuditLog } from "@/lib/security/audit-log";
+import { createServiceRoleClient } from "@/lib/database/server";
 import { getFulfillmentProvider } from "@/server/services/fulfillment/providers";
 import { persistFulfillmentJob } from "@/server/services/fulfillment/jobs";
+import { createProjectFromOrder } from "@/server/services/website-production/create-project-from-order";
+import { emitPlatformEvent } from "@/server/services/platform-events";
+import {
+  asFulfillmentType,
+  inferFulfillmentType,
+  type FulfillmentType,
+} from "@/lib/commerce/fulfillment-type";
 
-export type FulfillmentType =
-  | "DIGITAL_LICENSE"
-  | "SUBSCRIPTION"
-  | "WEBSITE_PROJECT"
-  | "SERVICE"
-  | "DOWNLOAD"
-  | "MANUAL_REVIEW"
-  | "QUOTE_REQUIRED";
+export type { FulfillmentType };
+export { inferFulfillmentType };
 
 export type FulfillmentJobStatus =
   | "queued"
@@ -30,52 +32,131 @@ export interface FulfillmentJob {
 
 const processedReleaseKeys = new Set<string>();
 
-export function inferFulfillmentType(
-  productSlug: string | null | undefined,
-  explicit?: FulfillmentType | null,
-): FulfillmentType {
-  if (explicit) return explicit;
-  const slug = (productSlug ?? "").toLowerCase();
-  if (slug.includes("custom") || slug.includes("quote")) return "QUOTE_REQUIRED";
-  if (slug.includes("website") || slug.includes("webshop") || slug.includes("onepage")) {
-    return "WEBSITE_PROJECT";
+type FulfillmentLine = {
+  slug: string | null;
+  explicit: FulfillmentType | null;
+};
+
+async function loadFulfillmentLines(
+  orderId: string,
+  productSlugs?: string[],
+): Promise<FulfillmentLine[]> {
+  if (productSlugs && productSlugs.length > 0) {
+    return productSlugs.map((slug) => ({ slug, explicit: null }));
   }
-  if (slug.includes("license") || slug.includes("software")) return "DIGITAL_LICENSE";
-  if (slug.includes("download")) return "DOWNLOAD";
-  if (slug.includes("service") || slug.includes("support")) return "SERVICE";
-  if (slug.includes("care") || slug.includes("subscription") || slug.includes("jaar")) {
-    return "SUBSCRIPTION";
+
+  const supabase = createServiceRoleClient();
+  if (!supabase) return [{ slug: null, explicit: null }];
+
+  const { data: items } = await supabase
+    .from("order_items")
+    .select("product_slug, product_id")
+    .eq("order_id", orderId);
+
+  if (!items?.length) return [{ slug: null, explicit: null }];
+
+  const productIds = items
+    .map((row) => row.product_id as string | null)
+    .filter((id): id is string => Boolean(id));
+
+  const fulfillmentByProduct = new Map<string, FulfillmentType>();
+  if (productIds.length) {
+    const { data: products } = await supabase
+      .from("products")
+      .select("id, fulfillment_type")
+      .in("id", productIds);
+    for (const product of products ?? []) {
+      const typed = asFulfillmentType(product.fulfillment_type as string | null);
+      if (typed) fulfillmentByProduct.set(product.id as string, typed);
+    }
   }
-  return "MANUAL_REVIEW";
+
+  return items.map((row) => ({
+    slug: (row.product_slug as string | null) ?? null,
+    explicit: row.product_id
+      ? (fulfillmentByProduct.get(row.product_id as string) ?? null)
+      : null,
+  }));
 }
 
 /**
  * Idempotent entry after payment.paid → delivery_released.
- * Provider adapters run here; unknown/unready providers fail closed to manual review.
+ * Website packages create a project/intake/job. Unknown providers fail closed.
  */
 export async function processDeliveryReleased(args: {
   orderId: string;
   paymentId?: string;
   productSlugs?: string[];
   alreadyProcessed?: boolean;
+  forceRetry?: boolean;
 }): Promise<FulfillmentJob[]> {
   if (args.alreadyProcessed) return [];
 
   const key = `delivery_released:${args.orderId}:${args.paymentId ?? "none"}`;
-  if (processedReleaseKeys.has(key)) return [];
+  if (!args.forceRetry && processedReleaseKeys.has(key)) return [];
   processedReleaseKeys.add(key);
 
-  const slugs =
-    args.productSlugs && args.productSlugs.length > 0 ? args.productSlugs : [null];
-
+  const lines = await loadFulfillmentLines(args.orderId, args.productSlugs);
   const jobs: FulfillmentJob[] = [];
-  for (const slug of slugs) {
-    const fulfillmentType = inferFulfillmentType(slug);
+
+  await emitPlatformEvent({
+    eventType: "fulfillment.started",
+    entityType: "orders",
+    entityId: args.orderId,
+    idempotencyKey: `fulfillment.started:${args.orderId}:${args.paymentId ?? "none"}`,
+    payload: { paymentId: args.paymentId ?? null },
+  });
+
+  for (const line of lines) {
+    const fulfillmentType = inferFulfillmentType(line.slug, line.explicit);
+
+    if (fulfillmentType === "WEBSITE_PROJECT") {
+      const created = await createProjectFromOrder({
+        orderId: args.orderId,
+        paymentId: args.paymentId,
+        productSlug: line.slug,
+      });
+
+      const status: FulfillmentJobStatus = created.ok
+        ? "completed"
+        : created.error === "custom_requires_quote" || created.error === "not_a_website_package"
+          ? "pending_manual_review"
+          : "failed";
+
+      const job: FulfillmentJob = {
+        orderId: args.orderId,
+        paymentId: args.paymentId,
+        fulfillmentType,
+        status,
+        provider: "internal",
+        error: created.ok ? undefined : created.error,
+      };
+      jobs.push(job);
+
+      await persistFulfillmentJob({
+        orderId: args.orderId,
+        paymentId: args.paymentId,
+        productSlug: line.slug,
+        fulfillmentType,
+        status,
+        provider: "internal",
+        error: created.error,
+        metadata: {
+          projectId: created.projectId,
+          organizationId: created.organizationId,
+          package: created.package,
+          duplicate: created.duplicate,
+          websiteAutomation: created.ok ? "project_created" : "failed",
+        },
+      });
+      continue;
+    }
+
     const provider = getFulfillmentProvider("internal");
     const provision = await provider.provision({
       orderId: args.orderId,
-      productSlug: slug ?? "unknown",
-      providerProductRef: slug ?? "unknown",
+      productSlug: line.slug ?? "unknown",
+      providerProductRef: line.slug ?? "unknown",
       quantity: 1,
     });
 
@@ -98,15 +179,13 @@ export async function processDeliveryReleased(args: {
     await persistFulfillmentJob({
       orderId: args.orderId,
       paymentId: args.paymentId,
-      productSlug: slug,
+      productSlug: line.slug,
       fulfillmentType,
       status,
       provider: provider.id,
       error: provision.error,
       metadata: {
         externalRef: provision.externalRef ?? null,
-        websiteAutomation:
-          fulfillmentType === "WEBSITE_PROJECT" ? "queued_intake_project_link" : null,
       },
     });
   }
@@ -122,6 +201,18 @@ export async function processDeliveryReleased(args: {
         status: job.status,
         provider: job.provider,
       })),
+    },
+  });
+
+  const allOk = jobs.every((job) => job.status === "completed");
+  await emitPlatformEvent({
+    eventType: allOk ? "fulfillment.completed" : "fulfillment.started",
+    entityType: "orders",
+    entityId: args.orderId,
+    idempotencyKey: `fulfillment.completed:${args.orderId}:${args.paymentId ?? "none"}`,
+    payload: {
+      paymentId: args.paymentId ?? null,
+      statuses: jobs.map((job) => job.status),
     },
   });
 

@@ -3,6 +3,7 @@ import { createServiceRoleClient } from "@/lib/database/server";
 import { requireAuthenticatedUser } from "@/server/auth/require-session";
 import { AuthError } from "@/server/auth/errors";
 import { writeAuditLog } from "@/lib/security/audit-log";
+import { isCustomerOrganizationStatus } from "@/lib/auth/customer-ssot";
 import type { AuthenticatedUser } from "@/server/auth/types";
 
 export type CustomerOrgRole = "PRIMARY" | "MEMBER" | "BILLING" | "VIEW_ONLY";
@@ -78,7 +79,7 @@ export async function lookupCustomerMemberships(
           }
         | null
         | undefined;
-      if (!org || org.status === "BLOCKED" || org.status === "ARCHIVED") {
+      if (!org || !isCustomerOrganizationStatus(org.status)) {
         return null;
       }
       return {

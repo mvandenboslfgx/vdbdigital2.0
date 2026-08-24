@@ -3,32 +3,9 @@ import { checkAdminAccess } from "@/server/auth/require-admin";
 import { logoutAction } from "@/server/actions/auth-actions";
 import { hasPermission } from "@/lib/auth/permissions";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { ADMIN_NAV_GROUPS } from "@/config/admin-nav";
 
 export const dynamic = "force-dynamic";
-
-const adminNav = [
-  { label: "Dashboard", href: "/admin", permission: null },
-  { label: "Klanten", href: "/admin/customers", permission: "customers.view" as const },
-  { label: "Projecten", href: "/admin/projects", permission: "projects.view_all" as const },
-  { label: "Offertes", href: "/admin/quotes", permission: "quotes.view_assigned" as const },
-  { label: "Facturen", href: "/admin/invoices", permission: "invoices.view_assigned" as const },
-  { label: "Documenten", href: "/admin/documents", permission: "documents.view_organization" as const },
-  { label: "Berichten", href: "/admin/messages", permission: "messages.manage" as const },
-  { label: "Support", href: "/admin/support", permission: "support.manage" as const },
-  { label: "Producten", href: "/admin/products", permission: "products.read" as const },
-  { label: "Categorieën", href: "/admin/categories", permission: "products.read" as const },
-  { label: "Add-ons", href: "/admin/addons", permission: "products.read" as const },
-  { label: "Orders", href: "/admin/orders", permission: "orders.read" as const },
-  { label: "Jobs", href: "/admin/jobs", permission: "jobs.review" as const },
-  { label: "Leads", href: "/admin/leads", permission: "leads.read" as const },
-  { label: "Partners", href: "/admin/payouts", permission: "partners.view" as const },
-  { label: "Uitbetalingen", href: "/admin/payouts", permission: "payouts.review" as const },
-  { label: "Content", href: "/admin/content", permission: "content.manage" as const },
-  { label: "Gebruikers", href: "/admin/users", permission: "roles.read" as const },
-  { label: "Rollen", href: "/admin/roles", permission: "roles.read" as const },
-  { label: "Instellingen", href: "/admin/settings", permission: "settings.read" as const },
-  { label: "Audit", href: "/admin/audit", permission: "audit.read" as const },
-];
 
 export default async function AdminProtectedLayout({
   children,
@@ -42,17 +19,19 @@ export default async function AdminProtectedLayout({
   }
 
   const { context: profile } = access;
-  const visibleNav = adminNav
-    .filter(
-      (item) => !item.permission || hasPermission(profile.role, item.permission),
-    )
-    .map(({ label, href }) => ({ label, href }));
+  const groups = ADMIN_NAV_GROUPS.map((group) => ({
+    id: group.id,
+    label: group.label,
+    items: group.items
+      .filter((item) => !item.permission || hasPermission(profile.role, item.permission))
+      .map(({ label, href }) => ({ label, href })),
+  })).filter((group) => group.items.length > 0);
 
   const maskedEmail = profile.user.email.replace(/^(.).+(@.+)$/, "$1***$2");
 
   return (
     <AdminShell
-      nav={visibleNav}
+      groups={groups}
       maskedEmail={maskedEmail}
       role={profile.role}
       logoutAction={logoutAction}

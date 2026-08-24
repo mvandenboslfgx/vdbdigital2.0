@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { inferFulfillmentType } from "@/server/services/fulfillment/engine";
+import { inferFulfillmentType } from "@/lib/commerce/fulfillment-type";
 
 describe("fulfillment type inference", () => {
-  it("maps website slugs to WEBSITE_PROJECT", () => {
-    expect(inferFulfillmentType("website-starter")).toBe("WEBSITE_PROJECT");
+  it("maps catalog probe slugs to WEBSITE_PROJECT", () => {
+    expect(inferFulfillmentType("rc7-catalog-probe")).toBe("WEBSITE_PROJECT");
   });
 
   it("maps yearly/license slugs to DIGITAL_LICENSE or SUBSCRIPTION", () => {

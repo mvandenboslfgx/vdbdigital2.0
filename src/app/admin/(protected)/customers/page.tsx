@@ -65,37 +65,56 @@ export default async function AdminCustomersPage({
           description="Maak een klantorganisatie aan en verstuur een uitnodiging. Geen fictieve data."
         />
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-small text-left">
-            <thead>
-              <tr className="border-b border-border text-muted">
-                <th className="py-2 pr-3">Klant</th>
-                <th className="py-2 pr-3">Nummer</th>
-                <th className="py-2 pr-3">Type</th>
-                <th className="py-2 pr-3">Status</th>
-                <th className="py-2">Contact</th>
-              </tr>
-            </thead>
-            <tbody>
-              {organizations.map((org) => (
-                <tr key={org.id} className="border-b border-border/60">
-                  <td className="py-3 pr-3">
-                    <Link
-                      href={`/admin/customers/${org.id}`}
-                      className="text-primary hover:underline font-medium"
-                    >
-                      {org.trade_name || org.legal_name}
-                    </Link>
-                  </td>
-                  <td className="py-3 pr-3">{org.customer_number ?? "—"}</td>
-                  <td className="py-3 pr-3">{org.type}</td>
-                  <td className="py-3 pr-3">{org.status}</td>
-                  <td className="py-3">{org.contact_email ?? "—"}</td>
+        <>
+          <div className="md:hidden space-y-3">
+            {organizations.map((org) => (
+              <article key={org.id} className="rounded-xl border border-border bg-surface p-4 space-y-2">
+                <p className="font-medium">{org.trade_name || org.legal_name}</p>
+                <p className="text-small text-muted">
+                  {org.status} · {org.customer_number ?? "geen nummer"}
+                </p>
+                <p className="text-small">{org.contact_email ?? "—"}</p>
+                <Link
+                  href={`/admin/customers/${org.id}`}
+                  className="inline-flex min-h-11 items-center rounded-lg border border-border px-4 text-sm"
+                >
+                  Open
+                </Link>
+              </article>
+            ))}
+          </div>
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full text-small text-left">
+              <thead>
+                <tr className="border-b border-border text-muted">
+                  <th className="py-2 pr-3">Klant</th>
+                  <th className="py-2 pr-3">Nummer</th>
+                  <th className="py-2 pr-3">Type</th>
+                  <th className="py-2 pr-3">Status</th>
+                  <th className="py-2">Contact</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {organizations.map((org) => (
+                  <tr key={org.id} className="border-b border-border/60">
+                    <td className="py-3 pr-3">
+                      <Link
+                        href={`/admin/customers/${org.id}`}
+                        className="text-primary hover:underline font-medium"
+                      >
+                        {org.trade_name || org.legal_name}
+                      </Link>
+                    </td>
+                    <td className="py-3 pr-3">{org.customer_number ?? "—"}</td>
+                    <td className="py-3 pr-3">{org.type}</td>
+                    <td className="py-3 pr-3">{org.status}</td>
+                    <td className="py-3">{org.contact_email ?? "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
   );

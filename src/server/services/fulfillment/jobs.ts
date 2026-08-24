@@ -66,6 +66,34 @@ export async function persistFulfillmentJob(input: {
   };
 }
 
+export async function getFulfillmentJob(id: string): Promise<PersistedFulfillmentJob | null> {
+  const supabase = createServiceRoleClient();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("fulfillment_jobs")
+    .select(
+      "id, order_id, payment_id, product_slug, fulfillment_type, status, provider, attempt_count, last_error, metadata",
+    )
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error || !data) return null;
+
+  return {
+    id: data.id as string,
+    orderId: data.order_id as string,
+    paymentId: (data.payment_id as string | null) ?? null,
+    productSlug: (data.product_slug as string | null) ?? null,
+    fulfillmentType: data.fulfillment_type as FulfillmentType,
+    status: data.status as FulfillmentJobStatus,
+    provider: data.provider as string,
+    attemptCount: (data.attempt_count as number) ?? 0,
+    lastError: (data.last_error as string | null) ?? null,
+    metadata: (data.metadata as Record<string, unknown>) ?? {},
+  };
+}
+
 export async function listFulfillmentJobs(limit = 100): Promise<PersistedFulfillmentJob[]> {
   const supabase = createServiceRoleClient();
   if (!supabase) return [];

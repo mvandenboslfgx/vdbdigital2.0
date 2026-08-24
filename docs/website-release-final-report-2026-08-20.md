@@ -201,4 +201,27 @@ UI success confirmed for all three; rows written to production Supabase project 
 
 ---
 
-*Updated after controlled production release — 2026-08-20.*
+## DATA PARITY (added 2026-08-24)
+
+Full evidence: `docs/CUSTOMER_DATA_PARITY_AUDIT.md`.
+
+**CUSTOMER_DATA_PARITY: FAIL**
+
+| Entity | Website | App | Backend | DB | Status |
+|--------|---------|-----|---------|----|--------|
+| Customers | `organizations` via `listAdminOrganizations` | `admin_list_customers` → `organizations` | same table/RPC | `organizations` | FAIL until same-env retest |
+| Partners | | | | | NOT STARTED |
+| Products | | | | | NOT STARTED |
+| Orders | | | | | NOT STARTED |
+| Invoices | | | | | NOT STARTED |
+| Payments | | | | | NOT STARTED |
+
+Unexpected records: staging fixture profiles + staff-visible portal projects in the app customer shell.  
+Root cause: app assigned `customer` to every auth user; possible prod website vs staging app mix.  
+Fix: membership-gated customer role in `vdb-app` (source).  
+Regression test: `tests/unit/customer-data-ssot.test.ts`.  
+Production mutation required: **NO**.
+
+Play Store remains **BLOCKED** on this gate.
+
+*Updated after controlled production release — 2026-08-20. Data-parity section 2026-08-24.*

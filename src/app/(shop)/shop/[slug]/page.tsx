@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { Container, Section, Card } from "@/components/ui/container";
 import { getPublicShopProductBySlug } from "@/server/repositories/public-shop-catalog";
 import { billingPeriodLabel } from "@/lib/utilities/money";
@@ -16,6 +17,12 @@ import { publicShopPriceDisplay } from "@/lib/commerce/public-shop-gates";
 import { ProductImage } from "@/components/shop/product-image";
 import { formatCents } from "@/lib/utilities/money";
 import { resolvePublicPrice } from "@/lib/commerce/canonical-pricing";
+import { QuantityStepper } from "@/components/shop/quantity-stepper";
+import {
+  commercialCtaLabel,
+  commercialPackageCtaHref,
+  resolveCommercialCtaKind,
+} from "@/lib/commerce/commercial-cta";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -65,6 +72,13 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
     : minQuantity;
   const quantityLabel =
     locale === "nl" ? product.quantityLabelNl || "licentie" : product.quantityLabelEn || "license";
+  const ctaKind = resolveCommercialCtaKind({
+    quoteOnly: product.priceMode === "QUOTE_ONLY" || product.priceMode === "STARTING_FROM",
+    billingType: product.billingType,
+    monthly: product.billingType === "MONTHLY",
+  });
+  const ctaLabel = commercialCtaLabel(ctaKind, locale);
+  const ctaHref = commercialPackageCtaHref({ slug: product.slug, kind: ctaKind });
   const totalLabel =
     product.priceMode === "FIXED" && customerUnitCents
       ? formatCents(customerUnitCents * quantity, locale)
@@ -185,33 +199,18 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
                 </div>
                 ) : null}
                 <div className="pt-4 border-t border-light-border space-y-3">
-                  <form method="get" className="space-y-2">
-                    <label className="text-label text-light-muted" htmlFor="product-quantity">
-                      {locale === "nl" ? "Aantal licenties" : "Number of licences"}
-                    </label>
-                    <div className="flex gap-2">
-                      <input
-                        id="product-quantity"
-                        name="quantity"
-                        type="number"
-                        min={minQuantity}
-                        max={maxQuantity}
-                        defaultValue={quantity}
-                        className="min-h-11 min-w-0 flex-1 rounded-lg border border-light-border bg-light-surface px-3 text-light-foreground"
-                      />
-                      <button
-                        type="submit"
-                        className="min-h-11 rounded-lg border border-light-border px-3 text-small font-medium text-light-foreground"
-                      >
-                        {locale === "nl" ? "Bereken" : "Calculate"}
-                      </button>
-                    </div>
-                    <p className="text-xs text-light-muted">
-                      {locale === "nl"
-                        ? `Toegestaan: ${minQuantity}–${maxQuantity}`
-                        : `Allowed: ${minQuantity}–${maxQuantity}`}
-                    </p>
-                  </form>
+                  <Suspense fallback={null}>
+                    <QuantityStepper
+                      min={minQuantity}
+                      max={maxQuantity}
+                      value={quantity}
+                      label={
+                        locale === "nl"
+                          ? `Aantal (${quantityLabel})`
+                          : `Quantity (${quantityLabel})`
+                      }
+                    />
+                  </Suspense>
                   {totalLabel ? (
                     <div className="rounded-lg bg-light-surface p-3">
                       <p className="text-label text-light-muted">
@@ -220,21 +219,28 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
                       <p className="text-xl font-semibold text-primary">{totalLabel}</p>
                     </div>
                   ) : null}
-                  {canAddToCart && (
+                  {canAddToCart ? (
                     <AddToCartButton
                       productSlug={product.slug}
                       quantity={quantity}
                       minQuantity={minQuantity}
                       maxQuantity={maxQuantity}
+                      label={ctaLabel}
                     />
+                  ) : (
+                    <LocaleLinkButton href={`${ctaHref}&quantity=${quantity}`} className="w-full">
+                      {ctaLabel}
+                    </LocaleLinkButton>
                   )}
-                  <LocaleLinkButton
-                    href={`${paths.quote}?product=${product.slug}&quantity=${quantity}`}
-                    variant="outline"
-                    className="w-full"
-                  >
-                    {t("shop.requestQuote")}
-                  </LocaleLinkButton>
+                  {canAddToCart ? (
+                    <LocaleLinkButton
+                      href={`${paths.quote}?product=${product.slug}&quantity=${quantity}`}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      {t("shop.requestQuote")}
+                    </LocaleLinkButton>
+                  ) : null}
                   <WhatsAppButton message={whatsappMessage} className="w-full justify-center" />
                 </div>
               </Card>
