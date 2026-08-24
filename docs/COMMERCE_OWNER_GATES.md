@@ -8,8 +8,8 @@
 | Env | Ref | Rule |
 |-----|-----|------|
 | Production Supabase | `nhsrdnjfsxfikfbdmdfj` (`vdb nieuw`) | **Read-only** without explicit OWNER approval |
-| Staging (docs) | `qzekuvmgfekzsowdecyk` | Allowed for bootstrap sequence after re-confirm |
-| Claimed `kjricvicakvsreuytvra` | — | **Not found** in this repo — do not use |
+| Staging / RC7 | `kjricvicakvsreuytvra` | Canonical staging |
+| Deprecated | `qzekuvmgfekzsowdecyk` | REMOVED — never use |
 
 ## Safe work completed in repo (no prod DB writes)
 

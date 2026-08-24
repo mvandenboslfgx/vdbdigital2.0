@@ -123,7 +123,7 @@ Until then mobile should integrate **portal/auth** surfaces and treat shop as qu
 | Env | Supabase project ref (public) |
 |-----|-------------------------------|
 | Production | `nhsrdnjfsxfikfbdmdfj` (`vdb nieuw`) |
-| Staging (docs) | `qzekuvmgfekzsowdecyk` |
-| Claimed `kjricvicakvsreuytvra` | **Not found** in this repo |
+| Staging / RC7 | `kjricvicakvsreuytvra` (`VDB Digital Staging RC7`) |
+| Deprecated | `qzekuvmgfekzsowdecyk` — **REMOVED** — never use |
 
 Never apply staging scripts to production ref.

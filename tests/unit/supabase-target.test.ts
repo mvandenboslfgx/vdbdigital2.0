@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  DEPRECATED_STAGING_SUPABASE_PROJECT_REF,
   PRODUCTION_SUPABASE_PROJECT_REF,
   STAGING_SUPABASE_PROJECT_REF,
   assertSafeSupabaseTarget,
@@ -45,6 +46,15 @@ describe("supabase target guard", () => {
     ).not.toThrow();
     expect(isStagingSupabaseUrl(stagingUrl)).toBe(true);
     expect(isProductionSupabaseUrl(stagingUrl)).toBe(false);
+  });
+
+  it("blocks the removed staging project", () => {
+    expect(() =>
+      assertSafeSupabaseTarget({
+        NEXT_PUBLIC_SUPABASE_URL: `https://${DEPRECATED_STAGING_SUPABASE_PROJECT_REF}.supabase.co`,
+        NODE_ENV: "development",
+      }),
+    ).toThrow(/deprecated staging/);
   });
 
   it("allows Vercel production runtime against production URL", () => {

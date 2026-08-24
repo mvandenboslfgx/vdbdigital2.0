@@ -4,7 +4,10 @@
  */
 
 export const PRODUCTION_SUPABASE_PROJECT_REF = "nhsrdnjfsxfikfbdmdfj";
-export const STAGING_SUPABASE_PROJECT_REF = "qzekuvmgfekzsowdecyk";
+/** Canonical staging: VDB Digital Staging RC7 */
+export const STAGING_SUPABASE_PROJECT_REF = "kjricvicakvsreuytvra";
+/** Removed staging project \u2014 never use as an active target. */
+export const DEPRECATED_STAGING_SUPABASE_PROJECT_REF = "qzekuvmgfekzsowdecyk";
 
 export const PRODUCTION_SUPABASE_HOST = `${PRODUCTION_SUPABASE_PROJECT_REF}.supabase.co`;
 export const STAGING_SUPABASE_HOST = `${STAGING_SUPABASE_PROJECT_REF}.supabase.co`;
@@ -37,6 +40,12 @@ export function isStagingSupabaseUrl(url: string | undefined | null): boolean {
   return extractSupabaseProjectRef(url) === STAGING_SUPABASE_PROJECT_REF;
 }
 
+export function isDeprecatedStagingSupabaseUrl(
+  url: string | undefined | null,
+): boolean {
+  return extractSupabaseProjectRef(url) === DEPRECATED_STAGING_SUPABASE_PROJECT_REF;
+}
+
 export function isAuthorizedProductionSupabaseRun(env: EnvLike = process.env): boolean {
   if (env[ALLOW_PRODUCTION_WRITES_FLAG] === "1") return true;
   const isVercelProduction =
@@ -53,6 +62,14 @@ export function assertSafeSupabaseTarget(env: EnvLike = process.env): void {
     env.NEXT_PUBLIC_SUPABASE_URL ??
     env.SUPABASE_URL ??
     env.STAGING_SUPABASE_URL;
+
+  if (isDeprecatedStagingSupabaseUrl(url)) {
+    throw new Error(
+      `Refusing deprecated staging Supabase (${DEPRECATED_STAGING_SUPABASE_PROJECT_REF}). ` +
+        `Use RC7 (${STAGING_SUPABASE_PROJECT_REF}) or local Docker.`,
+    );
+  }
+
   if (!isProductionSupabaseUrl(url)) return;
   if (isAuthorizedProductionSupabaseRun(env)) return;
 

@@ -1,5 +1,5 @@
 /**
- * Apply exactly one local migration to staging (qzekuvmgfekzsowdecyk).
+ * Apply exactly one local migration to staging RC7 (kjricvicakvsreuytvra).
  * Never uses db push. Never targets production.
  *
  * Usage:
