@@ -359,7 +359,7 @@ export async function acceptInvitationAction(
     .from("organization_invitations")
     .select("*")
     .eq("token_hash", tokenHash)
-    .eq("status", "PENDING")
+    .in("status", ["PENDING", "SENT"])
     .maybeSingle();
 
   if (!invite || new Date(invite.expires_at).getTime() < Date.now()) {

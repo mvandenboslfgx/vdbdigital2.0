@@ -7,6 +7,7 @@ export type Permission =
   | "products.update"
   | "products.publish"
   | "products.change_price"
+  | "products.override_price_floor"
   | "products.archive"
   | "products.legal_approve"
   | "products.manage_media"
@@ -80,7 +81,9 @@ export type Permission =
   | "roles.manage"
   | "settings.read"
   | "settings.manage"
-  | "audit.read";
+  | "audit.read"
+  | "partners.view"
+  | "payouts.review";
 
 const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
   CONTENT: [
@@ -196,6 +199,8 @@ const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
     "notifications.manage",
     "settings.read",
     "audit.read",
+    "partners.view",
+    "payouts.review",
   ],
   OWNER: [
     "products.read",
@@ -203,6 +208,7 @@ const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
     "products.update",
     "products.publish",
     "products.change_price",
+    "products.override_price_floor",
     "products.archive",
     "products.legal_approve",
     "products.manage_media",
@@ -277,6 +283,8 @@ const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
     "settings.read",
     "settings.manage",
     "audit.read",
+    "partners.view",
+    "payouts.review",
   ],
 };
 
@@ -286,9 +294,11 @@ export const SENSITIVE_PERMISSIONS: ReadonlySet<Permission> = new Set([
   "payments.refund",
   "settings.manage",
   "products.change_price",
+  "products.override_price_floor",
   "products.publish",
   "products.legal_approve",
   "products.import",
+  "payouts.review",
 ]);
 
 export function getPermissionsForRole(role: AdminRole): readonly Permission[] {

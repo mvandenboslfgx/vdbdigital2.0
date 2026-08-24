@@ -20,6 +20,8 @@ const adminNav = [
   { label: "Add-ons", href: "/admin/addons", permission: "products.read" as const },
   { label: "Orders", href: "/admin/orders", permission: "orders.read" as const },
   { label: "Leads", href: "/admin/leads", permission: "leads.read" as const },
+  { label: "Partners", href: "/admin/payouts", permission: "partners.view" as const },
+  { label: "Uitbetalingen", href: "/admin/payouts", permission: "payouts.review" as const },
   { label: "Content", href: "/admin/content", permission: "content.manage" as const },
   { label: "Gebruikers", href: "/admin/users", permission: "roles.read" as const },
   { label: "Rollen", href: "/admin/roles", permission: "roles.read" as const },

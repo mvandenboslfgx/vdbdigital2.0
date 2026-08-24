@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Card } from "@/components/ui/container";
 import { getAdminOrganization } from "@/server/repositories/admin-portal";
+import { InvitationActions } from "@/components/admin/invitation-actions";
 import { PROJECT_STATUS_NL, QUOTE_STATUS_NL, TICKET_STATUS_NL, labelNl } from "@/lib/portal/labels";
 
 export const metadata: Metadata = {
@@ -15,7 +16,7 @@ export default async function AdminCustomerDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ invite?: string }>;
+  searchParams: Promise<{ invite?: string; mail?: string }>;
 }) {
   const { id } = await params;
   const sp = await searchParams;
@@ -35,10 +36,15 @@ export default async function AdminCustomerDetailPage({
         <p className="text-muted text-small">
           {org.customer_number} · {org.type} · {org.status}
         </p>
-        {sp.invite === "1" ? (
+        {sp.invite === "1" && sp.mail === "sent" ? (
           <p className="text-small text-success mt-2" role="status">
-            Klant aangemaakt. Uitnodiging is geregistreerd (token niet in UI
-            gelogd). Deel de uitnodigingsmail veilig.
+            Klant aangemaakt. Uitnodiging is verstuurd naar het klantadres.
+          </p>
+        ) : null}
+        {sp.invite === "1" && sp.mail === "failed" ? (
+          <p className="text-small text-error mt-2" role="alert">
+            Klant aangemaakt, maar de uitnodigingsmail is niet verstuurd. Gebruik
+            Opnieuw versturen hieronder.
           </p>
         ) : null}
       </div>
@@ -72,13 +78,21 @@ export default async function AdminCustomerDetailPage({
           {invites.length === 0 ? (
             <p className="text-small text-muted">Geen uitnodigingen.</p>
           ) : (
-            <ul className="space-y-2 text-small">
-              {invites.map((i: { id: string; email: string; status: string; expires_at: string }) => (
-                <li key={i.id}>
-                  {i.email} · {i.status} · verloopt{" "}
-                  {new Date(i.expires_at).toLocaleDateString("nl-NL")}
-                </li>
-              ))}
+            <ul className="space-y-3 text-small">
+              {invites.map(
+                (invitation: {
+                  id: string;
+                  email: string;
+                  status: string;
+                  expires_at: string;
+                  created_at: string;
+                  sent_at?: string | null;
+                  last_error?: string | null;
+                  retry_count?: number | null;
+                }) => (
+                  <InvitationActions key={invitation.id} invitation={invitation} />
+                ),
+              )}
             </ul>
           )}
         </Card>

@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import { getSupabasePublicKey } from "@/config/env";
+import { assertSafeSupabaseTarget } from "@/lib/security/supabase-target";
 
 interface SessionOptions {
   /** Extra request headers (e.g. x-locale) */
@@ -13,6 +14,7 @@ export async function updateSupabaseSession(
   request: NextRequest,
   options: SessionOptions = {},
 ): Promise<NextResponse> {
+  assertSafeSupabaseTarget(process.env);
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = getSupabasePublicKey();
 

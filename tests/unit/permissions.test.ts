@@ -85,6 +85,22 @@ describe("Catalog admin permissions", () => {
   it("OWNER can legal approve", () => {
     expect(hasPermission("OWNER", "products.legal_approve")).toBe(true);
   });
+
+  it("ADMIN and OWNER can review payouts; CONTENT cannot", () => {
+    expect(hasPermission("ADMIN", "payouts.review")).toBe(true);
+    expect(hasPermission("OWNER", "payouts.review")).toBe(true);
+    expect(hasPermission("CONTENT", "payouts.review")).toBe(false);
+    expect(hasPermission("SUPPORT", "payouts.review")).toBe(false);
+    expect(SENSITIVE_PERMISSIONS.has("payouts.review")).toBe(true);
+  });
+
+  it("only OWNER can override the minimum sale price floor", () => {
+    expect(hasPermission("OWNER", "products.override_price_floor")).toBe(true);
+    expect(hasPermission("ADMIN", "products.override_price_floor")).toBe(false);
+    expect(hasPermission("ADMIN", "products.change_price")).toBe(true);
+    expect(hasPermission("CONTENT", "products.override_price_floor")).toBe(false);
+    expect(SENSITIVE_PERMISSIONS.has("products.override_price_floor")).toBe(true);
+  });
 });
 
 describe("Role permission sets", () => {

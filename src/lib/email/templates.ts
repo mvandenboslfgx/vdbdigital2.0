@@ -91,6 +91,27 @@ export const customerMail = {
   },
 } as const;
 
+export function getInvitationMail(
+  locale: Locale | undefined,
+  input: { organizationName: string; acceptUrl: string },
+): MailBody {
+  const loc = locale === "en" ? "en" : "nl";
+  const name = input.organizationName;
+  const url = input.acceptUrl;
+  if (loc === "en") {
+    return {
+      subject: "You're invited to the VDB Digital customer portal",
+      text: `You have been invited to the customer portal for ${name}.\n\nActivate your account:\n${url}\n\nThis link expires in 7 days. If you did not expect this message, you can ignore it.`,
+      html: `<p>You have been invited to the customer portal for <strong>${escapeHtml(name)}</strong>.</p><p><a href="${escapeHtml(url)}">Activate your account</a></p><p>This link expires in 7 days. If you did not expect this message, you can ignore it.</p>`,
+    };
+  }
+  return {
+    subject: "Uitnodiging voor het klantenportaal van VDB Digital",
+    text: `Je bent uitgenodigd voor het klantenportaal van ${name}.\n\nActiveer je account:\n${url}\n\nDeze link is 7 dagen geldig. Verwachtte je dit bericht niet, dan kun je het negeren.`,
+    html: `<p>Je bent uitgenodigd voor het klantenportaal van <strong>${escapeHtml(name)}</strong>.</p><p><a href="${escapeHtml(url)}">Activeer je account</a></p><p>Deze link is 7 dagen geldig. Verwachtte je dit bericht niet, dan kun je het negeren.</p>`,
+  };
+}
+
 export type CustomerMailFamily = keyof typeof customerMail;
 
 export function resolveMailLocale(locale?: Locale): Locale {

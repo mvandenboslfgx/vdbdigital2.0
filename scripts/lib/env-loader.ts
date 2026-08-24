@@ -3,6 +3,7 @@
  */
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { assertSafeSupabaseTarget } from "../../src/lib/security/supabase-target";
 
 export function loadEnvLocal(): void {
   const envPath = resolve(process.cwd(), ".env.local");
@@ -21,6 +22,8 @@ export function loadEnvLocal(): void {
       process.env[key] = value;
     }
   }
+
+  assertSafeSupabaseTarget(process.env);
 }
 
 export function requireEnv(keys: string[]): void {

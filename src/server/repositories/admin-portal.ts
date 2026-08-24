@@ -8,6 +8,8 @@ import {
   hashInviteToken,
 } from "@/lib/auth/invite-token";
 import { resolveAppUrl } from "@/lib/url/app-url";
+import { sendInvitationEmail } from "@/lib/email/resend";
+import { resolveInvitationRecipient } from "@/lib/email/invitation-recipient";
 
 export type AdminOrganizationRow = {
   id: string;
@@ -122,7 +124,9 @@ export async function getAdminOrganization(id: string) {
         .order("created_at", { ascending: false }),
       supabase
         .from("organization_invitations")
-        .select("id, email, status, expires_at, created_at, customer_role")
+        .select(
+          "id, email, status, expires_at, created_at, sent_at, last_error, retry_count, customer_role",
+        )
         .eq("organization_id", id)
         .order("created_at", { ascending: false }),
     ]);
@@ -139,20 +143,93 @@ export async function getAdminOrganization(id: string) {
   };
 }
 
+async function dispatchOrganizationInvitation(input: {
+  supabase: NonNullable<ReturnType<typeof createServiceRoleClient>>;
+  invitationId: string;
+  organizationId: string;
+  organizationName: string;
+  recipient: string;
+  token: string;
+  actorUserId: string;
+  retryCount?: number;
+}) {
+  const acceptUrl = `${resolveAppUrl()}/uitnodiging/accepteren?token=${input.token}`;
+  const dispatch = await sendInvitationEmail({
+    to: input.recipient,
+    organizationName: input.organizationName,
+    acceptUrl,
+  });
+
+  const nextStatus = dispatch.sent ? "SENT" : "FAILED";
+  await input.supabase
+    .from("organization_invitations")
+    .update({
+      status: nextStatus,
+      sent_at: dispatch.sent ? new Date().toISOString() : null,
+      provider_message_id: dispatch.providerMessageId ?? null,
+      last_error: dispatch.sent ? null : (dispatch.reason ?? "send_failed"),
+      retry_count: input.retryCount ?? 0,
+    })
+    .eq("id", input.invitationId);
+
+  await writeAuditLog({
+    userId: input.actorUserId,
+    action: dispatch.sent
+      ? "admin.invitation_dispatched"
+      : "admin.invitation_dispatch_failed",
+    metadata: {
+      organizationId: input.organizationId,
+      invitationId: input.invitationId,
+      recipient: input.recipient,
+      providerMessageId: dispatch.providerMessageId ?? null,
+      reason: dispatch.sent ? null : (dispatch.reason ?? "send_failed"),
+    },
+  });
+
+  return dispatch;
+}
+
 export async function createOrganizationWithInvite(input: {
   legalName: string;
   tradeName?: string;
   type: "BUSINESS" | "CONSUMER";
   contactEmail: string;
-  inviteEmail: string;
+  inviteEmail?: string;
 }) {
   const ctx = await requireAdmin();
   await requirePermission(ctx, "customers.create");
   await requirePermission(ctx, "customers.invite");
 
+  const recipientResult = resolveInvitationRecipient({
+    contactEmail: input.contactEmail,
+    inviteEmail: input.inviteEmail,
+  });
+  if (!recipientResult.ok) {
+    throw new Error(recipientResult.error);
+  }
+
   const supabase = createServiceRoleClient();
   if (!supabase) {
     throw new Error("Database niet beschikbaar");
+  }
+
+  const since = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+  const { data: duplicate } = await supabase
+    .from("organizations")
+    .select("id")
+    .eq("legal_name", input.legalName)
+    .eq("contact_email", input.contactEmail)
+    .eq("account_manager_id", ctx.user.id)
+    .gte("created_at", since)
+    .maybeSingle();
+
+  if (duplicate?.id) {
+    return {
+      organizationId: duplicate.id,
+      customerNumber: null as string | null,
+      mailSent: false,
+      duplicate: true,
+    };
   }
 
   const customerNumber = `K-${Date.now().toString(36).toUpperCase()}`;
@@ -178,35 +255,161 @@ export async function createOrganizationWithInvite(input: {
   const tokenHash = hashInviteToken(token);
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
-  const { error: inviteError } = await supabase
+  const { data: invitation, error: inviteError } = await supabase
     .from("organization_invitations")
     .insert({
       organization_id: org.id,
-      email: input.inviteEmail.toLowerCase(),
+      email: recipientResult.recipient,
       customer_role: "PRIMARY",
       token_hash: tokenHash,
       status: "PENDING",
       invited_by: ctx.user.id,
       expires_at: expiresAt,
-    });
+    })
+    .select("id")
+    .single();
 
-  if (inviteError) {
-    throw new Error(inviteError.message);
+  if (inviteError || !invitation) {
+    throw new Error(inviteError?.message ?? "Uitnodiging aanmaken mislukt");
   }
 
   await writeAuditLog({
     userId: ctx.user.id,
     action: "admin.customer_created",
-    metadata: { organizationId: org.id },
-  });
-  await writeAuditLog({
-    userId: ctx.user.id,
-    action: "admin.invitation_sent",
-    metadata: { organizationId: org.id },
+    metadata: { organizationId: org.id, recipient: recipientResult.recipient },
   });
 
-  const inviteUrl = `${resolveAppUrl()}/uitnodiging/accepteren?token=${token}`;
-  return { organizationId: org.id, inviteUrl, customerNumber };
+  const dispatch = await dispatchOrganizationInvitation({
+    supabase,
+    invitationId: invitation.id,
+    organizationId: org.id,
+    organizationName: input.tradeName || input.legalName,
+    recipient: recipientResult.recipient,
+    token,
+    actorUserId: ctx.user.id,
+  });
+
+  return {
+    organizationId: org.id,
+    customerNumber,
+    mailSent: dispatch.sent,
+    mailError: dispatch.reason,
+    duplicate: false,
+  };
+}
+
+const RESENDABLE = new Set(["PENDING", "SENT", "FAILED"]);
+
+export async function resendOrganizationInvitation(invitationId: string) {
+  const ctx = await requireAdmin();
+  await requirePermission(ctx, "customers.invite");
+
+  const supabase = createServiceRoleClient();
+  if (!supabase) {
+    throw new Error("Database niet beschikbaar");
+  }
+
+  const { data: invitation } = await supabase
+    .from("organization_invitations")
+    .select("id, organization_id, email, status, retry_count, expires_at")
+    .eq("id", invitationId)
+    .maybeSingle();
+
+  if (!invitation) {
+    throw new Error("Uitnodiging niet gevonden");
+  }
+  if (!RESENDABLE.has(invitation.status)) {
+    throw new Error("Deze uitnodiging kan niet opnieuw worden verstuurd.");
+  }
+
+  const { data: org } = await supabase
+    .from("organizations")
+    .select("id, legal_name, trade_name")
+    .eq("id", invitation.organization_id)
+    .maybeSingle();
+
+  if (!org) {
+    throw new Error("Organisatie niet gevonden");
+  }
+
+  const recipientResult = resolveInvitationRecipient({
+    contactEmail: invitation.email,
+    inviteEmail: invitation.email,
+  });
+  if (!recipientResult.ok) {
+    throw new Error(recipientResult.error);
+  }
+
+  const token = createInviteToken();
+  const tokenHash = hashInviteToken(token);
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  const retryCount = (invitation.retry_count ?? 0) + 1;
+
+  await supabase
+    .from("organization_invitations")
+    .update({
+      token_hash: tokenHash,
+      expires_at: expiresAt,
+      status: "PENDING",
+      last_error: null,
+      retry_count: retryCount,
+    })
+    .eq("id", invitation.id);
+
+  return dispatchOrganizationInvitation({
+    supabase,
+    invitationId: invitation.id,
+    organizationId: org.id,
+    organizationName: org.trade_name || org.legal_name,
+    recipient: recipientResult.recipient,
+    token,
+    actorUserId: ctx.user.id,
+    retryCount,
+  });
+}
+
+export async function revokeOrganizationInvitation(invitationId: string) {
+  const ctx = await requireAdmin();
+  await requirePermission(ctx, "customers.invite");
+
+  const supabase = createServiceRoleClient();
+  if (!supabase) {
+    throw new Error("Database niet beschikbaar");
+  }
+
+  const { data: invitation } = await supabase
+    .from("organization_invitations")
+    .select("id, organization_id, status")
+    .eq("id", invitationId)
+    .maybeSingle();
+
+  if (!invitation) {
+    throw new Error("Uitnodiging niet gevonden");
+  }
+  if (invitation.status === "ACCEPTED") {
+    throw new Error("Een geaccepteerde uitnodiging kan niet worden ingetrokken.");
+  }
+
+  const { error } = await supabase
+    .from("organization_invitations")
+    .update({
+      status: "REVOKED",
+      revoked_at: new Date().toISOString(),
+    })
+    .eq("id", invitationId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  await writeAuditLog({
+    userId: ctx.user.id,
+    action: "admin.invitation_revoked",
+    metadata: {
+      organizationId: invitation.organization_id,
+      invitationId,
+    },
+  });
 }
 
 export async function getAdminPortalDashboardCounts() {

@@ -4,8 +4,10 @@ import {
   getSupabasePublicKey,
   isSupabasePublicConfigured,
 } from "@/config/env";
+import { assertSafeSupabaseTarget } from "@/lib/security/supabase-target";
 
 export function createClient() {
+  assertSafeSupabaseTarget(process.env);
   if (!isSupabasePublicConfigured()) {
     return null;
   }

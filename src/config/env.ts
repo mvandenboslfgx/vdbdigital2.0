@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { isEmailFromAddress } from "../lib/email/address";
 import { evaluateProductionAppUrl } from "../lib/url/app-url";
+import { assertSafeSupabaseTarget } from "../lib/security/supabase-target";
 
 /** Bare email or Resend-style `Name <email@domain>`. */
 const emailFromField = z
@@ -26,6 +27,7 @@ const publicEnvSchema = z.object({
 export type PublicEnv = z.infer<typeof publicEnvSchema>;
 
 export function getPublicEnv(): PublicEnv {
+  assertSafeSupabaseTarget(process.env);
   return publicEnvSchema.parse({
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NEXT_PUBLIC_SITE_NAME: process.env.NEXT_PUBLIC_SITE_NAME,
@@ -133,6 +135,7 @@ function envWithoutEmpty(values: Record<string, unknown>): Record<string, unknow
 }
 
 export function getServerEnv(): ServerEnv {
+  assertSafeSupabaseTarget(process.env);
   if (cachedServerEnv) return cachedServerEnv;
   cachedServerEnv = serverEnvSchema.parse(
     envWithoutEmpty({

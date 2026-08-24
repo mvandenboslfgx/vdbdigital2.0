@@ -1,11 +1,13 @@
 import "server-only";
 import { getServerEnv, getSupabaseSecretKey, isSupabaseFullyConfigured } from "@/config/env";
+import { assertSafeSupabaseTarget } from "@/lib/security/supabase-target";
 
 /**
  * Supabase admin client — Secret key, bypasses RLS.
  * Alleen server-side gebruiken (mutaties, seed, webhooks, audit).
  */
 export function createAdminClient() {
+  assertSafeSupabaseTarget(process.env);
   if (!isSupabaseFullyConfigured()) {
     return null;
   }

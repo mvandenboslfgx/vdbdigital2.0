@@ -6,10 +6,12 @@ import {
   getSupabasePublicKey,
   isSupabasePublicConfigured,
 } from "@/config/env";
+import { assertSafeSupabaseTarget } from "@/lib/security/supabase-target";
 
 export { createAdminClient, createServiceRoleClient } from "@/lib/database/admin";
 
 export async function createServerSupabaseClient() {
+  assertSafeSupabaseTarget(process.env);
   if (!isSupabasePublicConfigured()) {
     return null;
   }

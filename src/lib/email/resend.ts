@@ -5,9 +5,12 @@ import type { Locale } from "@/i18n/config";
 import { escapeHtml } from "@/lib/utilities/escape-html";
 import {
   getCustomerMailPreview,
+  getInvitationMail,
   type CustomerMailFamily,
   type MailBody,
 } from "@/lib/email/templates";
+import { extractEmailAddress } from "@/lib/email/address";
+import { assertInvitationRecipient } from "@/lib/email/invitation-recipient";
 
 export function isEmailConfigured(): boolean {
   return Boolean(process.env.RESEND_API_KEY && process.env.EMAIL_FROM);
@@ -23,21 +26,69 @@ const from = () =>
   process.env.EMAIL_FROM ?? `noreply@${siteConfig.name.toLowerCase().replace(/\s/g, "")}.nl`;
 const admin = () => process.env.EMAIL_ADMIN ?? siteConfig.contactEmail;
 
+export type MailDispatchResult = {
+  sent: boolean;
+  reason?: string;
+  providerMessageId?: string;
+};
+
 async function sendCustomerMail(
   to: string,
   body: MailBody,
-): Promise<{ sent: boolean; reason?: string }> {
+): Promise<MailDispatchResult> {
   const resend = getResend();
   if (!resend) return { sent: false, reason: "Email is not configured" };
 
-  await resend.emails.send({
-    from: from(),
-    to,
+  const sender = from();
+  const toAddress = extractEmailAddress(to) ?? to;
+  const fromAddress = extractEmailAddress(sender);
+
+  if (fromAddress && toAddress.toLowerCase() === fromAddress.toLowerCase()) {
+    return {
+      sent: false,
+      reason: "Recipient must not equal the configured From address",
+    };
+  }
+
+  const { data, error } = await resend.emails.send({
+    from: sender,
+    to: toAddress,
     subject: body.subject,
     text: body.text,
     html: body.html,
   });
-  return { sent: true };
+
+  if (error || !data?.id) {
+    return {
+      sent: false,
+      reason: error?.message ?? "Provider rejected the message",
+    };
+  }
+
+  return { sent: true, providerMessageId: data.id };
+}
+
+export async function sendInvitationEmail(input: {
+  to: string;
+  organizationName: string;
+  acceptUrl: string;
+  locale?: Locale;
+}): Promise<MailDispatchResult> {
+  const allowed = assertInvitationRecipient({
+    recipient: input.to,
+    fromAddress: from(),
+  });
+  if (!allowed.ok) {
+    return { sent: false, reason: allowed.error };
+  }
+
+  return sendCustomerMail(
+    allowed.recipient,
+    getInvitationMail(input.locale, {
+      organizationName: input.organizationName,
+      acceptUrl: input.acceptUrl,
+    }),
+  );
 }
 
 function pick(family: CustomerMailFamily, locale: Locale | undefined, arg: string) {

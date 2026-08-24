@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 import {
   createCustomerAction,
   type AdminPortalActionState,
@@ -15,6 +15,7 @@ export function CreateCustomerForm() {
     createCustomerAction,
     initial,
   );
+  const inviteRef = useRef<HTMLInputElement>(null);
 
   return (
     <form
@@ -22,6 +23,10 @@ export function CreateCustomerForm() {
       className="rounded-xl border border-border bg-surface p-5 space-y-4"
     >
       <h2 className="text-h3">Klant aanmaken & uitnodigen</h2>
+      <p className="text-small text-muted">
+        De uitnodiging gaat naar het klantadres, niet naar het VDB-afzenderadres
+        (noreply).
+      </p>
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
           <label htmlFor="legalName" className="block text-small font-medium mb-1">
@@ -62,6 +67,13 @@ export function CreateCustomerForm() {
             type="email"
             required
             maxLength={254}
+            autoComplete="off"
+            onBlur={(event) => {
+              const invite = inviteRef.current;
+              if (invite && !invite.value.trim()) {
+                invite.value = event.currentTarget.value.trim();
+              }
+            }}
           />
         </div>
         <div className="sm:col-span-2">
@@ -72,12 +84,17 @@ export function CreateCustomerForm() {
             Uitnodiging naar
           </label>
           <Input
+            ref={inviteRef}
             id="inviteEmail"
             name="inviteEmail"
             type="email"
-            required
             maxLength={254}
+            autoComplete="off"
+            placeholder="Standaard het contactadres"
           />
+          <p className="text-small text-muted mt-1">
+            Leeg laten = zelfde adres als contact. Geen noreply@-adres.
+          </p>
         </div>
       </div>
       {state.error && (
