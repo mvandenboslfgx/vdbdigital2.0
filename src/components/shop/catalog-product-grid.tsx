@@ -4,7 +4,8 @@ import type { Locale } from "@/i18n/config";
 import { paths } from "@/i18n/config";
 import { LocaleLink } from "@/i18n/locale-link";
 import { localizeProduct } from "@/i18n/localize-product";
-import { publicShopPriceDisplay } from "@/lib/commerce/public-shop-gates";
+import { PublicPrice } from "@/components/shop/public-price";
+import { publicShopCtaLabel, publicShopPriceDisplay } from "@/lib/commerce/public-shop-gates";
 import { billingPeriodLabel } from "@/lib/utilities/money";
 import type { Product } from "@/types";
 
@@ -12,13 +13,14 @@ export function CatalogProductGrid({
   products,
   locale,
   recommendedLabel,
-  viewLabel,
+  viewLabel: _viewLabel,
 }: {
   products: Product[];
   locale: Locale;
   recommendedLabel: string;
   viewLabel: string;
 }) {
+  void _viewLabel;
   return (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {products.map((rawProduct) => {
@@ -47,21 +49,20 @@ export function CatalogProductGrid({
                 <h2 className="text-h3 mb-2 text-light-foreground transition-colors group-hover:text-primary">
                   {product.name}
                 </h2>
-                <p className="text-small mb-5 line-clamp-3 flex-1 text-light-muted">
+                <p className="text-small mb-4 line-clamp-2 flex-1 text-light-muted">
                   {product.shortDescription}
                 </p>
-                <p className="font-semibold text-primary">{price.label}</p>
+                <PublicPrice product={product} locale={locale} />
                 {price.mode !== "on_request" ? (
                   <p className="mt-1 text-xs text-light-muted">
-                    {locale === "nl" ? "per" : "per"} {quantityLabel || "item"} ·{" "}
                     {billingPeriodLabel(product.billingType, locale)}
                   </p>
                 ) : null}
                 <span
-                  className="mt-5 inline-flex min-h-11 items-center text-small font-medium text-primary"
+                  className="mt-4 inline-flex min-h-11 items-center text-small font-medium text-primary"
                   data-catalog-product-cta
                 >
-                  {viewLabel} →
+                  {publicShopCtaLabel(product, locale)} →
                 </span>
               </div>
             </Card>

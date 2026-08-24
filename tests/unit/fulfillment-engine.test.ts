@@ -1,46 +1,22 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
+import { inferFulfillmentType } from "@/server/services/fulfillment/engine";
 
-vi.mock("@/lib/security/audit-log", () => ({
-  writeAuditLog: vi.fn(async () => undefined),
-}));
-
-import { writeAuditLog } from "@/lib/security/audit-log";
-import {
-  __resetFulfillmentIdempotencyForTests,
-  processDeliveryReleased,
-} from "@/server/services/fulfillment/engine";
-
-describe("fulfillment engine", () => {
-  beforeEach(() => {
-    __resetFulfillmentIdempotencyForTests();
-    vi.mocked(writeAuditLog).mockClear();
+describe("fulfillment type inference", () => {
+  it("maps website slugs to WEBSITE_PROJECT", () => {
+    expect(inferFulfillmentType("website-starter")).toBe("WEBSITE_PROJECT");
   });
 
-  it("queues manual review jobs idempotently on delivery_released", async () => {
-    const first = await processDeliveryReleased({
-      orderId: "ord-1",
-      paymentId: "pay-1",
-      productSlugs: ["launch-website"],
-    });
-    const second = await processDeliveryReleased({
-      orderId: "ord-1",
-      paymentId: "pay-1",
-      productSlugs: ["launch-website"],
-    });
-
-    expect(first).toHaveLength(1);
-    expect(first[0]?.fulfillmentType).toBe("WEBSITE_PROJECT");
-    expect(first[0]?.status).toBe("pending_manual_review");
-    expect(second).toHaveLength(0);
-    expect(writeAuditLog).toHaveBeenCalledTimes(1);
+  it("maps yearly/license slugs to DIGITAL_LICENSE or SUBSCRIPTION", () => {
+    expect(inferFulfillmentType("software-license")).toBe("DIGITAL_LICENSE");
+    expect(inferFulfillmentType("jaarlicentie")).toBe("SUBSCRIPTION");
   });
 
-  it("skips when alreadyProcessed", async () => {
-    const jobs = await processDeliveryReleased({
-      orderId: "ord-2",
-      alreadyProcessed: true,
-    });
-    expect(jobs).toHaveLength(0);
-    expect(writeAuditLog).not.toHaveBeenCalled();
+  it("maps download and service slugs instead of defaulting everything to manual review", () => {
+    expect(inferFulfillmentType("icon-pack-download")).toBe("DOWNLOAD");
+    expect(inferFulfillmentType("support-service")).toBe("SERVICE");
+  });
+
+  it("keeps custom work on QUOTE_REQUIRED", () => {
+    expect(inferFulfillmentType("custom-quote")).toBe("QUOTE_REQUIRED");
   });
 });

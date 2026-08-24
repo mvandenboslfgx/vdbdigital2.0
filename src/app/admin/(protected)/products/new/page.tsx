@@ -25,6 +25,7 @@ export default async function AdminNewProductPage() {
       categories={categories}
       canPublish={hasPermission(access.context.role, "products.publish")}
       canChangePrice={hasPermission(access.context.role, "products.change_price")}
+      canOverrideFloor={hasPermission(access.context.role, "products.override_price_floor")}
       canLegal={hasPermission(access.context.role, "products.legal_approve")}
       canArchive={hasPermission(access.context.role, "products.archive")}
       blockReasons={["Directe checkout is momenteel algemeen uitgeschakeld"]}

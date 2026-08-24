@@ -94,6 +94,13 @@ describe("Catalog admin permissions", () => {
     expect(SENSITIVE_PERMISSIONS.has("payouts.review")).toBe(true);
   });
 
+  it("ADMIN, OWNER and SUPPORT can review fulfillment jobs", () => {
+    expect(hasPermission("ADMIN", "jobs.review")).toBe(true);
+    expect(hasPermission("OWNER", "jobs.review")).toBe(true);
+    expect(hasPermission("SUPPORT", "jobs.review")).toBe(true);
+    expect(hasPermission("CONTENT", "jobs.review")).toBe(false);
+  });
+
   it("only OWNER can override the minimum sale price floor", () => {
     expect(hasPermission("OWNER", "products.override_price_floor")).toBe(true);
     expect(hasPermission("ADMIN", "products.override_price_floor")).toBe(false);

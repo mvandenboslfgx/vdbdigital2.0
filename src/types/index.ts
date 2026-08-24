@@ -157,10 +157,22 @@ export interface Product {
   currency?: string;
   vatPercent?: number;
   priceIncludesVat?: boolean;
-  compareAtCents?: number | null;
-  priceLabel?: string | null;
-  costCents?: number | null;
-  badge?: string | null;
+    compareAtCents?: number | null;
+    priceLabel?: string | null;
+    costCents?: number | null;
+    marketPriceCents?: number | null;
+    retailPriceCents?: number | null;
+    salePriceCents?: number | null;
+    saleStartsAt?: string | null;
+    saleEndsAt?: string | null;
+    partnerPriceCents?: number | null;
+    minimumSalePriceCents?: number | null;
+    belowFloorOwnerApproved?: boolean;
+    lowestPrice30dCents?: number | null;
+    currentPriceSince?: string | null;
+    partnerCommissionType?: string | null;
+    partnerCommissionValue?: number | null;
+    badge?: string | null;
   tags?: string[];
   audienceB2b?: boolean;
   audienceB2c?: boolean;
@@ -192,6 +204,14 @@ export interface Product {
   translations?: ProductTranslation[];
   media?: ProductMedia[];
   addons?: ProductAddon[];
+  fulfillmentType?:
+    | "DIGITAL_LICENSE"
+    | "SUBSCRIPTION"
+    | "WEBSITE_PROJECT"
+    | "SERVICE"
+    | "DOWNLOAD"
+    | "MANUAL_REVIEW"
+    | "QUOTE_REQUIRED";
 }
 
 export interface Category {

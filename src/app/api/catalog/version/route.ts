@@ -15,9 +15,9 @@ export async function GET(request: Request) {
     catalog_version: CATALOG_CONTENT_VERSION,
     contract: CATALOG_CONTRACT_PIN,
     updated_at: new Date().toISOString(),
-    status: "partial_ssot" as const,
+    status: "supabase_ssot" as const,
     notes:
-      "Commercial packages still dual-sourced (TS + Supabase). Treat as draft until SSOT unification.",
+      "Public shop catalog is Supabase-backed. Clients should revalidate via ETag after admin publish.",
   };
 
   const etag = `"${CATALOG_CONTENT_VERSION}"`;

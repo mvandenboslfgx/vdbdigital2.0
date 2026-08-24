@@ -103,8 +103,7 @@ export async function getAllProducts(): Promise<Product[]> {
   const { data, error } = await supabase
     .from("products")
     .select("*, category:categories(id, slug, name, name_nl, is_active)")
-    .eq("status", "PUBLISHED")
-    .eq("is_active", true)
+    .in("status", ["PUBLISHED"])
     .eq("is_concept", false)
     .order("sort_order");
 

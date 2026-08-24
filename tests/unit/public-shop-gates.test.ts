@@ -125,6 +125,42 @@ describe("public shop gates", () => {
     expect(nl.label).toBe("Prijs op aanvraag");
     expect(nl.label).not.toMatch(/500/);
   });
+
+  it("shows a labeled market benchmark without a discount claim when history is missing", () => {
+    const product = baseProduct({
+      priceMode: "FIXED",
+      billingType: "ONE_TIME",
+      marketPriceCents: 9995,
+      retailPriceCents: 9995,
+      salePriceCents: 7995,
+      priceCents: 7995,
+      priceLabel: null,
+    });
+    const nl = publicShopPriceDisplay(product, "nl");
+    expect(nl.mode).toBe("benchmark");
+    expect(nl.marketLabel).toMatch(/99/);
+    expect(nl.label).toMatch(/79/);
+    expect(nl.discountLabel).toBeUndefined();
+    expect(nl.compareLabel).toBeUndefined();
+  });
+
+  it("shows a public strikethrough only when lowest-price-30d history supports it", () => {
+    const product = baseProduct({
+      priceMode: "FIXED",
+      billingType: "ONE_TIME",
+      marketPriceCents: 10995,
+      retailPriceCents: 9995,
+      salePriceCents: 7995,
+      priceCents: 7995,
+      lowestPrice30dCents: 9995,
+      priceLabel: null,
+    });
+    const nl = publicShopPriceDisplay(product, "nl");
+    expect(nl.mode).toBe("legal_sale");
+    expect(nl.compareLabel).toMatch(/99/);
+    expect(nl.label).toMatch(/79/);
+    expect(nl.discountLabel).toBe("20% korting");
+  });
 });
 
 describe("category localization", () => {

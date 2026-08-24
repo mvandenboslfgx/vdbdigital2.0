@@ -42,6 +42,7 @@ export default async function AdminEditProductPage({
       checklist={checklist}
       canPublish={hasPermission(access.context.role, "products.publish")}
       canChangePrice={hasPermission(access.context.role, "products.change_price")}
+      canOverrideFloor={hasPermission(access.context.role, "products.override_price_floor")}
       canLegal={hasPermission(access.context.role, "products.legal_approve")}
       canArchive={hasPermission(access.context.role, "products.archive")}
       blockReasons={blockReasons}

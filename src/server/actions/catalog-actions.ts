@@ -40,6 +40,11 @@ import {
   PRODUCT_EXPORT_HEADERS,
 } from "@/lib/catalog/csv";
 import {
+  assertSaleRespectsFloor,
+  resolvePublicPrice,
+  type CanonicalPriceInput,
+} from "@/lib/commerce/canonical-pricing";
+import {
   isLegacyTawkProduct,
   isLegacyTawkAddon,
   LEGACY_TAWK_PUBLIC_DENIED_MESSAGE,
@@ -69,10 +74,56 @@ function quantityBoundsError(data: { minQuantity: number; maxQuantity: number })
     : null;
 }
 
+function pricingWriteInput(
+  pricing: CreateProductInput["pricing"],
+  ownerOverride: boolean,
+  lowestPrice30dCents?: number | null,
+): CanonicalPriceInput {
+  const retailPriceCents =
+    pricing.priceMode === "FIXED"
+      ? (pricing.retailPriceCents ?? pricing.priceCents)
+      : pricing.priceMode === "STARTING_FROM"
+        ? (pricing.retailPriceCents ?? pricing.fromPriceCents)
+        : (pricing.retailPriceCents ?? pricing.priceCents);
+  return {
+    priceMode: pricing.priceMode,
+    marketPriceCents: pricing.marketPriceCents ?? retailPriceCents,
+    retailPriceCents,
+    salePriceCents: pricing.salePriceCents ?? null,
+    saleStartsAt: pricing.saleStartsAt ?? null,
+    saleEndsAt: pricing.saleEndsAt ?? null,
+    partnerPriceCents: pricing.partnerPriceCents ?? null,
+    supplierCostCents: pricing.costCents ?? null,
+    minimumSalePriceCents: pricing.minimumSalePriceCents ?? null,
+    belowFloorOwnerApproved: ownerOverride,
+    lowestPrice30dCents: lowestPrice30dCents ?? null,
+    vatPercent: pricing.vatPercent,
+    priceIncludesVat: pricing.priceIncludesVat,
+  };
+}
+
+function priceFloorError(input: CanonicalPriceInput): string | null {
+  const result = assertSaleRespectsFloor(input);
+  if (result.ok) return null;
+  return "Korting mag niet onder de minimumverkoopprijs komen zonder expliciete OWNER-goedkeuring.";
+}
+
+function mapCatalogWriteError(message: string): string {
+  if (message.includes("PRICE_BELOW_FLOOR")) {
+    return "Korting mag niet onder de minimumverkoopprijs komen zonder expliciete OWNER-goedkeuring.";
+  }
+  if (message.includes("does not exist")) {
+    return "Catalogusmigratie is nog niet toegepast. Zie docs/CATALOG_ADMIN_MIGRATION.md.";
+  }
+  return message;
+}
+
 function buildProductInsert(data: CreateProductInput, userId: string) {
   const pricing = data.pricing;
   const priceMode = pricing.priceMode;
-  const priceCents = priceMode === "FIXED" ? pricing.priceCents : null;
+  const canonical = pricingWriteInput(pricing, Boolean(pricing.belowFloorOwnerApproved));
+  const resolved = resolvePublicPrice(canonical);
+  const priceCents = priceMode === "FIXED" ? resolved.customerPriceCents : null;
   const fromPriceCents = priceMode === "STARTING_FROM" ? pricing.fromPriceCents : null;
 
   return {
@@ -89,7 +140,19 @@ function buildProductInsert(data: CreateProductInput, userId: string) {
     currency: pricing.currency,
     vat_percent: pricing.vatPercent,
     price_includes_vat: pricing.priceIncludesVat,
-    compare_at_cents: pricing.compareAtCents ?? null,
+    compare_at_cents: resolved.compareAtCents ?? null,
+    market_price_cents: canonical.marketPriceCents ?? null,
+    retail_price_cents: canonical.retailPriceCents ?? null,
+    sale_price_cents: canonical.salePriceCents ?? null,
+    sale_starts_at: canonical.saleStartsAt ?? null,
+    sale_ends_at: canonical.saleEndsAt ?? null,
+    partner_price_cents: canonical.partnerPriceCents ?? null,
+    minimum_sale_price_cents: canonical.minimumSalePriceCents ?? null,
+    below_floor_owner_approved: Boolean(canonical.belowFloorOwnerApproved),
+    below_floor_approved_by: canonical.belowFloorOwnerApproved ? userId : null,
+    below_floor_approved_at: canonical.belowFloorOwnerApproved
+      ? new Date().toISOString()
+      : null,
     price_label: pricing.priceLabel ?? null,
     cost_cents: pricing.costCents ?? null,
     badge: data.badge ?? null,
@@ -179,6 +242,19 @@ export async function createProductAction(
     const quantityError = quantityBoundsError(parsed.data);
     if (quantityError) return { error: quantityError };
 
+    parsed.data.pricing.belowFloorOwnerApproved =
+      parsed.data.pricing.belowFloorOwnerApproved === true && ctx.role === "OWNER";
+    if (parsed.data.pricing.belowFloorOwnerApproved) {
+      await requirePermission(ctx, "products.override_price_floor");
+    }
+    const floor = priceFloorError(
+      pricingWriteInput(
+        parsed.data.pricing,
+        Boolean(parsed.data.pricing.belowFloorOwnerApproved),
+      ),
+    );
+    if (floor) return { error: floor };
+
     if (
       isLegacyTawkProduct({
         slug: parsed.data.slug,
@@ -205,11 +281,7 @@ export async function createProductAction(
     const { data, error } = await supabase.from("products").insert(row).select("id").single();
 
     if (error) {
-      return {
-        error: error.message.includes("does not exist")
-          ? "Catalogusmigratie is nog niet toegepast. Zie docs/CATALOG_ADMIN_MIGRATION.md."
-          : error.message,
-      };
+      return { error: mapCatalogWriteError(error.message) };
     }
 
     await upsertTranslations(data.id, parsed.data.translations);
@@ -244,6 +316,19 @@ export async function updateProductAction(
     const quantityError = quantityBoundsError(parsed.data);
     if (quantityError) return { error: quantityError };
 
+    parsed.data.pricing.belowFloorOwnerApproved =
+      parsed.data.pricing.belowFloorOwnerApproved === true && ctx.role === "OWNER";
+    if (parsed.data.pricing.belowFloorOwnerApproved) {
+      await requirePermission(ctx, "products.override_price_floor");
+    }
+    const floor = priceFloorError(
+      pricingWriteInput(
+        parsed.data.pricing,
+        Boolean(parsed.data.pricing.belowFloorOwnerApproved),
+      ),
+    );
+    if (floor) return { error: floor };
+
     const existing = await authorizeCatalogProduct(ctx, parsed.data.id, "products.update");
 
     if ((existing.version as number | undefined) !== parsed.data.expectedVersion) {
@@ -273,7 +358,15 @@ export async function updateProductAction(
       existing.price_cents !== parsed.data.pricing.priceCents ||
       existing.from_price_cents !== parsed.data.pricing.fromPriceCents ||
       existing.price_mode !== parsed.data.pricing.priceMode ||
-      existing.billing_type !== parsed.data.pricing.billingType;
+      existing.billing_type !== parsed.data.pricing.billingType ||
+      existing.market_price_cents !== (parsed.data.pricing.marketPriceCents ?? null) ||
+      existing.retail_price_cents !== (parsed.data.pricing.retailPriceCents ?? null) ||
+      existing.sale_price_cents !== (parsed.data.pricing.salePriceCents ?? null) ||
+      existing.sale_starts_at !== (parsed.data.pricing.saleStartsAt ?? null) ||
+      existing.sale_ends_at !== (parsed.data.pricing.saleEndsAt ?? null) ||
+      existing.partner_price_cents !== (parsed.data.pricing.partnerPriceCents ?? null) ||
+      existing.minimum_sale_price_cents !==
+        (parsed.data.pricing.minimumSalePriceCents ?? null);
 
     if (priceChanged) {
       await requirePermission(ctx, "products.change_price");
@@ -318,11 +411,7 @@ export async function updateProductAction(
       .maybeSingle();
 
     if (error) {
-      return {
-        error: error.message.includes("does not exist")
-          ? "Catalogusmigratie is nog niet toegepast. Zie docs/CATALOG_ADMIN_MIGRATION.md."
-          : error.message,
-      };
+      return { error: mapCatalogWriteError(error.message) };
     }
     if (!data) {
       return {

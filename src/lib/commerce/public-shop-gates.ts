@@ -1,5 +1,6 @@
 import type { Locale } from "@/i18n/config";
 import type { Product } from "@/types";
+import { resolvePublicPrice } from "@/lib/commerce/canonical-pricing";
 import { formatCents, formatPriceLabel } from "@/lib/utilities/money";
 import { assertProductTranslationComplete } from "@/i18n/localize-product";
 
@@ -78,12 +79,67 @@ export function isPublicShopProduct(product: Product): boolean {
 export function publicShopPriceDisplay(
   product: Product,
   locale: Locale,
-): { label: string; mode: "fixed" | "from" | "on_request" } {
+): {
+  label: string;
+  mode: "fixed" | "from" | "on_request" | "legal_sale" | "benchmark";
+  compareLabel?: string | null;
+  discountLabel?: string | null;
+  nowPrefix?: string | null;
+  marketLabel?: string | null;
+} {
   const onRequest = locale === "nl" ? "Prijs op aanvraag" : "Price on request";
 
   // Quote-only never surfaces a concrete from/fixed amount in the public shop.
   if (product.priceMode === "QUOTE_ONLY" || product.billingType === "QUOTE_ONLY") {
     return { label: onRequest, mode: "on_request" };
+  }
+
+  const view = resolvePublicPrice({
+    priceMode: product.priceMode,
+    marketPriceCents: product.marketPriceCents,
+    retailPriceCents: product.retailPriceCents ?? product.priceCents,
+    salePriceCents: product.salePriceCents,
+    saleStartsAt: product.saleStartsAt,
+    saleEndsAt: product.saleEndsAt,
+    lowestPrice30dCents: product.lowestPrice30dCents,
+  });
+
+  if (
+    product.priceMode === "FIXED" &&
+    view.customerPriceCents &&
+    view.legalDiscountPercentage &&
+    view.compareAtCents
+  ) {
+    return {
+      mode: "legal_sale",
+      label: formatPriceLabel(
+        view.customerPriceCents,
+        null,
+        product.billingType,
+        locale,
+      ),
+      compareLabel: formatCents(view.compareAtCents, locale),
+      discountLabel:
+        locale === "nl"
+          ? `${view.legalDiscountPercentage}% korting`
+          : `${view.legalDiscountPercentage}% off`,
+      nowPrefix: locale === "nl" ? "Nu" : "Now",
+    };
+  }
+
+  if (product.priceMode === "FIXED" && view.showMarketBenchmark && view.customerPriceCents) {
+    return {
+      mode: "benchmark",
+      label: formatPriceLabel(
+        view.customerPriceCents,
+        null,
+        product.billingType,
+        locale,
+      ),
+      marketLabel: view.marketPriceCents
+        ? formatCents(view.marketPriceCents, locale)
+        : null,
+    };
   }
 
   if (product.priceLabel?.trim()) {

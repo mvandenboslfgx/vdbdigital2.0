@@ -83,7 +83,8 @@ export type Permission =
   | "settings.manage"
   | "audit.read"
   | "partners.view"
-  | "payouts.review";
+  | "payouts.review"
+  | "jobs.review";
 
 const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
   CONTENT: [
@@ -124,6 +125,7 @@ const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
     "documents.archive",
     "quotes.view_assigned",
     "invoices.view_assigned",
+    "jobs.review",
   ],
   ADMIN: [
     "products.read",
@@ -201,6 +203,7 @@ const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
     "audit.read",
     "partners.view",
     "payouts.review",
+    "jobs.review",
   ],
   OWNER: [
     "products.read",
@@ -285,6 +288,7 @@ const ROLE_PERMISSIONS: Record<AdminRole, readonly Permission[]> = {
     "audit.read",
     "partners.view",
     "payouts.review",
+    "jobs.review",
   ],
 };
 

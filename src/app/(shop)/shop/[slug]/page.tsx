@@ -11,9 +11,11 @@ import { localizeProduct } from "@/i18n/localize-product";
 import { buildLocaleAlternates } from "@/i18n/seo";
 import { paths } from "@/i18n/config";
 import { productAllowsAddToCart } from "@/lib/commerce/product-checkout-ui";
+import { PublicPrice } from "@/components/shop/public-price";
 import { publicShopPriceDisplay } from "@/lib/commerce/public-shop-gates";
 import { ProductImage } from "@/components/shop/product-image";
 import { formatCents } from "@/lib/utilities/money";
+import { resolvePublicPrice } from "@/lib/commerce/canonical-pricing";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -46,6 +48,15 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
   const whatsappMessage = t("product.whatsappMessage", { product: product.name });
   const canAddToCart = productAllowsAddToCart(raw);
   const price = publicShopPriceDisplay(product, locale);
+  const customerUnitCents = resolvePublicPrice({
+    priceMode: product.priceMode,
+    marketPriceCents: product.marketPriceCents,
+    retailPriceCents: product.retailPriceCents ?? product.priceCents,
+    salePriceCents: product.salePriceCents,
+    saleStartsAt: product.saleStartsAt,
+    saleEndsAt: product.saleEndsAt,
+    lowestPrice30dCents: product.lowestPrice30dCents,
+  }).customerPriceCents;
   const minQuantity = product.minQuantity ?? 1;
   const maxQuantity = product.maxQuantity ?? 99;
   const requestedQuantity = Number(query.quantity ?? minQuantity);
@@ -55,8 +66,8 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
   const quantityLabel =
     locale === "nl" ? product.quantityLabelNl || "licentie" : product.quantityLabelEn || "license";
   const totalLabel =
-    product.priceMode === "FIXED" && product.priceCents
-      ? formatCents(product.priceCents * quantity, locale)
+    product.priceMode === "FIXED" && customerUnitCents
+      ? formatCents(customerUnitCents * quantity, locale)
       : null;
 
   return (
@@ -69,7 +80,7 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
               <h1 className="text-h1 mb-4">{product.name}</h1>
               <p className="text-body-lg text-muted prose-width mb-6">{product.shortDescription}</p>
               <div className="flex flex-wrap items-center gap-4">
-                <span className="text-2xl font-semibold text-primary">{price.label}</span>
+                <PublicPrice product={product} locale={locale} className="text-2xl" />
                 {price.mode !== "on_request" ? (
                   <span className="text-small text-muted">
                     {locale === "nl" ? `per ${quantityLabel}` : `per ${quantityLabel}`} ·{" "}
@@ -92,11 +103,14 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
         <Container>
           <div className="grid lg:grid-cols-3 gap-10">
             <div className="lg:col-span-2 space-y-10">
+              {product.fullDescription?.trim() ? (
               <div>
                 <h2 className="text-h2 text-light-foreground mb-4">{t("product.description")}</h2>
                 <p className="text-light-muted">{product.fullDescription}</p>
               </div>
+              ) : null}
 
+              {product.includedItems.length > 0 ? (
               <div>
                 <h2 className="text-h2 text-light-foreground mb-4">{t("product.whatYouGet")}</h2>
                 <ul className="space-y-2">
@@ -107,7 +121,9 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
                   ))}
                 </ul>
               </div>
+              ) : null}
 
+              {product.excludedItems.length > 0 ? (
               <div>
                 <h2 className="text-h2 text-light-foreground mb-4">{t("product.notIncluded")}</h2>
                 <ul className="space-y-2">
@@ -118,6 +134,7 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
                   ))}
                 </ul>
               </div>
+              ) : null}
 
               {product.extensions.length > 0 && (
                 <div>
@@ -149,18 +166,24 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
 
             <div>
               <Card variant="light" className="sticky top-24 space-y-4">
+                {product.deliveryTime?.trim() ? (
                 <div>
                   <p className="text-label text-light-muted mb-1">{t("product.deliveryTime")}</p>
                   <p className="font-medium text-light-foreground">{product.deliveryTime}</p>
                 </div>
+                ) : null}
+                {product.targetAudience?.trim() ? (
                 <div>
                   <p className="text-label text-light-muted mb-1">{t("product.targetAudience")}</p>
                   <p className="text-small text-light-muted">{product.targetAudience}</p>
                 </div>
+                ) : null}
+                {product.workflow?.trim() ? (
                 <div>
                   <p className="text-label text-light-muted mb-1">{t("product.workflow")}</p>
                   <p className="text-small text-light-muted">{product.workflow}</p>
                 </div>
+                ) : null}
                 <div className="pt-4 border-t border-light-border space-y-3">
                   <form method="get" className="space-y-2">
                     <label className="text-label text-light-muted" htmlFor="product-quantity">

@@ -19,6 +19,7 @@ const adminNav = [
   { label: "Categorieën", href: "/admin/categories", permission: "products.read" as const },
   { label: "Add-ons", href: "/admin/addons", permission: "products.read" as const },
   { label: "Orders", href: "/admin/orders", permission: "orders.read" as const },
+  { label: "Jobs", href: "/admin/jobs", permission: "jobs.review" as const },
   { label: "Leads", href: "/admin/leads", permission: "leads.read" as const },
   { label: "Partners", href: "/admin/payouts", permission: "partners.view" as const },
   { label: "Uitbetalingen", href: "/admin/payouts", permission: "payouts.review" as const },

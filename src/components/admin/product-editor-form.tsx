@@ -19,6 +19,7 @@ import {
   type CatalogActionState,
 } from "@/server/actions/catalog-actions";
 import { billingWarningNl } from "@/lib/commerce/catalog-admin-eligibility";
+import { resolveInternalEconomics } from "@/lib/commerce/canonical-pricing";
 import { LEGACY_TAWK_ADMIN_STATUS_LABEL } from "@/lib/commerce/tawk-legacy-blocklist";
 import type { BillingType, PriceMode, Product } from "@/types";
 import type { PublicationCheckItem } from "@/lib/commerce/publication-checklist";
@@ -32,6 +33,7 @@ interface Props {
   checklist?: PublicationCheckItem[];
   canPublish: boolean;
   canChangePrice: boolean;
+  canOverrideFloor?: boolean;
   canLegal: boolean;
   canArchive: boolean;
   blockReasons: string[];
@@ -39,6 +41,21 @@ interface Props {
 }
 
 const initialState: CatalogActionState = {};
+
+function toDateTimeLocal(iso?: string | null): string {
+  if (!iso) return "";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function fromDateTimeLocal(value: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  const date = new Date(trimmed);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}
 
 function linesToArray(value: string): string[] {
   return value
@@ -54,6 +71,7 @@ export function ProductEditorForm({
   checklist = [],
   canPublish,
   canChangePrice,
+  canOverrideFloor = false,
   canLegal,
   canArchive,
   blockReasons,
@@ -198,7 +216,20 @@ export function ProductEditorForm({
         billingType,
         priceCents: priceMode === "FIXED" ? toCents(euros) : null,
         fromPriceCents: priceMode === "STARTING_FROM" ? toCents(fromEuros) : null,
-        compareAtCents: toCents(String(fd.get("compareAtEuros") ?? "")),
+        retailPriceCents:
+          priceMode === "FIXED"
+            ? toCents(euros)
+            : priceMode === "STARTING_FROM"
+              ? toCents(fromEuros)
+              : null,
+        marketPriceCents: toCents(String(fd.get("marketPriceEuros") ?? "")),
+        compareAtCents: toCents(String(fd.get("marketPriceEuros") ?? "")),
+        salePriceCents: toCents(String(fd.get("salePriceEuros") ?? "")),
+        saleStartsAt: fromDateTimeLocal(String(fd.get("saleStartsAt") ?? "")),
+        saleEndsAt: fromDateTimeLocal(String(fd.get("saleEndsAt") ?? "")),
+        partnerPriceCents: toCents(String(fd.get("partnerPriceEuros") ?? "")),
+        minimumSalePriceCents: toCents(String(fd.get("minimumSalePriceEuros") ?? "")),
+        belowFloorOwnerApproved: canOverrideFloor && fd.get("belowFloorOwnerApproved") === "on",
         currency: "EUR" as const,
         vatPercent: Number(fd.get("vatPercent") ?? 21),
         priceIncludesVat: fd.get("priceIncludesVat") === "on",
@@ -224,6 +255,25 @@ export function ProductEditorForm({
 
   const centsToEuros = (cents: number | null | undefined) =>
     cents === null || cents === undefined ? "" : (cents / 100).toFixed(2);
+
+  const internalEconomics =
+    canChangePrice && product
+      ? resolveInternalEconomics({
+          priceMode: product.priceMode,
+          marketPriceCents: product.marketPriceCents,
+          retailPriceCents: product.retailPriceCents ?? product.priceCents,
+          salePriceCents: product.salePriceCents,
+          saleStartsAt: product.saleStartsAt,
+          saleEndsAt: product.saleEndsAt,
+          supplierCostCents: product.costCents,
+          partnerCommissionType: product.partnerCommissionType,
+          partnerCommissionValue: product.partnerCommissionValue,
+          minimumSalePriceCents: product.minimumSalePriceCents,
+          lowestPrice30dCents: product.lowestPrice30dCents,
+          vatPercent: product.vatPercent,
+          priceIncludesVat: product.priceIncludesVat,
+        })
+      : null;
 
   return (
     <div className="space-y-8" onChange={() => setDirty(true)}>
@@ -381,9 +431,9 @@ export function ProductEditorForm({
             {priceMode === "FIXED" && (
               <Input
                 name="amountEuros"
-                label="Bedrag (EUR)"
-                defaultValue={centsToEuros(product?.priceCents)}
-                hint="Wordt opgeslagen als gehele centen"
+                label="VDB-prijs / retail (EUR)"
+                defaultValue={centsToEuros(product?.retailPriceCents ?? product?.priceCents)}
+                hint="Standaard verkoopprijs, meestal rond marktwaarde"
               />
             )}
             {priceMode === "STARTING_FROM" && (
@@ -394,19 +444,65 @@ export function ProductEditorForm({
               />
             )}
             <Input
-              name="compareAtEuros"
-              label="Oude prijs (optioneel, EUR)"
-              defaultValue={centsToEuros(product?.compareAtCents)}
+              name="marketPriceEuros"
+              label="Marktwaarde (EUR)"
+              defaultValue={centsToEuros(product?.marketPriceCents)}
+              hint="Externe benchmark. Wordt nooit automatisch een doorgestreepte korting."
+            />
+            <Input
+              name="salePriceEuros"
+              label="Actieprijs (EUR, optioneel)"
+              defaultValue={centsToEuros(product?.salePriceCents)}
+            />
+            <Input
+              name="saleStartsAt"
+              label="Actie vanaf"
+              type="datetime-local"
+              defaultValue={toDateTimeLocal(product?.saleStartsAt)}
+            />
+            <Input
+              name="saleEndsAt"
+              label="Actie tot"
+              type="datetime-local"
+              defaultValue={toDateTimeLocal(product?.saleEndsAt)}
+            />
+            <Input
+              name="minimumSalePriceEuros"
+              label="Minimumverkoopprijs (EUR)"
+              defaultValue={centsToEuros(product?.minimumSalePriceCents)}
+              hint="Korting mag hier niet onder zonder OWNER-goedkeuring"
+            />
+            <Input
+              name="lowestPrice30dEuros"
+              label="Laagste VDB-prijs 30 dagen (EUR)"
+              defaultValue={centsToEuros(product?.lowestPrice30dCents)}
+              hint="Automatisch uit prijshistorie. Enige geldige publieke kortingsanker."
+              disabled
+            />
+            <Input
+              name="partnerPriceEuros"
+              label="Partnerprijs (EUR, optioneel)"
+              defaultValue={centsToEuros(product?.partnerPriceCents)}
             />
             <Input name="vatPercent" label="BTW %" type="number" defaultValue={product?.vatPercent ?? 21} />
             <Input name="priceLabel" label="Prijslabel" defaultValue={product?.priceLabel ?? ""} />
             {canChangePrice && (
               <Input
                 name="costEuros"
-                label="Interne kostprijs (EUR)"
+                label="Inkoop / leverancierskost (EUR, intern)"
                 defaultValue={centsToEuros(product?.costCents)}
               />
             )}
+            {canOverrideFloor ? (
+              <label className="flex items-center gap-2 text-small mt-8 md:col-span-2">
+                <input
+                  type="checkbox"
+                  name="belowFloorOwnerApproved"
+                  defaultChecked={product?.belowFloorOwnerApproved}
+                />
+                OWNER: sta een prijs onder de minimumverkoopprijs toe
+              </label>
+            ) : null}
             <label className="flex items-center gap-2 text-small mt-8">
               <input
                 type="checkbox"
@@ -416,6 +512,34 @@ export function ProductEditorForm({
               Prijs inclusief btw
             </label>
           </fieldset>
+          {internalEconomics ? (
+            <div className="rounded-lg border border-border bg-surface px-4 py-3 text-small text-muted">
+              <p className="font-medium text-foreground mb-1">Interne marge (alleen OWNER/ADMIN)</p>
+              <p>
+                Inkoop €{centsToEuros(internalEconomics.supplierCostCents) || "—"}
+                {internalEconomics.partnerCommissionCents != null
+                  ? ` · commissie €${centsToEuros(internalEconomics.partnerCommissionCents)}`
+                  : ""}
+                {internalEconomics.vatAmountCents != null
+                  ? ` · btw €${centsToEuros(internalEconomics.vatAmountCents)}`
+                  : ""}
+                {internalEconomics.remainingMarginCents != null
+                  ? ` · resterende marge €${centsToEuros(internalEconomics.remainingMarginCents)} (${internalEconomics.remainingMarginPercentage ?? 0}%)`
+                  : ""}
+              </p>
+              <p className="mt-1">
+                Markt vs VDB (intern):{" "}
+                {internalEconomics.marketDiscountPercentage != null
+                  ? `${internalEconomics.marketDiscountPercentage}%`
+                  : "geen"}
+                . Publieke korting komt alleen uit de laagste eigen VDB-prijs van de voorgaande 30 dagen
+                {product?.lowestPrice30dCents != null
+                  ? ` (€${centsToEuros(product.lowestPrice30dCents)})`
+                  : " (nog geen historie)"}
+                .
+              </p>
+            </div>
+          ) : null}
           {billingWarn && (
             <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-small text-amber-950">
               {billingWarn}

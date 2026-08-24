@@ -36,7 +36,10 @@ export async function listAdminPayoutRequests() {
     throw new Error(error.message);
   }
 
-  return (data ?? []) as AdminPayoutRequestRow[];
+  return (data ?? []).map((row) => {
+    const partner = Array.isArray(row.partner) ? row.partner[0] ?? null : row.partner;
+    return { ...row, partner } as AdminPayoutRequestRow;
+  });
 }
 
 export async function reviewPayoutRequest(input: {

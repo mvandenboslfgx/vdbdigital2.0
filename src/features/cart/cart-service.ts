@@ -7,6 +7,7 @@ import {
   assertCheckoutAllowedForCustomer,
   resolvePriceMode,
 } from "@/lib/commerce/checkout-eligibility";
+import { resolveCustomerUnitPriceCents } from "@/lib/commerce/canonical-pricing";
 import type { CheckoutCustomerType } from "@/lib/commerce/checkout-eligibility";
 
 const CART_COOKIE = "vdb_cart";
@@ -177,7 +178,19 @@ export async function validateCartItems(
       }
     }
 
-    if (resolvePriceMode(product) !== "FIXED" || product.priceCents === null) {
+    if (resolvePriceMode(product) !== "FIXED") {
+      errors.push(`${item.name} requires a quote (starting-from or non-fixed price)`);
+      continue;
+    }
+
+    const unitPriceCents = resolveCustomerUnitPriceCents({
+      priceMode: product.priceMode,
+      retailPriceCents: product.retailPriceCents ?? product.priceCents,
+      salePriceCents: product.salePriceCents,
+      saleStartsAt: product.saleStartsAt,
+      saleEndsAt: product.saleEndsAt,
+    });
+    if (unitPriceCents == null || unitPriceCents <= 0) {
       errors.push(`${item.name} requires a quote (starting-from or non-fixed price)`);
       continue;
     }
@@ -188,8 +201,8 @@ export async function validateCartItems(
       productSlug: product.slug,
       name: product.name,
       billingType: product.billingType,
-      validatedPriceCents: product.priceCents,
-      priceCents: product.priceCents,
+      validatedPriceCents: unitPriceCents,
+      priceCents: unitPriceCents,
       quantity: item.quantity,
       validatedProduct: product,
     });

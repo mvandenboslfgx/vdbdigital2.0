@@ -64,6 +64,58 @@ slug, naam, prijs, valuta, btw, periode, quantity, versie en afbeeldingspad.
 Partnerleads bewaren eveneens quantity en een server-berekende product- en
 prijssnapshot.
 
+## Canonieke prijsstructuur
+
+Publieke verkoop toont de **VDB-prijs**. `market_price` is een externe
+benchmark, geen kortingsanker. Korting is een verkoopinstrument, maar een
+doorgestreepte van-prijs en een publiek kortingspercentage zijn alleen
+toegestaan als de VDB-prijshistorie dat ondersteunt (ACM: laagste eigen
+verkoopprijs van de voorafgaande 30 dagen). De leverancierslijst blijft intern
+voor inkoop en beschikbaarheid.
+
+| Veld | Betekenis | Zichtbaarheid |
+|---|---|---|
+| `market_price_cents` | Actuele externe marktwaarde/benchmark | Publiek als gelabelde marktwaarde, nooit als % korting |
+| `retail_price_cents` | Standaard VDB-verkoopprijs | Publiek |
+| `sale_price_cents` + venster | Tijdelijke aanbieding | Publiek als actief |
+| `lowest_price_30d_cents` | Laagste aangeboden VDB-prijs in de 30 dagen vóór de huidige prijs | Publiek als anker |
+| `product_price_history` | Audit van aangeboden VDB-klantprijzen | Intern |
+| `partner_price_cents` | Optionele speciale partnerprijs | Partner-RPC |
+| `price_cents` | Opgeloste klantprijs (actie of retail) | Publiek, compat |
+| `cost_cents` | Leveranciersinkoop | Alleen intern |
+| `partner_commission_*` | Commissie per verkoop | Partner/intern |
+| `minimum_sale_price_cents` | Harde commerciële vloer | Intern |
+| `legal_discount_percentage` | Publiek; alleen vanaf `lowest_price_30d` | Publiek |
+| `market_discount_pct` | Intern analytisch t.o.v. marktwaarde | Alleen OWNER/ADMIN |
+| interne marge | `klantprijs − inkoop − commissie − btw` | Alleen OWNER/ADMIN |
+
+Zonder geldige historie, als de marktwaarde €99,95 is en VDB €79,95 vraagt:
+
+**Marktwaarde: €99,95**  
+**VDB-prijs: €79,95**
+
+zonder kortingsclaim. Pas als VDB het artikel in de voorgaande 30 dagen
+daadwerkelijk voor €99,95 (of hoger als laagste) heeft aangeboden:
+
+~~€99,95~~ **€79,95 — 20% korting**
+
+Harde regels:
+
+- `market_price` is nooit automatisch een discount anchor.
+- Publieke kortingspercentages en doorgestreepte prijzen komen uitsluitend uit
+  geldige VDB price history / `lowest_price_30d`.
+- De klantprijs mag niet onder `minimum_sale_price_cents` komen zonder
+  expliciete OWNER-goedkeuring (`products.override_price_floor`, AAL2).
+  ADMIN mag prijzen wijzigen, maar niet onder de vloer. De database-trigger
+  `trg_products_sync_canonical_prices` faalt fail-closed met `PRICE_BELOW_FLOOR`.
+
+Publieke RPCs (`list_public_catalog`, en via diezelfde bron
+`list_partner_catalog`) geven **nooit** `cost_cents`, interne marge of
+`market_discount_pct` terug.
+
+`20260820224500_catalog_market_pricing.sql` is een lokale proposal. Niet
+remote toepassen zonder ownergoedkeuring.
+
 ## Jaarabonnement voor TV-streaming
 
 De migration proposal bevat `tv-streaming-jaarabonnement` voor €100 per
@@ -81,4 +133,5 @@ beoordeeld en de primaire Storage-afbeelding met NL/EN-alttekst is gekoppeld.
 `20260820164821_catalog_supabase_ssot_v1.sql` is een lokale migration proposal.
 Pas deze eerst toe op een lokale Supabase-stack en daarna, met ownergoedkeuring,
 op staging. Productieapply, Storage-upload, betalingen en publicatie vallen niet
-onder een automatische codewijziging.
+onder een automatische codewijziging. Hetzelfde geldt voor
+`20260820224500_catalog_market_pricing.sql`.

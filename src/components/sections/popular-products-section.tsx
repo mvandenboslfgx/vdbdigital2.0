@@ -5,7 +5,7 @@ import { LocaleLink } from "@/i18n/locale-link";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import { localizeProduct } from "@/i18n/localize-product";
 import { paths } from "@/i18n/config";
-import { publicShopPriceDisplay } from "@/lib/commerce/public-shop-gates";
+import { PublicPrice } from "@/components/shop/public-price";
 
 interface PopularProductsSectionProps {
   products: Product[];
@@ -37,9 +37,7 @@ export async function PopularProductsSection({ products }: PopularProductsSectio
           </Card>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featured.map((product) => {
-              const price = publicShopPriceDisplay(product, locale);
-              return (
+            {featured.map((product) => (
                 <LocaleLink key={product.id} href={`${paths.shop}/${product.slug}`}>
                   <Card className="h-full hover:border-primary/40 transition-colors group">
                     <p className="text-label text-muted mb-2">{product.categoryName}</p>
@@ -49,11 +47,10 @@ export async function PopularProductsSection({ products }: PopularProductsSectio
                     <p className="text-small text-muted mb-4 line-clamp-2">
                       {product.shortDescription}
                     </p>
-                    <p className="text-body font-semibold text-primary">{price.label}</p>
+                    <PublicPrice product={product} locale={locale} />
                   </Card>
                 </LocaleLink>
-              );
-            })}
+            ))}
           </div>
         )}
       </Container>

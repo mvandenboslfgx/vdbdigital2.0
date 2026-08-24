@@ -61,6 +61,22 @@ export function mapDbProductRow(row: Record<string, unknown>): Product {
     compareAtCents: (row.compare_at_cents as number | null | undefined) ?? null,
     priceLabel: (row.price_label as string | null | undefined) ?? null,
     costCents: (row.cost_cents as number | null | undefined) ?? null,
+    marketPriceCents: (row.market_price_cents as number | null | undefined) ?? null,
+    retailPriceCents: (row.retail_price_cents as number | null | undefined) ?? null,
+    salePriceCents: (row.sale_price_cents as number | null | undefined) ?? null,
+    saleStartsAt: (row.sale_starts_at as string | null | undefined) ?? null,
+    saleEndsAt: (row.sale_ends_at as string | null | undefined) ?? null,
+    partnerPriceCents: (row.partner_price_cents as number | null | undefined) ?? null,
+    minimumSalePriceCents:
+      (row.minimum_sale_price_cents as number | null | undefined) ?? null,
+    lowestPrice30dCents:
+      (row.lowest_price_30d_cents as number | null | undefined) ?? null,
+    currentPriceSince: (row.current_price_since as string | null | undefined) ?? null,
+    belowFloorOwnerApproved: Boolean(row.below_floor_owner_approved),
+    partnerCommissionType:
+      (row.partner_commission_type as string | null | undefined) ?? null,
+    partnerCommissionValue:
+      (row.partner_commission_value as number | null | undefined) ?? null,
     badge: (row.badge as string | null | undefined) ?? null,
     tags: asStringArray(row.tags),
     audienceB2b: (row.audience_b2b as boolean | undefined) ?? true,
@@ -83,13 +99,18 @@ export function mapDbProductRow(row: Record<string, unknown>): Product {
     primaryImagePath: (row.primary_image_path as string | null | undefined) ?? null,
     imageUrl: (row.image_url as string | null | undefined) ?? null,
     imageAlt: (row.image_alt as string | null | undefined) ?? null,
-    isActive: (row.is_active as boolean | undefined) ?? false,
+    isActive:
+      typeof row.is_active === "boolean"
+        ? row.is_active
+        : String(row.status ?? "") === "PUBLISHED" &&
+          !Boolean(row.is_concept),
     categoryActive: category?.is_active ?? false,
     minQuantity: (row.min_quantity as number | undefined) ?? 1,
     maxQuantity: (row.max_quantity as number | undefined) ?? 99,
     quantityLabelNl: (row.quantity_label_nl as string | undefined) ?? "licentie",
     quantityLabelEn: (row.quantity_label_en as string | undefined) ?? "license",
     isConcept: (row.is_concept as boolean | undefined) ?? false,
+    fulfillmentType: (row.fulfillment_type as Product["fulfillmentType"] | undefined) ?? undefined,
   };
 }
 
