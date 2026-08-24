@@ -3,18 +3,16 @@
 **Audience:** Mobile app repository engineers  
 **Backend repo:** `vdbdigital2.0`  
 **Contract pin:** `vdb-backend-contract@0.2.0-rc.3` (**unpublished** — do not treat as production-published)  
-**Updated:** 2026-08-20  
-**Verdict:** `WEB/BACKEND COMMERCE — BLOCKED` for full dynamic commerce integration
+**Updated:** 2026-08-24  
+**Verdict:** `WEB/BACKEND COMMERCE — READY FOR MOBILE INTEGRATION` for catalog/quote/auth/portal contracts. Live invitation/payout E2E and Mollie checkout remain owner-gated.
 
-This document describes what the mobile app **can** integrate today and what is **not** ready. No secrets.
+This document describes what the mobile app **can** integrate today. No secrets.
 
 ---
 
 ## 1. Do not build a second catalog in the app
 
-Target: app loads products/categories/prices/options from this backend only.
-
-Today the website still has TypeScript commercial SSOT for packages. Mobile must not copy those cents into the app binary.
+App loads products/categories/prices from this backend only. Public shop is Supabase SSOT (`GET /api/catalog/version` status `supabase_ssot`). Do not copy euro cents into the app binary.
 
 ---
 
@@ -23,17 +21,15 @@ Today the website still has TypeScript commercial SSOT for packages. Mobile must
 | Capability | Status | Notes |
 |------------|--------|-------|
 | Auth / session (Supabase) | EXISTS | Shared project; AAL2 for **admin** only |
-| Customer portal data model | EXISTS | Projects, quotes, invoices, support — portal routes are web; APIs via Supabase client + RLS |
-| Partner financial RPCs | EXISTS | Schema in this repo; partner **UI** lives in affiliate repo |
-| Public shop products (DB) | PARTIAL | Fail-closed gates; few/no ACTIVE public SKUs depending on env |
-| Software license browse | PARTIAL | Fail-closed curated catalog; quote-only |
-| Mollie one-time checkout | PARTIAL | Website cart/checkout; `CHECKOUT_ENABLED` fail-closed |
-| Catalog version / ETag API | PARTIAL | `GET /api/catalog/version` — content version + ETag; not full product payload |
-| Server price-quote API for options+qty | MISSING | Cart revalidates server-side on web only |
-| Product options schema API | MISSING | Addons exist in DB; no full configurator contract |
-| Fulfillment / entitlements push | PARTIAL | `delivery_released` → audited manual-review jobs; no provider adapters yet |
-| Subscriptions / renewals | MISSING | |
-| Admin product publish → app refresh | PARTIAL | Admin CMS exists; version bump via `catalog_version` constant |
+| Customer portal data model | EXISTS | Projects, quotes, invoices, support — RLS |
+| Partner financial RPCs | EXISTS | Partner cannot set price/payment/payout |
+| Public shop products (DB) | EXISTS | Fail-closed publish gate; admin publish without git deploy |
+| Server price-quote API | EXISTS | `POST /api/commerce/quote` — preview only; server is source of truth |
+| Mollie one-time checkout | EXISTS, FAIL-CLOSED | Website cart/checkout; `CHECKOUT_ENABLED` off by default; test-mode only |
+| Catalog version / ETag API | EXISTS | `GET /api/catalog/version` |
+| Fulfillment jobs | EXISTS | Persist + admin `/admin/jobs`; adapters fail closed to manual review |
+| Subscriptions / renewals | PREPARED | Yearly quantity/billing/entitlement modelled; not ACTIVE without supplier rights |
+| Invoices from paid orders | PARTIAL | Portal invoices exist; shop auto-invoice still fail-closed without org mapping |
 
 ---
 
@@ -44,19 +40,28 @@ GET /api/catalog/version
 If-None-Match: "<catalog_version>"
 ```
 
-Response `200`:
-
 ```json
 {
-  "catalog_version": "2026.08.20.commerce-cta-1",
+  "catalog_version": "2026.08.24.supabase-ssot-1",
   "contract": "vdb-backend-contract@0.2.0-rc.3",
   "updated_at": "<iso>",
-  "status": "partial_ssot",
-  "notes": "..."
+  "status": "supabase_ssot",
+  "notes": "Public shop catalog is Supabase-backed."
 }
 ```
 
-`304` when ETag matches. Do not treat this as a full product sync API.
+---
+
+## 2c. Server quote (preview only)
+
+```http
+POST /api/commerce/quote
+Content-Type: application/json
+
+{ "slug": "rc7-catalog-probe", "quantity": 2 }
+```
+
+Success includes `previewOnly: true`, `unitPriceCents`, `lineTotalCents`. Never send client totals to payment.
 
 ---
 
@@ -104,17 +109,16 @@ Payment return / login deep links must land on authenticated handlers that re-ch
 
 ---
 
-## 7. Backend work remaining before READY
+## 7. Remaining owner gates (not code blockers)
 
-1. Single Supabase commercial SSOT (packages leave TS)
-2. Public ACTIVE SKUs with media + NL/EN
-3. Documented catalog list/detail + `catalog_version`
-4. Server quote endpoint (qty + options)
-5. Checkout enabled path for FIXED SKUs (owner gate)
-6. Post-pay fulfillment job consuming `delivery_released`
-7. Contract bump published for mobile consumers
+- Staging `RESEND_TEST_TO` real mailbox for invitation E2E (never `noreply@vdbdigital.nl`)
+- RC7 anon + service-role keys in local env if live admin/E2E against staging is required
+- OWNER + AAL2 session for payout review E2E
+- `CHECKOUT_ENABLED=true` only on staging for Mollie **test-mode**
+- Supplier/rights confirmation before publishing any yearly third-party-like licence SKU
+- Production remains read-only / no-write
 
-Until then mobile should integrate **portal/auth** surfaces and treat shop as quote-led / secondary.
+Mobile can integrate catalog, quote, auth, portal, and order states now. Do not wait for mailbox/payout E2E.
 
 ---
 
