@@ -83,11 +83,18 @@ export async function submitAccountDeletionAction(
   const payload = stored as { stored?: boolean } | null;
   if (payload?.stored === true) {
     const verifyUrl = `${resolveAppUrl()}${paths.accountDeletion}/confirm?token=${token}`;
-    await sendAccountDeletionVerifyEmail(email, verifyUrl, locale);
-    await writeAuditLog({
-      action: "account.deletion.web_verification_sent",
-      metadata: { source: "WEB" },
-    });
+    const mail = await sendAccountDeletionVerifyEmail(email, verifyUrl, locale);
+    if (mail.sent) {
+      await writeAuditLog({
+        action: "account.deletion.web_verification_sent",
+        metadata: { source: "WEB" },
+      });
+    } else {
+      await writeAuditLog({
+        action: "account.deletion.web_verification_email_failed",
+        metadata: { source: "WEB", reason: mail.reason ?? "unknown" },
+      });
+    }
   }
 
   return {

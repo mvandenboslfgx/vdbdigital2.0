@@ -30,13 +30,19 @@ async function sendCustomerMail(
   const resend = getResend();
   if (!resend) return { sent: false, reason: "Email is not configured" };
 
-  await resend.emails.send({
+  const { error } = await resend.emails.send({
     from: from(),
     to,
     subject: body.subject,
     text: body.text,
     html: body.html,
   });
+  if (error) {
+    return {
+      sent: false,
+      reason: error.message || "Email provider rejected the message",
+    };
+  }
   return { sent: true };
 }
 
