@@ -51,6 +51,7 @@ export const paths = {
   cookies: "/cookies",
   terms: "/terms",
   refundPolicy: "/refund-policy",
+  accountDeletion: "/account-deletion",
   /** Dutch SEO landing pages (NL primary) */
   websiteLatenMaken: "/website-laten-maken",
   webdesign: "/webdesign",

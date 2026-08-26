@@ -627,6 +627,7 @@ const en = {
   },
   legal: {
     privacy: "Privacy policy",
+    accountDeletion: "Delete account",
     cookies: "Cookie policy",
     terms: "Terms and conditions",
     refund: "Refund policy",

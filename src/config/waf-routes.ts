@@ -48,6 +48,14 @@ export const FORM_MUTATION_ROUTES: MutationRoute[] = [
     handler: "submitSupportAction",
   },
   {
+    feature: "Account deletion request",
+    method: "POST",
+    path: "/account-deletion",
+    implementation: "Next.js Server Action (useActionState + form POST)",
+    access: "public",
+    handler: "submitAccountDeletionAction",
+  },
+  {
     feature: "Checkout / payment creation",
     method: "POST",
     path: "/checkout",
@@ -95,6 +103,7 @@ export const WAF_PUBLIC_MUTATION_PATHS = [
   "/contact",
   "/quote",
   "/support",
+  "/account-deletion",
   "/checkout",
   "/cart",
 ] as const;

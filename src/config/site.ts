@@ -103,6 +103,7 @@ export const siteConfig = {
       ],
       legal: [
         { labelKey: "legal.privacy", href: paths.privacy },
+        { labelKey: "legal.accountDeletion", href: paths.accountDeletion },
         { labelKey: "legal.cookies", href: paths.cookies },
         { labelKey: "legal.terms", href: paths.terms },
         { labelKey: "legal.refund", href: paths.refundPolicy },

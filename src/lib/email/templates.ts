@@ -89,6 +89,18 @@ export const customerMail = {
       html: `<p>Bestelling <strong>${escapeHtml(orderNumber)}</strong> is geannuleerd. Je winkelwagen kan nog beschikbaar zijn als je het opnieuw wilt proberen.</p>`,
     }),
   },
+  accountDeletionVerify: {
+    en: (verifyUrl: string): MailBody => ({
+      subject: "Confirm account deletion — VDB Digital",
+      text: `You requested to delete your VDB Digital account.\n\nOpen this link to verify ownership and start deletion:\n${verifyUrl}\n\nThis link expires in 24 hours. If you did not request this, ignore this email.`,
+      html: `<p>You requested to delete your VDB Digital account.</p><p><a href="${escapeHtml(verifyUrl)}">Confirm account deletion</a></p><p>This link expires in 24 hours. If you did not request this, ignore this email.</p>`,
+    }),
+    nl: (verifyUrl: string): MailBody => ({
+      subject: "Bevestig accountverwijdering — VDB Digital",
+      text: `Je hebt gevraagd om je VDB Digital-account te verwijderen.\n\nOpen deze link om eigenaarschap te bevestigen:\n${verifyUrl}\n\nDeze link verloopt binnen 24 uur. Negeer deze e-mail als je dit niet hebt aangevraagd.`,
+      html: `<p>Je hebt gevraagd om je VDB Digital-account te verwijderen.</p><p><a href="${escapeHtml(verifyUrl)}">Accountverwijdering bevestigen</a></p><p>Deze link verloopt binnen 24 uur. Negeer deze e-mail als je dit niet hebt aangevraagd.</p>`,
+    }),
+  },
 } as const;
 
 export type CustomerMailFamily = keyof typeof customerMail;

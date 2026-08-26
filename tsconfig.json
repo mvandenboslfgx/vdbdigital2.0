@@ -39,6 +39,7 @@
   "exclude": [
     "node_modules",
     "review-package",
-    ".next/dev"
+    ".next/dev",
+    "scripts"
   ]
 }

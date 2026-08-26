@@ -634,6 +634,7 @@ const nl: Messages = {
   },
   legal: {
     privacy: "Privacyverklaring",
+    accountDeletion: "Account verwijderen",
     cookies: "Cookiebeleid",
     terms: "Algemene voorwaarden",
     refund: "Refundbeleid",

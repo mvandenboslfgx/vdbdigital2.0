@@ -29,6 +29,7 @@ const staticRoutes = [
   "/cookies",
   "/terms",
   "/refund-policy",
+  "/account-deletion",
 ];
 
 function bilingualEntries(

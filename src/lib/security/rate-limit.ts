@@ -29,6 +29,7 @@ const BUCKET_LIMITS: Record<string, number> = {
   contact: 5,
   quote: 3,
   support: 10,
+  "account-deletion": 3,
   checkout: 5,
   payment: 5,
   "documents-upload": 20,

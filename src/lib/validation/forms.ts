@@ -178,4 +178,14 @@ export type ContactFormInput = z.infer<typeof contactFormSchema>;
 export type QuoteFormInput = z.infer<typeof quoteFormSchema>;
 export type SupportFormInput = z.infer<typeof supportFormSchema>;
 export type CheckoutFormInput = z.infer<typeof checkoutFormSchema>;
+
+export const accountDeletionFormSchema = z.object({
+  email: emailSchema,
+  confirm: z.literal(true, {
+    message: "You must confirm that you understand the consequences",
+  }),
+  website: z.string().max(0).optional(),
+});
+
+export type AccountDeletionFormInput = z.infer<typeof accountDeletionFormSchema>;
 export type BudgetRange = z.infer<typeof budgetRangeSchema>;

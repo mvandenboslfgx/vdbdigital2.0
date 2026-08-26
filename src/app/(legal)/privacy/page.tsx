@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { LegalPageContent } from "@/components/sections/legal-page";
 import { CompanyLegalBlock } from "@/components/sections/company-legal-block";
 import { siteConfig } from "@/config/site";
+import { paths } from "@/i18n/config";
 
 export const metadata: Metadata = {
   title: "Privacy policy",
@@ -65,6 +67,18 @@ export default function PrivacyPage() {
         processing, data portability and objection. Contact us at{" "}
         {siteConfig.legal.privacyContact}. You may also lodge a complaint with the
         Dutch Data Protection Authority (Autoriteit Persoonsgegevens).
+      </p>
+
+      <h2 className="text-h3 text-light-foreground">Account deletion</h2>
+      <p>
+        You can request deletion of your VDB Digital account and associated personal
+        data via our{" "}
+        <Link href={paths.accountDeletion} className="underline">
+          account deletion page
+        </Link>{" "}
+        or in the mobile app (Meer → Account verwijderen). After email verification the
+        request is recorded for processing under our retention policy. Financial and
+        legal records may be retained where required by law.
       </p>
 
       <p className="text-small text-light-muted">

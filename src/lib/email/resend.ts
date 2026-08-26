@@ -146,6 +146,14 @@ export async function sendSupportConfirmation(
   return sendCustomerMail(to, pick("support", locale, name));
 }
 
+export async function sendAccountDeletionVerifyEmail(
+  to: string,
+  verifyUrl: string,
+  locale?: Locale,
+) {
+  return sendCustomerMail(to, pick("accountDeletionVerify", locale, verifyUrl));
+}
+
 export async function sendTestEmail(to?: string) {
   const resend = getResend();
   if (!resend) {
