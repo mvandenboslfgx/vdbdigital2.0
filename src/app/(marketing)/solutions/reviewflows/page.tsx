@@ -20,5 +20,5 @@ export default async function ReviewflowsPage() {
   const locale = await getLocale();
   const page = getSolutionContent("reviewflows", locale);
 
-  return <SolutionPageContent {...page} />;
+  return <SolutionPageContent {...page} path={paths.reviewflows} />;
 }

@@ -31,6 +31,7 @@ export default async function WebshopsPage() {
   return (
     <SolutionPageContent
       {...page}
+      path={paths.webshops}
       visual={<AutomationFlowVisual title={visualTitle} steps={visualSteps} />}
     />
   );

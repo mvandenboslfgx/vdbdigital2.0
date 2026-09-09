@@ -24,6 +24,7 @@ export default async function WebsitesPage() {
   return (
     <SolutionPageContent
       {...page}
+      path={paths.websites}
       visual={<WebsitePreviewVisual />}
     />
   );

@@ -7,6 +7,9 @@ import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import { paths } from "@/i18n/config";
 import { buildLocaleAlternates, openGraphLocale } from "@/i18n/seo";
 import { BookingCta } from "@/components/commercial/booking-cta";
+import { ServiceJsonLd } from "@/components/seo/service-json-ld";
+import { BreadcrumbJsonLd } from "@/components/seo/breadcrumb-json-ld";
+import { FaqJsonLd } from "@/components/seo/faq-json-ld";
 
 export interface SolutionPageSections {
   title: string;
@@ -27,6 +30,12 @@ export interface SolutionPageSections {
   visual?: ReactNode;
   ctaHref?: string;
   ctaLabel?: string;
+  /**
+   * Canonical path for this page (e.g. paths.websites) — when set, renders
+   * Service/Breadcrumb/FAQ structured data. Alias pages should pass the
+   * primary page's path here, matching their canonical URL.
+   */
+  path?: string;
   /** Allowed when spreading getSolutionContent(); ignored by UI */
   metaTitle?: string;
   metaDescription?: string;
@@ -85,12 +94,31 @@ export async function SolutionPageContent(props: SolutionPageSections) {
     visual,
     ctaHref = `${paths.contact}?intent=introduction`,
     ctaLabel,
+    path,
   } = props;
 
   const resolvedCtaLabel = ctaLabel ?? t("nav.scheduleIntro");
 
   return (
     <>
+      {path ? (
+        <>
+          <BreadcrumbJsonLd
+            items={[
+              { name: t("nav.solutions"), path: paths.solutions },
+              { name: title, path },
+            ]}
+            locale={locale}
+          />
+          <ServiceJsonLd
+            name={title}
+            description={description}
+            path={path}
+            locale={locale}
+          />
+          <FaqJsonLd items={faq} />
+        </>
+      ) : null}
       <Section variant="dark" className="pt-12">
         <Container>
           <div className="grid lg:grid-cols-12 gap-10 items-center">
