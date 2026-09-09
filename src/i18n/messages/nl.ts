@@ -118,6 +118,10 @@ const nl: Messages = {
     aboutBody2:
       "Wij bestaan om digitale frictie te vervangen door systemen die aansluiten op hoe jouw bedrijf écht werkt: heldere scope, realistische planning en geen loze beloftes.",
     aboutCta: "Meer over ons",
+    trustKvk: "KvK {number}",
+    trustProjectsSingular: "{count} project live opgeleverd",
+    trustProjectsPlural: "{count} projecten live opgeleverd",
+    trustFounder: "Direct contact met de founder",
   },
   pillars: {
     eyebrow: "Aanpak",

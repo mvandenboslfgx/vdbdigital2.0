@@ -115,6 +115,10 @@ const en = {
     aboutBody2:
       "We exist to replace digital friction with systems that fit how your business actually works: a clear scope, a realistic timeline and no hollow promises.",
     aboutCta: "More about us",
+    trustKvk: "KvK {number}",
+    trustProjectsSingular: "{count} project delivered live",
+    trustProjectsPlural: "{count} projects delivered live",
+    trustFounder: "Direct contact with the founder",
   },
   pillars: {
     eyebrow: "Approach",

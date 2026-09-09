@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { HeroSection } from "@/components/sections/hero-section";
+import { TrustStripSection } from "@/components/sections/trust-strip-section";
 import { ProblemsSection } from "@/components/sections/problems-section";
 import { SolutionsGridSection } from "@/components/sections/solutions-grid-section";
 import { PackagesSection } from "@/components/sections/packages-section";
@@ -32,6 +33,7 @@ export default async function HomePage() {
   return (
     <>
       <HeroSection />
+      <TrustStripSection />
       <SolutionsGridSection />
       <PackagesSection />
       <CasePreviewSection />

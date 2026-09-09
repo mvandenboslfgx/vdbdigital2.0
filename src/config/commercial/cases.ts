@@ -327,6 +327,17 @@ export function getCaseBySlug(slug: string): CaseDefinition | undefined {
   return caseCatalog.find((c) => c.slug === slug);
 }
 
+/**
+ * Count of real, delivered work that is actually live — excludes
+ * coming-soon/in-development platforms and demonstration concepts.
+ * Drives trust-strip copy so the number never has to be hand-maintained.
+ */
+export function getDeliveredProjectCount(): number {
+  return getPublicCases().filter(
+    (c) => c.launchStatus === "LIVE" && c.type !== "demonstration",
+  ).length;
+}
+
 export function isCasePubliclyVisible(slug: string): boolean {
   const c = getCaseBySlug(slug);
   if (!c) return false;
