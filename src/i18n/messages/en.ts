@@ -108,6 +108,13 @@ const en = {
     websitesStores: "Websites & stores",
     whatsappLivechat: "WhatsApp AI & live chat",
     reviewFollowup: "Review flows & follow-up",
+    aboutEyebrow: "About us",
+    aboutTitle: "One studio, direct contact with the founder",
+    aboutBody1:
+      "{name} is a software studio based in the Netherlands. No account manager standing between you and the work — strategy, design decisions and delivery stay close to the person actually building your project.",
+    aboutBody2:
+      "We exist to replace digital friction with systems that fit how your business actually works: a clear scope, a realistic timeline and no hollow promises.",
+    aboutCta: "More about us",
   },
   pillars: {
     eyebrow: "Approach",

@@ -5,6 +5,7 @@ import { SolutionsGridSection } from "@/components/sections/solutions-grid-secti
 import { PackagesSection } from "@/components/sections/packages-section";
 import { ProcessStepsSection } from "@/components/sections/process-steps-section";
 import { CasePreviewSection } from "@/components/sections/case-preview-section";
+import { AboutTeaserSection } from "@/components/sections/about-teaser-section";
 import { CtaSection } from "@/components/sections/cta-section";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import { buildLocaleAlternates, openGraphLocale } from "@/i18n/seo";
@@ -36,6 +37,7 @@ export default async function HomePage() {
       <CasePreviewSection />
       <ProcessStepsSection />
       <ProblemsSection />
+      <AboutTeaserSection />
       <CtaSection />
     </>
   );
