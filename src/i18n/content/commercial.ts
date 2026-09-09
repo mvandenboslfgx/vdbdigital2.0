@@ -228,6 +228,15 @@ export const commercialContent = {
         status: "Live",
         website: "vermeulenbouwservice.nl",
       },
+      // Placeholder only — do not publish until the client has given
+      // testimonialPermission (see src/config/commercial/cases.ts) and this
+      // text is replaced with their own wording.
+      testimonial: {
+        quote:
+          "Add the client's own quote here once you have their permission and exact wording — do not publish invented text.",
+        authorName: "Client name",
+        authorRole: "Role, company name",
+      },
       detailsTitle: "Project details",
       previewTitle: "Website preview",
       ctaTitle:
@@ -284,6 +293,15 @@ export const commercialContent = {
         type: "Website and online ordering experience",
         status: "Live",
         website: "grillgasten.eu",
+      },
+      // Placeholder only — do not publish until the client has given
+      // testimonialPermission (see src/config/commercial/cases.ts) and this
+      // text is replaced with their own wording.
+      testimonial: {
+        quote:
+          "Add the client's own quote here once you have their permission and exact wording — do not publish invented text.",
+        authorName: "Client name",
+        authorRole: "Role, company name",
       },
       detailsTitle: "Project details",
       previewTitle: "Website preview",
@@ -590,6 +608,15 @@ export const commercialContent = {
         status: "Live",
         website: "vermeulenbouwservice.nl",
       },
+      // Alleen een placeholder — niet publiceren voordat de klant
+      // testimonialPermission heeft gegeven (zie src/config/commercial/cases.ts)
+      // en deze tekst is vervangen door hun eigen woorden.
+      testimonial: {
+        quote:
+          "Plaats hier het citaat van de klant zelf zodra je toestemming en de exacte tekst hebt — publiceer geen verzonnen tekst.",
+        authorName: "Naam klant",
+        authorRole: "Functie, bedrijfsnaam",
+      },
       detailsTitle: "Projectdetails",
       previewTitle: "Websitepreview",
       ctaTitle:
@@ -646,6 +673,15 @@ export const commercialContent = {
         type: "Website en online bestelervaring",
         status: "Live",
         website: "grillgasten.eu",
+      },
+      // Alleen een placeholder — niet publiceren voordat de klant
+      // testimonialPermission heeft gegeven (zie src/config/commercial/cases.ts)
+      // en deze tekst is vervangen door hun eigen woorden.
+      testimonial: {
+        quote:
+          "Plaats hier het citaat van de klant zelf zodra je toestemming en de exacte tekst hebt — publiceer geen verzonnen tekst.",
+        authorName: "Naam klant",
+        authorRole: "Functie, bedrijfsnaam",
       },
       detailsTitle: "Projectdetails",
       previewTitle: "Websitepreview",

@@ -11,6 +11,7 @@ import { LocaleLinkButton } from "@/components/ui/locale-link-button";
 import { LinkButton } from "@/components/ui/link-button";
 import { paths } from "@/i18n/config";
 import { WhatsAppAiChatVisual } from "@/components/visuals/whatsapp-ai-chat-visual";
+import { CaseTestimonial } from "@/components/cases/case-testimonial";
 import { cn } from "@/lib/utilities/cn";
 
 const PORTFOLIO_SLUGS = new Set([
@@ -56,6 +57,12 @@ export async function CasePreviewSection() {
               item.slug === "trustbooker"
                 ? `/cases/${item.assetDir}/desktop-dashboard.webp`
                 : `/cases/${item.assetDir}/desktop-home.webp`;
+            // Only render once the client has explicitly given
+            // testimonialPermission — never show an unapproved quote.
+            const testimonial =
+              item.permissions.testimonialPermission && "testimonial" in copy
+                ? copy.testimonial
+                : null;
 
             return (
               <Card
@@ -87,6 +94,15 @@ export async function CasePreviewSection() {
                   <p className="text-small text-light-muted mb-4 flex-1">
                     {copy.summary}
                   </p>
+                  {testimonial ? (
+                    <CaseTestimonial
+                      quote={testimonial.quote}
+                      authorName={testimonial.authorName}
+                      authorRole={testimonial.authorRole}
+                      tone="light"
+                      className="mb-4"
+                    />
+                  ) : null}
                   <div className="flex flex-wrap items-center gap-3">
                     <LocaleLinkButton
                       href={`${paths.cases}/${item.slug}`}
