@@ -4,17 +4,23 @@ import { getCommercialContent } from "@/i18n/content/commercial";
 import {
   websitePackages,
   getPackageCatalogItem,
+  getNextPackageExclEuros,
 } from "@/config/commercial/website-packages";
-import { formatDualPrice } from "@/lib/utilities/commercial-price";
+import {
+  formatDualPrice,
+  formatPriceRangeNote,
+} from "@/lib/utilities/commercial-price";
 import { LocaleLinkButton } from "@/components/ui/locale-link-button";
 import { paths } from "@/i18n/config";
 
 function PriceBlock({
   price,
   fallback,
+  rangeNote,
 }: {
   price: ReturnType<typeof formatDualPrice> | null;
   fallback?: string;
+  rangeNote?: string | null;
 }) {
   if (!price) {
     return fallback ? (
@@ -32,6 +38,9 @@ function PriceBlock({
       ) : null}
       {price.inclAmountLabel ? (
         <p className="text-sm text-light-muted">{price.inclAmountLabel}</p>
+      ) : null}
+      {rangeNote ? (
+        <p className="text-xs leading-relaxed text-light-muted">{rangeNote}</p>
       ) : null}
       {price.scopeNote ? (
         <p className="text-xs leading-relaxed text-light-muted">{price.scopeNote}</p>
@@ -60,6 +69,15 @@ export async function PackagesSection() {
             const copy = c.packages[pkg.i18nKey];
             const catalog = getPackageCatalogItem(pkg);
             const price = catalog ? formatDualPrice(catalog, locale) : null;
+            const nextExclEuros = getNextPackageExclEuros(pkg);
+            const rangeNote =
+              price && !price.isQuoteOnly && catalog?.pricing && nextExclEuros
+                ? formatPriceRangeNote(
+                    catalog.pricing.exclVatCents,
+                    nextExclEuros,
+                    locale,
+                  )
+                : null;
 
             return (
               <Card
@@ -74,7 +92,7 @@ export async function PackagesSection() {
                     {copy.summary}
                   </p>
                   <div data-pricing-amount className="mb-2">
-                    <PriceBlock price={price} fallback={copy.price} />
+                    <PriceBlock price={price} fallback={copy.price} rangeNote={rangeNote} />
                   </div>
                 </div>
                 <div className="mt-auto pt-6" data-pricing-cta>
