@@ -20,5 +20,5 @@ export default async function LivechatPage() {
   const locale = await getLocale();
   const page = getSolutionContent("livechat", locale);
 
-  return <SolutionPageContent {...page} />;
+  return <SolutionPageContent {...page} path={paths.livechat} />;
 }

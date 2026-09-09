@@ -106,6 +106,28 @@ export function formatPricePair(
   };
 }
 
+const rangeLabels = {
+  en: (low: string, high: string) =>
+    `Usually between ${low} and ${high}, depending on scope.`,
+  nl: (low: string, high: string) =>
+    `Meestal tussen ${low} en ${high}, afhankelijk van scope.`,
+} as const;
+
+/**
+ * Indicative "usually between €X and €Y" note for a starting-from price.
+ * The caller supplies the upper bound (e.g. the next package tier's
+ * starting price) — this function only formats it, never invents a number.
+ */
+export function formatPriceRangeNote(
+  lowExclVatCents: number,
+  highExclVatEuros: number,
+  locale: Locale,
+): string {
+  const low = formatCents(lowExclVatCents, locale);
+  const high = formatCents(Math.round(highExclVatEuros * 100), locale);
+  return rangeLabels[locale](low, high);
+}
+
 export function formatFoundingPrice(
   foundingExclVatCents: number,
   locale: Locale,

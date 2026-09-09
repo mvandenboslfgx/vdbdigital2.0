@@ -19,5 +19,5 @@ export async function generateMetadata() {
 export default async function ConversionOptimisationPage() {
   const locale = await getLocale();
   const page = getSolutionContent("conversion-optimisation", locale);
-  return <SolutionPageContent {...page} />;
+  return <SolutionPageContent {...page} path={paths.conversionOptimisation} />;
 }

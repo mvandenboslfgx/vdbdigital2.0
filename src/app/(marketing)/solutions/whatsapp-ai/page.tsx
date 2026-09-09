@@ -41,6 +41,7 @@ export default async function WhatsappAiPage() {
   return (
     <SolutionPageContent
       {...page}
+      path={paths.whatsappAi}
       visual={<WhatsAppAiChatVisual title={visualTitle} steps={visualSteps} />}
     />
   );

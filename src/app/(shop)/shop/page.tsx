@@ -15,13 +15,17 @@ import { getCommercialContent } from "@/i18n/content/commercial";
 import {
   websitePackages,
   getPackageCatalogItem,
+  getNextPackageExclEuros,
 } from "@/config/commercial/website-packages";
 import {
   commercialBundles,
   getBundleCatalogItem,
 } from "@/config/commercial/bundles";
 import { carePackages, getCareCatalogItem } from "@/config/commercial/care-packages";
-import { formatDualPrice } from "@/lib/utilities/commercial-price";
+import {
+  formatDualPrice,
+  formatPriceRangeNote,
+} from "@/lib/utilities/commercial-price";
 import {
   categorySlugsForPillar,
   getPillarById,
@@ -294,6 +298,15 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                 const copy = commercial.packages[pkg.i18nKey];
                 const catalog = getPackageCatalogItem(pkg);
                 const price = catalog ? formatDualPrice(catalog, locale) : null;
+                const nextExclEuros = getNextPackageExclEuros(pkg);
+                const rangeNote =
+                  price && !price.isQuoteOnly && catalog?.pricing && nextExclEuros
+                    ? formatPriceRangeNote(
+                        catalog.pricing.exclVatCents,
+                        nextExclEuros,
+                        locale,
+                      )
+                    : null;
                 return (
                   <Card
                     key={pkg.id}
@@ -316,6 +329,11 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                           {price.inclAmountLabel ? (
                             <p className="text-sm text-light-muted">
                               {price.inclAmountLabel}
+                            </p>
+                          ) : null}
+                          {rangeNote ? (
+                            <p className="text-xs leading-relaxed text-light-muted">
+                              {rangeNote}
                             </p>
                           ) : null}
                           {price.scopeNote ? (

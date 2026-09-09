@@ -31,6 +31,7 @@ export default async function AiAutomationPage() {
   return (
     <SolutionPageContent
       {...page}
+      path={paths.aiAutomation}
       visual={<AutomationFlowVisual title={visualTitle} steps={visualSteps} />}
     />
   );

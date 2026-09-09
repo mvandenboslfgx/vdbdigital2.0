@@ -19,5 +19,5 @@ export async function generateMetadata() {
 export default async function CustomSoftwarePage() {
   const locale = await getLocale();
   const page = getSolutionContent("custom-software", locale);
-  return <SolutionPageContent {...page} />;
+  return <SolutionPageContent {...page} path={paths.customSoftware} />;
 }

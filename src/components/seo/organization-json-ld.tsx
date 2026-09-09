@@ -1,6 +1,10 @@
-import { siteConfig } from "@/config/site";
+import { siteConfig, hasSocial } from "@/config/site";
 
 export function OrganizationJsonLd() {
+  const sameAs = (["linkedin", "instagram"] as const)
+    .filter((network) => hasSocial(network))
+    .map((network) => siteConfig.social[network]);
+
   const data = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -27,6 +31,7 @@ export function OrganizationJsonLd() {
         availableLanguage: ["Dutch", "English", "nl", "en"],
       },
     ],
+    sameAs: sameAs.length > 0 ? sameAs : undefined,
   };
 
   return (

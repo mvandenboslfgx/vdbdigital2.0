@@ -111,6 +111,17 @@ const nl: Messages = {
     websitesStores: "Websites & webshops",
     whatsappLivechat: "WhatsApp AI & livechat",
     reviewFollowup: "Reviewflows & opvolging",
+    aboutEyebrow: "Over ons",
+    aboutTitle: "Eén studio, rechtstreeks contact met de founder",
+    aboutBody1:
+      "{name} is een softwarestudio uit Nederland. Geen accountmanager tussen jou en het werk — strategie, ontwerpkeuzes en oplevering blijven dicht bij de persoon die jouw project daadwerkelijk bouwt.",
+    aboutBody2:
+      "Wij bestaan om digitale frictie te vervangen door systemen die aansluiten op hoe jouw bedrijf écht werkt: heldere scope, realistische planning en geen loze beloftes.",
+    aboutCta: "Meer over ons",
+    trustKvk: "KvK {number}",
+    trustProjectsSingular: "{count} project live opgeleverd",
+    trustProjectsPlural: "{count} projecten live opgeleverd",
+    trustFounder: "Direct contact met de founder",
   },
   pillars: {
     eyebrow: "Aanpak",

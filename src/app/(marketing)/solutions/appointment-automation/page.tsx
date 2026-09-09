@@ -19,5 +19,5 @@ export async function generateMetadata() {
 export default async function AppointmentAutomationPage() {
   const locale = await getLocale();
   const page = getSolutionContent("appointment-automation", locale);
-  return <SolutionPageContent {...page} />;
+  return <SolutionPageContent {...page} path={paths.appointmentAutomation} />;
 }
