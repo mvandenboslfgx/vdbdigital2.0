@@ -26,11 +26,13 @@ describe("HTTP mutation route inventory", () => {
       "/contact",
       "/quote",
       "/support",
+      "/account-deletion",
       "/checkout",
     ]);
     expect(fileExists("src/app/(marketing)/contact/page.tsx")).toBe(true);
     expect(fileExists("src/app/(marketing)/quote/page.tsx")).toBe(true);
     expect(fileExists("src/app/(marketing)/support/page.tsx")).toBe(true);
+    expect(fileExists("src/app/(marketing)/account-deletion/page.tsx")).toBe(true);
     expect(fileExists("src/app/(shop)/checkout/page.tsx")).toBe(true);
   });
 
