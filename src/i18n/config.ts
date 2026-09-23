@@ -1,12 +1,13 @@
-export const locales = ["en", "nl"] as const;
+export const locales = ["nl", "en"] as const;
 export type Locale = (typeof locales)[number];
 
-export const defaultLocale: Locale = "en";
+/** Dutch is the commercial/canonical default for vdbdigital.nl. */
+export const defaultLocale: Locale = "nl";
 
 /** Expandable later: de | fr | es | sq */
 export const localeLabels: Record<Locale, string> = {
-  en: "English",
   nl: "Nederlands",
+  en: "English",
 };
 
 export function isLocale(value: string): value is Locale {
@@ -14,7 +15,10 @@ export function isLocale(value: string): value is Locale {
 }
 
 /**
- * English pathnames (root). Dutch uses the same pathnames under `/nl`.
+ * Canonical routing:
+ * - Dutch: bare path (`/`, `/solutions`, `/website-laten-maken`)
+ * - English: `/en/...`
+ * - Legacy Dutch `/nl/...` is parsed as NL and canonicalized by middleware.
  */
 export const paths = {
   home: "/",
@@ -52,7 +56,6 @@ export const paths = {
   terms: "/terms",
   refundPolicy: "/refund-policy",
   accountDeletion: "/account-deletion",
-  /** Dutch SEO landing pages (NL primary) */
   websiteLatenMaken: "/website-laten-maken",
   webdesign: "/webdesign",
   webshopLatenMaken: "/webshop-laten-maken",
@@ -66,7 +69,7 @@ export const paths = {
 
 export type PathKey = keyof typeof paths;
 
-/** Old Dutch URLs → new English path (no locale prefix). */
+/** Historic path aliases → current route shape. Locale is preserved by middleware. */
 export const legacyRedirects: Record<string, string> = {
   "/oplossingen": paths.solutions,
   "/oplossingen/websites": paths.websites,
@@ -103,6 +106,10 @@ export function stripLocalePrefix(pathname: string): {
   locale: Locale;
   pathname: string;
 } {
+  if (pathname === "/en" || pathname.startsWith("/en/")) {
+    const stripped = pathname.slice(3) || "/";
+    return { locale: "en", pathname: stripped };
+  }
   if (pathname === "/nl" || pathname.startsWith("/nl/")) {
     const stripped = pathname.slice(3) || "/";
     return { locale: "nl", pathname: stripped };
@@ -112,9 +119,7 @@ export function stripLocalePrefix(pathname: string): {
 
 export function withLocale(pathname: string, locale: Locale): string {
   const normalized = pathname.startsWith("/") ? pathname : `/${pathname}`;
-  if (locale === defaultLocale) {
-    return normalized === "" ? "/" : normalized;
-  }
-  if (normalized === "/") return `/${locale}`;
-  return `/${locale}${normalized}`;
+  if (locale === "nl") return normalized || "/";
+  if (normalized === "/") return "/en";
+  return `/en${normalized}`;
 }

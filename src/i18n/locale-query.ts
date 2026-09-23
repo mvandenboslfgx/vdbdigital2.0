@@ -1,6 +1,5 @@
 import { isLocale, type Locale } from "@/i18n/config";
 
-/** Safe query keys preserved across language switches. */
 export const SAFE_QUERY_KEYS = new Set([
   "product",
   "category",
@@ -13,7 +12,6 @@ export const SAFE_QUERY_KEYS = new Set([
   "utm_term",
 ]);
 
-/** Sensitive keys stripped on language switch (auth, payment, tokens). */
 export const SENSITIVE_QUERY_KEYS = new Set([
   "token",
   "access_token",
@@ -59,12 +57,10 @@ export function filterSearchParams(
 
 export function appendFilteredSearch(path: string, params: URLSearchParams): string {
   const qs = params.toString();
-  if (!qs) return path;
-  return `${path}?${qs}`;
+  return qs ? `${path}?${qs}` : path;
 }
 
-/** Only `en` | `nl` — never trust arbitrary client locale strings. */
 export function parseFormLocale(raw: unknown): Locale {
   if (typeof raw === "string" && isLocale(raw)) return raw;
-  return "en";
+  return "nl";
 }

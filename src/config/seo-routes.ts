@@ -1,6 +1,5 @@
 import { paths } from "@/i18n/config";
 
-/** Dutch keyword landing paths — NL locale is primary; EN redirects to equivalent solution. */
 export const seoPaths = {
   websiteLatenMaken: paths.websiteLatenMaken,
   webdesign: paths.webdesign,
@@ -10,7 +9,7 @@ export const seoPaths = {
   whatsappAutomatisering: paths.whatsappAutomatisering,
   maatwerkSoftware: paths.maatwerkSoftware,
   klantportaalLatenMaken: paths.klantportaalLatenMaken,
-  kennisbank: paths.kennisbank,
+  kennisbank: paths.kennisbank ,
 } as const;
 
 export type SeoLandingKey =
@@ -34,7 +33,6 @@ export const seoLandingKeys: SeoLandingKey[] = [
   "klantportaalLatenMaken",
 ];
 
-/** Maps Dutch SEO path → English canonical solution path for hreflang / EN redirect. */
 export const seoEnglishEquivalent: Record<string, string> = {
   [seoPaths.websiteLatenMaken]: paths.websites,
   [seoPaths.webdesign]: paths.websites,
@@ -53,27 +51,19 @@ export function getSeoPath(key: SeoLandingKey): string {
 export const seoLocalLocations = ["hoeksche-waard", "rotterdam"] as const;
 export type SeoLocalLocation = (typeof seoLocalLocations)[number];
 
-export const seoLocalParentKeys: Record<
-  SeoLocalLocation,
-  { website: SeoLandingKey; webdesign: SeoLandingKey }
-> = {
-  "hoeksche-waard": {
-    website: "websiteLatenMaken",
-    webdesign: "webdesign",
-  },
-  rotterdam: {
-    website: "websiteLatenMaken",
-    webdesign: "webdesign",
-  },
-};
+/** High-intent services that get genuinely useful regional pages. */
+export const seoLocalServiceKeys = [
+  "websiteLatenMaken",
+  "webdesign",
+  "aiAutomatisering",
+  "maatwerkSoftware",
+  "klantportaalLatenMaken",
+] as const satisfies readonly SeoLandingKey[];
 
-/** All indexable SEO routes for sitemap (NL only — EN uses solution equivalents). */
 export function getAllSeoSitemapPaths(): string[] {
   const landing = seoLandingKeys.map((key) => seoPaths[key]);
-  const local: string[] = [];
-  for (const loc of seoLocalLocations) {
-    local.push(`${seoPaths.websiteLatenMaken}/${loc}`);
-    local.push(`${seoPaths.webdesign}/${loc}`);
-  }
+  const local = seoLocalLocations.flatMap((location) =>
+    seoLocalServiceKeys.map((key) => `${seoPaths[key]}/${location}`),
+  );
   return [...landing, seoPaths.kennisbank, ...local];
 }

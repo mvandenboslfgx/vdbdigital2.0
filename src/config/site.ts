@@ -4,20 +4,20 @@ import {
   resolvePublicSiteUrl,
 } from "@/lib/url/app-url";
 
-function envOrEmpty(value: string | undefined): string {
+function envOrEmpty(value: string | unddefined): string {
   return value?.trim() ?? "";
 }
 
 export const siteConfig = {
   name: "VDB Digital Software",
   legalName: "VDB Digital Software",
-  tagline: "Software built around your business.",
+  tagline: "Websites, software en AI-automatisering voor bedrijven.",
   description:
-    "VDB Digital Software builds fast, scalable digital systems for businesses, entrepreneurs and ambitious ideas — custom websites, webshops, AI automation and ongoing support.",
-  /** Canonical public origin — production must be https://vdbdigital.nl */
+    "VDB Digital Software bouwt professionele websites, webshops, AI-automatiseringen, CRM-systemen, klantportalen en maatwerksoftware voor bedrijven in Nederland.",
   url: resolvePublicSiteUrl(),
   canonicalProductionOrigin: CANONICAL_PRODUCTION_ORIGIN,
-  contactEmail: envOrEmpty(process.env.NEXT_PUBLIC_CONTACT_EMAIL) || "info@vdbdigital.nl",
+  contactEmail:
+    envOrEmpty(process.env.NEXT_PUBLIC_CONTACT_EMAIL) || "algemeen@vdbdigital.nl",
   supportEmail:
     envOrEmpty(process.env.NEXT_PUBLIC_SUPPORT_EMAIL) || "support@vdbdigital.nl",
   whatsappNumber: envOrEmpty(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER),
@@ -28,13 +28,8 @@ export const siteConfig = {
     address: envOrEmpty(process.env.NEXT_PUBLIC_COMPANY_ADDRESS),
     city: envOrEmpty(process.env.NEXT_PUBLIC_COMPANY_CITY),
     country: "Netherlands",
-    /**
-     * Display phone. Env override allowed; default keeps public belpad available.
-     * Format for humans: 06 286 00 727
-     */
     phone:
       envOrEmpty(process.env.NEXT_PUBLIC_COMPANY_PHONE) || "06 286 00 727",
-    /** E.164 for tel: links */
     phoneTel:
       envOrEmpty(process.env.NEXT_PUBLIC_COMPANY_PHONE_TEL) || "+31628600727",
   },
@@ -46,8 +41,8 @@ export const siteConfig = {
   navigation: {
     main: [
       { labelKey: "nav.solutions", href: paths.solutions },
-      { labelKey: "nav.shop", href: paths.shop },
       { labelKey: "nav.cases", href: paths.cases },
+      { labelKey: "nav.shop", href: paths.shop },
       { labelKey: "nav.process", href: paths.process },
       { labelKey: "nav.about", href: paths.about },
       { labelKey: "nav.support", href: paths.support },
@@ -72,8 +67,8 @@ export const siteConfig = {
       },
       business: [{ labelKey: "nav.quote", href: paths.quote }],
       primaryLinks: [
-        { labelKey: "nav.shop", href: paths.shop },
         { labelKey: "nav.cases", href: paths.cases },
+        { labelKey: "nav.shop", href: paths.shop },
         { labelKey: "nav.process", href: paths.process },
         { labelKey: "nav.about", href: paths.about },
         { labelKey: "nav.support", href: paths.support },
@@ -117,7 +112,6 @@ export const siteConfig = {
     lastUpdated: "2026-07-24",
   },
   brand: {
-    /** Square mark for schema.org / fallback icon consumers */
     logo: "/brand/vdb-logo-mark-light.svg",
     logoAlt: "VDB Digital Software",
     openGraphImage: "/brand/opengraph-image.svg",

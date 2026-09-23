@@ -1,8 +1,3 @@
-/**
- * Appointment scheduling — provider-agnostic, server-validated.
- * Never trust client-supplied booking URLs.
- */
-
 export type BookingProvider =
   | "calcom"
   | "google"
@@ -13,6 +8,9 @@ export type BookingProvider =
   | "google_calendar"
   | "cal_com"
   | "custom";
+
+const DEFAULT_CALENDLY_URL =
+  "https://calendly.com/verzamelvdbdigital/strategiegesprek";
 
 const SAFE_PROVIDERS = new Set<string>([
   "calcom",
@@ -27,7 +25,7 @@ const SAFE_PROVIDERS = new Set<string>([
 ]);
 
 function readProvider(): BookingProvider {
-  const raw = (process.env.BOOKING_PROVIDER ?? "disabled").trim().toLowerCase();
+  const raw = (process.env.BOOKING_PROVIDER ?? "calendly").trim().toLowerCase();
   if (!SAFE_PROVIDERS.has(raw)) return "disabled";
   return raw as BookingProvider;
 }
@@ -38,18 +36,19 @@ function readSafeUrl(value: string | undefined): string {
   try {
     const parsed = new URL(url);
     if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return "";
-    // Block javascript: and data: already handled by protocol check
     return parsed.toString();
   } catch {
     return "";
   }
 }
 
+const configuredUrl = readSafeUrl(process.env.BOOKING_PROVIDER_URL);
+const defaultUrl = readSafeUrl(DEFAULT_CALENDLY_URL);
+
 export const bookingConfig = {
   provider: readProvider(),
-  enabled: process.env.BOOKING_ENABLED === "1",
-  /** Primary public scheduling URL */
-  url: readSafeUrl(process.env.BOOKING_PROVIDER_URL),
+  enabled: process.env.BOOKING_ENABLED !== "0",
+  url: configuredUrl || defaultUrl,
   onlineUrl: readSafeUrl(process.env.BOOKING_ONLINE_URL),
   inPersonUrl: readSafeUrl(process.env.BOOKING_IN_PERSON_URL),
   defaultMode: "online" as const,
@@ -62,21 +61,17 @@ export function isBookingUrlSafe(url: string): boolean {
 }
 
 export function getPrimaryBookingUrl(): string | null {
-  if (bookingConfig.provider === "disabled" || bookingConfig.provider === "none") {
+  if (
+    bookingConfig.provider === "disabled" ||
+    bookingConfig.provider === "none" ||
+    !bookingConfig.enabled
+  ) {
     return null;
   }
-  if (!bookingConfig.enabled && !bookingConfig.url) {
-    // Allow URL-only config without explicit BOOKING_ENABLED for backwards compat
-    if (!bookingConfig.url && !bookingConfig.onlineUrl) return null;
-  }
-  const candidate = bookingConfig.onlineUrl || bookingConfig.url;
-  return candidate || null;
+  return bookingConfig.onlineUrl || bookingConfig.url || null;
 }
 
 export function isBookingConfigured(): boolean {
-  if (bookingConfig.provider === "disabled" || bookingConfig.provider === "none") {
-    return false;
-  }
   return getPrimaryBookingUrl() !== null;
 }
 
@@ -89,9 +84,7 @@ export type BookingResolution =
 
 export function resolveBooking(): BookingResolution {
   const url = getPrimaryBookingUrl();
-  if (url && bookingConfig.provider !== "disabled" && bookingConfig.provider !== "none") {
-    return { available: true, url, provider: bookingConfig.provider };
-  }
+  if (url) return { available: true, url, provider: bookingConfig.provider };
   return {
     available: false,
     fallbacks: ["quote", "contact", "whatsapp", "email"],

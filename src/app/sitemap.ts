@@ -32,47 +32,46 @@ const staticRoutes = [
   "/account-deletion",
 ];
 
+function absolute(path: string): string {
+  const base = siteConfig.url.replace(/\/$/, "");
+  return `${base}${path === "/" ? "" : path}` || base;
+}
+
 function bilingualEntries(
   path: string,
-  opts: { changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]; priority: number },
+  opts: {
+    changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"];
+    priority: number;
+  },
 ): MetadataRoute.Sitemap {
-  const base = siteConfig.url.replace(/\/$/, "");
-  const enPath = withLocale(path, "en");
-  const nlPath = withLocale(path, "nl");
-  const enUrl = `${base}${enPath === "/" ? "" : enPath}` || base;
-  const nlUrl = `${base}${nlPath}`;
+  const nlUrl = absolute(withLocale(path, "nl"));
+  const enUrl = absolute(withLocale(path, "en"));
+  const alternates = {
+    languages: {
+      nl: nlUrl,
+      en: enUrl,
+      "x-default": nlUrl,
+    },
+  };
 
   return [
-    {
-      url: enUrl,
-      lastModified: new Date(),
-      changeFrequency: opts.changeFrequency,
-      priority: opts.priority,
-      alternates: {
-        languages: {
-          en: enUrl,
-          nl: nlUrl,
-          "x-default": enUrl,
-        },
-      },
-    },
     {
       url: nlUrl,
       lastModified: new Date(),
       changeFrequency: opts.changeFrequency,
       priority: opts.priority,
-      alternates: {
-        languages: {
-          en: enUrl,
-          nl: nlUrl,
-          "x-default": enUrl,
-        },
-      },
+      alternates,
+    },
+    {
+      url: enUrl,
+      lastModified: new Date(),
+      changeFrequency: opts.changeFrequency,
+      priority: Math.max(0.1, opts.priority - 0.05),
+      alternates,
     },
   ];
 }
 
-/** Dutch SEO landing pages — NL canonical only; EN alternate points to solution equivalent. */
 function resolveSeoEnEquivalent(path: string): string {
   if (seoEnglishEquivalent[path]) return seoEnglishEquivalent[path];
   const segments = path.split("/").filter(Boolean);
@@ -83,15 +82,17 @@ function resolveSeoEnEquivalent(path: string): string {
   return path;
 }
 
+/** Dutch keyword pages are canonical NL; English alternate points to the closest real EN page. */
 function nlSeoEntries(
   path: string,
-  opts: { changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]; priority: number },
+  opts: {
+    changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"];
+    priority: number;
+  },
 ): MetadataRoute.Sitemap {
-  const base = siteConfig.url.replace(/\/$/, "");
-  const nlPath = withLocale(path, "nl");
-  const nlUrl = `${base}${nlPath}`;
+  const nlUrl = absolute(withLocale(path, "nl"));
   const enEquivalent = resolveSeoEnEquivalent(path);
-  const enUrl = `${base}${enEquivalent === "/" ? "" : enEquivalent}` || base;
+  const enUrl = absolute(withLocale(enEquivalent, "en"));
 
   return [
     {
@@ -103,7 +104,7 @@ function nlSeoEntries(
         languages: {
           nl: nlUrl,
           en: enUrl,
-          "x-default": enUrl,
+          "x-default": nlUrl,
         },
       },
     },
@@ -127,7 +128,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .filter((c) => isCaseSearchIndexable(c) || c.type === "demonstration")
       .map((c) => c.slug),
   ];
-  // TrustBooker stays noindex → excluded via isCaseSearchIndexable (COMING_SOON).
 
   return [
     ...staticRoutes.flatMap((route) =>
@@ -139,13 +139,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...getAllSeoSitemapPaths().flatMap((route) =>
       nlSeoEntries(route, {
         changeFrequency: "monthly",
-        priority: route.split("/").length > 2 ? 0.7 : 0.85,
+        priority: route.split("/").length > 2 ? 0.75 : 0.9,
       }),
     ),
     ...caseSlugs.flatMap((slug) =>
       bilingualEntries(`/cases/${slug}`, {
         changeFrequency: "monthly",
-        priority: 0.6,
+        priority: 0.7,
       }),
     ),
     ...products.flatMap((p) =>

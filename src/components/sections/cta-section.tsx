@@ -2,6 +2,7 @@ import { Container, Section } from "@/components/ui/container";
 import { getDictionary } from "@/i18n/get-dictionary";
 import { paths } from "@/i18n/config";
 import { LocaleLinkButton } from "@/components/ui/locale-link-button";
+import { BookingCta } from "@/components/commercial/booking-cta";
 
 export async function CtaSection() {
   const { t } = await getDictionary();
@@ -28,9 +29,7 @@ export async function CtaSection() {
               {t("cta.body")}
             </p>
             <div className="flex flex-wrap justify-center gap-3">
-              <LocaleLinkButton href={`${paths.contact}?intent=introduction`} size="lg">
-                {t("cta.intro")}
-              </LocaleLinkButton>
+              <BookingCta label={t("cta.intro")} variant="primary" />
               <LocaleLinkButton
                 href={paths.quote}
                 variant="outline"

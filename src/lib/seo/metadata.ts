@@ -9,17 +9,28 @@ import {
 import { seoEnglishEquivalent } from "@/config/seo-routes";
 import { siteConfig } from "@/config/site";
 
-/**
- * Hreflang for Dutch SEO landing pages: NL canonical on /nl/…, EN on solution equivalent.
- */
+function resolveSeoEnEquivalent(seoPath: string): string {
+  if (seoEnglishEquivalent[seoPath]) return seoEnglishEquivalent[seoPath];
+  const segments = seoPath.split("/").filter(Boolean);
+  if (segments.length > 1) {
+    const parent = `/${segments.slice(0, -1).join("/")}`;
+    return seoEnglishEquivalent[parent] ?? parent;
+  }
+  return seoPath;
+}
+
+/** Dutch SEO landing pages are canonical on bare NL paths; EN points to a real solution page. */
 export function buildSeoLandingAlternates(seoPath: string, locale: Locale) {
-  const enEquivalent = seoEnglishEquivalent[seoPath] ?? seoPath;
+  const enEquivalent = resolveSeoEnEquivalent(seoPath);
+  const nlUrl = absoluteLocalizedUrl(seoPath, "nl");
+  const enUrl = absoluteLocalizedUrl(enEquivalent, "en");
   return {
-    canonical: withLocale(seoPath, locale),
+    canonical:
+      locale === "nl" ? withLocale(seoPath, "nl") : withLocale(enEquivalent, "en"),
     languages: {
-      nl: absoluteLocalizedUrl(seoPath, "nl"),
-      en: absoluteLocalizedUrl(enEquivalent, "en"),
-      "x-default": absoluteLocalizedUrl(enEquivalent, "en"),
+      nl: nlUrl,
+      en: enUrl,
+      "x-default": nlUrl,
     },
   };
 }

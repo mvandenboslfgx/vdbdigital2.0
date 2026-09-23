@@ -4,6 +4,7 @@ import "@/styles/globals.css";
 import { siteConfig } from "@/config/site";
 import { ConsentProvider } from "@/components/consent/consent-provider";
 import { OrganizationJsonLd } from "@/components/seo/organization-json-ld";
+import { WebSiteJsonLd } from "@/components/seo/website-json-ld";
 import { getDictionary, getLocale, getMessages } from "@/i18n/get-dictionary";
 import { I18nProvider } from "@/i18n/provider";
 
@@ -15,7 +16,6 @@ export const viewport: Viewport = {
 const bodyFont = Plus_Jakarta_Sans({
   variable: "--font-body",
   subsets: ["latin"],
-  // optional: avoid font-swap CLS on LCP text; fallback metrics stay stable
   display: "optional",
   adjustFontFallback: true,
 });
@@ -89,8 +89,8 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     alternates: {
       languages: {
-        en: "/",
-        nl: "/nl",
+        nl: "/",
+        en: "/en",
         "x-default": "/",
       },
     },
@@ -112,6 +112,7 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col antialiased">
         <OrganizationJsonLd />
+        <WebSiteJsonLd />
         <I18nProvider locale={locale} messages={messages}>
           <ConsentProvider>{children}</ConsentProvider>
         </I18nProvider>

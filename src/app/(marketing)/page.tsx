@@ -34,11 +34,11 @@ export default async function HomePage() {
     <>
       <HeroSection />
       <TrustStripSection />
+      <ProblemsSection />
+      <CasePreviewSection />
       <SolutionsGridSection />
       <PackagesSection />
-      <CasePreviewSection />
       <ProcessStepsSection />
-      <ProblemsSection />
       <AboutTeaserSection />
       <CtaSection />
     </>

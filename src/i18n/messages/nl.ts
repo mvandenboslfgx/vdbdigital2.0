@@ -3,9 +3,9 @@ import type { Messages } from "./en";
 const nl: Messages = {
   meta: {
     siteName: "VDB Digital Software",
-    tagline: "Software gebouwd rond jouw bedrijf.",
+    tagline: "Websites, software en AI-automatisering die bedrijven vooruithelpen.",
     description:
-      "VDB Digital Software bouwt snelle en schaalbare digitale systemen voor bedrijven, ondernemers en ambitieuze ideeën — maatwerkwebsites, webshops, AI-automatisering en doorlopende support.",
+      "VDB Digital bouwt professionele websites, webshops, apps, CRM-systemen, klantportalen en AI-automatisering voor bedrijven in Nederland.",
   },
   nav: {
     solutions: "Oplossingen",
@@ -17,7 +17,7 @@ const nl: Messages = {
     support: "Support",
     contact: "Contact",
     quote: "Vraag een voorstel aan",
-    scheduleIntro: "Kennismaken",
+    scheduleIntro: "Plan gratis gesprek",
     login: "Login",
     cart: "Winkelwagen",
     allSolutions: "Alle oplossingen",
@@ -91,16 +91,16 @@ const nl: Messages = {
     nl: "Nederlands",
   },
   home: {
-    metaTitle: "Website laten maken | Webdesign & AI automatisering | VDB Digital",
+    metaTitle: "Website laten maken & AI automatisering | VDB Digital",
     metaDescription:
-      "VDB Digital bouwt professionele websites en digitale systemen voor bedrijven — van webdesign en webshops tot AI automatisering. Meer aanvragen, minder handmatig werk.",
-    heroTitle: "Professionele website laten maken voor jouw bedrijf",
+      "Website laten maken voor je bedrijf? VDB Digital bouwt websites, webshops, apps, CRM, klantportalen en AI-automatisering voor bedrijven in Nederland en de Hoeksche Waard.",
+    heroTitle: "Websites, apps & automatisering die je bedrijf vooruithelpen",
     heroBody:
-      "Wij bouwen websites, webshops en slimme automatisering voor Nederlandse ondernemers — helder, snel en gericht op aanvragen. Van kennismaking tot livegang.",
-    ctaIntro: "Plan een kennismaking",
+      "Van een professionele website tot CRM, AI, WhatsApp-automatisering en maatwerksoftware. VDB Digital bouwt en verbetert digitale systemen waarmee je minder handmatig werkt en meer uit je aanvragen haalt.",
+    ctaIntro: "Plan gratis strategiegesprek",
     ctaSolutions: "Bekijk onze oplossingen",
     ctaQuote: "Vraag een voorstel aan",
-    ctaCases: "Bekijk cases →",
+    ctaCases: "Bekijk ons werk →",
     visualTitle: "Wat we leveren",
     visualNote: "Illustratie van onze focus — helder, mobiel-first en conversiegericht.",
     visualPointStructure: "Heldere structuur",
@@ -139,9 +139,9 @@ const nl: Messages = {
   },
   cta: {
     eyebrow: "Volgende stap",
-    title: "Klaar om iets te bouwen dat écht werkt voor jouw bedrijf?",
-    body: "Of je net start of een zwakke website wilt upgraden — plan een kennismaking en wij helpen je kiezen wat past.",
-    intro: "Plan een kennismaking",
+    title: "Klaar voor een website of systeem dat echt voor je werkt?",
+    body: "Vertel waar je bedrijf nu tegenaan loopt. We kijken of een website, automatisering, CRM, klantportaal of maatwerkoplossing het meeste oplevert.",
+    intro: "Plan gratis strategiegesprek",
     quote: "Vraag een voorstel aan",
     contact: "Contact opnemen",
     cases: "Bekijk cases",

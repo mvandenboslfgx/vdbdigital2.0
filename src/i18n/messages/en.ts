@@ -1,9 +1,9 @@
 const en = {
   meta: {
     siteName: "VDB Digital Software",
-    tagline: "Software built around your business.",
+    tagline: "Websites, software and AI automation built for business growth.",
     description:
-      "VDB Digital Software builds fast, scalable digital systems for businesses, entrepreneurs and ambitious ideas — custom websites, webshops, AI automation and ongoing support.",
+      "VDB Digital builds professional websites, online stores, apps, CRM systems, customer portals and AI automation for businesses in the Netherlands.",
   },
   nav: {
     solutions: "Solutions",
@@ -15,7 +15,7 @@ const en = {
     support: "Support",
     contact: "Contact",
     quote: "Request a proposal",
-    scheduleIntro: "Book intro",
+    scheduleIntro: "Book free strategy call",
     login: "Login",
     cart: "Cart",
     allSolutions: "All solutions",
@@ -88,13 +88,13 @@ const en = {
     nl: "Dutch",
   },
   home: {
-    metaTitle: "Custom websites, AI automation & software | VDB Digital",
+    metaTitle: "Websites, AI automation & custom software | VDB Digital",
     metaDescription:
-      "VDB Digital builds professional websites, online stores and practical AI automation for growing businesses — scoped clearly from introduction to launch.",
-    heroTitle: "Custom software, websites and automation built around your business.",
+      "VDB Digital builds websites, online stores, apps, CRM systems, customer portals and practical AI automation for companies across the Netherlands.",
+    heroTitle: "Websites, apps and automation that move your business forward",
     heroBody:
-      "VDB Digital Software builds fast, scalable digital systems for companies, entrepreneurs and ambitious ideas.",
-    ctaIntro: "Schedule an introduction",
+      "From professional websites to CRM, AI, WhatsApp automation and custom software. We build digital systems that cut manual work and help turn more enquiries into business.",
+    ctaIntro: "Book a free strategy call",
     ctaSolutions: "View our solutions",
     ctaQuote: "Request a proposal",
     ctaCases: "View cases →",

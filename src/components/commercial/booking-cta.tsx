@@ -2,17 +2,20 @@ import { LocaleLinkButton } from "@/components/ui/locale-link-button";
 import { resolveBooking } from "@/config/commercial/booking";
 import { paths } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
+import { cn } from "@/lib/utilities/cn";
 
-/** Server component — never embeds raw client URLs */
 export async function BookingCta({
   label,
-  variant = "outline",
+  variant = "primary",
+  className,
 }: {
   label?: string;
   variant?: "outline" | "ghost" | "primary";
+  className?: string;
 }) {
   const { t } = await getDictionary();
   const booking = resolveBooking();
+  const text = label ?? t("nav.scheduleIntro");
 
   if (booking.available) {
     return (
@@ -20,9 +23,16 @@ export async function BookingCta({
         href={booking.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex min-h-12 items-center justify-center rounded-lg border border-border px-5 text-base font-medium hover:border-primary hover:text-primary"
+        className={cn(
+          "inline-flex min-h-12 items-center justify-center rounded-lg px-5 text-base font-medium transition-colors",
+          variant === "primary" && "bg-primary text-white hover:bg-primary-hover",
+          variant === "outline" &&
+            "border border-border hover:border-primary hover:text-primary",
+          variant === "ghost" && "hover:bg-surface-elevated hover:text-primary",
+          className,
+        )}
       >
-        {label ?? t("nav.scheduleIntro")}
+        {text}
       </a>
     );
   }
@@ -30,10 +40,11 @@ export async function BookingCta({
   return (
     <LocaleLinkButton
       href={`${paths.contact}?intent=introduction`}
-      variant={variant === "primary" ? "primary" : variant}
+      variant={variant}
       size="lg"
+      className={className}
     >
-      {label ?? t("nav.scheduleIntro")}
+      {text}
     </LocaleLinkButton>
   );
 }

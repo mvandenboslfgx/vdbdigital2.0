@@ -652,7 +652,7 @@ export const seoLandingPages: Record<SeoLandingPageKey, SeoLandingContent> = {
     faq: [
       {
         q: "Wanneer heeft een bedrijf een klantportaal nodig?",
-        a: "Als je regelmatig offertes, facturen, documenten of projectupdates deelt met klanten — en statusvragen je team much tijd kosten.",
+        a: "Als je regelmatig offertes, facturen, documenten of projectupdates deelt met klanten — en statusvragen je team veel tijd kosten.",
       },
       {
         q: "Kunnen klanten ook betalen via het portaal?",
@@ -670,13 +670,12 @@ export function getSeoLandingContent(key: SeoLandingPageKey): SeoLandingContent 
   return seoLandingPages[key];
 }
 
-/** Local page content overlays — unique per location. */
+/** Local page content overlays — unique per location and service. */
 export function getSeoLocalContent(
   parentKey: SeoLandingPageKey,
   location: "hoeksche-waard" | "rotterdam",
 ): SeoLocalContent {
   const base = seoLandingPages[parentKey];
-  const isWebsite = parentKey === "websiteLatenMaken";
 
   const locations: Record<
     "hoeksche-waard" | "rotterdam",
@@ -685,47 +684,90 @@ export function getSeoLocalContent(
     "hoeksche-waard": {
       label: "Hoeksche Waard",
       context:
-        "VDB Digital bedient ondernemers in de Hoeksche Waard en Zuid-Holland. Wij kennen de lokale markt van mkb-bedrijven, bouw, installatie en dienstverlening in de regio — zonder te doen alsof we een fysiek kantoor op elke hoek hebben.",
+        "VDB Digital helpt bedrijven in de Hoeksche Waard, waaronder ondernemers rond Oud-Beijerland, Klaaswaal, Numansdorp, Strijen, Puttershoek en 's-Gravendeel. De focus ligt op mkb, bouw, installatie, dienstverlening en bedrijven die online professioneler en efficiënter willen werken. Projecten kunnen online worden afgestemd en waar relevant op locatie in de regio.",
       metaSuffix: "Hoeksche Waard",
     },
     rotterdam: {
       label: "Rotterdam",
       context:
-        "Rotterdam is een dynamische markt met veel ambitieuze mkb-bedrijven. VDB Digital helpt Rotterdamse ondernemers met professionele websites, webdesign en digitale systemen — met persoonlijke afstemming en heldere communicatie.",
+        "VDB Digital helpt bedrijven in Rotterdam en de omliggende regio met websites, automatisering en maatwerksoftware. De aanpak is gericht op duidelijke positionering, snelle opvolging van aanvragen en digitale processen die schaalbaar blijven als het bedrijf groeit.",
       metaSuffix: "Rotterdam",
     },
   };
 
+  const service: Record<SeoLandingPageKey, { label: string; title: string; description: (loc: string) => string }> = {
+    websiteLatenMaken: {
+      label: "Website laten maken",
+      title: "Professionele website laten maken",
+      description: (loc) => `Website laten maken in ${loc}? VDB Digital bouwt snelle, professionele bedrijfswebsites die vertrouwen wekken en bezoekers naar een duidelijke aanvraag leiden.`,
+    },
+    webdesign: {
+      label: "Webdesign",
+      title: "Webdesign voor bedrijven",
+      description: (loc) => `Webdesign in ${loc}? VDB Digital ontwerpt en bouwt professionele websites voor mkb-bedrijven, mobiel-first en gericht op vertrouwen en aanvragen.`,
+    },
+    aiAutomatisering: {
+      label: "AI automatisering",
+      title: "AI automatisering voor bedrijven",
+      description: (loc) => `AI automatisering in ${loc}? VDB Digital automatiseert leadopvolging, e-mail, planning, CRM-processen en terugkerend administratief werk voor bedrijven.`,
+    },
+    maatwerkSoftware: {
+      label: "Maatwerk software",
+      title: "Maatwerk software voor bedrijven",
+      description: (loc) => `Maatwerk software in ${loc}? VDB Digital bouwt dashboards, CRM-oplossingen, interne tools en webapplicaties rond de processen van jouw bedrijf.`,
+    },
+    klantportaalLatenMaken: {
+      label: "Klantportaal laten maken",
+      title: "Klantportaal laten maken",
+      description: (loc) => `Klantportaal laten maken in ${loc}? VDB Digital bouwt beveiligde klantportalen voor projecten, offertes, facturen, documenten, berichten en statusupdates.`,
+    },
+    webshopLatenMaken: {
+      label: "Webshop laten maken",
+      title: "Webshop laten maken",
+      description: (loc) => `Webshop laten maken in ${loc}? VDB Digital bouwt snelle webshops met een duidelijke product- en checkoutflow.`,
+    },
+    aiChatbot: {
+      label: "AI chatbot",
+      title: "AI chatbot voor bedrijven",
+      description: (loc) => `AI chatbot voor een bedrijf in ${loc}? VDB Digital bouwt chatbots voor vragen, leadkwalificatie en overdracht naar medewerkers.`,
+    },
+    whatsappAutomatisering: {
+      label: "WhatsApp automatisering",
+      title: "WhatsApp automatisering voor bedrijven",
+      description: (loc) => `WhatsApp automatisering in ${loc}? VDB Digital koppelt intake, FAQ, leadopvolging en menselijke overdracht in één zakelijke flow.`,
+    },
+  };
+
   const loc = locations[location];
-  const serviceLabel = isWebsite ? "Website laten maken" : "Webdesign";
+  const current = service[parentKey];
 
   return {
     ...base,
     locationLabel: loc.label,
     regionContext: loc.context,
-    metaTitle: `${serviceLabel} ${loc.metaSuffix} | VDB Digital`,
-    metaDescription: isWebsite
-      ? `Website laten maken in ${loc.label}? VDB Digital bouwt professionele bedrijfswebsites voor ondernemers in ${loc.label} en omgeving — snel, conversiegericht en op maat.`
-      : `Webdesign bureau in ${loc.label}? VDB Digital ontwerpt premium bedrijfswebsites voor mkb in ${loc.label} en regio — helder, mobiel-first en gericht op aanvragen.`,
-    title: isWebsite
-      ? `Professionele website laten maken in ${loc.label}`
-      : `Webdesign voor bedrijven in ${loc.label}`,
+    metaTitle: `${current.label} ${loc.metaSuffix} | VDB Digital`,
+    metaDescription: current.description(loc.label),
+    title: `${current.title} in ${loc.label}`,
     description: `${loc.context} ${base.description}`,
     faq: [
       ...(base.faq ?? []),
       {
         q: `Werken jullie met bedrijven in ${loc.label}?`,
-        a: `Ja. Wij werken met ondernemers in ${loc.label} en omliggende regio's. Kennismaking en projectafstemming verlopen online en waar nodig op locatie — zonder fysiek kantoor in elke stad.`,
+        a: `Ja. VDB Digital werkt met bedrijven in ${loc.label} en omliggende plaatsen. Projecten worden efficiënt online afgestemd en waar het project daar baat bij heeft kan afstemming op locatie plaatsvinden.`,
+      },
+      {
+        q: `Kunnen jullie ook een bestaand systeem of bestaande website in ${loc.label} verbeteren?`,
+        a: "Ja. We kunnen bestaande websites, processen en software eerst technisch en commercieel beoordelen en daarna gericht verbeteren in plaats van automatisch alles opnieuw te bouwen.",
       },
     ],
     related: [
       ...(base.related ?? []),
-      {
-        href: isWebsite ? `/webdesign/${location}` : `/website-laten-maken/${location}`,
-        label: isWebsite
-          ? `Webdesign ${loc.label}`
-          : `Website laten maken ${loc.label}`,
-      },
+      ...(parentKey !== "websiteLatenMaken"
+        ? [{ href: `/website-laten-maken/${location}`, label: `Website laten maken ${loc.label}` }]
+        : []),
+      ...(parentKey !== "aiAutomatisering"
+        ? [{ href: `/ai-automatisering/${location}`, label: `AI automatisering ${loc.label}` }]
+        : []),
     ],
   };
 }

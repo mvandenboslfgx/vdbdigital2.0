@@ -3,9 +3,9 @@ import type { NextRequest } from "next/server";
 import { updateSupabaseSession } from "@/lib/database/middleware";
 import { isPreviewDeployment } from "@/lib/url/app-url";
 import {
-  defaultLocale,
   legacyRedirects,
   stripLocalePrefix,
+  withLocale,
   type Locale,
 } from "@/i18n/config";
 
@@ -43,16 +43,13 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
   ].join("; ");
 
   response.headers.set("Content-Security-Policy", csp);
-
   return response;
 }
 
 function resolveLegacyTarget(pathname: string): string | null {
   if (legacyRedirects[pathname]) return legacyRedirects[pathname];
   for (const [from, to] of Object.entries(legacyRedirects)) {
-    if (pathname.startsWith(`${from}/`)) {
-      return `${to}${pathname.slice(from.length)}`;
-    }
+    if (pathname.startsWith(`${from}/`)) return `${to}${pathname.slice(from.length)}`;
   }
   return null;
 }
@@ -67,12 +64,7 @@ function attachLocale(response: NextResponse, locale: Locale): NextResponse {
   return response;
 }
 
-function prefersDutchBrowser(request: NextRequest): boolean {
-  const accept = request.headers.get("accept-language") ?? "";
-  return /^nl(-|$)/i.test(accept.trim()) || /,nl(-|;|$)/i.test(accept);
-}
-
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (
@@ -83,46 +75,28 @@ export async function middleware(request: NextRequest) {
     return applySecurityHeaders(await updateSupabaseSession(request));
   }
 
-  const { locale: pathLocale, pathname: barePath } =
-    stripLocalePrefix(pathname);
-
-  // First visit: Dutch browser may safely land on /nl (manual cookie always wins later)
-  const localeCookie = request.cookies.get("NEXT_LOCALE")?.value;
-  if (
-    barePath === "/" &&
-    pathLocale === "en" &&
-    !localeCookie &&
-    prefersDutchBrowser(request)
-  ) {
+  // SEO migration: legacy /nl/... permanently becomes canonical Dutch bare path.
+  if (pathname === "/nl" || pathname.startsWith("/nl/")) {
     const url = request.nextUrl.clone();
-    url.pathname = "/nl";
-    return NextResponse.redirect(url, 302);
+    url.pathname = pathname.slice(3) || "/";
+    return applySecurityHeaders(NextResponse.redirect(url, 308));
   }
+
+  const { locale: pathLocale, pathname: barePath } = stripLocalePrefix(pathname);
 
   const legacyTarget = resolveLegacyTarget(barePath);
   if (legacyTarget) {
     const url = request.nextUrl.clone();
-    const prefix = pathLocale === "nl" ? "/nl" : "";
-    url.pathname = `${prefix}${legacyTarget}`;
-    return NextResponse.redirect(url, 308);
-  }
-
-  // Admin is English-only
-  if (barePath.startsWith("/admin")) {
-    if (pathname.startsWith("/nl")) {
-      const url = request.nextUrl.clone();
-      url.pathname = barePath;
-      return NextResponse.redirect(url, 308);
-    }
-    const response = await updateSupabaseSession(request);
-    return applySecurityHeaders(attachLocale(response, defaultLocale));
+    url.pathname = withLocale(legacyTarget, pathLocale);
+    return applySecurityHeaders(NextResponse.redirect(url, 308));
   }
 
   const locale: Locale = pathLocale;
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-locale", locale);
 
-  if (locale === "nl") {
+  // English lives under /en but is rendered by the existing bare route tree.
+  if (locale === "en") {
     const rewriteUrl = request.nextUrl.clone();
     rewriteUrl.pathname = barePath;
     const response = await updateSupabaseSession(request, {

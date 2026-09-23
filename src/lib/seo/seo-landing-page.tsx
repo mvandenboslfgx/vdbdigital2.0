@@ -15,6 +15,7 @@ import {
   type SeoLocalContent,
 } from "@/i18n/content/seo-landing-pages";
 import { getLocale } from "@/i18n/get-dictionary";
+import { withLocale } from "@/i18n/config";
 import { createSeoLandingMetadata } from "@/lib/seo/metadata";
 import {
   getSeoPath,
@@ -23,6 +24,11 @@ import {
 } from "@/config/seo-routes";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+
+function resolveEnglishEquivalent(path: string, pageKey: SeoLandingPageKey): string {
+  if (seoEnglishEquivalent[path]) return seoEnglishEquivalent[path];
+  return seoEnglishEquivalent[getSeoPath(pageKey)] ?? "/";
+}
 
 export async function generateSeoLandingMetadata(
   key: SeoLandingPageKey,
@@ -87,6 +93,17 @@ function getSeoVisual(pageKey: SeoLandingPageKey): ReactNode {
   }
 }
 
+const breadcrumbLabels: Record<SeoLandingPageKey, string> = {
+  websiteLatenMaken: "Website laten maken",
+  webdesign: "Webdesign",
+  webshopLatenMaken: "Webshop laten maken",
+  aiAutomatisering: "AI automatisering",
+  aiChatbot: "AI chatbot",
+  whatsappAutomatisering: "WhatsApp automatisering",
+  maatwerkSoftware: "Maatwerk software",
+  klantportaalLatenMaken: "Klantportaal laten maken",
+};
+
 interface SeoLandingPageProps {
   pageKey: SeoLandingPageKey;
   location?: SeoLocalLocation;
@@ -99,7 +116,7 @@ export async function SeoLandingPage({ pageKey, location }: SeoLandingPageProps)
     : getSeoPath(pageKey);
 
   if (locale === "en") {
-    redirect(seoEnglishEquivalent[path] ?? seoEnglishEquivalent[getSeoPath(pageKey)] ?? "/");
+    redirect(withLocale(resolveEnglishEquivalent(path, pageKey), "en"));
   }
 
   const content = location
@@ -111,15 +128,12 @@ export async function SeoLandingPage({ pageKey, location }: SeoLandingPageProps)
   const breadcrumbs = location && localContent
     ? [
         { name: "Home", path: "/" },
-        {
-          name: pageKey === "websiteLatenMaken" ? "Website laten maken" : "Webdesign",
-          path: getSeoPath(pageKey),
-        },
+        { name: breadcrumbLabels[pageKey], path: getSeoPath(pageKey) },
         { name: localContent.locationLabel, path },
       ]
     : [
         { name: "Home", path: "/" },
-        { name: content.title.split(" ").slice(0, 4).join(" "), path },
+        { name: breadcrumbLabels[pageKey], path },
       ];
 
   return (
