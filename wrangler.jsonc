@@ -12,7 +12,13 @@
     "enabled": true
   },
   "vars": {
-    "NEXT_PUBLIC_APP_URL": "https://preview-100-10-site-vdbdigital-preview.matthijsvandenbos8.workers.dev",
-    "ALLOWED_ORIGINS": "https://preview-100-10-site-vdbdigital-preview.matthijsvandenbos8.workers.dev"
+    "NEXT_PUBLIC_APP_URL": "https://vdbdigital.nl",
+    "ALLOWED_ORIGINS": "https://vdbdigital.nl"
+  },
+  "previews": {
+    "vars": {
+      "NEXT_PUBLIC_APP_URL": "https://preview-100-10-site-vdbdigital-preview.matthijsvandenbos8.workers.dev",
+      "ALLOWED_ORIGINS": "https://preview-100-10-site-vdbdigital-preview.matthijsvandenbos8.workers.dev"
+    }
   }
 }
