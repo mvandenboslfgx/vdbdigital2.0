@@ -1,22 +1,42 @@
 import { googleLoginAction } from "@/server/actions/google-auth-action";
 
-export function GoogleLoginForm({ next }: { next?: string }) {
-  if (process.env.GOOGLE_AUTH_ENABLED !== "1") return null;
-
+export function GoogleLoginForm({
+  next,
+  label = "Doorgaan met Google",
+}: {
+  next?: string;
+  label?: string;
+}) {
   return (
     <form action={googleLoginAction}>
       {next ? <input type="hidden" name="next" value={next} /> : null}
       <button
         type="submit"
-        className="flex min-h-12 w-full items-center justify-center gap-3 rounded-lg border border-border bg-surface px-4 text-sm font-medium text-foreground transition-colors hover:border-primary hover:bg-surface-elevated focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        className="flex min-h-12 w-full items-center justify-center gap-3 rounded-lg border border-border bg-white px-4 text-sm font-medium text-[#1f1f1f] transition-colors hover:bg-[#f8f9fa] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
-        <span
+        <svg
           aria-hidden="true"
-          className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-sm font-bold text-[#4285F4]"
+          viewBox="0 0 24 24"
+          className="h-5 w-5 shrink-0"
         >
-          G
-        </span>
-        Doorgaan met Google
+          <path
+            fill="#4285F4"
+            d="M21.6 12.227c0-.709-.064-1.391-.182-2.045H12v3.868h5.382a4.6 4.6 0 0 1-1.996 3.018v2.509h3.232c1.891-1.741 2.982-4.309 2.982-7.35Z"
+          />
+          <path
+            fill="#34A853"
+            d="M12 22c2.7 0 4.964-.895 6.618-2.423l-3.232-2.509c-.895.6-2.041.955-3.386.955-2.605 0-4.809-1.759-5.596-4.123H3.064v2.591A9.996 9.996 0 0 0 12 22Z"
+          />
+          <path
+            fill="#FBBC05"
+            d="M6.404 13.9A6.01 6.01 0 0 1 6.09 12c0-.659.114-1.3.314-1.9V7.509H3.064A9.997 9.997 0 0 0 2 12c0 1.614.386 3.141 1.064 4.491L6.404 13.9Z"
+          />
+          <path
+            fill="#EA4335"
+            d="M12 5.977c1.468 0 2.786.505 3.823 1.496l2.868-2.868C16.959 2.991 14.695 2 12 2a9.996 9.996 0 0 0-8.936 5.509l3.34 2.591C7.191 7.736 9.395 5.977 12 5.977Z"
+          />
+        </svg>
+        <span>{label}</span>
       </button>
     </form>
   );

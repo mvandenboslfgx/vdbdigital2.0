@@ -80,14 +80,14 @@ export function PasswordUpdateForm() {
   );
 }
 
-export function MagicLinkForm() {
+export function MagicLinkForm({ compact = false }: { compact?: boolean } = {}) {
   const [state, formAction, pending] = useActionState(
     requestMagicLinkAction,
     initialState,
   );
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form action={formAction} className={compact ? "space-y-3" : "space-y-4"}>
       <div>
         <label htmlFor="magic-email" className="block text-small font-medium mb-1">
           E-mailadres
@@ -111,7 +111,7 @@ export function MagicLinkForm() {
         </p>
       )}
       <Button type="submit" disabled={pending} className="w-full" variant="secondary">
-        {pending ? "Versturen…" : "Stuur inloglink"}
+        {pending ? "Versturen…" : "Stuur beveiligde inloglink"}
       </Button>
     </form>
   );

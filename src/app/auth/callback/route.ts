@@ -12,9 +12,11 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const nextParam = searchParams.get("next");
+  const providerError = searchParams.get("error") || searchParams.get("error_code");
 
   if (!code) {
-    return NextResponse.redirect(`${origin}/inloggen`);
+    const suffix = providerError ? "?fout=google" : "";
+    return NextResponse.redirect(`${origin}/inloggen${suffix}`);
   }
 
   const env = getServerEnv();
