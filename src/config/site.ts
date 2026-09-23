@@ -4,7 +4,7 @@ import {
   resolvePublicSiteUrl,
 } from "@/lib/url/app-url";
 
-function envOrEmpty(value: string | unddefined): string {
+function envOrEmpty(value: string | undefined): string {
   return value?.trim() ?? "";
 }
 
