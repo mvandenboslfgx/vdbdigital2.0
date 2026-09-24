@@ -83,15 +83,21 @@ describe("P0.5 env + Mollie mode + harness", () => {
     expect(buildRateLimitStorageKey("checkout", "a@b.nl")).toMatch(/^rl:checkout:[a-f0-9]+$/);
   });
 
-  it("release gate stays not ready without operator confirmations and keeps checkout off", () => {
+  it("release gate is read-only and blocks non-production runtime", () => {
     const report = evaluateCheckoutReleaseGate({
+      NODE_ENV: "production",
+      VDB_DEPLOYMENT_ENV: "preview",
       CHECKOUT_ENABLED: "false",
-      NEXT_PUBLIC_APP_URL: "https://vdbdigital.nl",
+      NEXT_PUBLIC_APP_URL: "https://preview-vdb.workers.dev",
+      NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co",
+      SUPABASE_SECRET_KEY: "server-secret",
       MOLLIE_API_KEY: "test_demo",
+      RESEND_API_KEY: "re_demo",
+      EMAIL_FROM: "VDB Digital <noreply@vdbdigital.nl>",
     });
-    expect(report.checkoutRemainsOff).toBe(true);
-    expect(report.readyForManualEnablement).toBe(false);
-    expect(report.code).not.toBe("READY FOR MANUAL CHECKOUT ENABLEMENT");
-    expect(report.checks.find((c) => c.id === "feature_flag_off")?.ok).toBe(true);
+    expect(report.deployPerformed).toBe(false);
+    expect(report.readyForDeploy).toBe(false);
+    expect(report.code).not.toBe("READY FOR CLOUDFLARE PRODUCTION");
+    expect(report.checks.find((c) => c.id === "cloudflare_production")?.ok).toBe(false);
   });
 });
