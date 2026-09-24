@@ -213,13 +213,15 @@ export async function submitContactAction(
     locale,
   );
   await sendContactNotification({ ...parsed.data, locale });
-  await recordMarketingPreference({
-    email: parsed.data.email,
-    optIn: parsed.data.marketingConsent === true,
-    source: "contact_form",
-    locale,
-    firstName: parsed.data.name,
-  });
+  if (parsed.data.marketingConsent === true) {
+    await recordMarketingPreference({
+      email: parsed.data.email,
+      optIn: true,
+      source: "contact_form",
+      locale,
+      firstName: parsed.data.name,
+    });
+  }
 
   return {
     success: true,
@@ -293,13 +295,15 @@ export async function submitQuoteAction(
     description,
     locale,
   });
-  await recordMarketingPreference({
-    email: parsed.data.email,
-    optIn: parsed.data.marketingConsent === true,
-    source: "quote_form",
-    locale,
-    firstName: parsed.data.name,
-  });
+  if (parsed.data.marketingConsent === true) {
+    await recordMarketingPreference({
+      email: parsed.data.email,
+      optIn: true,
+      source: "quote_form",
+      locale,
+      firstName: parsed.data.name,
+    });
+  }
 
   return { success: true, mailPending: !confirm.sent };
 }
