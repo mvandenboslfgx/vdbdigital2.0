@@ -7,7 +7,8 @@ import { assertMollieKeySafeForRuntime } from "@/lib/payments/mollie-mode";
 import { logCheckoutEvent } from "@/lib/observability/checkout-log";
 
 export function isMollieConfigured(): boolean {
-  return Boolean(process.env.MOLLIE_API_KEY);
+  const apiKey = process.env.MOLLIE_API_KEY;
+  return Boolean(apiKey && assertMollieKeySafeForRuntime(apiKey).ok);
 }
 
 export function getMollieClient() {
