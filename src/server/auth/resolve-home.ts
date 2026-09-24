@@ -25,7 +25,7 @@ function blockedAccessPath(): string {
  * Bepaalt de post-login bestemming op basis van rollen.
  * Staff (admin_roles) → /admin (eventueel via MFA).
  * Actief organisatielid → /portal.
- * Authenticated zonder toegang → /geen-toegang (terminal — geen login-loop).
+ * Authenticated zonder klantworkspace → veilige self-service provisioning → /portal.
  * Schema/DB-fouten → fail-closed op /geen-toegang?reden=tijdelijk.
  *
  * `next` wordt server-side gevalideerd én audience-aware.
@@ -73,5 +73,17 @@ export async function resolvePostLoginPath(
     return audienceSafeInternalPath(requestedNext, "customer", "/portal");
   }
 
-  return AUTH_NO_ACCESS_PATH;
+  const { error: provisionError } = await supabase.rpc(
+    "ensure_customer_workspace",
+  );
+  if (provisionError) {
+    return temporaryAccessPath();
+  }
+
+  const provisionedLookup = await lookupCustomerMemberships(userId, supabase);
+  if (!provisionedLookup.ok || provisionedLookup.memberships.length === 0) {
+    return temporaryAccessPath();
+  }
+
+  return audienceSafeInternalPath(requestedNext, "customer", "/portal");
 }
