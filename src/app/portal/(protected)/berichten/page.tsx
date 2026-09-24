@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { EmptyState } from "@/components/portal/empty-state";
-import { StartConversationForm } from "@/components/portal/conversation-forms";
-import { LocaleLink } from "@/i18n/locale-link";
 import { listPortalConversations } from "@/server/repositories/portal";
+import { StartConversationForm } from "@/components/portal/conversation-forms";
 
 export const metadata: Metadata = {
   title: "Berichten",
@@ -17,7 +17,7 @@ export default async function PortalMessagesPage() {
       <div>
         <h1 className="text-h1">Berichten</h1>
         <p className="text-muted text-small mt-1">
-          Beveiligde gesprekken tussen jouw organisatie en VDB Digital.
+          Beveiligd berichtencentrum met VDB Digital.
         </p>
       </div>
 
@@ -28,35 +28,31 @@ export default async function PortalMessagesPage() {
         {denied ? (
           <EmptyState
             title="Geen toegang"
-            description="Je rol heeft geen toegang tot klantgesprekken."
+            description="Je hebt geen rechten om berichten te gebruiken."
           />
         ) : conversations.length === 0 ? (
           <EmptyState
             title="Nog geen gesprekken"
-            description="Start hierboven een gesprek. Reacties van VDB Digital verschijnen in dezelfde thread."
+            description="Start hierboven een gesprek. Reacties van VDB Digital verschijnen daarna in dezelfde thread."
           />
         ) : (
           <ul className="space-y-3">
             {conversations.map((c) => (
               <li key={c.id}>
-                <LocaleLink
+                <Link
                   href={`/portal/berichten/${c.id}`}
                   className="block rounded-xl border border-border bg-surface p-5 hover:border-primary transition-colors"
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <p className="font-medium">{c.subject}</p>
-                      <p className="text-small text-muted mt-1">
-                        {c.last_message_at
-                          ? `Laatste bericht ${new Date(c.last_message_at).toLocaleString("nl-NL")}`
-                          : "Nog geen berichten"}
-                      </p>
-                    </div>
-                    <span className="text-xs uppercase tracking-wide text-muted">
-                      {c.status}
-                    </span>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="font-medium">{c.subject}</p>
+                    <span className="text-xs text-muted">{c.status}</span>
                   </div>
-                </LocaleLink>
+                  <p className="text-small text-muted mt-2">
+                    {c.last_message_at
+                      ? `Laatste bericht ${new Date(c.last_message_at).toLocaleString("nl-NL")}`
+                      : "Nog geen berichten"}
+                  </p>
+                </Link>
               </li>
             ))}
           </ul>
