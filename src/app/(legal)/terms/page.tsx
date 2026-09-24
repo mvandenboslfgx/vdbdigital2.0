@@ -50,6 +50,16 @@ export default function TermsPage() {
         frequency.
       </p>
 
+      <h2 className="text-h3 text-light-foreground">Recurring subscriptions</h2>
+      <p>
+        For recurring Care subscriptions, the first Mollie payment authorizes
+        future recurring collections at the billing frequency shown before
+        checkout. The subscription continues at that frequency until it is
+        ended. Cancellation can be requested through support or the contact
+        channels published on this website. Mandatory consumer rights remain
+        unaffected where they apply.
+      </p>
+
       <h2 className="text-h3 text-light-foreground">Delivery</h2>
       <p>
         Delivery times are indicative and confirmed per product or project. Digital
