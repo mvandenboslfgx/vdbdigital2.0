@@ -16,6 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t("cart.title"),
     alternates: { canonical: paths.cart },
+    robots: { index: false, follow: false },
   };
 }
 
@@ -84,7 +85,13 @@ export default async function CartPage() {
                     <p className="text-small text-muted mt-1">
                       {formatCents(item.validatedPriceCents)} {t("cart.perItem")}
                     </p>
-                    <CartQuantityControls productId={item.productId} quantity={item.quantity} />
+                    {item.billingType === "MONTHLY" || item.billingType === "YEARLY" ? (
+                      <p className="text-xs text-muted mt-2">
+                        {item.billingType === "YEARLY" ? "1 yearly subscription" : "1 monthly subscription"}
+                      </p>
+                    ) : (
+                      <CartQuantityControls productId={item.productId} quantity={item.quantity} />
+                    )}
                   </div>
                   <div className="text-right">
                     <p className="font-semibold">
