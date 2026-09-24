@@ -16,6 +16,8 @@ import { verifyOrigin } from "@/lib/security/origin";
 import { isDirectCheckoutEnabled } from "@/config/features";
 import { logCheckoutEvent, newCheckoutCorrelationId } from "@/lib/observability/checkout-log";
 import { createPendingBillingSubscription } from "@/server/services/subscription-service";
+import { recordMarketingPreference } from "@/server/services/marketing-preferences";
+import { parseFormLocale } from "@/i18n/locale-query";
 
 export async function submitCheckoutAction(
   _prev: { errors?: string[] } | null,
@@ -59,6 +61,7 @@ export async function submitCheckoutAction(
     customerType: formData.get("customerType") || undefined,
     idempotencyKey: formData.get("idempotencyKey") || undefined,
     acceptTerms: formData.get("acceptTerms") === "true" ? true : undefined,
+    marketingConsent: formData.get("marketingConsent") === "true",
     website: formData.get("website") || undefined,
   };
 
@@ -146,6 +149,15 @@ export async function submitCheckoutAction(
       return { errors: [seeded.error] };
     }
   }
+
+  await recordMarketingPreference({
+    email: validation.data.customer.email,
+    optIn: parsed.data.marketingConsent === true,
+    source: "checkout",
+    locale: parseFormLocale(formData.get("locale")),
+    firstName: validation.data.customer.firstName,
+    lastName: validation.data.customer.lastName,
+  });
 
   redirect(payment.checkoutUrl);
 }
