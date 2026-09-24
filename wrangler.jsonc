@@ -38,7 +38,7 @@
     "BOOKING_PROVIDER_URL": "https://calendly.com/verzamelvdbdigital/strategiegesprek",
     "BOOKING_ONLINE_URL": "https://calendly.com/verzamelvdbdigital/strategiegesprek",
     "GOOGLE_AUTH_ENABLED": "1",
-    "CHECKOUT_ENABLED": "false"
+    "CHECKOUT_ENABLED": "true"
   },
   "previews": {
     "vars": {
