@@ -245,6 +245,8 @@ const nl: Messages = {
     recommended: "Aanbevolen",
     addToCart: "In winkelwagen",
     adding: "Toevoegen…",
+    subscribeNow: "Abonneren via Mollie",
+    startingSubscription: "Abonnement starten…",
     quoteOnly: "Offerte aanvragen",
     categories: "Categorieën",
     metaDescription:
