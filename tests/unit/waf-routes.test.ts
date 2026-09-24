@@ -26,6 +26,7 @@ describe("HTTP mutation route inventory", () => {
       "/contact",
       "/quote",
       "/support",
+      "/account-deletion",
       "/checkout",
     ]);
     expect(fileExists("src/app/(marketing)/contact/page.tsx")).toBe(true);
@@ -65,28 +66,17 @@ describe("Mollie webhook WAF exclusion", () => {
   });
 });
 
-describe("WAF plan constraints in documentation", () => {
-  it("uses max 10 minute windows only", () => {
+describe("Cloudflare and application rate-limit documentation", () => {
+  it("documents the application limiter as the free baseline", () => {
     expect(MAX_WAF_WINDOW_MINUTES).toBeLessThanOrEqual(10);
-    const doc = readFileSync("docs/VERCEL_WAF_RATE_LIMITING.md", "utf8");
-    expect(doc).not.toMatch(/15 min/i);
-    expect(doc).toMatch(/10 min/i);
-  });
-
-  it("Hobby uses single combined rate limit rule", () => {
-    const doc = readFileSync("docs/VERCEL_WAF_RATE_LIMITING.md", "utf8");
-    expect(doc).toContain("public-mutations-combined");
-    expect(doc).toMatch(/Hobby[\s\S]*?1/);
-  });
-
-  it("does not block Mollie webhook in combined rule", () => {
-    const doc = readFileSync("docs/VERCEL_WAF_RATE_LIMITING.md", "utf8");
-    expect(doc).toContain("Path is NOT /api/webhooks/mollie");
-    expect(doc).toMatch(/Log only/i);
+    const doc = readFileSync("docs/CLOUDFLARE_SECURITY.md", "utf8");
+    expect(doc).toContain("Supabase RPC");
+    expect(doc).toContain("/api/webhooks/mollie");
+    expect(doc).toMatch(/fail.?closed/i);
   });
 });
 
-describe("Application security without Upstash", () => {
+describe("Application security with free Supabase fallback", () => {
   it("form actions still use origin guard and validation", async () => {
     const source = readFileSync("src/server/actions/form-actions.ts", "utf8");
     expect(source).toContain("verifyOrigin");
