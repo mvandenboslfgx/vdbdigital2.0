@@ -198,6 +198,7 @@ export async function markPaymentCreationFailed(orderId: string): Promise<void> 
 export async function markPaymentInitialized(
   orderId: string,
   paymentId: string,
+  mollieCustomerId?: string | null,
 ): Promise<void> {
   if (isSupabaseDatabaseReady()) {
     const supabase = createServiceRoleClient();
@@ -206,6 +207,9 @@ export async function markPaymentInitialized(
       .from("orders")
       .update({
         payment_init_status: "CREATED",
+        ...(mollieCustomerId
+          ? { mollie_customer_id: mollieCustomerId }
+          : {}),
         updated_at: new Date().toISOString(),
       })
       .eq("id", orderId);
@@ -223,6 +227,9 @@ export async function markPaymentInitialized(
   if (order) {
     order.payment_init_status = "CREATED";
     order.payment_id = paymentId;
+    if (mollieCustomerId) {
+      order.mollie_customer_id = mollieCustomerId;
+    }
   }
 }
 
