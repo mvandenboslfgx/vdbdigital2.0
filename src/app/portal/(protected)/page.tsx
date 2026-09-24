@@ -104,6 +104,13 @@ export default async function PortalDashboardPage() {
   const orgName = ctx.organization.tradeName || ctx.organization.legalName;
   const unread = notifications.filter((n) => !n.read_at).length;
   const dateLocale = locale === "en" ? "en-GB" : "nl-NL";
+  const isNewPortal =
+    projects.length === 0 &&
+    quotes.length === 0 &&
+    invoices.length === 0 &&
+    tickets.length === 0 &&
+    files.length === 0 &&
+    conversations.length === 0;
 
   return (
     <div className="space-y-8">
@@ -111,6 +118,50 @@ export default async function PortalDashboardPage() {
         <h1 className="text-h1 mb-2">{ui.welcome}, {ctx.displayName}</h1>
         <p className="text-muted">{ui.overviewFor} {orgName}. {ui.privacy}</p>
       </header>
+
+      {isNewPortal ? (
+        <section className="rounded-2xl border border-primary/30 bg-primary-soft/40 p-5 sm:p-6">
+          <p className="text-label text-primary mb-2">
+            {locale === "en" ? "Your portal is ready" : "Je klantportaal is klaar"}
+          </p>
+          <h2 className="text-h2 mb-2">
+            {locale === "en"
+              ? "Start with your account and first request"
+              : "Begin met je account en eerste aanvraag"}
+          </h2>
+          <p className="text-small text-muted max-w-2xl">
+            {locale === "en"
+              ? "Projects, quotes, invoices and files appear automatically when VDB Digital shares them with your organisation."
+              : "Projecten, offertes, facturen en bestanden verschijnen automatisch zodra VDB Digital ze met jouw organisatie deelt. Een leeg onderdeel betekent dus niet dat het portaal stuk is."}
+          </p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <LocaleLink
+              href="/portal/profiel"
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white"
+            >
+              {locale === "en" ? "Complete profile" : "Profiel aanvullen"}
+            </LocaleLink>
+            <LocaleLink
+              href="/portal/berichten"
+              className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium"
+            >
+              {locale === "en" ? "Start conversation" : "Start een gesprek"}
+            </LocaleLink>
+            <LocaleLink
+              href="/quote"
+              className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium"
+            >
+              {locale === "en" ? "Request quote" : "Offerte aanvragen"}
+            </LocaleLink>
+            <LocaleLink
+              href="/portal/beveiliging"
+              className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium"
+            >
+              {locale === "en" ? "Security" : "Beveiliging instellen"}
+            </LocaleLink>
+          </div>
+        </section>
+      ) : null}
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card><p className="text-label text-muted mb-1">{ui.activeProjects}</p><p className="text-3xl font-semibold">{projects.length}</p></Card>
