@@ -4,6 +4,7 @@
  */
 
 import { detectMollieKeyMode, assertMollieKeySafeForRuntime } from "@/lib/payments/mollie-mode";
+import { getDeploymentEnvironment } from "@/lib/url/app-url";
 import { extractEmailAddress, isEmailFromAddress } from "@/lib/email/address";
 
 const PLACEHOLDER_EMAIL_FROM = [
@@ -84,18 +85,9 @@ export function validateCheckoutEnvironment(
   env: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env,
 ): { ok: boolean; issues: CheckoutEnvIssue[] } {
   const issues: CheckoutEnvIssue[] = [];
-  const isProd = env.VERCEL_ENV === "production" || (
-    env.NODE_ENV === "production" && env.VERCEL_ENV !== "preview"
-  );
+  const deployment = getDeploymentEnvironment(env);
+  const isProd = deployment === "production";
   const checkoutOn = env.CHECKOUT_ENABLED === "true";
-
-  if (checkoutOn) {
-    issues.push({
-      code: "checkout_flag_on",
-      message: "CHECKOUT_ENABLED=true — P0.5 gate forbids enabling during this round",
-      severity: "error",
-    });
-  }
 
   if (!env.NEXT_PUBLIC_APP_URL) {
     issues.push({
@@ -168,16 +160,16 @@ export function validateCheckoutEnvironment(
     }
   }
 
-  if (detectMollieKeyMode(env.MOLLIE_API_KEY) === "live" && env.VERCEL_ENV === "preview") {
+  if (detectMollieKeyMode(env.MOLLIE_API_KEY) === "live" && deployment !== "production") {
     issues.push({
-      code: "live_mollie_preview",
-      message: "Live Mollie key must not be used on preview",
+      code: "live_mollie_non_production",
+      message: "Live Mollie key is allowed only on the Cloudflare production deployment",
       severity: "error",
     });
   }
 
   const errors = issues.filter((i) => i.severity === "error");
-  return { ok: errors.length === 0 && !checkoutOn, issues };
+  return { ok: errors.length === 0, issues };
 }
 
 export function isCheckoutFeatureFlagOff(
