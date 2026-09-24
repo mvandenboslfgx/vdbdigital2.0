@@ -1,25 +1,26 @@
 /**
- * Centrale base-URL-resolutie — nooit clientinput vertrouwen.
+ * Centrale base-URL-resolutie voor Cloudflare/OpenNext.
  *
  * Contract:
- * - Local / non-Vercel: http://localhost:3000 (or explicit APP_URL)
- * - Vercel Preview: explicit non-localhost APP_URL, else https://${VERCEL_URL}
- * - Vercel Production: MUST be exactly https://vdbdigital.nl (fail-closed)
+ * - Local development: localhost (of expliciete APP_URL)
+ * - Cloudflare preview: expliciete workers.dev/pages.dev preview-URL
+ * - Cloudflare production: exact https://vdbdigital.nl (fail-closed)
  *
- * Production never falls back to VERCEL_URL, localhost, or www.
+ * Production valt nooit terug op een preview-host, localhost of www.
  */
 
 export const CANONICAL_PRODUCTION_ORIGIN = "https://vdbdigital.nl" as const;
 
 const LOCALHOST_DEFAULT = "http://localhost:3000";
 
+export type DeploymentEnvironment =
+  | "production"
+  | "preview"
+  | "development"
+  | "unknown";
+
 function stripTrailingSlash(url: string): string {
   return url.replace(/\/$/, "");
-}
-
-function normalizeHttpsHost(host: string): string {
-  const cleaned = host.replace(/^https?:\/\//, "");
-  return `https://${cleaned}`;
 }
 
 export function isLocalhostUrl(url: string): boolean {
@@ -31,27 +32,61 @@ export function isLocalhostUrl(url: string): boolean {
   }
 }
 
-export function isPreviewDeployment(): boolean {
-  return process.env.VERCEL === "1" && process.env.VERCEL_ENV === "preview";
+export function isCloudflarePreviewHost(hostname: string): boolean {
+  const h = hostname.toLowerCase();
+  return h.endsWith(".workers.dev") || h.endsWith(".pages.dev");
 }
 
-export function isProductionDeployment(): boolean {
-  return process.env.VERCEL === "1" && process.env.VERCEL_ENV === "production";
-}
-
+/** Legacy host detector kept only to reject old preview origins. */
 export function isVercelPreviewHost(hostname: string): boolean {
   const h = hostname.toLowerCase();
   return h.endsWith(".vercel.app") || h.endsWith(".now.sh");
+}
+
+export function isHostedPreviewHost(hostname: string): boolean {
+  return isCloudflarePreviewHost(hostname) || isVercelPreviewHost(hostname);
+}
+
+export function getDeploymentEnvironment(
+  env: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env,
+): DeploymentEnvironment {
+  const explicit = env.VDB_DEPLOYMENT_ENV?.trim().toLowerCase();
+  if (explicit === "production" || explicit === "preview" || explicit === "development") {
+    return explicit;
+  }
+
+  const rawUrl = env.NEXT_PUBLIC_APP_URL?.trim();
+  if (rawUrl) {
+    try {
+      const parsed = new URL(rawUrl.startsWith("http") ? rawUrl : `https://${rawUrl}`);
+      if (isCloudflarePreviewHost(parsed.hostname)) return "preview";
+      if (
+        stripTrailingSlash(parsed.origin) === CANONICAL_PRODUCTION_ORIGIN &&
+        env.NODE_ENV === "production"
+      ) {
+        return "production";
+      }
+      if (isLocalhostUrl(parsed.origin)) return "development";
+    } catch {
+      return "unknown";
+    }
+  }
+
+  return env.NODE_ENV === "production" ? "unknown" : "development";
+}
+
+export function isPreviewDeployment(): boolean {
+  return getDeploymentEnvironment() === "preview";
+}
+
+export function isProductionDeployment(): boolean {
+  return getDeploymentEnvironment() === "production";
 }
 
 export type ProductionAppUrlEvaluation =
   | { ok: true; origin: typeof CANONICAL_PRODUCTION_ORIGIN }
   | { ok: false; reason: string };
 
-/**
- * Fail-closed evaluation for Vercel Production NEXT_PUBLIC_APP_URL.
- * Does not log env values or secrets.
- */
 export function evaluateProductionAppUrl(
   raw: string | undefined | null,
 ): ProductionAppUrlEvaluation {
@@ -73,16 +108,10 @@ export function evaluateProductionAppUrl(
   }
 
   if (parsed.username || parsed.password) {
-    return {
-      ok: false,
-      reason: "NEXT_PUBLIC_APP_URL must not contain credentials",
-    };
+    return { ok: false, reason: "NEXT_PUBLIC_APP_URL must not contain credentials" };
   }
   if (parsed.search || parsed.hash) {
-    return {
-      ok: false,
-      reason: "NEXT_PUBLIC_APP_URL must not contain query or fragment",
-    };
+    return { ok: false, reason: "NEXT_PUBLIC_APP_URL must not contain query or fragment" };
   }
   if (parsed.protocol !== "https:") {
     return {
@@ -98,7 +127,6 @@ export function evaluateProductionAppUrl(
   }
 
   const origin = stripTrailingSlash(parsed.origin);
-
   if (isLocalhostUrl(origin)) {
     return {
       ok: false,
@@ -111,10 +139,10 @@ export function evaluateProductionAppUrl(
       reason: `NEXT_PUBLIC_APP_URL must use apex, not www (${CANONICAL_PRODUCTION_ORIGIN})`,
     };
   }
-  if (isVercelPreviewHost(parsed.hostname)) {
+  if (isHostedPreviewHost(parsed.hostname)) {
     return {
       ok: false,
-      reason: `NEXT_PUBLIC_APP_URL must not be a Vercel preview host (${CANONICAL_PRODUCTION_ORIGIN})`,
+      reason: `NEXT_PUBLIC_APP_URL must not be a preview host (${CANONICAL_PRODUCTION_ORIGIN})`,
     };
   }
   if (origin !== CANONICAL_PRODUCTION_ORIGIN) {
@@ -127,42 +155,31 @@ export function evaluateProductionAppUrl(
   return { ok: true, origin: CANONICAL_PRODUCTION_ORIGIN };
 }
 
-/** Throws a safe Error when production APP_URL is missing or invalid. */
 export function assertProductionAppUrl(raw: string | undefined | null): string {
   const result = evaluateProductionAppUrl(raw);
-  if (!result.ok) {
-    throw new Error(result.reason);
-  }
+  if (!result.ok) throw new Error(result.reason);
   return result.origin;
 }
 
-/**
- * Server-side canonical application URL for redirects, webhooks, e-mail and metadata.
- * Production: fail-closed to https://vdbdigital.nl only — never VERCEL_URL / localhost / www.
- */
 export function resolveAppUrl(): string {
-  if (process.env.VERCEL === "1") {
-    const vercelHost = process.env.VERCEL_URL?.trim();
+  const deployment = getDeploymentEnvironment();
+  const explicit = process.env.NEXT_PUBLIC_APP_URL?.trim();
 
-    if (isPreviewDeployment()) {
-      const explicit = process.env.NEXT_PUBLIC_APP_URL?.trim();
-      if (explicit && !isLocalhostUrl(explicit)) {
-        return stripTrailingSlash(
-          explicit.startsWith("http") ? explicit : `https://${explicit}`,
-        );
-      }
-      if (vercelHost) {
-        return stripTrailingSlash(normalizeHttpsHost(vercelHost));
-      }
-    }
-
-    if (isProductionDeployment()) {
-      // Fail-closed: no VERCEL_URL / localhost rescue path.
-      return assertProductionAppUrl(process.env.NEXT_PUBLIC_APP_URL);
-    }
+  if (deployment === "production") {
+    return assertProductionAppUrl(explicit);
   }
 
-  const explicit = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (deployment === "preview") {
+    if (!explicit || isLocalhostUrl(explicit)) {
+      throw new Error(
+        "NEXT_PUBLIC_APP_URL must be the Cloudflare preview origin when VDB_DEPLOYMENT_ENV=preview",
+      );
+    }
+    return stripTrailingSlash(
+      explicit.startsWith("http") ? explicit : `https://${explicit}`,
+    );
+  }
+
   if (explicit) {
     return stripTrailingSlash(
       explicit.startsWith("http") ? explicit : `https://${explicit}`,
@@ -172,10 +189,6 @@ export function resolveAppUrl(): string {
   return LOCALHOST_DEFAULT;
 }
 
-/**
- * Public site URL for SEO metadata (metadataBase, sitemap, JSON-LD).
- * Same rules as resolveAppUrl — single source of truth.
- */
 export function resolvePublicSiteUrl(): string {
   return resolveAppUrl();
 }
