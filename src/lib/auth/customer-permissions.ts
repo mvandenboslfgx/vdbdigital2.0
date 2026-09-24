@@ -24,7 +24,10 @@ export type CustomerPortalPermission =
   | "portal.documents.view"
   | "portal.documents.download"
   | "portal.documents.upload"
-  | "portal.documents.manage_own_uploads";
+  | "portal.documents.manage_own_uploads"
+  | "portal.messages.view"
+  | "portal.messages.create"
+  | "portal.messages.reply";
 
 const ROLE_PERMS: Record<CustomerOrgRole, readonly CustomerPortalPermission[]> = {
   VIEW_ONLY: [
@@ -38,6 +41,7 @@ const ROLE_PERMS: Record<CustomerOrgRole, readonly CustomerPortalPermission[]> =
     "portal.documents.download",
     "portal.quotes.view",
     "portal.quotes.download",
+    "portal.messages.view",
   ],
   BILLING: [
     "portal.access",
@@ -50,6 +54,7 @@ const ROLE_PERMS: Record<CustomerOrgRole, readonly CustomerPortalPermission[]> =
     "portal.documents.download",
     "portal.quotes.view",
     "portal.quotes.download",
+    "portal.messages.view",
   ],
   MEMBER: [
     "portal.access",
@@ -70,6 +75,9 @@ const ROLE_PERMS: Record<CustomerOrgRole, readonly CustomerPortalPermission[]> =
     "portal.documents.view",
     "portal.documents.download",
     "portal.documents.upload",
+    "portal.messages.view",
+    "portal.messages.create",
+    "portal.messages.reply",
   ],
   PRIMARY: [
     "portal.access",
@@ -92,6 +100,9 @@ const ROLE_PERMS: Record<CustomerOrgRole, readonly CustomerPortalPermission[]> =
     "portal.documents.download",
     "portal.documents.upload",
     "portal.documents.manage_own_uploads",
+    "portal.messages.view",
+    "portal.messages.create",
+    "portal.messages.reply",
   ],
 };
 
