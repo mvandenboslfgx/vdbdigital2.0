@@ -59,6 +59,7 @@ const nl: Messages = {
     seoWebdesign: "Webdesign",
     seoWebshop: "Webshop laten maken",
     seoAi: "AI automatisering",
+    seoApp: "App laten maken",
     seoKennisbank: "Kennisbank",
     cookiePreferences: "Cookievoorkeuren",
     rights: "Alle rechten voorbehouden.",
