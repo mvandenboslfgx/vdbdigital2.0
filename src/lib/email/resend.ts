@@ -160,6 +160,91 @@ export async function sendAccountDeletionVerifyEmail(
   return sendCustomerMail(to, pick("accountDeletionVerify", locale, verifyUrl));
 }
 
+
+export async function syncMarketingPreference(input: {
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  optIn: boolean;
+}): Promise<{ synced: boolean; reason?: string }> {
+  const resend = getResend();
+  const segmentId = process.env.RESEND_MARKETING_SEGMENT_ID?.trim();
+  const topicId = process.env.RESEND_MARKETING_TOPIC_ID?.trim();
+
+  if (!resend || !segmentId || !topicId) {
+    return { synced: false, reason: "Marketing email sync is not configured" };
+  }
+
+  try {
+    const existing = await resend.contacts.get({ email: input.email });
+    const exists = Boolean(existing.data && !existing.error);
+
+    if (!exists && !input.optIn) {
+      return { synced: true };
+    }
+
+    if (!exists) {
+      const created = await resend.contacts.create({
+        email: input.email,
+        firstName: input.firstName,
+        lastName: input.lastName,
+        unsubscribed: false,
+        segments: [{ id: segmentId }],
+        topics: [{ id: topicId, subscription: "opt_in" }],
+      });
+      if (created.error) {
+        return { synced: false, reason: created.error.message };
+      }
+      return { synced: true };
+    }
+
+    const updated = await resend.contacts.update({
+      email: input.email,
+      firstName: input.firstName,
+      lastName: input.lastName,
+      unsubscribed: false,
+    });
+    if (updated.error) {
+      return { synced: false, reason: updated.error.message };
+    }
+
+    const topic = await resend.contacts.topics.update({
+      email: input.email,
+      topics: [
+        {
+          id: topicId,
+          subscription: input.optIn ? "opt_in" : "opt_out",
+        },
+      ],
+    });
+    if (topic.error) {
+      return { synced: false, reason: topic.error.message };
+    }
+
+    if (input.optIn) {
+      const segment = await resend.contacts.segments.add({
+        email: input.email,
+        segmentId,
+      });
+      if (segment.error) {
+        return { synced: false, reason: segment.error.message };
+      }
+    } else {
+      const segment = await resend.contacts.segments.remove({
+        email: input.email,
+        segmentId,
+      });
+      if (segment.error && segment.error.statusCode !== 404) {
+        return { synced: false, reason: segment.error.message };
+      }
+    }
+
+    return { synced: true };
+  } catch {
+    return { synced: false, reason: "Marketing provider unavailable" };
+  }
+}
+
 export async function sendTestEmail(to?: string) {
   const resend = getResend();
   if (!resend) {
