@@ -13,12 +13,32 @@
   },
   "vars": {
     "NEXT_PUBLIC_APP_URL": "https://vdbdigital.nl",
-    "ALLOWED_ORIGINS": "https://vdbdigital.nl"
+    "ALLOWED_ORIGINS": "https://vdbdigital.nl",
+    "NEXT_PUBLIC_SITE_NAME": "VDB Digital Software",
+    "NEXT_PUBLIC_CONTACT_EMAIL": "algemeen@vdbdigital.nl",
+    "NEXT_PUBLIC_SUPABASE_URL": "https://nhsrdnjfsxfikfbdmdfj.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_TMYx-L-l4D7p_-J8PQsCaQ_hNfvIzLb",
+    "BOOKING_PROVIDER": "calendly",
+    "BOOKING_ENABLED": "1",
+    "BOOKING_PROVIDER_URL": "https://calendly.com/verzamelvdbdigital/strategiegesprek",
+    "BOOKING_ONLINE_URL": "https://calendly.com/verzamelvdbdigital/strategiegesprek",
+    "GOOGLE_AUTH_ENABLED": "1",
+    "CHECKOUT_ENABLED": "false"
   },
   "previews": {
     "vars": {
       "NEXT_PUBLIC_APP_URL": "https://preview-100-10-site-vdbdigital-preview.matthijsvandenbos8.workers.dev",
-      "ALLOWED_ORIGINS": "https://preview-100-10-site-vdbdigital-preview.matthijsvandenbos8.workers.dev"
+      "ALLOWED_ORIGINS": "https://preview-100-10-site-vdbdigital-preview.matthijsvandenbos8.workers.dev",
+      "NEXT_PUBLIC_SITE_NAME": "VDB Digital Software",
+      "NEXT_PUBLIC_CONTACT_EMAIL": "algemeen@vdbdigital.nl",
+      "NEXT_PUBLIC_SUPABASE_URL": "https://nhsrdnjfsxfikfbdmdfj.supabase.co",
+      "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_TMYx-L-l4D7p_-J8PQsCaQ_hNfvIzLb",
+      "BOOKING_PROVIDER": "calendly",
+      "BOOKING_ENABLED": "1",
+      "BOOKING_PROVIDER_URL": "https://calendly.com/verzamelvdbdigital/strategiegesprek",
+      "BOOKING_ONLINE_URL": "https://calendly.com/verzamelvdbdigital/strategiegesprek",
+      "GOOGLE_AUTH_ENABLED": "1",
+      "CHECKOUT_ENABLED": "false"
     }
   }
 }

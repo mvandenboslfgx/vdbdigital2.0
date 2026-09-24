@@ -67,6 +67,15 @@ function attachLocale(response: NextResponse, locale: Locale): NextResponse {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // One canonical production host for SEO, auth callbacks and cookies.
+  if (request.nextUrl.hostname === "www.vdbdigital.nl") {
+    const url = new URL(
+      `${request.nextUrl.pathname}${request.nextUrl.search}`,
+      "https://vdbdigital.nl",
+    );
+    return applySecurityHeaders(NextResponse.redirect(url, 308));
+  }
+
   if (
     pathname.startsWith("/api") ||
     pathname.startsWith("/auth") ||
