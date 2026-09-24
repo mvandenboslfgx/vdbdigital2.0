@@ -75,6 +75,13 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_APP_URL: resolvedPublicAppUrl,
   },
+  experimental: {
+    // Cloudflare/OpenNext is a reverse-proxy deployment. Keep Server Actions
+    // locked to the two production hostnames only; middleware canonicalizes www.
+    serverActions: {
+      allowedOrigins: ["vdbdigital.nl", "www.vdbdigital.nl"],
+    },
+  },
   images: {
     remotePatterns: [],
   },
