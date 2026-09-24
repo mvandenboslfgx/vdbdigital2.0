@@ -5,7 +5,8 @@ import {
   quoteFormSchema,
   supportFormSchema,
 } from "@/lib/validation/forms";
-import { checkRateLimit, rateLimitErrorMessage } from "@/lib/security/rate-limit";
+import { rateLimitErrorMessage } from "@/lib/security/rate-limit";
+import { buildRateLimitStorageKey } from "@/lib/security/rate-limit-key";
 import { verifyOrigin } from "@/lib/security/origin";
 import {
   sendContactConfirmation,
@@ -15,12 +16,11 @@ import {
   sendSupportConfirmation,
 } from "@/lib/email/resend";
 import {
-  createServiceRoleClient,
-  isSupabaseDatabaseReady,
+  createServerSupabaseClient,
+  isSupabaseConfigured,
 } from "@/lib/database/server";
 import { isProductionRuntime } from "@/lib/runtime/environment";
 import { parseFormLocale } from "@/i18n/locale-query";
-import { randomUUID } from "crypto";
 
 export type FormState = {
   errors?: string[];
@@ -114,23 +114,64 @@ function buildQuoteDescription(
   return lines.join("\n\n");
 }
 
-async function guardForm(
-  bucket: string,
-  email: string,
-): Promise<string[] | null> {
+async function guardFormOrigin(): Promise<string[] | null> {
   if (!(await verifyOrigin())) return ["Invalid request"];
-  const rateLimit = await checkRateLimit(bucket, email);
-  if (!rateLimit.success) return [rateLimitErrorMessage(rateLimit)];
   return null;
 }
 
-async function persistOrFail(): Promise<{ ok: true } | { ok: false; error: string }> {
-  if (isSupabaseDatabaseReady()) {
+type PublicFormKind = "contact" | "quote" | "support";
+
+type PublicFormRpcRow = {
+  ok?: boolean;
+  retry_after_seconds?: number;
+  record_id?: string | null;
+  error_code?: string | null;
+};
+
+async function persistPublicForm(
+  kind: PublicFormKind,
+  email: string,
+  payload: Record<string, unknown>,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const secret = process.env.PUBLIC_FORM_RPC_SECRET;
+
+  if (!isSupabaseConfigured() || !secret) {
+    if (isProductionRuntime()) {
+      return { ok: false, error: "Form storage is temporarily unavailable" };
+    }
     return { ok: true };
   }
-  if (isProductionRuntime()) {
-    return { ok: false, error: "Form storage requires database configuration" };
+
+  const supabase = await createServerSupabaseClient();
+  if (!supabase) {
+    return { ok: false, error: "Form storage is temporarily unavailable" };
   }
+
+  const { data, error } = await supabase.rpc("submit_vdb_public_form", {
+    p_secret: secret,
+    p_kind: kind,
+    p_rate_key: buildRateLimitStorageKey(kind, email),
+    p_payload: payload,
+  });
+
+  if (error) {
+    return { ok: false, error: "Your request could not be saved. Please try again later." };
+  }
+
+  const row = (Array.isArray(data) ? data[0] : data) as PublicFormRpcRow | null;
+  if (!row?.ok) {
+    if (row?.error_code === "rate_limited") {
+      return {
+        ok: false,
+        error: rateLimitErrorMessage({
+          success: false,
+          retryAfterSeconds: Number(row.retry_after_seconds ?? 60),
+        }),
+      };
+    }
+    return { ok: false, error: "Your request could not be saved. Please try again later." };
+  }
+
   return { ok: true };
 }
 
@@ -147,30 +188,19 @@ export async function submitContactAction(
     return { errors: parsed.error.issues.map((i) => i.message) };
   }
 
-  const guard = await guardForm("contact", parsed.data.email);
+  const guard = await guardFormOrigin();
   if (guard) return { errors: guard };
 
-  const storage = await persistOrFail();
+  const storage = await persistPublicForm("contact", parsed.data.email, {
+    name: parsed.data.name,
+    email: parsed.data.email,
+    company: parsed.data.company ?? null,
+    phone: parsed.data.phone ?? null,
+    subject: parsed.data.subject,
+    message: parsed.data.message,
+    locale,
+  });
   if (!storage.ok) return { errors: [storage.error] };
-
-  if (isSupabaseDatabaseReady()) {
-    const supabase = createServiceRoleClient();
-    const { error } = await supabase!.from("contact_submissions").insert({
-      id: randomUUID(),
-      name: parsed.data.name,
-      email: parsed.data.email,
-      company: parsed.data.company,
-      phone: parsed.data.phone,
-      subject: parsed.data.subject,
-      message: parsed.data.message,
-      locale,
-    });
-    if (error) {
-      return {
-        errors: ["Your request could not be saved. Please try again later."],
-      };
-    }
-  }
 
   const confirm = await sendContactConfirmation(
     parsed.data.email,
@@ -217,46 +247,26 @@ export async function submitQuoteAction(
     };
   }
 
-  const guard = await guardForm("quote", parsed.data.email);
+  const guard = await guardFormOrigin();
   if (guard) return { errors: guard, values, attempt };
-
-  const storage = await persistOrFail();
-  if (!storage.ok) return { errors: [storage.error], values, attempt };
 
   const description = buildQuoteDescription(parsed.data);
   const budgetLabel = parsed.data.budget
     ? (BUDGET_LABELS[parsed.data.budget] ?? parsed.data.budget)
     : undefined;
 
-  if (isSupabaseDatabaseReady()) {
-    const supabase = createServiceRoleClient();
-    const { error } = await supabase!.from("quote_requests").insert({
-      id: randomUUID(),
-      name: parsed.data.name,
-      email: parsed.data.email,
-      company: parsed.data.company,
-      phone: parsed.data.phone,
-      project_type: parsed.data.projectType,
-      budget: budgetLabel,
-      timeline: parsed.data.timeline,
-      description,
-      status: "NEW",
-      locale,
-    });
-    if (error) {
-      console.error("[submitQuoteAction] quote_requests insert failed", {
-        code: error.code,
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-      });
-      return {
-        errors: ["Your quote request could not be saved."],
-        values,
-        attempt,
-      };
-    }
-  }
+  const storage = await persistPublicForm("quote", parsed.data.email, {
+    name: parsed.data.name,
+    email: parsed.data.email,
+    company: parsed.data.company ?? null,
+    phone: parsed.data.phone ?? null,
+    project_type: parsed.data.projectType,
+    budget: budgetLabel ?? null,
+    timeline: parsed.data.timeline ?? null,
+    description,
+    locale,
+  });
+  if (!storage.ok) return { errors: [storage.error], values, attempt };
 
   const confirm = await sendQuoteConfirmation(
     parsed.data.email,
@@ -287,32 +297,19 @@ export async function submitSupportAction(
     return { errors: parsed.error.issues.map((i) => i.message) };
   }
 
-  const guard = await guardForm("support", parsed.data.email);
+  const guard = await guardFormOrigin();
   if (guard) return { errors: guard };
 
-  const storage = await persistOrFail();
+  const storage = await persistPublicForm("support", parsed.data.email, {
+    name: parsed.data.name,
+    email: parsed.data.email,
+    subject: parsed.data.subject,
+    message: parsed.data.message,
+    priority: parsed.data.priority,
+    order_reference: parsed.data.orderReference ?? null,
+    locale,
+  });
   if (!storage.ok) return { errors: [storage.error] };
-
-  if (isSupabaseDatabaseReady()) {
-    const supabase = createServiceRoleClient();
-    const { error } = await supabase!.from("leads").insert({
-      id: randomUUID(),
-      type: "SUPPORT",
-      name: parsed.data.name,
-      email: parsed.data.email,
-      subject: parsed.data.subject,
-      message: parsed.data.message,
-      status: "NEW",
-      metadata: {
-        priority: parsed.data.priority,
-        orderReference: parsed.data.orderReference,
-        locale,
-      },
-    });
-    if (error) {
-      return { errors: ["Your support request could not be saved."] };
-    }
-  }
 
   const confirm = await sendSupportConfirmation(
     parsed.data.email,

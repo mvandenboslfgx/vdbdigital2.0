@@ -1,5 +1,5 @@
 import "server-only";
-import { createServiceRoleClient } from "@/lib/database/server";
+import { createServerSupabaseClient } from "@/lib/database/server";
 import { requireAdmin } from "@/server/auth/require-admin";
 import { requirePermission } from "@/server/auth/require-permission";
 import { writeAuditLog } from "@/lib/security/audit-log";
@@ -35,7 +35,7 @@ export async function listAdminOrganizations(filters: {
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  const supabase = createServiceRoleClient();
+  const supabase = await createServerSupabaseClient();
   if (!supabase) {
     return { organizations: [] as AdminOrganizationRow[], total: 0, page, pageSize };
   }
@@ -76,7 +76,7 @@ export async function getAdminOrganization(id: string) {
   const ctx = await requireAdmin();
   await requirePermission(ctx, "customers.view");
 
-  const supabase = createServiceRoleClient();
+  const supabase = await createServerSupabaseClient();
   if (!supabase) return null;
 
   const { data: org } = await supabase
@@ -150,7 +150,7 @@ export async function createOrganizationWithInvite(input: {
   await requirePermission(ctx, "customers.create");
   await requirePermission(ctx, "customers.invite");
 
-  const supabase = createServiceRoleClient();
+  const supabase = await createServerSupabaseClient();
   if (!supabase) {
     throw new Error("Database niet beschikbaar");
   }
@@ -211,7 +211,7 @@ export async function createOrganizationWithInvite(input: {
 
 export async function getAdminPortalDashboardCounts() {
   const ctx = await requireAdmin();
-  const supabase = createServiceRoleClient();
+  const supabase = await createServerSupabaseClient();
   if (!supabase) {
     return {
       customers: 0,
@@ -260,7 +260,7 @@ export async function listAdminProjects() {
   const ctx = await requireAdmin();
   await requirePermission(ctx, "projects.view_all");
 
-  const supabase = createServiceRoleClient();
+  const supabase = await createServerSupabaseClient();
   if (!supabase) return [];
 
   const { data } = await supabase
