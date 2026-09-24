@@ -25,8 +25,8 @@ export default async function PortalProjectDeliverablesPage({
   return (
     <PortalProjectTabShell projectId={id} active="deliverables">
       <p className="text-small text-muted">
-        Bestanden en downloads volgen in een latere documentenfase. Hier zie je
-        alleen gedeelde opleveringen en goedkeuringen.
+        Hier beoordeel je gedeelde opleveringen. Bijbehorende bestanden staan
+        onder het tabblad Documenten en kunnen daar veilig worden gedownload.
       </p>
       {bundle.deliverables.length === 0 ? (
         <p className="text-muted text-small">
