@@ -7,9 +7,10 @@ interface ServiceJsonLdProps {
   description: string;
   path: string;
   locale: Locale;
+  areaServed?: string;
 }
 
-export function ServiceJsonLd({ name, description, path, locale }: ServiceJsonLdProps) {
+export function ServiceJsonLd({ name, description, path, locale, areaServed }: ServiceJsonLdProps) {
   const data = {
     "@context": "https://schema.org",
     "@type": "Service",
@@ -21,10 +22,21 @@ export function ServiceJsonLd({ name, description, path, locale }: ServiceJsonLd
       name: siteConfig.name,
       url: siteConfig.url,
     },
-    areaServed: {
-      "@type": "Country",
-      name: "Netherlands",
-    },
+    areaServed: areaServed
+      ? [
+          {
+            "@type": "AdministrativeArea",
+            name: areaServed,
+          },
+          {
+            "@type": "Country",
+            name: "Netherlands",
+          },
+        ]
+      : {
+          "@type": "Country",
+          name: "Netherlands",
+        },
   };
 
   return (
