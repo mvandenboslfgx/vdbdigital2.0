@@ -31,6 +31,10 @@ export interface CreatePaymentInput {
   lines: OrderLine[];
 }
 
+function isRecurringLine(line: OrderLine): boolean {
+  return line.billingType === "MONTHLY" || line.billingType === "YEARLY";
+}
+
 export async function createMolliePayment(input: CreatePaymentInput) {
   const mollie = getMollieClient();
   if (!mollie) {
@@ -53,8 +57,62 @@ export async function createMolliePayment(input: CreatePaymentInput) {
   }
 
   const appUrl = resolveAppUrl();
+  const recurringLines = input.lines.filter(isRecurringLine);
 
   try {
+    if (recurringLines.length > 0) {
+      if (
+        input.lines.length !== 1 ||
+        recurringLines.length !== 1 ||
+        recurringLines[0].quantity !== 1
+      ) {
+        return {
+          configured: false as const,
+          configurationError:
+            "Recurring products must be purchased one at a time",
+        };
+      }
+
+      const line = recurringLines[0];
+      const customer = await mollie.customers.create({
+        name: `${input.customer.firstName} ${input.customer.lastName}`.trim(),
+        email: input.customer.email,
+        metadata: {
+          orderId: input.orderId,
+          orderNumber: input.orderNumber,
+        },
+      });
+
+      const payment = await mollie.customerPayments.create({
+        customerId: customer.id,
+        amount: {
+          currency: "EUR",
+          value: (input.totals.totalCents / 100).toFixed(2),
+        },
+        description: `${line.productName} · ${input.orderNumber}`,
+        sequenceType: "first",
+        redirectUrl: `${appUrl}/checkout/success?order=${input.orderId}`,
+        cancelUrl: `${appUrl}/checkout/cancelled?order=${input.orderId}`,
+        webhookUrl: webhook.url,
+        metadata: {
+          orderId: input.orderId,
+          orderNumber: input.orderNumber,
+          recurring: true,
+          productId: line.productId,
+          productSlug: line.productSlug,
+          billingType: line.billingType,
+        },
+      });
+
+      return {
+        configured: true as const,
+        paymentId: payment.id,
+        checkoutUrl: payment.getCheckoutUrl(),
+        recurring: true as const,
+        mollieCustomerId: customer.id,
+      };
+    }
+
     const payment = await mollie.payments.create({
       amount: {
         currency: "EUR",
@@ -67,6 +125,7 @@ export async function createMolliePayment(input: CreatePaymentInput) {
       metadata: {
         orderId: input.orderId,
         orderNumber: input.orderNumber,
+        recurring: false,
       },
     });
 
@@ -74,6 +133,8 @@ export async function createMolliePayment(input: CreatePaymentInput) {
       configured: true as const,
       paymentId: payment.id,
       checkoutUrl: payment.getCheckoutUrl(),
+      recurring: false as const,
+      mollieCustomerId: null,
     };
   } catch {
     logCheckoutEvent("mollie.payment_creation_failed", {
