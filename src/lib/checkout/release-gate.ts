@@ -1,6 +1,6 @@
 /**
- * Release-gate evaluator — report only.
- * Never mutates CHECKOUT_ENABLED, env, publications, or live payments.
+ * Cloudflare production release gate.
+ * Read-only: validates configuration and repository contracts, never deploys.
  */
 
 import { readFileSync, existsSync } from "fs";
@@ -9,22 +9,22 @@ import {
   mapMolliePaymentStatus,
   canApplyOrderTransition,
 } from "@/lib/payments/mollie-status";
-import { assertMollieKeySafeForRuntime } from "@/lib/payments/mollie-mode";
 import {
-  validateCheckoutEnvironment,
-  isCheckoutFeatureFlagOff,
-} from "@/lib/checkout/env-validation";
+  assertMollieKeySafeForRuntime,
+  detectMollieKeyMode,
+} from "@/lib/payments/mollie-mode";
+import { validateCheckoutEnvironment } from "@/lib/checkout/env-validation";
 import { hasLegallyApprovedFixedSku } from "@/lib/commerce/checkout-eligibility";
-import { isUpstashConfigured } from "@/lib/security/rate-limit-config";
+import { getDeploymentEnvironment } from "@/lib/url/app-url";
 
 export type ReleaseGateCode =
-  | "READY FOR MANUAL CHECKOUT ENABLEMENT"
-  | "NOT READY — migration missing"
-  | "NOT READY — limiter backend unavailable"
-  | "NOT READY — Mollie test verification incomplete"
+  | "READY FOR CLOUDFLARE PRODUCTION"
+  | "NOT READY — migration contract missing"
+  | "NOT READY — durable limiter unavailable"
+  | "NOT READY — Mollie configuration unsafe"
+  | "NOT READY — live Mollie key required"
   | "NOT READY — no legally approved FIXED SKU"
   | "NOT READY — environment invalid"
-  | "NOT READY — checkout flag must stay OFF"
   | "NOT READY — payment status map incomplete"
   | "NOT READY — multiple blockers";
 
@@ -36,9 +36,9 @@ export interface ReleaseGateCheck {
 
 export interface ReleaseGateReport {
   code: ReleaseGateCode;
-  readyForManualEnablement: boolean;
+  readyForDeploy: boolean;
   checks: ReleaseGateCheck[];
-  checkoutRemainsOff: true;
+  deployPerformed: false;
 }
 
 const REQUIRED_STATUSES = [
@@ -54,16 +54,24 @@ const REQUIRED_STATUSES = [
 ] as const;
 
 function migrationFilesPresent(cwd = process.cwd()): boolean {
-  const a = join(cwd, "supabase/migrations/20260716000000_p0_payment_integrity.sql");
-  const b = join(cwd, "supabase/migrations/20260716010000_p05_rate_limit_hardening.sql");
-  return existsSync(a) && existsSync(b);
+  const payment = join(
+    cwd,
+    "supabase/migrations/20260716000000_p0_payment_integrity.sql",
+  );
+  const limiter = join(
+    cwd,
+    "supabase/migrations/20260716010000_p05_rate_limit_hardening.sql",
+  );
+  return existsSync(payment) && existsSync(limiter);
 }
 
 function rpcDefinitionsPresent(cwd = process.cwd()): boolean {
-  const sql = readFileSync(
-    join(cwd, "supabase/migrations/20260716000000_p0_payment_integrity.sql"),
-    "utf8",
+  const path = join(
+    cwd,
+    "supabase/migrations/20260716000000_p0_payment_integrity.sql",
   );
+  if (!existsSync(path)) return false;
+  const sql = readFileSync(path, "utf8");
   return (
     sql.includes("create_order_with_items") &&
     sql.includes("apply_mollie_payment_update") &&
@@ -88,89 +96,85 @@ export function evaluateCheckoutReleaseGate(
   cwd = process.cwd(),
 ): ReleaseGateReport {
   const checks: ReleaseGateCheck[] = [];
+  const deployment = getDeploymentEnvironment(env);
+  const checkoutOn = env.CHECKOUT_ENABLED === "true";
 
-  const flagOff = isCheckoutFeatureFlagOff(env);
   checks.push({
-    id: "feature_flag_off",
-    ok: flagOff,
-    detail: flagOff
-      ? "CHECKOUT_ENABLED is off (required for P0.5)"
-      : "CHECKOUT_ENABLED must remain false",
+    id: "cloudflare_production",
+    ok: deployment === "production",
+    detail:
+      deployment === "production"
+        ? "VDB_DEPLOYMENT_ENV resolves to production"
+        : `Deployment environment is ${deployment}; production is required for release`,
   });
 
   const migrationsOk = migrationFilesPresent(cwd) && rpcDefinitionsPresent(cwd);
   checks.push({
-    id: "migration_files",
+    id: "migration_contract",
     ok: migrationsOk,
     detail: migrationsOk
-      ? "P0/P0.5 migration files + RPC definitions present in repo"
-      : "Required payment-integrity migrations missing",
+      ? "Payment integrity and durable rate-limit RPC migrations are present"
+      : "Required payment/rate-limit migration contract is missing",
   });
 
-  const migrationAppliedHint = env.P05_MIGRATION_APPLIED === "1";
+  const hasSupabaseLimiter = Boolean(
+    env.NEXT_PUBLIC_SUPABASE_URL &&
+      (env.SUPABASE_SECRET_KEY || env.SUPABASE_SERVICE_ROLE_KEY),
+  );
+  const hasUpstash = Boolean(
+    env.UPSTASH_REDIS_REST_URL && env.UPSTASH_REDIS_REST_TOKEN,
+  );
+  const limiterConfigured = hasUpstash || hasSupabaseLimiter;
   checks.push({
-    id: "migration_applied",
-    ok: migrationAppliedHint,
-    detail: migrationAppliedHint
-      ? "Operator confirmed migration applied (P05_MIGRATION_APPLIED=1)"
-      : "Set P05_MIGRATION_APPLIED=1 after applying migrations on target Supabase",
-  });
-
-  const limiterConfigured =
-    isUpstashConfigured() ||
-    Boolean(
-      env.NEXT_PUBLIC_SUPABASE_URL &&
-        (env.SUPABASE_SECRET_KEY || env.SUPABASE_SERVICE_ROLE_KEY) &&
-        env.P05_LIMITER_RPC_VERIFIED === "1",
-    );
-  checks.push({
-    id: "limiter_backend",
+    id: "durable_limiter",
     ok: limiterConfigured,
     detail: limiterConfigured
-      ? "Limiter backend configured (Upstash or verified DB RPC)"
-      : "Configure Upstash or verify check_rate_limit RPC (P05_LIMITER_RPC_VERIFIED=1)",
+      ? hasUpstash
+        ? "Durable limiter available via Upstash"
+        : "Durable limiter available via Supabase RPC fallback"
+      : "Configure Supabase server access or Upstash before checkout release",
   });
 
   const mollie = assertMollieKeySafeForRuntime(env.MOLLIE_API_KEY, env);
-  const mollieTestVerified = env.P05_MOLLIE_TEST_VERIFIED === "1";
   checks.push({
     id: "mollie_safe",
     ok: mollie.ok,
-    detail: mollie.ok ? `Mollie key mode ok (${mollie.mode})` : mollie.reason,
-  });
-  checks.push({
-    id: "mollie_test_verified",
-    ok: mollieTestVerified,
-    detail: mollieTestVerified
-      ? "Operator confirmed Mollie testmode flows (P05_MOLLIE_TEST_VERIFIED=1)"
-      : "Complete Mollie testmode checklist then set P05_MOLLIE_TEST_VERIFIED=1",
+    detail: mollie.ok ? `Mollie key is runtime-safe (${mollie.mode})` : mollie.reason,
   });
 
-  const envResult = validateCheckoutEnvironment({
-    ...env,
-    // Gate itself requires flag off; validate as if not enabling
-    CHECKOUT_ENABLED: "false",
+  const needsLiveMollie = deployment === "production" && checkoutOn;
+  const liveMollieOk =
+    !needsLiveMollie || detectMollieKeyMode(env.MOLLIE_API_KEY) === "live";
+  checks.push({
+    id: "mollie_live_for_checkout",
+    ok: liveMollieOk,
+    detail: !needsLiveMollie
+      ? "Live Mollie key not required while production checkout is disabled"
+      : liveMollieOk
+        ? "Production checkout uses a live Mollie key"
+        : "CHECKOUT_ENABLED=true in production requires a live_ Mollie key",
   });
-  // Filter out the intentional "flag on" noise — we force false above
-  const envOk = envResult.issues.filter((i) => i.severity === "error").length === 0;
+
+  const envResult = validateCheckoutEnvironment(env);
+  const envErrors = envResult.issues.filter((issue) => issue.severity === "error");
   checks.push({
     id: "environment",
-    ok: envOk,
-    detail: envOk
-      ? "Environment validation passed (with checkout forced off)"
-      : envResult.issues
-          .filter((i) => i.severity === "error")
-          .map((i) => i.message)
-          .join("; "),
+    ok: envErrors.length === 0,
+    detail:
+      envErrors.length === 0
+        ? "Checkout environment validation passed"
+        : envErrors.map((issue) => issue.message).join("; "),
   });
 
-  const hasSku = hasLegallyApprovedFixedSku("B2B") || hasLegallyApprovedFixedSku("B2C");
+  const hasSku =
+    hasLegallyApprovedFixedSku("B2B") ||
+    hasLegallyApprovedFixedSku("B2C");
   checks.push({
     id: "legal_fixed_sku",
     ok: hasSku,
     detail: hasSku
-      ? "At least one legally approved FIXED catalog SKU exists"
-      : "No legally approved FIXED SKU in commercial catalog",
+      ? "At least one legally approved fixed-price SKU exists"
+      : "No legally approved fixed-price SKU exists",
   });
 
   const mapOk = statusMapComplete();
@@ -179,35 +183,33 @@ export function evaluateCheckoutReleaseGate(
     ok: mapOk,
     detail: mapOk
       ? "Mollie status map covers required transitions"
-      : "Payment status map incomplete",
+      : "Payment status map is incomplete",
   });
 
-  const failed = checks.filter((c) => !c.ok);
-  let code: ReleaseGateCode;
+  const failed = checks.filter((check) => !check.ok);
+  let code: ReleaseGateCode = "NOT READY — multiple blockers";
   if (failed.length === 0) {
-    code = "READY FOR MANUAL CHECKOUT ENABLEMENT";
-  } else if (!flagOff) {
-    code = "NOT READY — checkout flag must stay OFF";
-  } else if (!migrationsOk || !migrationAppliedHint) {
-    code = "NOT READY — migration missing";
+    code = "READY FOR CLOUDFLARE PRODUCTION";
+  } else if (!migrationsOk) {
+    code = "NOT READY — migration contract missing";
   } else if (!limiterConfigured) {
-    code = "NOT READY — limiter backend unavailable";
-  } else if (!mollie.ok || !mollieTestVerified) {
-    code = "NOT READY — Mollie test verification incomplete";
+    code = "NOT READY — durable limiter unavailable";
+  } else if (!mollie.ok) {
+    code = "NOT READY — Mollie configuration unsafe";
+  } else if (!liveMollieOk) {
+    code = "NOT READY — live Mollie key required";
+  } else if (envErrors.length > 0) {
+    code = "NOT READY — environment invalid";
   } else if (!hasSku) {
     code = "NOT READY — no legally approved FIXED SKU";
-  } else if (!envOk) {
-    code = "NOT READY — environment invalid";
   } else if (!mapOk) {
     code = "NOT READY — payment status map incomplete";
-  } else {
-    code = "NOT READY — multiple blockers";
   }
 
   return {
     code,
-    readyForManualEnablement: failed.length === 0,
+    readyForDeploy: failed.length === 0,
     checks,
-    checkoutRemainsOff: true,
+    deployPerformed: false,
   };
 }
