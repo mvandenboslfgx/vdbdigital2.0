@@ -99,6 +99,7 @@ export const siteConfig = {
         { labelKey: "footer.seoWebdesign", href: paths.webdesign },
         { labelKey: "footer.seoWebshop", href: paths.webshopLatenMaken },
         { labelKey: "footer.seoAi", href: paths.aiAutomatisering },
+        { labelKey: "footer.seoApp", href: paths.appLatenMaken },
         { labelKey: "footer.seoKennisbank", href: paths.kennisbank },
       ],
       legal: [
