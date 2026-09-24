@@ -4,6 +4,7 @@ import { useActionState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { AddressAutocompleteFields } from "@/components/forms/address-autocomplete-fields";
 import { submitCheckoutAction } from "@/server/actions/checkout-actions";
 import { formatCents } from "@/lib/utilities/money";
 import { useI18n, useT } from "@/i18n/provider";
@@ -53,12 +54,11 @@ export function CheckoutForm({
       <Input name="company" label={t("checkout.companyName")} />
       <Input name="phone" label={t("checkout.phoneNumber")} type="tel" />
       <Input name="vatNumber" label={t("checkout.vatNumber")} />
-      <Input name="addressLine1" label={t("checkout.address")} />
-      <div className="grid sm:grid-cols-2 gap-4">
-        <Input name="postalCode" label={t("checkout.postalCode")} />
-        <Input name="city" label={t("checkout.city")} />
-      </div>
-      <input type="hidden" name="country" value="NL" />
+      <AddressAutocompleteFields
+        addressLabel={t("checkout.address")}
+        postalCodeLabel={t("checkout.postalCode")}
+        cityLabel={t("checkout.city")}
+      />
       <Textarea name="notes" label={t("checkout.notes")} rows={3} />
       <input
         type="text"
