@@ -1,4 +1,4 @@
-// Production deploy source: GitHub main · portal+marketing rollout 2026-09-24
+// Production deploy source: GitHub main · portal final rollout 2026-09-24
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "vdbdigital-preview",
