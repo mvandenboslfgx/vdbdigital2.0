@@ -340,6 +340,7 @@ const en = {
     customerTypeB2b: "Business (B2B)",
     customerTypeB2c: "Consumer (B2C)",
     acceptTermsPrefix: "I agree to the",
+    marketingConsent: "I want to receive news, tips and offers from VDB Digital by email (optional).",
     termsLink: "terms and conditions",
     mollieNotConfigured:
       "Payments are not configured yet. Orders cannot be completed in development mode. Set MOLLIE_API_KEY to enable payments.",
@@ -404,6 +405,7 @@ const en = {
       "We will use your answers to prepare a clear proposal. You can schedule an introduction afterwards.",
     privacyConsentPrefix: "I have read and acknowledge the",
     termsConsentPrefix: "I agree to the",
+    marketingConsent: "I want to receive news, tips and offers from VDB Digital by email (optional).",
     projectType: "Project type",
     projectTypePlaceholder: "e.g. website, online store, automation",
     budget: "Budget (indication)",
