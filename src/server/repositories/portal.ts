@@ -774,10 +774,19 @@ export async function getPortalProfile() {
     .eq("id", ctx.user.id)
     .maybeSingle();
 
-  const marketingOptIn = await getMarketingPreference({
-    email: data?.email ?? ctx.user.email,
-    userId: ctx.user.id,
-  });
+  const [{ data: organization }, marketingOptIn] = await Promise.all([
+    supabase
+      .from("organizations")
+      .select(
+        "id, legal_name, trade_name, contact_email, contact_phone, vat_number, kvk_number, invoice_address, type",
+      )
+      .eq("id", ctx.organization.id)
+      .maybeSingle(),
+    getMarketingPreference({
+      email: data?.email ?? ctx.user.email,
+      userId: ctx.user.id,
+    }),
+  ]);
 
-  return { ctx, profile: data, marketingOptIn };
+  return { ctx, profile: data, organization, marketingOptIn };
 }
