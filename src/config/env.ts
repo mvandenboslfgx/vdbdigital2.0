@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { isEmailFromAddress } from "../lib/email/address";
-import { evaluateProductionAppUrl } from "../lib/url/app-url";
+import { evaluateProductionAppUrl, getDeploymentEnvironment } from "../lib/url/app-url";
 
 /** Bare email or Resend-style `Name <email@domain>`. */
 const emailFromField = z
@@ -96,8 +96,9 @@ export function getMollieWebhookToken(): string | undefined {
   return undefined;
 }
 
+/** @deprecated Cloudflare previews are identified by VDB_DEPLOYMENT_ENV. */
 export function isProtectedPreviewDeployment(): boolean {
-  return process.env.VERCEL === "1" && process.env.VERCEL_ENV === "preview";
+  return getDeploymentEnvironment() === "preview";
 }
 
 /** Server-only env — importeer alleen vanuit server-only modules */
@@ -111,8 +112,6 @@ const serverEnvSchema = publicEnvSchema.extend({
   MOLLIE_WEBHOOK_TOKEN: z.string().min(1).optional(),
   /** @deprecated Gebruik MOLLIE_WEBHOOK_TOKEN */
   MOLLIE_WEBHOOK_SECRET: z.string().min(1).optional(),
-  /** Vercel Deployment Protection bypass — uitsluitend Preview, server-side */
-  VERCEL_AUTOMATION_BYPASS_SECRET: z.string().min(1).optional(),
   RESEND_API_KEY: z.string().min(1).optional(),
   EMAIL_FROM: emailFromField,
   EMAIL_ADMIN: emailFromField,
@@ -177,10 +176,10 @@ export function validateProductionEnv(): { ok: true } | { ok: false; missing: st
     return { ok: false, missing };
   }
 
-  // On Vercel production (or forced local prod gate), APP_URL must be exact apex.
+  // Cloudflare production (or forced local release check) must use the exact apex.
   const enforceOrigin =
     process.env.REQUIRE_PRODUCTION_ENV === "1" ||
-    (process.env.VERCEL === "1" && process.env.VERCEL_ENV === "production");
+    getDeploymentEnvironment() === "production";
   if (enforceOrigin) {
     const originCheck = evaluateProductionAppUrl(env.NEXT_PUBLIC_APP_URL);
     if (!originCheck.ok) {
@@ -191,7 +190,7 @@ export function validateProductionEnv(): { ok: true } | { ok: false; missing: st
   return { ok: true };
 }
 
-/** Zelfde vereisten als production — gebruikt bij Vercel Preview builds. */
+/** Zelfde integratievereisten als production — gebruikt voor Cloudflare previewchecks. */
 export function validatePreviewBuildEnv(): { ok: true } | { ok: false; missing: string[] } {
   return validateProductionEnv();
 }
