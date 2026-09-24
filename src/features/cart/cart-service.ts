@@ -58,9 +58,32 @@ export async function addToCart(productSlug: string, quantity = 1): Promise<Cart
   const cart = await getCart();
   const priceCents = product.priceCents;
   const existing = cart.items.find((i) => i.productId === product.id);
+  const recurring =
+    product.billingType === "MONTHLY" || product.billingType === "YEARLY";
+  const cartHasRecurring = cart.items.some(
+    (i) => i.billingType === "MONTHLY" || i.billingType === "YEARLY",
+  );
+
+  if (recurring && quantity !== 1) {
+    throw new Error("Recurring products must use quantity 1");
+  }
+  if (recurring && cart.items.length > 0 && !existing) {
+    throw new Error("Recurring products must be purchased separately");
+  }
+  if (!recurring && cartHasRecurring) {
+    throw new Error("One-time and recurring products cannot share a checkout");
+  }
 
   if (existing) {
-    existing.quantity += quantity;
+    if (recurring) {
+      existing.quantity = 1;
+    } else {
+      const nextQuantity = existing.quantity + quantity;
+      if (nextQuantity > MAX_QUANTITY) {
+        throw new Error("Maximum quantity exceeded");
+      }
+      existing.quantity = nextQuantity;
+    }
   } else {
     const item: CartItem = {
       productId: product.id,
@@ -99,6 +122,12 @@ export async function updateCartQuantity(
   }
   if (quantity > MAX_QUANTITY) {
     throw new Error("Maximum quantity exceeded");
+  }
+  if (
+    (item.billingType === "MONTHLY" || item.billingType === "YEARLY") &&
+    quantity !== 1
+  ) {
+    throw new Error("Recurring products must use quantity 1");
   }
 
   item.quantity = quantity;
