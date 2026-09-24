@@ -20,6 +20,18 @@ const loginSchema = z.object({
   next: z.string().max(500).optional(),
 });
 
+const signupSchema = z
+  .object({
+    fullName: z.string().trim().min(2).max(120),
+    email: z.string().email().max(254),
+    password: z.string().min(8).max(128),
+    confirmPassword: z.string().min(8).max(128),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Wachtwoorden komen niet overeen.",
+    path: ["confirmPassword"],
+  });
+
 const emailSchema = z.object({
   email: z.string().email().max(254),
 });
@@ -59,6 +71,85 @@ function dutchRateLimitMessage(result: Awaited<ReturnType<typeof checkRateLimit>
     return `Te veel pogingen. Probeer het over ${result.retryAfterSeconds} seconden opnieuw.`;
   }
   return "Te veel pogingen. Probeer het later opnieuw.";
+}
+
+export async function registerAction(
+  _prev: AuthActionState,
+  formData: FormData,
+): Promise<AuthActionState> {
+  if (!(await verifyOrigin())) {
+    return { error: "Verzoek geweigerd." };
+  }
+
+  const parsed = signupSchema.safeParse({
+    fullName: formData.get("fullName"),
+    email: formData.get("email"),
+    password: formData.get("password"),
+    confirmPassword: formData.get("confirmPassword"),
+  });
+
+  if (!parsed.success) {
+    return {
+      error:
+        parsed.error.issues[0]?.message ??
+        "Controleer je gegevens en probeer opnieuw.",
+    };
+  }
+
+  const limited = await checkRateLimit(
+    "auth-signup",
+    parsed.data.email.toLowerCase(),
+  );
+  if (!limited.success) {
+    return { error: dutchRateLimitMessage(limited) };
+  }
+
+  const supabase = await createServerSupabaseClient();
+  if (!supabase) {
+    return { error: "Authenticatie is niet geconfigureerd." };
+  }
+
+  const emailRedirectTo = `${resolveAppUrl()}/auth/callback?next=/portal`;
+  const { data, error } = await supabase.auth.signUp({
+    email: parsed.data.email,
+    password: parsed.data.password,
+    options: {
+      emailRedirectTo,
+      data: { full_name: parsed.data.fullName },
+    },
+  });
+
+  if (error) {
+    await writeAuditLog({
+      action: "auth.signup_failed",
+      metadata: { reason: "provider" },
+    });
+    return {
+      error:
+        "Account aanmaken is niet gelukt. Probeer het opnieuw of gebruik Google.",
+    };
+  }
+
+  await writeAuditLog({
+    userId: data.user?.id,
+    action: "auth.signup_created",
+    metadata: { confirmationRequired: !data.session },
+  });
+
+  if (data.user && data.session) {
+    const destination = await resolvePostLoginPath(
+      data.user.id,
+      "/portal",
+      supabase,
+    );
+    redirect(destination);
+  }
+
+  return {
+    success: true,
+    message:
+      "Account aangemaakt. Controleer je e-mail om je account te bevestigen en daarna direct in te loggen.",
+  };
 }
 
 export async function loginAction(
@@ -224,7 +315,7 @@ export async function requestMagicLinkAction(
 
   const parsed = emailSchema.safeParse({ email: formData.get("email") });
   const successMessage =
-    "Als dit e-mailadres bij ons bekend is, ontvang je een inloglink.";
+    "Als het e-mailadres geldig is, ontvang je een beveiligde inloglink.";
 
   if (!parsed.success) {
     return { success: true, message: successMessage };
@@ -244,10 +335,21 @@ export async function requestMagicLinkAction(
   }
 
   const emailRedirectTo = `${resolveAppUrl()}/auth/callback?next=/portal`;
-  await supabase.auth.signInWithOtp({
+  const { error } = await supabase.auth.signInWithOtp({
     email: parsed.data.email,
-    options: { emailRedirectTo, shouldCreateUser: false },
+    options: { emailRedirectTo, shouldCreateUser: true },
   });
+
+  if (error) {
+    await writeAuditLog({
+      action: "auth.magic_link_failed",
+      metadata: { reason: "provider" },
+    });
+    return {
+      error:
+        "De inloglink kon niet worden verstuurd. Probeer opnieuw of gebruik Google.",
+    };
+  }
 
   await writeAuditLog({
     action: "auth.magic_link_requested",
