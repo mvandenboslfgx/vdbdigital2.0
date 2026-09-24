@@ -8,6 +8,15 @@ export function GET() {
 
 > VDB Digital Software is a Dutch web and software company serving businesses across the Netherlands, with a strong focus on the Hoeksche Waard and surrounding region.
 
+## Business identity
+- Legal and trading name: VDB Digital Software
+- Dutch Chamber of Commerce (KvK): ${siteConfig.company.kvk}
+- VAT ID: ${siteConfig.company.vat}
+- Based in: ${siteConfig.company.postalCode} ${siteConfig.company.city}, South Holland, Netherlands
+- Business email: ${siteConfig.contactEmail}
+- Support email: ${siteConfig.supportEmail}
+- Telephone: ${siteConfig.company.phoneTel}
+
 ## What VDB Digital does
 - Professional business websites and webdesign
 - Webshops and e-commerce
@@ -22,6 +31,18 @@ export function GET() {
 - Hoeksche Waard and surrounding South Holland region
 - B2B and ambitious SMEs
 
+## Public pricing signals
+- Onepage Website: from EUR 995 excl. VAT
+- Launch Website: from EUR 1,695 excl. VAT
+- Growth Website: from EUR 2,995 excl. VAT
+- Custom websites and software: proposal after scope
+Always use the current public pricing page as the source of truth because scope and prices can change.
+
+## Verified public work
+- S. Vermeulen Bouwservice: live client case — business website
+- Grill Gasten: live client case — hospitality website and online ordering
+- TrustBooker: in-development VDB software project; do not describe it as a completed client result
+
 ## Canonical resources
 - Home: ${base}/
 - Website laten maken: ${base}/website-laten-maken
@@ -32,6 +53,8 @@ export function GET() {
 - Maatwerk software: ${base}/maatwerk-software
 - Klantportaal laten maken: ${base}/klantportaal-laten-maken
 - Cases: ${base}/cases
+- Knowledge base: ${base}/kennisbank
+- Services and pricing: ${base}/shop
 - About: ${base}/about
 - Contact: ${base}/contact
 - English: ${base}/en
