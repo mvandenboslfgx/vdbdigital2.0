@@ -32,6 +32,21 @@ export function QuoteResponseForm({
             ? "Bevestig afwijzing"
             : "Reageren"}
       </h2>
+      {mode === "accept" ? (
+        <label className="flex items-start gap-3 rounded-lg border border-border p-4 text-small">
+          <input
+            type="checkbox"
+            name="confirmAcceptance"
+            value="true"
+            required
+            className="mt-1 accent-primary"
+          />
+          <span>
+            Ik bevestig dat ik de offerte en de genoemde voorwaardenversie heb gelezen
+            en akkoord ga.
+          </span>
+        </label>
+      ) : null}
       <div>
         <label htmlFor="note" className="block text-small font-medium mb-1">
           {mode === "decline" ? "Reden (optioneel)" : "Opmerking (optioneel)"}
