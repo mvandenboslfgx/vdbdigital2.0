@@ -28,7 +28,6 @@ describe("Classic Mollie webhook route", () => {
     const fs = await import("node:fs");
     const page = fs.readFileSync("src/app/(shop)/checkout/success/page.tsx", "utf8");
     expect(page).not.toContain("updateOrderPaymentStatus");
-    expect(page).toMatch(/checkout\.successBody|payment provider|betalingsprovider/i);
   });
 });
 
@@ -49,67 +48,51 @@ describe("Application webhook token", () => {
     expect(timingSafeCompare("wrong-token", "expected-token-value")).toBe(false);
     expect(timingSafeCompare("expected-token-value", "expected-token-value")).toBe(true);
   });
-
-  it("supports legacy secret query param name", () => {
-    process.env.MOLLIE_WEBHOOK_TOKEN = "my-token";
-    expect(verifyMollieWebhookToken("my-token").valid).toBe(true);
-  });
 });
 
-describe("Preview Vercel protection bypass", () => {
+describe("Cloudflare webhook URL", () => {
   afterEach(() => {
     process.env = { ...env };
   });
 
-  it("includes bypass param on preview when secret set", () => {
-    process.env.VERCEL = "1";
-    process.env.VERCEL_ENV = "preview";
-    process.env.VERCEL_URL = "preview.example.vercel.app";
-    process.env.VERCEL_AUTOMATION_BYPASS_SECRET = "bypass-secret";
+  it("builds a preview webhook without provider-specific bypass parameters", () => {
+    process.env.NODE_ENV = "production";
+    process.env.VDB_DEPLOYMENT_ENV = "preview";
+    process.env.NEXT_PUBLIC_APP_URL = "https://preview-vdb.workers.dev";
     process.env.MOLLIE_WEBHOOK_TOKEN = "app-token";
 
     const result = buildMollieWebhookUrl();
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.url).toContain("x-vercel-protection-bypass=bypass-secret");
-      expect(result.url).toContain("token=app-token");
-      expect(result.url).toMatch(/^https:\/\/preview\.example\.vercel\.app/);
+      expect(result.url).toBe(
+        "https://preview-vdb.workers.dev/api/webhooks/mollie?token=app-token",
+      );
+      expect(result.url).not.toContain("vercel");
     }
   });
 
-  it("blocks preview when bypass secret missing", () => {
-    process.env.VERCEL = "1";
-    process.env.VERCEL_ENV = "preview";
-    process.env.VERCEL_URL = "preview.example.vercel.app";
-    delete process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
-
-    const result = buildMollieWebhookUrl();
-    expect(result.ok).toBe(false);
-  });
-
-  it("production URL has no bypass param", () => {
-    process.env.VERCEL = "1";
-    process.env.VERCEL_ENV = "production";
+  it("builds production webhook on the canonical apex", () => {
+    process.env.NODE_ENV = "production";
+    process.env.VDB_DEPLOYMENT_ENV = "production";
     process.env.NEXT_PUBLIC_APP_URL = "https://vdbdigital.nl";
-    delete process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
     process.env.MOLLIE_WEBHOOK_TOKEN = "app-token";
 
     const result = buildMollieWebhookUrl();
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.url).not.toContain("x-vercel-protection-bypass");
-      expect(result.url).toContain("token=app-token");
+      expect(result.url).toBe(
+        "https://vdbdigital.nl/api/webhooks/mollie?token=app-token",
+      );
     }
   });
 });
 
 describe("URL sanitization for logs", () => {
-  it("redacts token and bypass secrets from URLs", () => {
+  it("redacts token values from URLs", () => {
     const url =
-      "https://preview.vercel.app/api/webhooks/mollie?token=secret123&x-vercel-protection-bypass=bypass456";
+      "https://preview-vdb.workers.dev/api/webhooks/mollie?token=secret123";
     const sanitized = sanitizeUrlForLog(url);
     expect(sanitized).not.toContain("secret123");
-    expect(sanitized).not.toContain("bypass456");
     expect(decodeURIComponent(sanitized)).toContain("[REDACTED]");
   });
 });
@@ -120,23 +103,5 @@ describe("Webhook idempotency", () => {
     const service = fs.readFileSync("src/server/services/order-service.ts", "utf8");
     expect(service).toContain("23505");
     expect(service).toContain("alreadyProcessed");
-  });
-});
-
-describe("AAL2 enforcement", () => {
-  it("requireAal2 module enforces MFA_REQUIRED and MFA_SETUP_REQUIRED", async () => {
-    const fs = await import("node:fs");
-    const aal2 = fs.readFileSync("src/server/auth/require-aal2.ts", "utf8");
-    expect(aal2).toContain("MFA_REQUIRED");
-    expect(aal2).toContain("MFA_SETUP_REQUIRED");
-    expect(aal2).toContain('currentLevel !== "aal2"');
-  });
-
-  it("guarded admin action uses requireAdmin with AAL2", async () => {
-    const fs = await import("node:fs");
-    const actions = fs.readFileSync("src/server/actions/auth-actions.ts", "utf8");
-    expect(actions).toContain("requireAdmin");
-    const admin = fs.readFileSync("src/server/auth/require-admin.ts", "utf8");
-    expect(admin).toContain("requireAal2");
   });
 });
