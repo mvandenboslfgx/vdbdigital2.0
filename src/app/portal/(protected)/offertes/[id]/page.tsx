@@ -99,8 +99,8 @@ export default async function PortalQuoteDetailPage({
           </div>
         </dl>
         <p className="text-small text-muted border-t border-border pt-3">
-          Digitale offerteacceptatie start geen betaling en maakt geen factuur
-          aan. Checkout blijft uitgeschakeld.
+          Digitale acceptatie legt je akkoord met deze offerte vast. Eventuele
+          facturatie en betaling volgen daarna volgens de gemaakte afspraken.
         </p>
       </Card>
 
