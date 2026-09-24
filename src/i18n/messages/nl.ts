@@ -344,6 +344,7 @@ const nl: Messages = {
     customerTypeB2b: "Zakelijk (B2B)",
     customerTypeB2c: "Consument (B2C)",
     acceptTermsPrefix: "Ik ga akkoord met de",
+    marketingConsent: "Ik wil nieuws, tips en aanbiedingen van VDB Digital per e-mail ontvangen (optioneel).",
     termsLink: "algemene voorwaarden",
     mollieNotConfigured:
       "Betalingen zijn nog niet geconfigureerd. Bestellingen kunnen in ontwikkelmodus niet worden afgerond. Stel MOLLIE_API_KEY in om betalingen te activeren.",
@@ -411,6 +412,7 @@ const nl: Messages = {
       "We gebruiken je antwoorden voor een helder voorstel. Daarna kun je een kennismaking inplannen.",
     privacyConsentPrefix: "Ik heb gelezen en erken de",
     termsConsentPrefix: "Ik ga akkoord met de",
+    marketingConsent: "Ik wil nieuws, tips en aanbiedingen van VDB Digital per e-mail ontvangen (optioneel).",
     projectType: "Type project",
     projectTypePlaceholder: "Bijv. website, webshop, automatisering",
     budget: "Budget (indicatie)",
