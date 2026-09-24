@@ -78,6 +78,28 @@ export type PortalNotificationRow = {
   created_at: string;
 };
 
+export type PortalOrderRow = {
+  id: string;
+  order_number: string;
+  status: string;
+  total_cents: number;
+  created_at: string;
+  subscription_status: string | null;
+  billing_interval: string | null;
+};
+
+export type PortalSubscriptionRow = {
+  id: string;
+  order_id: string;
+  product_name: string;
+  status: string;
+  interval: string;
+  amount_cents: number;
+  currency: string;
+  starts_on: string | null;
+  last_payment_at: string | null;
+};
+
 export type PortalConversationRow = {
   id: string;
   subject: string;
@@ -621,6 +643,98 @@ export async function getPortalDocument(id: string) {
     .order("version_number", { ascending: false });
 
   return { ctx, document, versions: versions ?? [] };
+}
+
+
+export async function listPortalOrders() {
+  const ctx = await requireCustomer();
+  const supabase = createServiceRoleClient();
+  if (!supabase) {
+    return {
+      ctx,
+      orders: [] as PortalOrderRow[],
+      subscriptions: [] as PortalSubscriptionRow[],
+    };
+  }
+
+  const email = ctx.user.email.trim().toLowerCase();
+
+  const [{ data: orders }, { data: subscriptions }] = await Promise.all([
+    supabase
+      .from("orders")
+      .select(
+        "id, order_number, status, total_cents, created_at, subscription_status, billing_interval",
+      )
+      .ilike("customer_email", email)
+      .order("created_at", { ascending: false })
+      .limit(50),
+    supabase
+      .from("billing_subscriptions")
+      .select(
+        "id, order_id, product_name, status, interval, amount_cents, currency, starts_on, last_payment_at",
+      )
+      .ilike("customer_email", email)
+      .order("created_at", { ascending: false })
+      .limit(20),
+  ]);
+
+  return {
+    ctx,
+    orders: (orders ?? []) as PortalOrderRow[],
+    subscriptions: (subscriptions ?? []) as PortalSubscriptionRow[],
+  };
+}
+
+export async function getPortalOrder(id: string) {
+  const ctx = await requireCustomer();
+  const supabase = createServiceRoleClient();
+  if (!supabase) {
+    return { ctx, order: null, items: [], payments: [], subscription: null };
+  }
+
+  const email = ctx.user.email.trim().toLowerCase();
+  const { data: order } = await supabase
+    .from("orders")
+    .select("*")
+    .eq("id", id)
+    .ilike("customer_email", email)
+    .maybeSingle();
+
+  if (!order) {
+    return { ctx, order: null, items: [], payments: [], subscription: null };
+  }
+
+  const [{ data: items }, { data: payments }, { data: subscription }] =
+    await Promise.all([
+      supabase
+        .from("order_items")
+        .select(
+          "id, product_name, product_slug, quantity, unit_price_cents, total_cents, billing_type",
+        )
+        .eq("order_id", id)
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("payments")
+        .select("id, status, amount_cents, provider_status, created_at, updated_at")
+        .eq("order_id", id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("billing_subscriptions")
+        .select(
+          "id, product_name, status, interval, amount_cents, currency, starts_on, last_payment_at",
+        )
+        .eq("order_id", id)
+        .ilike("customer_email", email)
+        .maybeSingle(),
+    ]);
+
+  return {
+    ctx,
+    order,
+    items: items ?? [],
+    payments: payments ?? [],
+    subscription,
+  };
 }
 
 export async function listPortalConversations() {
