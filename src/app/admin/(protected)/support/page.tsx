@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { EmptyState } from "@/components/portal/empty-state";
 import { requireAdmin } from "@/server/auth/require-admin";
 import { requirePermission } from "@/server/auth/require-permission";
@@ -31,8 +32,16 @@ export default async function AdminSupportPage() {
       ) : (
         <ul className="space-y-2">
           {rows.map((t) => (
-            <li key={t.id} className="rounded-lg border border-border p-4 text-small">
-              {t.ticket_number}: {t.subject} · {labelNl(TICKET_STATUS_NL, t.status)}
+            <li key={t.id}>
+              <Link
+                href={`/admin/support/${t.id}`}
+                className="block rounded-lg border border-border p-4 text-small hover:border-primary transition-colors"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <span className="font-medium">{t.ticket_number}: {t.subject}</span>
+                  <span className="text-muted">{labelNl(TICKET_STATUS_NL, t.status)}</span>
+                </div>
+              </Link>
             </li>
           ))}
         </ul>
