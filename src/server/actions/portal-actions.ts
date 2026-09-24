@@ -40,6 +40,16 @@ const replySchema = z.object({
   body: z.string().min(1).max(5000),
 });
 
+const conversationCreateSchema = z.object({
+  subject: z.string().trim().min(3).max(200),
+  body: z.string().trim().min(2).max(5000),
+});
+
+const conversationReplySchema = z.object({
+  conversationId: z.string().uuid(),
+  body: z.string().trim().min(1).max(5000),
+});
+
 const profileSchema = z.object({
   fullName: z.string().min(2).max(120),
   marketingConsent: z.boolean().optional(),
@@ -330,6 +340,176 @@ export async function replySupportTicketAction(
 
   revalidatePath(`/portal/support/${ticket.id}`);
   return { success: true, message: "Reactie geplaatst." };
+}
+
+
+export async function createPortalConversationAction(
+  _prev: PortalActionState,
+  formData: FormData,
+): Promise<PortalActionState> {
+  if (!(await verifyOrigin())) return { error: "Verzoek geweigerd." };
+
+  const parsed = conversationCreateSchema.safeParse({
+    subject: formData.get("subject"),
+    body: formData.get("body"),
+  });
+  if (!parsed.success) {
+    return { error: "Vul een onderwerp en bericht in." };
+  }
+
+  const ctx = await requireCustomer();
+  if (!hasCustomerPermission(ctx.customerRole, "portal.messages.create")) {
+    return denyPortalPermission();
+  }
+
+  const limited = await checkRateLimit("portal-messages", ctx.user.id);
+  if (!limited.success) {
+    return { error: "Te veel berichten. Probeer later opnieuw." };
+  }
+
+  const supabase = createServiceRoleClient();
+  if (!supabase) return { error: "Berichtenservice niet beschikbaar." };
+
+  const now = new Date().toISOString();
+  const { data: conversation, error: conversationError } = await supabase
+    .from("portal_conversations")
+    .insert({
+      organization_id: ctx.organization.id,
+      subject: parsed.data.subject,
+      status: "OPEN",
+      conversation_type: "SUPPORT",
+      created_by: ctx.user.id,
+      last_message_at: now,
+      updated_at: now,
+    })
+    .select("id")
+    .single();
+
+  if (conversationError || !conversation) {
+    return { error: "Gesprek kon niet worden gestart." };
+  }
+
+  const { error: participantError } = await supabase
+    .from("portal_conversation_participants")
+    .insert({
+      conversation_id: conversation.id,
+      user_id: ctx.user.id,
+      role_in_conversation: "MEMBER",
+      last_read_at: now,
+    });
+
+  if (participantError) {
+    await supabase.from("portal_conversations").delete().eq("id", conversation.id);
+    return { error: "Gesprek kon niet worden gestart." };
+  }
+
+  const { error: messageError } = await supabase.from("portal_messages").insert({
+    conversation_id: conversation.id,
+    author_user_id: ctx.user.id,
+    body: parsed.data.body,
+    is_internal: false,
+    client_message_id: crypto.randomUUID(),
+  });
+
+  if (messageError) {
+    await supabase
+      .from("portal_conversation_participants")
+      .delete()
+      .eq("conversation_id", conversation.id)
+      .eq("user_id", ctx.user.id);
+    await supabase.from("portal_conversations").delete().eq("id", conversation.id);
+    return { error: "Bericht kon niet worden opgeslagen." };
+  }
+
+  await writeAuditLog({
+    userId: ctx.user.id,
+    action: "portal.conversation_created",
+    metadata: {
+      conversationId: conversation.id,
+      organizationId: ctx.organization.id,
+    },
+  });
+
+  revalidatePath("/portal/berichten");
+  revalidatePath("/admin/messages");
+  return {
+    success: true,
+    message: "Gesprek gestart. Je kunt het nu openen bij Berichten.",
+  };
+}
+
+export async function replyPortalConversationAction(
+  _prev: PortalActionState,
+  formData: FormData,
+): Promise<PortalActionState> {
+  if (!(await verifyOrigin())) return { error: "Verzoek geweigerd." };
+
+  const parsed = conversationReplySchema.safeParse({
+    conversationId: formData.get("conversationId"),
+    body: formData.get("body"),
+  });
+  if (!parsed.success) return { error: "Bericht is ongeldig." };
+
+  const ctx = await requireCustomer();
+  if (!hasCustomerPermission(ctx.customerRole, "portal.messages.reply")) {
+    return denyPortalPermission();
+  }
+
+  const limited = await checkRateLimit("portal-messages", ctx.user.id);
+  if (!limited.success) {
+    return { error: "Te veel berichten. Probeer later opnieuw." };
+  }
+
+  const supabase = createServiceRoleClient();
+  if (!supabase) return { error: "Berichtenservice niet beschikbaar." };
+
+  const { data: conversation } = await supabase
+    .from("portal_conversations")
+    .select("id, status")
+    .eq("id", parsed.data.conversationId)
+    .eq("organization_id", ctx.organization.id)
+    .neq("conversation_type", "INTERNAL")
+    .is("deleted_at", null)
+    .maybeSingle();
+
+  if (!conversation || conversation.status === "CLOSED") {
+    return { error: "Dit gesprek is niet beschikbaar." };
+  }
+
+  const now = new Date().toISOString();
+  const { error } = await supabase.from("portal_messages").insert({
+    conversation_id: conversation.id,
+    author_user_id: ctx.user.id,
+    body: parsed.data.body,
+    is_internal: false,
+    client_message_id: crypto.randomUUID(),
+  });
+  if (error) return { error: "Bericht kon niet worden geplaatst." };
+
+  await supabase
+    .from("portal_conversations")
+    .update({ last_message_at: now, updated_at: now })
+    .eq("id", conversation.id);
+
+  await supabase
+    .from("portal_conversation_participants")
+    .update({ last_read_at: now })
+    .eq("conversation_id", conversation.id)
+    .eq("user_id", ctx.user.id);
+
+  await writeAuditLog({
+    userId: ctx.user.id,
+    action: "portal.conversation_replied",
+    metadata: {
+      conversationId: conversation.id,
+      organizationId: ctx.organization.id,
+    },
+  });
+
+  revalidatePath("/portal/berichten");
+  revalidatePath(`/portal/berichten/${conversation.id}`);
+  revalidatePath("/admin/messages");
+  return { success: true, message: "Bericht verzonden." };
 }
 
 export async function updatePortalProfileAction(
