@@ -8,6 +8,10 @@ import {
 import { formatDualPrice } from "@/lib/utilities/commercial-price";
 import { LocaleLinkButton } from "@/components/ui/locale-link-button";
 import { paths } from "@/i18n/config";
+import { SubscribeNowButton } from "@/components/shop/subscribe-now-button";
+import { isDirectCheckoutEnabled } from "@/config/features";
+import { getProductBySlug } from "@/server/repositories/products";
+import { canAddToDirectCheckout } from "@/lib/commerce/checkout-eligibility";
 
 function PriceBlock({
   price,
@@ -43,6 +47,17 @@ function PriceBlock({
 export async function CarePackagesSection() {
   const locale = await getLocale();
   const c = getCommercialContent(locale);
+  const checkoutOn = isDirectCheckoutEnabled();
+  const checkoutProducts = checkoutOn
+    ? await Promise.all(
+        carePackages.map((pkg) => getProductBySlug(pkg.catalogSlug)),
+      )
+    : [];
+  const purchasableCareSlugs = new Set(
+    checkoutProducts
+      .filter((product) => product && canAddToDirectCheckout(product))
+      .map((product) => product!.slug),
+  );
 
   return (
     <Section variant="dark" data-pricing-section="care">
@@ -74,7 +89,12 @@ export async function CarePackagesSection() {
                     <PriceBlock price={price} fallback={copy.price} />
                   </div>
                 </div>
-                <div className="mt-auto pt-6" data-pricing-cta>
+                <div className="mt-auto space-y-2 pt-6" data-pricing-cta>
+                  {checkoutOn &&
+                  !pkg.quoteOnly &&
+                  purchasableCareSlugs.has(pkg.catalogSlug) ? (
+                    <SubscribeNowButton productSlug={pkg.catalogSlug} />
+                  ) : null}
                   <LocaleLinkButton
                     href={
                       pkg.quoteOnly
