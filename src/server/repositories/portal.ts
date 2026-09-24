@@ -85,6 +85,15 @@ export type PortalConversationRow = {
   last_message_at: string | null;
 };
 
+export type PortalMessageRow = {
+  id: string;
+  body: string;
+  created_at: string;
+  author_user_id: string;
+  author_name: string;
+  mine: boolean;
+};
+
 function formatEuro(cents: number, currency = "EUR"): string {
   return new Intl.NumberFormat("nl-NL", {
     style: "currency",
@@ -616,6 +625,10 @@ export async function getPortalDocument(id: string) {
 
 export async function listPortalConversations() {
   const ctx = await requireCustomer();
+  if (!hasCustomerPermission(ctx.customerRole, "portal.messages.view")) {
+    return { ctx, conversations: [] as PortalConversationRow[], denied: true as const };
+  }
+
   const supabase = createServiceRoleClient();
   if (!supabase) return { ctx, conversations: [] as PortalConversationRow[] };
 
@@ -623,9 +636,78 @@ export async function listPortalConversations() {
     .from("portal_conversations")
     .select("id, subject, status, last_message_at")
     .eq("organization_id", ctx.organization.id)
-    .order("last_message_at", { ascending: false, nullsFirst: false });
+    .neq("conversation_type", "INTERNAL")
+    .is("deleted_at", null)
+    .order("last_message_at", { ascending: false, nullsFirst: false })
+    .order("created_at", { ascending: false });
 
   return { ctx, conversations: (data ?? []) as PortalConversationRow[] };
+}
+
+export async function getPortalConversation(id: string) {
+  const ctx = await requireCustomer();
+  if (!hasCustomerPermission(ctx.customerRole, "portal.messages.view")) {
+    return { ctx, conversation: null, messages: [] as PortalMessageRow[], denied: true as const };
+  }
+
+  const supabase = createServiceRoleClient();
+  if (!supabase) {
+    return { ctx, conversation: null, messages: [] as PortalMessageRow[] };
+  }
+
+  const { data: conversation } = await supabase
+    .from("portal_conversations")
+    .select("id, subject, status, last_message_at, created_at, conversation_type")
+    .eq("id", id)
+    .eq("organization_id", ctx.organization.id)
+    .neq("conversation_type", "INTERNAL")
+    .is("deleted_at", null)
+    .maybeSingle();
+
+  if (!conversation) {
+    return { ctx, conversation: null, messages: [] as PortalMessageRow[] };
+  }
+
+  const { data: messageRows } = await supabase
+    .from("portal_messages")
+    .select("id, body, created_at, author_user_id")
+    .eq("conversation_id", id)
+    .eq("is_internal", false)
+    .is("deleted_at", null)
+    .order("created_at", { ascending: true });
+
+  const authorIds = Array.from(
+    new Set((messageRows ?? []).map((row) => row.author_user_id).filter(Boolean)),
+  );
+  const names = new Map<string, string>();
+
+  if (authorIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, full_name, email")
+      .in("id", authorIds);
+    for (const profile of profiles ?? []) {
+      names.set(
+        profile.id,
+        profile.full_name?.trim() || profile.email || "VDB Digital",
+      );
+    }
+  }
+
+  await supabase
+    .from("portal_conversation_participants")
+    .update({ last_read_at: new Date().toISOString() })
+    .eq("conversation_id", id)
+    .eq("user_id", ctx.user.id)
+    .is("removed_at", null);
+
+  const messages: PortalMessageRow[] = (messageRows ?? []).map((row) => ({
+    ...row,
+    author_name: names.get(row.author_user_id) ?? "VDB Digital",
+    mine: row.author_user_id === ctx.user.id,
+  }));
+
+  return { ctx, conversation, messages };
 }
 
 export async function listPortalTickets() {
