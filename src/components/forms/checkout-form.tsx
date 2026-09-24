@@ -8,14 +8,19 @@ import { submitCheckoutAction } from "@/server/actions/checkout-actions";
 import { formatCents } from "@/lib/utilities/money";
 import { useI18n, useT } from "@/i18n/provider";
 import { useLocalizedHref } from "@/i18n/use-localized-href";
-import type { OrderTotals } from "@/types";
+import type { BillingType, OrderTotals } from "@/types";
 
 interface CheckoutFormProps {
   totals: OrderTotals;
   mollieConfigured: boolean;
+  recurringBillingType?: BillingType | null;
 }
 
-export function CheckoutForm({ totals, mollieConfigured }: CheckoutFormProps) {
+export function CheckoutForm({
+  totals,
+  mollieConfigured,
+  recurringBillingType,
+}: CheckoutFormProps) {
   const t = useT();
   const { locale } = useI18n();
   const localizeHref = useLocalizedHref();
@@ -64,6 +69,22 @@ export function CheckoutForm({ totals, mollieConfigured }: CheckoutFormProps) {
         aria-hidden="true"
       />
 
+      {recurringBillingType ? (
+        <div className="rounded-lg border border-primary/30 bg-primary/10 p-4">
+          <p className="font-semibold text-foreground mb-1">
+            {t("checkout.subscriptionTitle")}
+          </p>
+          <p className="text-small text-muted">
+            {t(
+              recurringBillingType === "YEARLY"
+                ? "checkout.subscriptionDisclosureYearly"
+                : "checkout.subscriptionDisclosureMonthly",
+              { amount: formatCents(totals.totalCents) },
+            )}
+          </p>
+        </div>
+      ) : null}
+
       <label className="flex items-start gap-3 text-small">
         <input type="checkbox" name="acceptTerms" value="true" required className="mt-1" />
         <span>
@@ -96,7 +117,11 @@ export function CheckoutForm({ totals, mollieConfigured }: CheckoutFormProps) {
           {t("checkout.totalInclVat")}: {formatCents(totals.totalCents)}
         </span>
         <Button type="submit" disabled={pending || !mollieConfigured} size="lg">
-          {pending ? t("checkout.processing") : t("checkout.payWithMollie")}
+          {pending
+            ? t("checkout.processing")
+            : recurringBillingType
+              ? t("checkout.startSubscription")
+              : t("checkout.payWithMollie")}
         </Button>
       </div>
     </form>
