@@ -87,7 +87,9 @@ export default async function CartPage() {
                     </p>
                     {item.billingType === "MONTHLY" || item.billingType === "YEARLY" ? (
                       <p className="text-xs text-muted mt-2">
-                        {item.billingType === "YEARLY" ? "1 yearly subscription" : "1 monthly subscription"}
+                        {item.billingType === "YEARLY"
+                          ? t("cart.yearlySubscription")
+                          : t("cart.monthlySubscription")}
                       </p>
                     ) : (
                       <CartQuantityControls productId={item.productId} quantity={item.quantity} />
