@@ -106,13 +106,6 @@ export function collectEnvChecks(): EnvCheck[] {
       "optional — applicatietoken, geen Mollie signature",
     ),
     check(
-      "VERCEL_AUTOMATION_BYPASS_SECRET",
-      Boolean(process.env.VERCEL_AUTOMATION_BYPASS_SECRET?.trim()),
-      Boolean(process.env.VERCEL_AUTOMATION_BYPASS_SECRET?.trim()),
-      "preview/checkout",
-      "vereist voor Mollie op beschermde Preview",
-    ),
-    check(
       "RESEND_API_KEY",
       Boolean(process.env.RESEND_API_KEY),
       Boolean(process.env.RESEND_API_KEY?.length),
@@ -160,7 +153,7 @@ export function printEnvReport(checks: EnvCheck[], title: string): void {
 
 export function printIntegrationStatus(): void {
   console.log("live chat widget: REMOVED (contact / WhatsApp only)");
-  console.log("rate limiting: VERCEL WAF CONFIGURATION REQUIRED");
+  console.log("rate limiting: Cloudflare Worker + Upstash/Supabase RPC");
 }
 
 export function printStructuralChecks(): boolean {
