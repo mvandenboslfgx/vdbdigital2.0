@@ -9,6 +9,7 @@ import { writeAuditLog } from "@/lib/security/audit-log";
 import { checkRateLimit } from "@/lib/security/rate-limit";
 import { hasCustomerPermission } from "@/lib/auth/customer-permissions";
 import { validateSelectedOptionalQuoteItems } from "@/lib/commerce/quote-status";
+import { recordMarketingPreference } from "@/server/services/marketing-preferences";
 
 function denyPortalPermission(): PortalActionState {
   return {
@@ -41,6 +42,7 @@ const replySchema = z.object({
 
 const profileSchema = z.object({
   fullName: z.string().min(2).max(120),
+  marketingConsent: z.boolean().optional(),
 });
 
 /** Offerte accepteren/afwijzen via RPC — digitale offerteacceptatie, geen Mollie. */
@@ -340,6 +342,7 @@ export async function updatePortalProfileAction(
 
   const parsed = profileSchema.safeParse({
     fullName: formData.get("fullName"),
+    marketingConsent: formData.get("marketingConsent") === "true",
   });
   if (!parsed.success) {
     return { error: "Vul een geldige naam in." };
@@ -363,6 +366,14 @@ export async function updatePortalProfileAction(
   if (error) {
     return { error: "Profiel kon niet worden bijgewerkt." };
   }
+
+  await recordMarketingPreference({
+    email: ctx.user.email,
+    userId: ctx.user.id,
+    optIn: parsed.data.marketingConsent === true,
+    source: "portal_profile",
+    firstName: parsed.data.fullName,
+  });
 
   revalidatePath("/portal/profiel");
   return { success: true, message: "Profiel opgeslagen." };
