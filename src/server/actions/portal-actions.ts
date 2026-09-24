@@ -27,6 +27,7 @@ const respondSchema = z.object({
   quoteId: z.string().uuid(),
   decision: z.enum(["ACCEPT", "DECLINE"]),
   note: z.string().max(2000).optional(),
+  confirmAcceptance: z.boolean().optional(),
 });
 
 const ticketSchema = z.object({
@@ -68,6 +69,7 @@ export async function respondToQuoteAction(
     quoteId: formData.get("quoteId"),
     decision: formData.get("decision"),
     note: formData.get("note") || undefined,
+    confirmAcceptance: formData.get("confirmAcceptance") === "true",
   });
   if (!parsed.success) {
     return { error: "Ongeldige aanvraag." };
@@ -75,6 +77,9 @@ export async function respondToQuoteAction(
 
   const ctx = await requireCustomer();
   const needsAccept = parsed.data.decision === "ACCEPT";
+  if (needsAccept && parsed.data.confirmAcceptance !== true) {
+    return { error: "Bevestig dat je de offerte en voorwaarden hebt gelezen en accepteert." };
+  }
   if (
     !hasCustomerPermission(
       ctx.customerRole,
@@ -183,7 +188,7 @@ export async function respondToQuoteAction(
     return {
       success: true,
       message: needsAccept
-        ? "Offerte was al geaccepteerd. Er is geen betaling gestart."
+        ? "Offerte was al geaccepteerd."
         : "Offerte was al afgewezen.",
     };
   }
@@ -216,7 +221,7 @@ export async function respondToQuoteAction(
   return {
     success: true,
     message: needsAccept
-      ? "Digitale offerteacceptatie vastgelegd. Er is geen betaling of factuur gestart."
+      ? "Digitale offerteacceptatie is vastgelegd. Eventuele facturatie en betaling volgen volgens de offerte."
       : "Offerte afgewezen.",
   };
 }
