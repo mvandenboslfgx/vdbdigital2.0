@@ -150,14 +150,16 @@ export async function submitCheckoutAction(
     }
   }
 
-  await recordMarketingPreference({
-    email: validation.data.customer.email,
-    optIn: parsed.data.marketingConsent === true,
-    source: "checkout",
-    locale: parseFormLocale(formData.get("locale")),
-    firstName: validation.data.customer.firstName,
-    lastName: validation.data.customer.lastName,
-  });
+  if (parsed.data.marketingConsent === true) {
+    await recordMarketingPreference({
+      email: validation.data.customer.email,
+      optIn: true,
+      source: "checkout",
+      locale: parseFormLocale(formData.get("locale")),
+      firstName: validation.data.customer.firstName,
+      lastName: validation.data.customer.lastName,
+    });
+  }
 
   redirect(payment.checkoutUrl);
 }
