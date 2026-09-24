@@ -8,7 +8,12 @@ export function CompanyLegalBlock() {
     company.legalName,
     tradeName,
     company.address || null,
-    [company.city, company.country].filter(Boolean).join(", ") || null,
+    [
+      [company.postalCode, company.city].filter(Boolean).join(" "),
+      company.country,
+    ]
+      .filter(Boolean)
+      .join(", ") || null,
     company.kvk ? `KvK: ${company.kvk}` : null,
     company.vat ? `BTW: ${company.vat}` : null,
     company.phone ? `Telefoon: ${company.phone}` : null,
