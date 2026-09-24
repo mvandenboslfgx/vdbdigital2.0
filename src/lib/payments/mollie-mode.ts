@@ -1,6 +1,12 @@
 /**
  * Mollie key mode separation — fail closed on unsafe combinations.
+ * Hosting target: Cloudflare/OpenNext.
  */
+
+import {
+  getDeploymentEnvironment,
+  isLocalhostUrl,
+} from "@/lib/url/app-url";
 
 export type MollieKeyMode = "test" | "live" | "unknown" | "missing";
 
@@ -15,21 +21,20 @@ export function isLocalOrPreviewRuntime(
   env: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env,
 ): boolean {
   const appUrl = env.NEXT_PUBLIC_APP_URL ?? "";
-  if (/localhost|127\.0\.0\.1/i.test(appUrl)) return true;
-  if (env.VERCEL_ENV === "preview") return true;
-  if (env.VERCEL_ENV === "development") return true;
-  return false;
+  if (appUrl && isLocalhostUrl(appUrl)) return true;
+  const deployment = getDeploymentEnvironment(env);
+  return deployment === "development" || deployment === "preview";
 }
 
-export function isProductionDeployment(env: NodeJS.ProcessEnv = process.env): boolean {
-  return env.VERCEL_ENV === "production" || (
-    env.NODE_ENV === "production" && env.VERCEL_ENV !== "preview" && !isLocalOrPreviewRuntime(env)
-  );
+export function isProductionDeployment(
+  env: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env,
+): boolean {
+  return getDeploymentEnvironment(env) === "production";
 }
 
 /**
- * Live keys must never be used on localhost/preview.
- * Unknown keys are rejected.
+ * Live keys are accepted only on the explicitly identified production origin.
+ * Preview/development/unknown runtimes fail closed for live keys.
  */
 export function assertMollieKeySafeForRuntime(
   apiKey: string | undefined | null,
@@ -42,24 +47,22 @@ export function assertMollieKeySafeForRuntime(
   if (mode === "unknown") {
     return { ok: false, reason: "MOLLIE_API_KEY must start with test_ or live_", mode };
   }
-  if (mode === "live" && isLocalOrPreviewRuntime(env)) {
+  if (mode === "live" && !isProductionDeployment(env)) {
     return {
       ok: false,
-      reason: "Live Mollie key is not allowed on localhost/preview",
+      reason: "Live Mollie key is allowed only on the Cloudflare production deployment",
       mode,
     };
   }
   return { ok: true, mode };
 }
 
-/** For release-gate: production enablement expects live only after explicit decision;
- * until then test mode is the verification mode. */
 export function describeMollieModeForGate(
   apiKey: string | undefined | null,
-  env: NodeJS.ProcessEnv = process.env,
+  env: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env,
 ): string {
   const check = assertMollieKeySafeForRuntime(apiKey, env);
   if (!check.ok) return `NOT SAFE: ${check.reason}`;
-  if (check.mode === "test") return "test mode (correct for P0.5 verification)";
-  return "live mode configured (manual production decision required)";
+  if (check.mode === "test") return "test mode (safe for verification)";
+  return "live mode configured for production";
 }
