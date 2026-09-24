@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { EmptyState } from "@/components/portal/empty-state";
 import { requireAdmin } from "@/server/auth/require-admin";
 import { requirePermission } from "@/server/auth/require-permission";
@@ -33,8 +34,21 @@ export default async function AdminMessagesPage() {
       ) : (
         <ul className="space-y-2">
           {rows.map((c) => (
-            <li key={c.id} className="rounded-lg border border-border p-4 text-small">
-              {c.subject} · {c.status}
+            <li key={c.id}>
+              <Link
+                href={`/admin/messages/${c.id}`}
+                className="block rounded-lg border border-border p-4 text-small hover:border-primary transition-colors"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <span className="font-medium">{c.subject}</span>
+                  <span className="text-muted">{c.status}</span>
+                </div>
+                <p className="text-xs text-muted mt-1">
+                  {c.last_message_at
+                    ? new Date(c.last_message_at).toLocaleString("nl-NL")
+                    : new Date(c.created_at).toLocaleString("nl-NL")}
+                </p>
+              </Link>
             </li>
           ))}
         </ul>
