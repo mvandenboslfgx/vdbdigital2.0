@@ -464,6 +464,16 @@ export function QuoteForm() {
             </LocaleLink>
           </span>
         </label>
+        <label className="flex items-start gap-3 text-small text-light-foreground">
+          <input
+            type="checkbox"
+            name="marketingConsent"
+            value="true"
+            defaultChecked={val("marketingConsent") === "true"}
+            className="mt-1 accent-primary"
+          />
+          <span>{t("forms.marketingConsent")}</span>
+        </label>
       </fieldset>
 
       <input
