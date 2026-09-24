@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import {
+  registerAction,
   requestPasswordResetAction,
   requestMagicLinkAction,
   requestAccountAction,
@@ -14,6 +15,93 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 const initialState: AuthActionState = {};
+
+export function SignupForm() {
+  const [state, formAction, pending] = useActionState(
+    registerAction,
+    initialState,
+  );
+
+  return (
+    <form action={formAction} className="space-y-4">
+      <div>
+        <label htmlFor="signup-full-name" className="block text-small font-medium mb-1">
+          Naam
+        </label>
+        <Input
+          id="signup-full-name"
+          name="fullName"
+          type="text"
+          autoComplete="name"
+          required
+          minLength={2}
+          maxLength={120}
+        />
+      </div>
+      <div>
+        <label htmlFor="signup-email" className="block text-small font-medium mb-1">
+          E-mailadres
+        </label>
+        <Input
+          id="signup-email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          required
+          maxLength={254}
+        />
+      </div>
+      <div>
+        <label htmlFor="signup-password" className="block text-small font-medium mb-1">
+          Wachtwoord
+        </label>
+        <Input
+          id="signup-password"
+          name="password"
+          type="password"
+          autoComplete="new-password"
+          required
+          minLength={8}
+          maxLength={128}
+        />
+      </div>
+      <div>
+        <label htmlFor="signup-confirm-password" className="block text-small font-medium mb-1">
+          Herhaal wachtwoord
+        </label>
+        <Input
+          id="signup-confirm-password"
+          name="confirmPassword"
+          type="password"
+          autoComplete="new-password"
+          required
+          minLength={8}
+          maxLength={128}
+        />
+      </div>
+
+      {state.error && (
+        <p className="text-small text-error" role="alert">
+          {state.error}
+        </p>
+      )}
+      {state.message && (
+        <p className="text-small text-success" role="status">
+          {state.message}
+        </p>
+      )}
+
+      <Button type="submit" disabled={pending} className="w-full">
+        {pending ? "Account aanmaken…" : "Gratis account aanmaken"}
+      </Button>
+
+      <p className="text-xs text-muted text-center">
+        Na je eerste login wordt automatisch een beveiligde klantomgeving
+        aangemaakt. Beheerrechten worden nooit automatisch toegekend.
+      </p>
+    </form>
+  );
+}
 
 export function PasswordResetRequestForm() {
   const [state, formAction, pending] = useActionState(
