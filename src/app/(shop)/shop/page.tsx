@@ -38,6 +38,8 @@ import {
 import { queryPublicShopCatalog } from "@/server/repositories/public-shop-catalog";
 import { SubscribeNowButton } from "@/components/shop/subscribe-now-button";
 import { isDirectCheckoutEnabled } from "@/config/features";
+import { getProductBySlug } from "@/server/repositories/products";
+import { canAddToDirectCheckout } from "@/lib/commerce/checkout-eligibility";
 
 type BillingFilter = "all" | "one-time" | "monthly" | "quote-only";
 
@@ -90,6 +92,17 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const { t } = await getDictionary(locale);
   const commercial = getCommercialContent(locale);
   const checkoutOn = isDirectCheckoutEnabled();
+  const careCheckoutProducts = checkoutOn
+    ? await Promise.all(
+        carePackages.map((pkg) => getProductBySlug(pkg.catalogSlug)),
+      )
+    : [];
+  const purchasableCareSlugs = new Set(
+    careCheckoutProducts
+      .filter((product): product is NonNullable<typeof product> => Boolean(product))
+      .filter(canAddToDirectCheckout)
+      .map((product) => product.slug),
+  );
   const params = await searchParams;
 
   if (params.categorie && !params.category) {
@@ -449,7 +462,9 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                         ) : null}
                       </div>
                       <div className="mt-auto pt-6 space-y-2">
-                        {checkoutOn && !pkg.quoteOnly ? (
+                        {checkoutOn &&
+                        !pkg.quoteOnly &&
+                        purchasableCareSlugs.has(pkg.catalogSlug) ? (
                           <SubscribeNowButton productSlug={pkg.catalogSlug} />
                         ) : null}
                         <LocaleLinkButton
