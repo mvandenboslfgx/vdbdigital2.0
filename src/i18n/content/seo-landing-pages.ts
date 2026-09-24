@@ -18,6 +18,7 @@ export type SeoLandingPageKey =
   | "aiChatbot"
   | "whatsappAutomatisering"
   | "maatwerkSoftware"
+  | "appLatenMaken"
   | "klantportaalLatenMaken";
 
 function related(
@@ -588,6 +589,92 @@ export const seoLandingPages: Record<SeoLandingPageKey, SeoLandingContent> = {
     ]),
   },
 
+  appLatenMaken: {
+    metaTitle: "App laten maken voor bedrijven | VDB Digital",
+    metaDescription:
+      "App laten maken voor jouw bedrijf? VDB Digital bouwt mobiele apps, webapps en interne bedrijfsapps op maat — snel, veilig en gekoppeld aan jouw processen.",
+    title: "App laten maken die jouw bedrijf echt gebruikt",
+    description:
+      "Van interne bedrijfsapp tot klantgerichte webapp: VDB Digital ontwerpt en bouwt maatwerk apps die processen versnellen, data centraal houden en prettig werken op mobiel en desktop.",
+    problem: {
+      title: "Losse tools en spreadsheets schalen niet mee",
+      body: "Veel bedrijven werken met Excel, WhatsApp, losse portals en handmatige overdracht. Dat werkt tot het volume groeit. Daarna ontstaan dubbele invoer, fouten en gebrek aan overzicht.",
+    },
+    builds: {
+      title: "Mobiele app, webapp of bedrijfsapp op maat",
+      body: "We bouwen precies wat het proces nodig heeft: bijvoorbeeld een planning-app, werkbonnenapp, klantapp, voorraadtool, dashboard of volledig platform met login, rollen en koppelingen.",
+    },
+    benefits: [
+      "Eén app rond jouw eigen workflow in plaats van losse tools",
+      "Werkt mobiel, tablet en desktop waar dat nodig is",
+      "Veilige login, rollen en centrale data",
+      "Uitbreidbaar met betalingen, AI en automatisering",
+    ],
+    features: [
+      "Mobiel-vriendelijke webapps en progressive web apps",
+      "Interne bedrijfsapps en dashboards",
+      "Klant- en partnerapps met beveiligde login",
+      "API-koppelingen met bestaande systemen",
+      "Push-, e-mail- of WhatsApp-notificaties waar passend",
+      "Mollie-betalingen en abonnementen indien nodig",
+    ],
+    process: [
+      "Proces en gewenste gebruikersflow uitwerken",
+      "Prototype en technische architectuur",
+      "Iteratief bouwen en testen met echte scenario's",
+      "Livegang, monitoring en verdere doorontwikkeling",
+    ],
+    integrations: ["Mollie", "Supabase", "E-mail", "WhatsApp", "Kalender", "Externe API's"],
+    security: [
+      "Authenticatie en rolgebaseerde toegang",
+      "Row-level security waar van toepassing",
+      "Server-side validatie en auditlogging",
+      "HTTPS en veilige secret-opslag",
+    ],
+    whoFor: [
+      "Bedrijven die een eigen werkbonnen- of planning-app nodig hebben",
+      "Organisaties die klanten via een app of portaal willen bedienen",
+      "Ondernemers die processen uit Excel en WhatsApp willen halen",
+      "Bedrijven met een uniek idee voor een commerciële app",
+    ],
+    included: [
+      "Requirements en UX-flow",
+      "Ontwerp en development",
+      "Testen, livegang en documentatie",
+    ],
+    notIncluded: [
+      "App Store- en Play Store-kosten van derden",
+      "Onbeperkte functionaliteitswijzigingen buiten scope",
+      "Legacy-migraties zonder aparte analyse",
+    ],
+    extensions: [
+      "AI automatisering",
+      "Klantportaal",
+      "Betalingen en abonnementen",
+      "CRM- en backofficekoppelingen",
+    ],
+    faq: [
+      {
+        q: "Wat kost een app laten maken?",
+        a: "Dat hangt af van functies, gebruikersrollen, koppelingen en of je een webapp, mobiele app of combinatie nodig hebt. Na een korte discovery ontvang je een duidelijke scope en investering.",
+      },
+      {
+        q: "Bouwen jullie ook apps voor interne bedrijfsprocessen?",
+        a: "Ja. Juist interne apps voor planning, werkbonnen, voorraad, projecten, klanten en rapportage zijn geschikt voor maatwerk.",
+      },
+      {
+        q: "Kan een app gekoppeld worden aan mijn bestaande website of CRM?",
+        a: "Ja. We kunnen via API's en webhooks bestaande systemen koppelen zolang de technische toegang dat ondersteunt.",
+      },
+    ],
+    related: related([
+      { href: "/maatwerk-software", label: "Maatwerk software" },
+      { href: "/klantportaal-laten-maken", label: "Klantportaal laten maken" },
+      { href: "/ai-automatisering", label: "AI automatisering" },
+      { href: "/cases/vdb-digital-platform", label: "Case: VDB Digital platform" },
+    ]),
+  },
+
   klantportaalLatenMaken: {
     metaTitle: "Klantportaal laten maken | VDB Digital",
     metaDescription:
@@ -715,6 +802,11 @@ export function getSeoLocalContent(
       label: "Maatwerk software",
       title: "Maatwerk software voor bedrijven",
       description: (loc) => `Maatwerk software in ${loc}? VDB Digital bouwt dashboards, CRM-oplossingen, interne tools en webapplicaties rond de processen van jouw bedrijf.`,
+    },
+    appLatenMaken: {
+      label: "App laten maken",
+      title: "App laten maken voor bedrijven",
+      description: (loc) => `App laten maken in ${loc}? VDB Digital bouwt mobiele apps, webapps en bedrijfsapps op maat voor planning, werkbonnen, klanten, dashboards en automatisering.`,
     },
     klantportaalLatenMaken: {
       label: "Klantportaal laten maken",
