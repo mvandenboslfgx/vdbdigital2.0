@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getDictionary();
   return {
     title: t("checkout.successTitle"),
-    robots: { index: false },
+    robots: { index: false, follow: false },
   };
 }
 
