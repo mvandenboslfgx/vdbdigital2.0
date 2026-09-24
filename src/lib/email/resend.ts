@@ -144,6 +144,39 @@ export async function sendOrderCancelled(
   return sendCustomerMail(to, pick("orderCancelled", locale, orderNumber));
 }
 
+export async function sendAdminPortalAlert(input: {
+  subject: string;
+  title: string;
+  body: string;
+  href?: string;
+}) {
+  const resend = getResend();
+  if (!resend) return { sent: false, reason: "Email is not configured" };
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://vdbdigital.nl";
+  const safeTitle = escapeHtml(input.title);
+  const safeBody = escapeHtml(input.body).replace(/\n/g, "<br>");
+  const safeHref = input.href
+    ? `${appUrl.replace(/\/$/, "")}${input.href.startsWith("/") ? input.href : `/${input.href}`}`
+    : null;
+
+  const { error } = await resend.emails.send({
+    from: from(),
+    to: admin(),
+    subject: input.subject,
+    text: `${input.title}\n\n${input.body}${safeHref ? `\n\n${safeHref}` : ""}`,
+    html: `<p><strong>${safeTitle}</strong></p><p>${safeBody}</p>${
+      safeHref
+        ? `<p><a href="${escapeHtml(safeHref)}">Open in VDB Digital</a></p>`
+        : ""
+    }`,
+  });
+
+  return error
+    ? { sent: false, reason: error.message }
+    : { sent: true };
+}
+
 export async function sendSupportConfirmation(
   to: string,
   name: string,
