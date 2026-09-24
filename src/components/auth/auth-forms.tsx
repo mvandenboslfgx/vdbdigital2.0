@@ -80,6 +80,18 @@ export function SignupForm() {
         />
       </div>
 
+      <label className="flex items-start gap-3 rounded-lg border border-border p-3">
+        <input
+          type="checkbox"
+          name="marketingConsent"
+          value="true"
+          className="mt-1 accent-primary"
+        />
+        <span className="text-small text-muted">
+          Ik wil nieuws, tips en aanbiedingen van VDB Digital per e-mail ontvangen (optioneel).
+        </span>
+      </label>
+
       {state.error && (
         <p className="text-small text-error" role="alert">
           {state.error}
