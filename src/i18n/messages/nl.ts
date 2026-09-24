@@ -347,6 +347,12 @@ const nl: Messages = {
     totalInclVat: "Totaal incl. BTW",
     payWithMollie: "Betalen via Mollie",
     processing: "Verwerken…",
+    subscriptionTitle: "Doorlopend abonnement",
+    subscriptionDisclosureMonthly:
+      "Je betaalt nu {amount} via Mollie. Met deze eerste betaling geef je toestemming voor vervolgbetalingen van {amount} per maand totdat het abonnement wordt beëindigd volgens de voorwaarden.",
+    subscriptionDisclosureYearly:
+      "Je betaalt nu {amount} via Mollie. Met deze eerste betaling geef je toestemming voor vervolgbetalingen van {amount} per jaar totdat het abonnement wordt beëindigd volgens de voorwaarden.",
+    startSubscription: "Abonnement starten via Mollie",
   },
   forms: {
     contactTitle: "Contact",
