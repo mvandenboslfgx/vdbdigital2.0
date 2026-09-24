@@ -28,13 +28,22 @@ describe("P0.5 env + Mollie mode + harness", () => {
     expect(emailFromDomainAllowed("hello@evil.com", "vdbdigital.nl")).toBe(false);
   });
 
-  it("flags CHECKOUT_ENABLED=true as env error for P0.5", () => {
+  it("allows enabled checkout when all runtime requirements are safe", () => {
     const result = validateCheckoutEnvironment({
+      NODE_ENV: "production",
+      VDB_DEPLOYMENT_ENV: "preview",
       CHECKOUT_ENABLED: "true",
-      NEXT_PUBLIC_APP_URL: "https://vdbdigital.nl",
+      NEXT_PUBLIC_APP_URL: "https://preview-vdb.workers.dev",
+      NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co",
+      SUPABASE_SECRET_KEY: "server-secret",
+      MOLLIE_API_KEY: "test_demo",
+      RESEND_API_KEY: "re_demo",
+      EMAIL_FROM: "VDB Digital <noreply@vdbdigital.nl>",
+      UPSTASH_REDIS_REST_URL: "https://example.upstash.io",
+      UPSTASH_REDIS_REST_TOKEN: "token",
     });
-    expect(result.ok).toBe(false);
-    expect(result.issues.some((i) => i.code === "checkout_flag_on")).toBe(true);
+    expect(result.ok).toBe(true);
+    expect(result.issues.some((i) => i.code === "checkout_flag_on")).toBe(false);
   });
 
   it("separates Mollie test/live keys", () => {
