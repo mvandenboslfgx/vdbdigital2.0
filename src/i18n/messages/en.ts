@@ -309,6 +309,8 @@ const en = {
     decrease: "Decrease quantity",
     increase: "Increase quantity",
     remove: "Remove",
+    monthlySubscription: "1 monthly subscription",
+    yearlySubscription: "1 yearly subscription",
   },
   checkout: {
     title: "Checkout",
