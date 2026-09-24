@@ -38,6 +38,7 @@ const BUCKET_LIMITS: Record<string, number> = {
   "documents-download": 60,
   "portal-documents-upload": 10,
   "portal-documents-download": 40,
+  "portal-messages": 20,
 };
 
 /** Buckets that must fail closed without a working app limiter */
