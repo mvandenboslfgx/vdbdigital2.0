@@ -12,6 +12,7 @@ import { resolvePostLoginPath } from "@/server/auth/resolve-home";
 import { checkRateLimit } from "@/lib/security/rate-limit";
 import { resolveAppUrl } from "@/lib/url/app-url";
 import { hashInviteToken } from "@/lib/auth/invite-token";
+import { recordMarketingPreference } from "@/server/services/marketing-preferences";
 import { z } from "zod";
 
 const loginSchema = z.object({
@@ -26,6 +27,7 @@ const signupSchema = z
     email: z.string().email().max(254),
     password: z.string().min(8).max(128),
     confirmPassword: z.string().min(8).max(128),
+    marketingConsent: z.boolean().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Wachtwoorden komen niet overeen.",
@@ -86,6 +88,7 @@ export async function registerAction(
     email: formData.get("email"),
     password: formData.get("password"),
     confirmPassword: formData.get("confirmPassword"),
+    marketingConsent: formData.get("marketingConsent") === "true",
   });
 
   if (!parsed.success) {
@@ -134,6 +137,14 @@ export async function registerAction(
     userId: data.user?.id,
     action: "auth.signup_created",
     metadata: { confirmationRequired: !data.session },
+  });
+
+  await recordMarketingPreference({
+    email: parsed.data.email,
+    userId: data.user?.id ?? null,
+    optIn: parsed.data.marketingConsent === true,
+    source: "portal_profile",
+    firstName: parsed.data.fullName,
   });
 
   if (data.user && data.session) {
