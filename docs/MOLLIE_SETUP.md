@@ -2,39 +2,31 @@
 
 ## Webhookvariant
 
-VDB Digital gebruikt de **klassieke Mollie Payments API-webhook** (geen Next-gen Webhooks).
+VDB Digital gebruikt de klassieke Mollie Payments API-webhook. De webhook ontvangt een payment-ID; de applicatie haalt daarna de payment opnieuw op via de Mollie API en vertrouwt niet op clientstatus.
 
 | Aspect | Implementatie |
 | --- | --- |
-| Webhook URL | Per betaling via `webhookUrl` bij `payments.create` |
-| Payload | `application/x-www-form-urlencoded` met payment-ID (`id`) |
-| Status | Altijd opgehaald via `mollie.payments.get(paymentId)` |
-| Signature | **Geen** `X-Mollie-Signature` — geen Next-gen webhook |
-| Applicatietoken | Optioneel `MOLLIE_WEBHOOK_TOKEN` als queryparam `token` |
-| Token type | **Eigen applicatietoken** — geen Mollie signing secret |
-| Vercel Preview | `x-vercel-protection-bypass` via `VERCEL_AUTOMATION_BYPASS_SECRET` |
-| Returnpagina | Markeert order **niet** als betaald |
-| Idempotency | `webhook_events` unique constraint |
-| Onbekende payment/order | HTTP 400 |
-| Dubbele delivery | HTTP 200, geen dubbele mail/orderupdate |
+| Webhook URL | Per payment/subscription via `webhookUrl` |
+| Payload | `application/x-www-form-urlencoded` met payment-ID |
+| Status | Opnieuw ophalen via `mollie.payments.get(paymentId)` |
+| Applicatietoken | Optioneel `MOLLIE_WEBHOOK_TOKEN` |
+| Returnpagina | Markeert een order nooit zelfstandig als betaald |
+| Idempotency | `webhook_events` + payment status transitions |
+| Recurring | Eerste payment met `sequenceType=first`, daarna Mollie subscription |
+| Hosting | Cloudflare Workers/OpenNext |
 
-Code: `src/app/api/webhooks/mollie/route.ts`, `src/lib/payments/mollie.ts`, `src/lib/payments/webhook-url.ts`
-
----
-
-## Environment variables
+## Environment
 
 ```env
+VDB_DEPLOYMENT_ENV=preview
+NEXT_PUBLIC_APP_URL=https://<preview>.workers.dev
 MOLLIE_API_KEY=test_...
-MOLLIE_WEBHOOK_TOKEN=<random-app-token>   # optioneel, timing-safe
-VERCEL_AUTOMATION_BYPASS_SECRET=<secret>  # alleen Preview + Deployment Protection
+MOLLIE_WEBHOOK_TOKEN=<random-app-token>
 ```
 
-**Niet gebruiken:** `MOLLIE_WEBHOOK_SECRET` (legacy alias — migreer naar `MOLLIE_WEBHOOK_TOKEN`).
+Een `live_` Mollie-key wordt buiten `VDB_DEPLOYMENT_ENV=production` fail-closed geweigerd.
 
----
-
-## Webhook URL per omgeving
+## URLs
 
 ### Development
 
@@ -42,37 +34,40 @@ VERCEL_AUTOMATION_BYPASS_SECRET=<secret>  # alleen Preview + Deployment Protecti
 http://localhost:3000/api/webhooks/mollie?token=<token>
 ```
 
-Mollie kan localhost niet bereiken — geen nepbetalingen of gesimuleerde webhooks.
+Mollie kan localhost niet rechtstreeks bereiken.
 
-### Vercel Preview (Deployment Protection)
+### Cloudflare preview
 
 ```
-https://<preview-host>/api/webhooks/mollie?x-vercel-protection-bypass=<secret>&token=<token>
+https://<preview>.workers.dev/api/webhooks/mollie?token=<token>
 ```
 
-Zonder `VERCEL_AUTOMATION_BYPASS_SECRET` blokkeert checkout met configuratiefout.
+Gebruik alleen testmode op preview.
 
-### Production (later)
+### Production
 
 ```
 https://vdbdigital.nl/api/webhooks/mollie?token=<token>
 ```
 
-Geen Vercel-bypass in Production. Canonical production origin is apex (`https://vdbdigital.nl`); `www` redirecteert naar apex.
+## Eenmalige betaling
 
----
+1. server-side checkoutvalidatie;
+2. order + orderregels opslaan;
+3. Mollie Hosted Checkout payment maken;
+4. gebruiker met HTTP redirect naar Mollie;
+5. Mollie webhook haalt payment opnieuw op;
+6. bedrag, currency, order en transition worden gecontroleerd;
+7. betaalde order wordt vrijgegeven en bevestiging maximaal één keer verzonden.
 
-## Flow
+## Abonnement
 
-1. Checkout validatie server-side (Zod, prijs herberekend)
-2. Order aanmaken (status PENDING)
-3. Mollie payment met `webhookUrl`, `redirectUrl`, `cancelUrl`
-4. Redirect naar Mollie Hosted Checkout
-5. Webhook: payment ophalen bij Mollie → order verifiëren → idempotent verwerken
-6. Bevestigingsmail maximaal één keer
+1. recurring SKU in checkout;
+2. Mollie customer aanmaken/hergebruiken;
+3. eerste payment met `sequenceType=first`;
+4. na `paid` wordt een Mollie subscription aangemaakt;
+5. subscription metadata bevat de lokale order- en productreferentie;
+6. Mollie zet subscription metadata door naar de automatisch gegenereerde recurring payments;
+7. recurring webhooks werken de lokale subscription/paymentstatus bij.
 
-## WAF
-
-`/api/webhooks/mollie` nooit in blokkerende publieke rate-limitgroep.
-
-Zie [VERCEL_WAF_RATE_LIMITING.md](./VERCEL_WAF_RATE_LIMITING.md).
+Zie ook `docs/CLOUDFLARE_SECURITY.md`.
