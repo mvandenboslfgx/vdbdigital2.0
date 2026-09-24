@@ -144,6 +144,8 @@ export async function replyAdminConversationAction(
   revalidatePath(`/admin/messages/${conversation.id}`);
   revalidatePath("/portal/berichten");
   revalidatePath(`/portal/berichten/${conversation.id}`);
+  revalidatePath("/portal/meldingen");
+  revalidatePath("/portal");
 
   return { success: true, message: "Reactie verzonden." };
 }
