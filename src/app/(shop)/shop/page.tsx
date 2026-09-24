@@ -97,12 +97,12 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         carePackages.map((pkg) => getProductBySlug(pkg.catalogSlug)),
       )
     : [];
-  const purchasableCareSlugs = new Set(
-    careCheckoutProducts
-      .filter((product): product is NonNullable<typeof product> => Boolean(product))
-      .filter(canAddToDirectCheckout)
-      .map((product) => product.slug),
-  );
+  const purchasableCareSlugs = new Set<string>();
+  for (const product of careCheckoutProducts) {
+    if (product && canAddToDirectCheckout(product)) {
+      purchasableCareSlugs.add(product.slug);
+    }
+  }
   const params = await searchParams;
 
   if (params.categorie && !params.category) {
