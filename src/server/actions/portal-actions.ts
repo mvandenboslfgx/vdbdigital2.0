@@ -10,6 +10,7 @@ import { checkRateLimit } from "@/lib/security/rate-limit";
 import { hasCustomerPermission } from "@/lib/auth/customer-permissions";
 import { validateSelectedOptionalQuoteItems } from "@/lib/commerce/quote-status";
 import { recordMarketingPreference } from "@/server/services/marketing-preferences";
+import { sendAdminPortalAlert } from "@/lib/email/resend";
 
 function denyPortalPermission(): PortalActionState {
   return {
@@ -286,6 +287,13 @@ export async function createSupportTicketAction(
     metadata: { ticketId: data.id, organizationId: ctx.organization.id },
   });
 
+  await sendAdminPortalAlert({
+    subject: `Nieuw supportticket: ${ticketNumber}`,
+    title: `${ticketNumber}: ${parsed.data.subject}`,
+    body: parsed.data.description,
+    href: `/admin/support/${data.id}`,
+  });
+
   revalidatePath("/portal/support");
   revalidatePath("/portal");
   revalidatePath("/admin/support");
@@ -349,6 +357,13 @@ export async function replySupportTicketAction(
     userId: ctx.user.id,
     action: "portal.ticket_replied",
     metadata: { ticketId: ticket.id },
+  });
+
+  await sendAdminPortalAlert({
+    subject: "Nieuwe reactie op supportticket",
+    title: "Klant heeft gereageerd op een supportticket",
+    body: parsed.data.body,
+    href: `/admin/support/${ticket.id}`,
   });
 
   revalidatePath(`/portal/support/${ticket.id}`);
@@ -459,6 +474,13 @@ export async function createPortalConversationAction(
     },
   });
 
+  await sendAdminPortalAlert({
+    subject: `Nieuw klantgesprek: ${parsed.data.subject}`,
+    title: parsed.data.subject,
+    body: parsed.data.body,
+    href: `/admin/messages/${conversation.id}`,
+  });
+
   revalidatePath("/portal/berichten");
   revalidatePath("/admin/messages");
   return {
@@ -533,6 +555,13 @@ export async function replyPortalConversationAction(
       conversationId: conversation.id,
       organizationId: ctx.organization.id,
     },
+  });
+
+  await sendAdminPortalAlert({
+    subject: "Nieuwe reactie in klantgesprek",
+    title: "Klant heeft gereageerd",
+    body: parsed.data.body,
+    href: `/admin/messages/${conversation.id}`,
   });
 
   revalidatePath("/portal/berichten");
