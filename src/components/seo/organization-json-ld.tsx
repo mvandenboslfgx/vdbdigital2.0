@@ -7,7 +7,7 @@ export function OrganizationJsonLd() {
 
   const data = {
     "@context": "https://schema.org",
-    "@type": "Organization",
+    "@type": ["Organization", "ProfessionalService"],
     "@id": `${siteConfig.url}/#organization`,
     name: siteConfig.name,
     alternateName: "VDB Digital",
@@ -25,10 +25,20 @@ export function OrganizationJsonLd() {
     description: siteConfig.description,
     email: siteConfig.contactEmail,
     telephone: siteConfig.company.phoneTel,
-    areaServed: {
-      "@type": "Country",
-      name: "Netherlands",
-    },
+    areaServed: [
+      {
+        "@type": "AdministrativeArea",
+        name: "Hoeksche Waard",
+      },
+      {
+        "@type": "City",
+        name: "Klaaswaal",
+      },
+      {
+        "@type": "Country",
+        name: "Netherlands",
+      },
+    ],
     knowsAbout: [
       "Webdesign",
       "Website development",
@@ -38,6 +48,10 @@ export function OrganizationJsonLd() {
       "CRM systems",
       "Customer portals",
       "Custom software",
+      "Mobile app development",
+      "Web application development",
+      "Business apps",
+      "Hoeksche Waard webdesign",
     ],
     address: siteConfig.company.address
       ? {
