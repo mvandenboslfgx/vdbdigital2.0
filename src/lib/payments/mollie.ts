@@ -91,7 +91,7 @@ export async function createMolliePayment(input: CreatePaymentInput) {
         },
         description: `${line.productName} · ${input.orderNumber}`,
         sequenceType: "first",
-        redirectUrl: `${appUrl}/checkout/success?order=${input.orderId}`,
+        redirectUrl: `${appUrl}/checkout/complete?order=${input.orderId}`,
         cancelUrl: `${appUrl}/checkout/cancelled?order=${input.orderId}`,
         webhookUrl: webhook.url,
         metadata: {
@@ -119,7 +119,7 @@ export async function createMolliePayment(input: CreatePaymentInput) {
         value: (input.totals.totalCents / 100).toFixed(2),
       },
       description: `Order ${input.orderNumber}`,
-      redirectUrl: `${appUrl}/checkout/success?order=${input.orderId}`,
+      redirectUrl: `${appUrl}/checkout/complete?order=${input.orderId}`,
       cancelUrl: `${appUrl}/checkout/cancelled?order=${input.orderId}`,
       webhookUrl: webhook.url,
       metadata: {
