@@ -112,7 +112,7 @@ export async function loginAction(
     metadata: { step: "password" },
   });
 
-  const destination = await resolvePostLoginPath(data.user.id, parsed.data.next);
+  const destination = await resolvePostLoginPath(data.user.id, parsed.data.next, supabase);
   redirect(destination);
 }
 
@@ -210,7 +210,7 @@ export async function updatePasswordAction(
     action: "auth.password_updated",
   });
 
-  const destination = await resolvePostLoginPath(userData.user.id);
+  const destination = await resolvePostLoginPath(userData.user.id, undefined, supabase);
   redirect(destination);
 }
 

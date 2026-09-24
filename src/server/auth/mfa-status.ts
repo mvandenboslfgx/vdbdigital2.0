@@ -1,5 +1,6 @@
 import "server-only";
 import { createServerSupabaseClient } from "@/lib/database/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type MfaStatus = {
   currentLevel: "aal1" | "aal2";
@@ -8,8 +9,10 @@ export type MfaStatus = {
   hasEnrolledFactor: boolean;
 };
 
-export async function getMfaStatus(): Promise<MfaStatus | null> {
-  const supabase = await createServerSupabaseClient();
+export async function getMfaStatus(
+  client?: SupabaseClient,
+): Promise<MfaStatus | null> {
+  const supabase = client ?? (await createServerSupabaseClient());
   if (!supabase) return null;
 
   const { data: aalData } =

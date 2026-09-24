@@ -1,5 +1,6 @@
 import "server-only";
-import { createServiceRoleClient } from "@/lib/database/server";
+import { createServerSupabaseClient } from "@/lib/database/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireAuthenticatedUser } from "@/server/auth/require-session";
 import { AuthError } from "@/server/auth/errors";
 import { writeAuditLog } from "@/lib/security/audit-log";
@@ -23,8 +24,11 @@ export type CustomerContext = {
   displayName: string;
 };
 
-async function loadStaffRole(userId: string): Promise<boolean> {
-  const supabase = createServiceRoleClient();
+async function loadStaffRole(
+  userId: string,
+  client?: SupabaseClient,
+): Promise<boolean> {
+  const supabase = client ?? (await createServerSupabaseClient());
   if (!supabase) return false;
   const { data } = await supabase
     .from("admin_roles")
@@ -50,8 +54,9 @@ export type CustomerMembershipLookup =
  */
 export async function lookupCustomerMemberships(
   userId: string,
+  client?: SupabaseClient,
 ): Promise<CustomerMembershipLookup> {
-  const supabase = createServiceRoleClient();
+  const supabase = client ?? (await createServerSupabaseClient());
   if (!supabase) return { ok: false, reason: "unavailable" };
 
   const { data, error } = await supabase
@@ -101,8 +106,9 @@ export async function lookupCustomerMemberships(
 /** Actieve organisatielidmaatschappen voor de huidige gebruiker. */
 export async function listCustomerMemberships(
   userId: string,
+  client?: SupabaseClient,
 ): Promise<CustomerMembershipRow[]> {
-  const result = await lookupCustomerMemberships(userId);
+  const result = await lookupCustomerMemberships(userId, client);
   if (!result.ok) return [];
   return result.memberships;
 }
@@ -111,7 +117,7 @@ export async function requireCustomer(
   organizationId?: string,
 ): Promise<CustomerContext> {
   const user = await requireAuthenticatedUser();
-  const supabase = createServiceRoleClient();
+  const supabase = await createServerSupabaseClient();
   if (!supabase) {
     throw new AuthError("UNAUTHENTICATED", "Authenticatie niet geconfigureerd");
   }
@@ -131,7 +137,7 @@ export async function requireCustomer(
     throw new AuthError("ACCOUNT_DISABLED");
   }
 
-  const memberships = await listCustomerMemberships(user.id);
+  const memberships = await listCustomerMemberships(user.id, supabase);
   if (memberships.length === 0) {
     await writeAuditLog({
       userId: user.id,

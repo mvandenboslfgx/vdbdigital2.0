@@ -1,6 +1,7 @@
 import "server-only";
 import { getMfaStatus } from "@/server/auth/mfa-status";
 import { AuthError } from "@/server/auth/errors";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 /** Vereist actieve AAL2-sessie (MFA geverifieerd). */
 export async function requireAal2(): Promise<void> {
@@ -20,8 +21,10 @@ export async function requireAal2(): Promise<void> {
 }
 
 /** Controleert MFA-status zonder throw — voor redirects in layouts */
-export async function getAal2RedirectPath(): Promise<string | null> {
-  const status = await getMfaStatus();
+export async function getAal2RedirectPath(
+  client?: SupabaseClient,
+): Promise<string | null> {
+  const status = await getMfaStatus(client);
   if (!status) return "/admin/login";
 
   if (!status.hasVerifiedFactor) {

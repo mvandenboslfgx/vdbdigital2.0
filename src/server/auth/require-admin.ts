@@ -1,5 +1,5 @@
 import "server-only";
-import { createServiceRoleClient } from "@/lib/database/server";
+import { createServerSupabaseClient } from "@/lib/database/server";
 import { getPermissionsForRole } from "@/lib/auth/permissions";
 import type { AdminRole } from "@/types";
 import { requireAuthenticatedUser } from "@/server/auth/require-session";
@@ -12,7 +12,7 @@ async function loadTrustedAdminRole(userId: string): Promise<{
   role: AdminRole;
   isActive: boolean;
 } | null> {
-  const supabase = createServiceRoleClient();
+  const supabase = await createServerSupabaseClient();
   if (!supabase) return null;
 
   const { data: profile } = await supabase

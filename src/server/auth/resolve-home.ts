@@ -1,5 +1,6 @@
 import "server-only";
-import { createServiceRoleClient } from "@/lib/database/server";
+import { createServerSupabaseClient } from "@/lib/database/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { lookupCustomerMemberships } from "@/server/auth/require-customer";
 import { getAal2RedirectPath } from "@/server/auth/require-aal2";
 import { audienceSafeInternalPath } from "@/lib/security/redirect";
@@ -32,8 +33,9 @@ function blockedAccessPath(): string {
 export async function resolvePostLoginPath(
   userId: string,
   requestedNext?: string | null,
+  client?: SupabaseClient,
 ): Promise<string> {
-  const supabase = createServiceRoleClient();
+  const supabase = client ?? (await createServerSupabaseClient());
   if (!supabase) return temporaryAccessPath();
 
   const { data: profile, error: profileError } = await supabase
@@ -57,12 +59,12 @@ export async function resolvePostLoginPath(
   if (roleError) return temporaryAccessPath();
 
   if (roleRow?.role) {
-    const mfaRedirect = await getAal2RedirectPath();
+    const mfaRedirect = await getAal2RedirectPath(supabase);
     if (mfaRedirect) return mfaRedirect;
     return audienceSafeInternalPath(requestedNext, "staff", "/admin");
   }
 
-  const membershipLookup = await lookupCustomerMemberships(userId);
+  const membershipLookup = await lookupCustomerMemberships(userId, supabase);
   if (!membershipLookup.ok) {
     return temporaryAccessPath();
   }

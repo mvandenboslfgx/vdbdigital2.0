@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
   }
 
   const requested = isSafeInternalPath(nextParam) ? nextParam : null;
-  const destination = await resolvePostLoginPath(data.user.id, requested);
+  const destination = await resolvePostLoginPath(data.user.id, requested, supabase);
 
   const response = NextResponse.redirect(`${origin}${destination}`);
   for (const cookie of pendingCookies) {
