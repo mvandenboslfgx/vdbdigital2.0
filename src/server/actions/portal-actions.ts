@@ -400,14 +400,27 @@ export async function createPortalConversationAction(
     return { error: "Gesprek kon niet worden gestart." };
   }
 
+  const { data: orgMembers } = await supabase
+    .from("organization_members")
+    .select("user_id")
+    .eq("organization_id", ctx.organization.id)
+    .eq("status", "ACTIVE");
+
+  const participantRows = Array.from(
+    new Set(
+      [ctx.user.id, ...(orgMembers ?? []).map((member) => member.user_id as string)]
+        .filter(Boolean),
+    ),
+  ).map((userId) => ({
+    conversation_id: conversation.id,
+    user_id: userId,
+    role_in_conversation: userId === ctx.user.id ? "OWNER" : "MEMBER",
+    last_read_at: userId === ctx.user.id ? now : null,
+  }));
+
   const { error: participantError } = await supabase
     .from("portal_conversation_participants")
-    .insert({
-      conversation_id: conversation.id,
-      user_id: ctx.user.id,
-      role_in_conversation: "MEMBER",
-      last_read_at: now,
-    });
+    .insert(participantRows);
 
   if (participantError) {
     await supabase.from("portal_conversations").delete().eq("id", conversation.id);
