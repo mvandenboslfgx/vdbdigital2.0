@@ -2,6 +2,7 @@ import "server-only";
 import { createServiceRoleClient } from "@/lib/database/server";
 import { hasCustomerPermission } from "@/lib/auth/customer-permissions";
 import { requireCustomer } from "@/server/auth/require-customer";
+import { getMarketingPreference } from "@/server/services/marketing-preferences";
 
 export type PortalProjectRow = {
   id: string;
@@ -691,5 +692,10 @@ export async function getPortalProfile() {
     .eq("id", ctx.user.id)
     .maybeSingle();
 
-  return { ctx, profile: data };
+  const marketingOptIn = await getMarketingPreference({
+    email: data?.email ?? ctx.user.email,
+    userId: ctx.user.id,
+  });
+
+  return { ctx, profile: data, marketingOptIn };
 }
