@@ -44,14 +44,10 @@ export default async function PortalQuoteAcceptPage({
           handtekening en start geen betaling.
         </p>
       </div>
-      <label className="flex gap-2 text-small items-start">
-        <input type="checkbox" required form="accept-form" className="mt-1" />
-        Ik bevestig dat ik de offerte en voorwaardenversie{" "}
-        {quote.terms_version || "—"} heb gelezen en akkoord ga.
-      </label>
-      <div id="accept-form">
-        <QuoteResponseForm quoteId={quote.id} mode="accept" />
-      </div>
+      <p className="text-small text-muted">
+        Voorwaardenversie: {quote.terms_version || "—"}
+      </p>
+      <QuoteResponseForm quoteId={quote.id} mode="accept" />
     </div>
   );
 }
