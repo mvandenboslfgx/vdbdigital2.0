@@ -94,6 +94,7 @@ export const quoteFormSchema = z
       message: "You must acknowledge the privacy policy",
     }),
     termsConsent: z.boolean().optional(),
+    marketingConsent: z.boolean().optional(),
     /** Legacy field name kept for callers that still send description */
     description: z.string().trim().max(10000).optional(),
     website: z.string().max(0).optional(), // honeypot
@@ -134,6 +135,7 @@ export const contactFormSchema = z.object({
     .trim()
     .min(10, "Message must be at least 10 characters")
     .max(5000, "Message is too long"),
+  marketingConsent: z.boolean().optional(),
   website: z.string().max(0).optional(), // honeypot
 });
 
@@ -172,6 +174,7 @@ export const checkoutFormSchema = z.object({
   acceptTerms: z.literal(true, {
     message: "You must agree to the terms and conditions",
   }),
+  marketingConsent: z.boolean().optional(),
 });
 
 export type ContactFormInput = z.infer<typeof contactFormSchema>;
