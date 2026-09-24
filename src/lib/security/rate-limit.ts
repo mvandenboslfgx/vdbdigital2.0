@@ -1,5 +1,6 @@
 import "server-only";
 import { isProductionRuntime } from "@/lib/runtime/environment";
+import { getDeploymentEnvironment } from "@/lib/url/app-url";
 import {
   MAX_WAF_WINDOW_MINUTES,
   WAF_EXCLUDED_PATHS,
@@ -50,7 +51,12 @@ function windowLimit(bucket: string): number {
 
 /** Preview deployments also use NODE_ENV=production — require durable limiter */
 function requiresDurableLimiter(): boolean {
-  return isProductionRuntime() || process.env.VERCEL_ENV === "preview";
+  const deployment = getDeploymentEnvironment();
+  return (
+    isProductionRuntime() ||
+    deployment === "preview" ||
+    deployment === "production"
+  );
 }
 
 function devRateLimit(bucket: string, identifier: string): RateLimitResult {
@@ -180,8 +186,13 @@ export async function checkRateLimit(
   return { success: true };
 }
 
-export function usesVercelWafRateLimiting(): boolean {
+export function usesDurableRateLimiting(): boolean {
   return requiresDurableLimiter();
+}
+
+/** @deprecated Use usesDurableRateLimiting. Kept temporarily for source compatibility. */
+export function usesVercelWafRateLimiting(): boolean {
+  return usesDurableRateLimiting();
 }
 
 export function usesApplicationRateLimiting(): boolean {
