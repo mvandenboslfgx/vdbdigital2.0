@@ -21,6 +21,7 @@ import {
 } from "@/lib/database/server";
 import { isProductionRuntime } from "@/lib/runtime/environment";
 import { parseFormLocale } from "@/i18n/locale-query";
+import { recordMarketingPreference } from "@/server/services/marketing-preferences";
 
 export type FormState = {
   errors?: string[];
@@ -183,7 +184,11 @@ export async function submitContactAction(
   if (raw.website) return { errors: ["Invalid request"] };
 
   const locale = parseFormLocale(raw.locale);
-  const parsed = contactFormSchema.safeParse(raw);
+  const prepared = {
+    ...raw,
+    marketingConsent: formData.get("marketingConsent") === "true",
+  };
+  const parsed = contactFormSchema.safeParse(prepared);
   if (!parsed.success) {
     return { errors: parsed.error.issues.map((i) => i.message) };
   }
@@ -208,6 +213,13 @@ export async function submitContactAction(
     locale,
   );
   await sendContactNotification({ ...parsed.data, locale });
+  await recordMarketingPreference({
+    email: parsed.data.email,
+    optIn: parsed.data.marketingConsent === true,
+    source: "contact_form",
+    locale,
+    firstName: parsed.data.name,
+  });
 
   return {
     success: true,
@@ -231,6 +243,7 @@ export async function submitQuoteAction(
     ...Object.fromEntries(formData.entries()),
     privacyConsent: formData.get("privacyConsent") === "true" ? true : undefined,
     termsConsent: formData.get("termsConsent") === "true",
+    marketingConsent: formData.get("marketingConsent") === "true",
     packageSlug: String(formData.get("packageSlug") ?? "").trim() || undefined,
     productSlug: String(formData.get("productSlug") ?? "").trim() || undefined,
     preferredContactMethod:
@@ -279,6 +292,13 @@ export async function submitQuoteAction(
     projectType: parsed.data.projectType,
     description,
     locale,
+  });
+  await recordMarketingPreference({
+    email: parsed.data.email,
+    optIn: parsed.data.marketingConsent === true,
+    source: "quote_form",
+    locale,
+    firstName: parsed.data.name,
   });
 
   return { success: true, mailPending: !confirm.sent };
