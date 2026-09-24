@@ -31,6 +31,8 @@
     "NEXT_PUBLIC_COMPANY_PHONE_TEL": "+31628600727",
     "EMAIL_FROM": "VDB Digital Software <noreply@vdbdigital.nl>",
     "EMAIL_ADMIN": "algemeen@vdbdigital.nl",
+    "RESEND_MARKETING_SEGMENT_ID": "2e044989-9b5c-4ecc-a20a-c33ae745b7f3",
+    "RESEND_MARKETING_TOPIC_ID": "09f16e01-4c11-4e31-bdb8-4886b13f123d",
     "NEXT_PUBLIC_SUPABASE_URL": "https://nhsrdnjfsxfikfbdmdfj.supabase.co",
     "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_TMYx-L-l4D7p_-J8PQsCaQ_hNfvIzLb",
     "BOOKING_PROVIDER": "calendly",
