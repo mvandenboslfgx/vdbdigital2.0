@@ -197,8 +197,16 @@ export function AddressAutocompleteFields({
                 ) : null}
               </button>
             ))}
-            <div className="flex items-center justify-end px-3 py-2 text-[10px] text-muted">
-              Powered by Google
+            <div className="flex items-center justify-end bg-white px-3 py-2">
+              {/* Google requires attribution when Places predictions are shown without a map. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="https://maps.gstatic.com/mapfiles/api-3/images/powered-by-google-on-white3.png"
+                alt="Powered by Google"
+                width="120"
+                height="14"
+                loading="lazy"
+              />
             </div>
           </div>
         ) : null}
