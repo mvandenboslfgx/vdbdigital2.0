@@ -13,6 +13,7 @@
   "observability": {
     "enabled": true
   },
+  "keep_vars": true,
   "vars": {
     "NEXT_PUBLIC_APP_URL": "https://vdbdigital.nl",
     "ALLOWED_ORIGINS": "https://vdbdigital.nl,https://www.vdbdigital.nl",
