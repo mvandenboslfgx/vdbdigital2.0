@@ -287,6 +287,8 @@ export async function createSupportTicketAction(
   });
 
   revalidatePath("/portal/support");
+  revalidatePath("/portal");
+  revalidatePath("/admin/support");
   return { success: true, message: `Ticket ${ticketNumber} is aangemaakt.` };
 }
 
@@ -350,6 +352,9 @@ export async function replySupportTicketAction(
   });
 
   revalidatePath(`/portal/support/${ticket.id}`);
+  revalidatePath("/portal/support");
+  revalidatePath("/admin/support");
+  revalidatePath(`/admin/support/${ticket.id}`);
   return { success: true, message: "Reactie geplaatst." };
 }
 
@@ -613,6 +618,7 @@ export async function updatePortalProfileAction(
 }
 
 export async function markNotificationsReadAction(): Promise<PortalActionState> {
+  if (!(await verifyOrigin())) return { error: "Verzoek geweigerd." };
   const ctx = await requireCustomer();
   const supabase = createServiceRoleClient();
   if (!supabase) return { error: "Database niet beschikbaar." };
@@ -624,5 +630,6 @@ export async function markNotificationsReadAction(): Promise<PortalActionState> 
     .is("read_at", null);
 
   revalidatePath("/portal/meldingen");
+  revalidatePath("/portal");
   return { success: true, message: "Meldingen gemarkeerd als gelezen." };
 }
