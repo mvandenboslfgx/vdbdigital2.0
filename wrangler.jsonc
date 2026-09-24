@@ -1,3 +1,4 @@
+// Production deploy source: GitHub main
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "vdbdigital-preview",
