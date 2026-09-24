@@ -9,14 +9,14 @@ const navByLocale = {
   nl: [
     ["Overzicht", "/portal"], ["Projecten", "/portal/projecten"],
     ["Offertes", "/portal/offertes"], ["Facturen", "/portal/facturen"],
-    ["Documenten", "/portal/documenten"], ["Berichten", "/portal/berichten"],
+    ["Bestellingen", "/portal/bestellingen"], ["Documenten", "/portal/documenten"], ["Berichten", "/portal/berichten"],
     ["Support", "/portal/support"], ["Meldingen", "/portal/meldingen"],
     ["Profiel", "/portal/profiel"], ["Beveiliging", "/portal/beveiliging"],
   ],
   en: [
     ["Overview", "/portal"], ["Projects", "/portal/projecten"],
     ["Quotes", "/portal/offertes"], ["Invoices", "/portal/facturen"],
-    ["Documents", "/portal/documenten"], ["Messages", "/portal/berichten"],
+    ["Orders", "/portal/bestellingen"], ["Documents", "/portal/documenten"], ["Messages", "/portal/berichten"],
     ["Support", "/portal/support"], ["Notifications", "/portal/meldingen"],
     ["Profile", "/portal/profiel"], ["Security", "/portal/beveiliging"],
   ],
