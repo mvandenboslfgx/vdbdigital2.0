@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 export default async function PortalProfilePage() {
-  const { ctx, profile, marketingOptIn } = await getPortalProfile();
+  const { ctx, profile, organization, marketingOptIn } = await getPortalProfile();
 
   return (
     <div className="space-y-6 max-w-lg">
@@ -21,6 +21,20 @@ export default async function PortalProfilePage() {
         email={profile?.email ?? ctx.user.email}
         fullName={profile?.full_name ?? ""}
         marketingOptIn={marketingOptIn}
+        canManageOrganization={ctx.customerRole === "PRIMARY"}
+        organization={
+          organization
+            ? {
+                legalName: organization.legal_name,
+                tradeName: organization.trade_name,
+                contactEmail: organization.contact_email,
+                contactPhone: organization.contact_phone,
+                vatNumber: organization.vat_number,
+                kvkNumber: organization.kvk_number,
+                invoiceAddress: organization.invoice_address,
+              }
+            : null
+        }
       />
     </div>
   );
