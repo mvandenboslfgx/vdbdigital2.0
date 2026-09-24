@@ -242,6 +242,8 @@ const en = {
     recommended: "Recommended",
     addToCart: "Add to cart",
     adding: "Adding…",
+    subscribeNow: "Subscribe with Mollie",
+    startingSubscription: "Starting subscription…",
     quoteOnly: "Request a quote",
     categories: "Categories",
     metaDescription:
