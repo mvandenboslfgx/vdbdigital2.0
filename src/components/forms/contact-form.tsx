@@ -41,6 +41,15 @@ export function ContactForm() {
         rows={5}
         className={fieldClass}
       />
+      <label className="flex items-start gap-3 text-small text-light-foreground">
+        <input
+          type="checkbox"
+          name="marketingConsent"
+          value="true"
+          className="mt-1 accent-primary"
+        />
+        <span>{t("forms.marketingConsent")}</span>
+      </label>
       <input
         type="text"
         name="website"
