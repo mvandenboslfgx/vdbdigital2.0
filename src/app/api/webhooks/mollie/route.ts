@@ -9,6 +9,10 @@ import {
 import { sendPaymentSuccess, sendPaymentFailed } from "@/lib/email/resend";
 import { writeAuditLog } from "@/lib/security/audit-log";
 import { sanitizeUrlForLog } from "@/lib/security/sanitize-url";
+import {
+  activateMollieSubscriptionForPaidFirstPayment,
+  recordRecurringSubscriptionPayment,
+} from "@/server/services/subscription-service";
 
 export async function GET() {
   return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
@@ -93,7 +97,77 @@ export async function POST(request: Request) {
   }
 
   const status = payment.status;
+  const paymentMetadata = (payment.metadata ?? {}) as {
+    recurring?: boolean | string;
+    orderNumber?: string;
+  };
+  const isRecurringPayment =
+    payment.sequenceType === "recurring" || Boolean(payment.subscriptionId);
+
+  if (isRecurringPayment) {
+    const recurringResult = await recordRecurringSubscriptionPayment({
+      orderId,
+      paymentId,
+      subscriptionId: payment.subscriptionId ?? null,
+      providerStatus: status,
+      amountCents: mollieAmountCents,
+    });
+
+    if (!recurringResult.ok) {
+      await writeAuditLog({
+        action: "webhook.mollie_recurring_failed",
+        resourceType: "order",
+        resourceId: orderId,
+        metadata: {
+          paymentIdPrefix: paymentId.slice(0, 8),
+          reason: recurringResult.error,
+        },
+      });
+      return NextResponse.json({ error: "Recurring payment processing failed" }, { status: 500 });
+    }
+
+    await writeAuditLog({
+      action: "webhook.mollie_recurring_processed",
+      resourceType: "order",
+      resourceId: orderId,
+      metadata: {
+        paymentIdPrefix: paymentId.slice(0, 8),
+        status,
+      },
+    });
+
+    return NextResponse.json({ received: true });
+  }
+
   const result = await updateOrderPaymentStatus(orderId, paymentId, status);
+
+  const isFirstRecurringPayment =
+    payment.sequenceType === "first" &&
+    (paymentMetadata.recurring === true || paymentMetadata.recurring === "true");
+
+  if (status === "paid" && isFirstRecurringPayment) {
+    const activation = await activateMollieSubscriptionForPaidFirstPayment({
+      orderId,
+      orderNumber:
+        paymentMetadata.orderNumber ||
+        (order.order_number as string),
+      paymentCustomerId: payment.customerId ?? null,
+    });
+
+    if (!activation.ok) {
+      await writeAuditLog({
+        action: "webhook.mollie_subscription_activation_retry",
+        resourceType: "order",
+        resourceId: orderId,
+        metadata: {
+          paymentIdPrefix: paymentId.slice(0, 8),
+          reason: activation.error,
+        },
+      });
+      // Returning 500 lets Mollie retry the webhook. Activation is idempotent.
+      return NextResponse.json({ error: "Subscription activation failed" }, { status: 500 });
+    }
+  }
 
   if (result && !result.alreadyProcessed && result.order) {
     const email = result.order.customer_email as string;
