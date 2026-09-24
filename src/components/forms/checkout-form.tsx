@@ -94,6 +94,15 @@ export function CheckoutForm({
           </a>
         </span>
       </label>
+      <label className="flex items-start gap-3 text-small">
+        <input
+          type="checkbox"
+          name="marketingConsent"
+          value="true"
+          className="mt-1"
+        />
+        <span>{t("checkout.marketingConsent")}</span>
+      </label>
 
       {!mollieConfigured && (
         <div className="p-4 rounded-lg border border-warning/30 bg-warning/10 text-small">
