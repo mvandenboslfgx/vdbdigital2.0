@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { checkoutFormSchema } from "@/lib/validation/forms";
-import { getCart, clearCart } from "@/features/cart/cart-service";
+import { getCart } from "@/features/cart/cart-service";
 import { validateCheckout, canCheckoutTogether } from "@/features/checkout/checkout-service";
 import {
   createOrder,
@@ -147,6 +147,5 @@ export async function submitCheckoutAction(
     }
   }
 
-  await clearCart();
   redirect(payment.checkoutUrl);
 }
