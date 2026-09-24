@@ -313,6 +313,8 @@ const nl: Messages = {
     decrease: "Aantal verlagen",
     increase: "Aantal verhogen",
     remove: "Verwijderen",
+    monthlySubscription: "1 maandabonnement",
+    yearlySubscription: "1 jaarabonnement",
   },
   checkout: {
     title: "Checkout",
