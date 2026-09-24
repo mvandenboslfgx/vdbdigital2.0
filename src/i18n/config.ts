@@ -63,6 +63,7 @@ export const paths = {
   aiChatbot: "/ai-chatbot",
   whatsappAutomatisering: "/whatsapp-automatisering",
   maatwerkSoftware: "/maatwerk-software",
+  appLatenMaken: "/app-laten-maken",
   klantportaalLatenMaken: "/klantportaal-laten-maken",
   kennisbank: "/kennisbank",
 } as const;
