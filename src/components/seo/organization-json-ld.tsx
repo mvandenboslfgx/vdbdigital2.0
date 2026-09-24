@@ -12,10 +12,19 @@ export function OrganizationJsonLd() {
     name: siteConfig.name,
     alternateName: "VDB Digital",
     legalName: siteConfig.legalName,
+    identifier: siteConfig.company.kvk
+      ? {
+          "@type": "PropertyValue",
+          propertyID: "KvK",
+          value: siteConfig.company.kvk,
+        }
+      : undefined,
+    vatID: siteConfig.company.vat || undefined,
     url: siteConfig.url,
     logo: `${siteConfig.url}${siteConfig.brand.logo}`,
     description: siteConfig.description,
     email: siteConfig.contactEmail,
+    telephone: siteConfig.company.phoneTel,
     areaServed: {
       "@type": "Country",
       name: "Netherlands",
@@ -34,7 +43,9 @@ export function OrganizationJsonLd() {
       ? {
           "@type": "PostalAddress",
           streetAddress: siteConfig.company.address,
+          postalCode: siteConfig.company.postalCode || undefined,
           addressLocality: siteConfig.company.city || undefined,
+          addressRegion: "South Holland",
           addressCountry: siteConfig.company.country,
         }
       : undefined,

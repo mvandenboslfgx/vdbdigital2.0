@@ -23,10 +23,15 @@ export const siteConfig = {
   whatsappNumber: envOrEmpty(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER),
   company: {
     legalName: "VDB Digital Software",
-    kvk: envOrEmpty(process.env.NEXT_PUBLIC_COMPANY_KVK),
-    vat: envOrEmpty(process.env.NEXT_PUBLIC_COMPANY_VAT),
-    address: envOrEmpty(process.env.NEXT_PUBLIC_COMPANY_ADDRESS),
-    city: envOrEmpty(process.env.NEXT_PUBLIC_COMPANY_CITY),
+    // Public legal identity gets safe production fallbacks so a hosting migration
+    // can never silently remove the entity/NAP signals from the public website.
+    kvk: envOrEmpty(process.env.NEXT_PUBLIC_COMPANY_KVK) || "99981440",
+    vat: envOrEmpty(process.env.NEXT_PUBLIC_COMPANY_VAT) || "NL005423221B29",
+    address:
+      envOrEmpty(process.env.NEXT_PUBLIC_COMPANY_ADDRESS) || "Molendijk 29",
+    postalCode:
+      envOrEmpty(process.env.NEXT_PUBLIC_COMPANY_POSTAL_CODE) || "3286 BE",
+    city: envOrEmpty(process.env.NEXT_PUBLIC_COMPANY_CITY) || "Klaaswaal",
     country: "Netherlands",
     phone:
       envOrEmpty(process.env.NEXT_PUBLIC_COMPANY_PHONE) || "06 286 00 727",
