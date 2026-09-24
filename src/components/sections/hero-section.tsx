@@ -14,6 +14,14 @@ export async function HeroSection() {
     locale === "nl"
       ? "Softwarestudio · Hoeksche Waard · Nederland"
       : "Software studio · Hoeksche Waard · Netherlands";
+  const homeLabel =
+    locale === "nl"
+      ? "VDB Digital Software — naar de homepage"
+      : "VDB Digital Software — back to the homepage";
+  const capabilityLine =
+    locale === "nl"
+      ? "Websites, apps, CRM, klantportalen en AI-automatisering — één technische partner voor groei en minder handmatig werk."
+      : "Websites, apps, CRM, customer portals and AI automation — one technical partner for growth and less manual work.";
 
   return (
     <section className="hero-glow relative py-12 sm:py-16 md:py-24 lg:py-28">
@@ -28,7 +36,7 @@ export async function HeroSection() {
             </div>
             <LocaleLink
               href="/"
-              aria-label="VDB Digital Software — naar de homepage"
+              aria-label={homeLabel}
               className="mb-5 hidden sm:mb-7 sm:inline-flex"
             >
               <VdbLogo
@@ -61,7 +69,7 @@ export async function HeroSection() {
               </LocaleLinkButton>
             </div>
             <p className="mt-5 max-w-2xl text-sm text-muted">
-              Websites, apps, CRM, klantportalen en AI-automatisering — één technische partner voor groei en minder handmatig werk.
+              {capabilityLine}
             </p>
           </div>
 
