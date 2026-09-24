@@ -833,16 +833,106 @@ export function getSeoLocalContent(
   const loc = locations[location];
   const current = service[parentKey];
 
+  const hoekscheOverrides: Partial<Record<SeoLandingPageKey, Partial<SeoLandingContent>>> = {
+    websiteLatenMaken: {
+      title: "Website laten maken in de Hoeksche Waard",
+      description:
+        "Zoek je een partij om een website te bouwen in de Hoeksche Waard? VDB Digital is gevestigd in Klaaswaal en bouwt maatwerk websites voor bedrijven in onder meer Oud-Beijerland, Numansdorp, Strijen, Puttershoek en de rest van de Hoeksche Waard. We combineren webdesign, development, technische SEO en conversiegerichte formulieren in één traject.",
+      problem: {
+        title: "Lokale bedrijven concurreren online met heel Nederland",
+        body: "Een bedrijf uit de Hoeksche Waard wordt niet alleen vergeleken met de buurman. Klanten zoeken in Google op diensten, plaatsnamen en reviews. Een trage of generieke website maakt het moeilijker om vertrouwen op te bouwen en aanvragen te winnen.",
+      },
+      builds: {
+        title: "Website bouwen voor een bedrijf in de Hoeksche Waard",
+        body: "We bouwen snelle bedrijfswebsites met lokale landingspagina's, duidelijke offerte- en contactroutes, technische SEO en een structuur die later kan doorgroeien naar webshop, klantportaal of automatisering.",
+      },
+      benefits: [
+        "Lokale positionering voor Hoeksche Waard en relevante plaatsen",
+        "Maatwerk design zonder standaard WordPress-template",
+        "Snelle mobiel-first pagina's met duidelijke aanvraagroutes",
+        "Technische SEO, structured data en sitemap vanaf de basis",
+      ],
+      whoFor: [
+        "Bouw-, installatie- en montagebedrijven in de Hoeksche Waard",
+        "Lokale dienstverleners en mkb rond Oud-Beijerland en Klaaswaal",
+        "Bedrijven die hun bestaande website professioneler willen maken",
+        "Ondernemers die lokaal én landelijk gevonden willen worden",
+      ],
+    },
+    webdesign: {
+      title: "Webdesign Hoeksche Waard voor ambitieuze bedrijven",
+      description:
+        "VDB Digital ontwerpt en bouwt premium webdesign vanuit Klaaswaal voor bedrijven in de Hoeksche Waard. Geen generieke template, maar een snelle website met een herkenbare uitstraling, sterke mobiele UX en een duidelijke route naar contact of offerte.",
+      builds: {
+        title: "Webdesign én development uit één hand",
+        body: "Ontwerp en techniek worden niet los van elkaar verkocht. We ontwerpen de pagina's op conversie, bouwen ze direct performant uit en stemmen lokale content af op zoekgedrag in de Hoeksche Waard.",
+      },
+    },
+    appLatenMaken: {
+      title: "App laten maken in de Hoeksche Waard",
+      description:
+        "Een app bouwen in de Hoeksche Waard? VDB Digital ontwikkelt vanuit Klaaswaal maatwerk webapps, mobiele bedrijfsapps en klantapps voor lokale ondernemers. Denk aan werkbonnen, planning, voorraad, CRM, dashboards, klantportalen en automatisering.",
+      problem: {
+        title: "Veel lokale bedrijven draaien nog op losse apps, Excel en WhatsApp",
+        body: "Planning in een spreadsheet, foto's in WhatsApp en klantgegevens in meerdere systemen zorgen voor dubbel werk. Een eigen bedrijfsapp brengt processen, gebruikers en data samen.",
+      },
+      builds: {
+        title: "Van werkbonnenapp tot volledig klantplatform",
+        body: "We bouwen apps voor interne teams én klanten: planning, werkbonnen, uren, projecten, voorraad, offertes, betalingen, documenten en meldingen. Alles afgestemd op de workflow van het bedrijf.",
+      },
+      benefits: [
+        "Maatwerk app gebouwd rond jouw proces",
+        "Mobiel bruikbaar op locatie en desktop op kantoor",
+        "Veilige accounts, rollen en centrale data",
+        "Koppelingen met website, CRM, Mollie, e-mail en automatisering",
+      ],
+      whoFor: [
+        "Bouw- en installatiebedrijven met buitendienst",
+        "Dienstverleners met planning, werkbonnen of projectstatus",
+        "Ondernemers met een eigen app- of platformidee",
+        "Bedrijven die Excel en losse tools willen vervangen",
+      ],
+    },
+    maatwerkSoftware: {
+      title: "Maatwerk software in de Hoeksche Waard",
+      description:
+        "VDB Digital bouwt maatwerk software vanuit Klaaswaal voor bedrijven in de Hoeksche Waard. Van CRM en dashboards tot interne tools, klantportalen en webapplicaties die aansluiten op bestaande bedrijfsprocessen.",
+      builds: {
+        title: "Bedrijfssoftware voor processen die niet in een standaardpakket passen",
+        body: "We brengen eerst de workflow in kaart en bouwen daarna alleen wat waarde toevoegt: rollen, dashboards, projectdata, documenten, facturen, planning, API-koppelingen en automatisering.",
+      },
+    },
+    aiAutomatisering: {
+      title: "AI automatisering in de Hoeksche Waard",
+      description:
+        "VDB Digital helpt bedrijven in de Hoeksche Waard met praktische AI automatisering voor leadopvolging, e-mail, planning, WhatsApp, CRM en terugkerende administratie. Gericht op minder handwerk en snellere klantreacties.",
+      builds: {
+        title: "Automatisering gekoppeld aan de systemen die je al gebruikt",
+        body: "We automatiseren geen processen om de hype. We zoeken eerst waar tijd verloren gaat en koppelen daarna formulieren, e-mail, agenda, WhatsApp en bedrijfssoftware tot een controleerbare workflow.",
+      },
+    },
+    klantportaalLatenMaken: {
+      title: "Klantportaal laten maken in de Hoeksche Waard",
+      description:
+        "VDB Digital bouwt beveiligde klantportalen voor bedrijven in de Hoeksche Waard. Klanten kunnen offertes, facturen, documenten, berichten en projectstatus op één plek bekijken.",
+    },
+  };
+
+  const localOverride =
+    location === "hoeksche-waard" ? hoekscheOverrides[parentKey] ?? {} : {};
+
   return {
     ...base,
+    ...localOverride,
     locationLabel: loc.label,
     regionContext: loc.context,
     metaTitle: `${current.label} ${loc.metaSuffix} | VDB Digital`,
     metaDescription: current.description(loc.label),
     title: `${current.title} in ${loc.label}`,
-    description: `${loc.context} ${base.description}`,
+    description:
+      localOverride.description ?? `${loc.context} ${base.description}`,
     faq: [
-      ...(base.faq ?? []),
+      ...((localOverride.faq as SeoLandingContent["faq"] | undefined) ?? base.faq ?? []),
       {
         q: `Werken jullie met bedrijven in ${loc.label}?`,
         a: `Ja. VDB Digital werkt met bedrijven in ${loc.label} en omliggende plaatsen. Projecten worden efficiënt online afgestemd en waar het project daar baat bij heeft kan afstemming op locatie plaatsvinden.`,
