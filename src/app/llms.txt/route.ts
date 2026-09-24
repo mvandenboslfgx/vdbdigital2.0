@@ -24,6 +24,7 @@ export function GET() {
 - WhatsApp automation and AI chat
 - CRM systems, dashboards and customer portals
 - Custom web applications and software
+- Mobile apps, webapps and internal business apps
 - Website maintenance, conversion optimisation and technical support
 
 ## Primary market
@@ -49,6 +50,9 @@ Always use the current public pricing page as the source of truth because scope 
 - Webdesign: ${base}/webdesign
 - Website laten maken Hoeksche Waard: ${base}/website-laten-maken/hoeksche-waard
 - Webdesign Hoeksche Waard: ${base}/webdesign/hoeksche-waard
+- App laten maken: ${base}/app-laten-maken
+- App laten maken Hoeksche Waard: ${base}/app-laten-maken/hoeksche-waard
+- Maatwerk software Hoeksche Waard: ${base}/maatwerk-software/hoeksche-waard
 - AI automatisering: ${base}/ai-automatisering
 - Maatwerk software: ${base}/maatwerk-software
 - Klantportaal laten maken: ${base}/klantportaal-laten-maken
