@@ -15,6 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t("checkout.title"),
     alternates: { canonical: paths.checkout },
+    robots: { index: false, follow: false },
   };
 }
 
@@ -39,13 +40,20 @@ export default async function CheckoutPage() {
     items.map((i) => ({ unitPriceCents: i.validatedPriceCents, quantity: i.quantity })),
   );
   const totals = calculateOrderTotals(subtotal);
+  const recurringLine = items.find(
+    (item) => item.billingType === "MONTHLY" || item.billingType === "YEARLY",
+  );
 
   return (
     <Section variant="dark" className="pt-12">
       <Container className="max-w-2xl">
         <h1 className="text-h1 mb-8">{t("checkout.title")}</h1>
         <Card>
-          <CheckoutForm totals={totals} mollieConfigured={isMollieConfigured()} />
+          <CheckoutForm
+            totals={totals}
+            mollieConfigured={isMollieConfigured()}
+            recurringBillingType={recurringLine?.billingType ?? null}
+          />
         </Card>
         <p className="text-center mt-4">
           <LocaleLinkButton href={paths.cart} variant="ghost" size="sm">
