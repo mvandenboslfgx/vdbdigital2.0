@@ -343,6 +343,12 @@ const en = {
     totalInclVat: "Total incl. VAT",
     payWithMollie: "Pay with Mollie",
     processing: "Processing…",
+    subscriptionTitle: "Recurring subscription",
+    subscriptionDisclosureMonthly:
+      "You pay {amount} via Mollie now. This first payment authorises recurring payments of {amount} each month until the subscription is ended under the terms.",
+    subscriptionDisclosureYearly:
+      "You pay {amount} via Mollie now. This first payment authorises recurring payments of {amount} each year until the subscription is ended under the terms.",
+    startSubscription: "Start subscription with Mollie",
   },
   forms: {
     contactTitle: "Contact",
