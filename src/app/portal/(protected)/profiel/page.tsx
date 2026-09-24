@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 export default async function PortalProfilePage() {
-  const { ctx, profile } = await getPortalProfile();
+  const { ctx, profile, marketingOptIn } = await getPortalProfile();
 
   return (
     <div className="space-y-6 max-w-lg">
@@ -20,6 +20,7 @@ export default async function PortalProfilePage() {
       <ProfileForm
         email={profile?.email ?? ctx.user.email}
         fullName={profile?.full_name ?? ""}
+        marketingOptIn={marketingOptIn}
       />
     </div>
   );
