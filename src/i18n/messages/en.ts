@@ -57,6 +57,7 @@ const en = {
     seoWebdesign: "Web design",
     seoWebshop: "Online stores",
     seoAi: "AI automation",
+    seoApp: "App development",
     seoKennisbank: "Knowledge base",
     cookiePreferences: "Cookie preferences",
     rights: "All rights reserved.",
