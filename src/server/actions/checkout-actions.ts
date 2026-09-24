@@ -15,6 +15,7 @@ import { checkRateLimit, rateLimitErrorMessage } from "@/lib/security/rate-limit
 import { verifyOrigin } from "@/lib/security/origin";
 import { isDirectCheckoutEnabled } from "@/config/features";
 import { logCheckoutEvent, newCheckoutCorrelationId } from "@/lib/observability/checkout-log";
+import { createPendingBillingSubscription } from "@/server/services/subscription-service";
 
 export async function submitCheckoutAction(
   _prev: { errors?: string[] } | null,
@@ -114,7 +115,38 @@ export async function submitCheckoutAction(
     return { errors: [configError] };
   }
 
-  await markPaymentInitialized(order.id, payment.paymentId);
+  await markPaymentInitialized(
+    order.id,
+    payment.paymentId,
+    payment.mollieCustomerId,
+  );
+
+  if (payment.recurring) {
+    const recurringLine = validation.data.lines.find(
+      (line) => line.billingType === "MONTHLY" || line.billingType === "YEARLY",
+    );
+
+    if (!recurringLine || !payment.mollieCustomerId) {
+      await markPaymentCreationFailed(order.id);
+      return { errors: ["Recurring billing could not be prepared"] };
+    }
+
+    const seeded = await createPendingBillingSubscription({
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      line: recurringLine,
+      customerEmail: validation.data.customer.email,
+      mollieCustomerId: payment.mollieCustomerId,
+      firstPaymentId: payment.paymentId,
+      amountCents: validation.data.totals.totalCents,
+    });
+
+    if (!seeded.ok) {
+      await markPaymentCreationFailed(order.id);
+      return { errors: [seeded.error] };
+    }
+  }
+
   await clearCart();
   redirect(payment.checkoutUrl);
 }
