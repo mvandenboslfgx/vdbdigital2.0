@@ -32,6 +32,8 @@ const BUCKET_LIMITS: Record<string, number> = {
   "account-deletion": 3,
   checkout: 5,
   payment: 5,
+  "address-autocomplete": 60,
+  "address-details": 20,
   "documents-upload": 20,
   "documents-download": 60,
   "portal-documents-upload": 10,
