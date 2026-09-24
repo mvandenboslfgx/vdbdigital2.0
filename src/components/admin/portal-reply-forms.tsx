@@ -2,8 +2,8 @@
 
 import { useActionState } from "react";
 import {
-  adminReplyConversationAction,
-  adminReplySupportTicketAction,
+  replyAdminConversationAction,
+  replyAdminSupportTicketAction,
   type AdminPortalActionState,
 } from "@/server/actions/admin-portal-actions";
 import { Button } from "@/components/ui/button";
