@@ -54,6 +54,12 @@ const conversationReplySchema = z.object({
 const profileSchema = z.object({
   fullName: z.string().min(2).max(120),
   marketingConsent: z.boolean().optional(),
+  tradeName: z.string().trim().max(200).optional(),
+  contactEmail: z.string().trim().email().max(254).optional(),
+  contactPhone: z.string().trim().max(40).optional(),
+  vatNumber: z.string().trim().max(40).optional(),
+  kvkNumber: z.string().trim().max(40).optional(),
+  invoiceAddress: z.string().trim().max(500).optional(),
 });
 
 /** Offerte accepteren/afwijzen via RPC — digitale offerteacceptatie, geen Mollie. */
@@ -528,6 +534,15 @@ export async function updatePortalProfileAction(
   const parsed = profileSchema.safeParse({
     fullName: formData.get("fullName"),
     marketingConsent: formData.get("marketingConsent") === "true",
+    tradeName: String(formData.get("tradeName") ?? "").trim() || undefined,
+    contactEmail:
+      String(formData.get("contactEmail") ?? "").trim() || undefined,
+    contactPhone:
+      String(formData.get("contactPhone") ?? "").trim() || undefined,
+    vatNumber: String(formData.get("vatNumber") ?? "").trim() || undefined,
+    kvkNumber: String(formData.get("kvkNumber") ?? "").trim() || undefined,
+    invoiceAddress:
+      String(formData.get("invoiceAddress") ?? "").trim() || undefined,
   });
   if (!parsed.success) {
     return { error: "Vul een geldige naam in." };
@@ -552,6 +567,25 @@ export async function updatePortalProfileAction(
     return { error: "Profiel kon niet worden bijgewerkt." };
   }
 
+  if (ctx.customerRole === "PRIMARY") {
+    const { error: organizationError } = await supabase
+      .from("organizations")
+      .update({
+        trade_name: parsed.data.tradeName ?? null,
+        contact_email: parsed.data.contactEmail ?? ctx.user.email,
+        contact_phone: parsed.data.contactPhone ?? null,
+        vat_number: parsed.data.vatNumber ?? null,
+        kvk_number: parsed.data.kvkNumber ?? null,
+        invoice_address: parsed.data.invoiceAddress ?? null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", ctx.organization.id);
+
+    if (organizationError) {
+      return { error: "Organisatiegegevens konden niet worden opgeslagen." };
+    }
+  }
+
   await recordMarketingPreference({
     email: ctx.user.email,
     userId: ctx.user.id,
@@ -561,6 +595,7 @@ export async function updatePortalProfileAction(
   });
 
   revalidatePath("/portal/profiel");
+  revalidatePath("/portal");
   return { success: true, message: "Profiel opgeslagen." };
 }
 
