@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { SequenceType } from "@mollie/api-client";
 import { getMollieClient } from "@/lib/payments/mollie";
 import { verifyMollieWebhookToken } from "@/lib/payments/webhook-url";
 import {
@@ -102,7 +103,7 @@ export async function POST(request: Request) {
     orderNumber?: string;
   };
   const isRecurringPayment =
-    payment.sequenceType === "recurring" || Boolean(payment.subscriptionId);
+    payment.sequenceType === SequenceType.recurring || Boolean(payment.subscriptionId);
 
   if (isRecurringPayment) {
     const recurringResult = await recordRecurringSubscriptionPayment({
@@ -142,7 +143,7 @@ export async function POST(request: Request) {
   const result = await updateOrderPaymentStatus(orderId, paymentId, status);
 
   const isFirstRecurringPayment =
-    payment.sequenceType === "first" &&
+    payment.sequenceType === SequenceType.first &&
     (paymentMetadata.recurring === true || paymentMetadata.recurring === "true");
 
   if (status === "paid" && isFirstRecurringPayment) {
