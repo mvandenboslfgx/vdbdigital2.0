@@ -162,7 +162,6 @@ export function canAddToDirectCheckout(product: Product): boolean {
   if (!isDirectCheckoutEnabled()) return false;
   if (product.status !== "PUBLISHED") return false;
   if (resolvePriceMode(product) !== "FIXED") return false;
-  if (isRecurringBilling(product.billingType)) return false;
   if (product.priceCents === null || product.priceCents <= 0) return false;
   return hasLegalApprovalForCheckout(product, "B2B");
 }
@@ -185,9 +184,6 @@ export function assertCheckoutAllowedForCustomer(
   }
   if (resolvePriceMode(product) !== "FIXED") {
     return `${product.name} cannot be purchased via direct checkout`;
-  }
-  if (isRecurringBilling(product.billingType)) {
-    return `${product.name} is a recurring product and cannot use one-time checkout`;
   }
   if (!hasLegalApprovalForCheckout(product, customerType)) {
     return `${product.name} is not approved for ${customerType} checkout`;
