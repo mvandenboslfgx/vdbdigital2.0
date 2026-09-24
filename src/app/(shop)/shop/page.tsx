@@ -36,6 +36,8 @@ import {
   publicShopPriceDisplay,
 } from "@/lib/commerce/public-shop-gates";
 import { queryPublicShopCatalog } from "@/server/repositories/public-shop-catalog";
+import { SubscribeNowButton } from "@/components/shop/subscribe-now-button";
+import { isDirectCheckoutEnabled } from "@/config/features";
 
 type BillingFilter = "all" | "one-time" | "monthly" | "quote-only";
 
@@ -87,6 +89,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const locale = await getLocale();
   const { t } = await getDictionary(locale);
   const commercial = getCommercialContent(locale);
+  const checkoutOn = isDirectCheckoutEnabled();
   const params = await searchParams;
 
   if (params.categorie && !params.category) {
@@ -445,7 +448,10 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
                           </p>
                         ) : null}
                       </div>
-                      <div className="mt-auto pt-6">
+                      <div className="mt-auto pt-6 space-y-2">
+                        {checkoutOn && !pkg.quoteOnly ? (
+                          <SubscribeNowButton productSlug={pkg.catalogSlug} />
+                        ) : null}
                         <LocaleLinkButton
                           href={`${paths.quote}?package=${pkg.slug}`}
                           variant="outline"
