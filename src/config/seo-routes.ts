@@ -8,6 +8,7 @@ export const seoPaths = {
   aiChatbot: paths.aiChatbot,
   whatsappAutomatisering: paths.whatsappAutomatisering,
   maatwerkSoftware: paths.maatwerkSoftware,
+  appLatenMaken: paths.appLatenMaken,
   klantportaalLatenMaken: paths.klantportaalLatenMaken,
   kennisbank: paths.kennisbank ,
 } as const;
@@ -20,6 +21,7 @@ export type SeoLandingKey =
   | "aiChatbot"
   | "whatsappAutomatisering"
   | "maatwerkSoftware"
+  | "appLatenMaken"
   | "klantportaalLatenMaken";
 
 export const seoLandingKeys: SeoLandingKey[] = [
@@ -30,6 +32,7 @@ export const seoLandingKeys: SeoLandingKey[] = [
   "aiChatbot",
   "whatsappAutomatisering",
   "maatwerkSoftware",
+  "appLatenMaken",
   "klantportaalLatenMaken",
 ];
 
@@ -41,6 +44,7 @@ export const seoEnglishEquivalent: Record<string, string> = {
   [seoPaths.aiChatbot]: paths.livechat,
   [seoPaths.whatsappAutomatisering]: paths.whatsappAi,
   [seoPaths.maatwerkSoftware]: paths.customSoftware,
+  [seoPaths.appLatenMaken]: paths.customSoftware,
   [seoPaths.klantportaalLatenMaken]: paths.customSoftware,
 };
 
@@ -57,6 +61,7 @@ export const seoLocalServiceKeys = [
   "webdesign",
   "aiAutomatisering",
   "maatwerkSoftware",
+  "appLatenMaken",
   "klantportaalLatenMaken",
 ] as const satisfies readonly SeoLandingKey[];
 
