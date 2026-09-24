@@ -13,9 +13,11 @@ const initial: PortalActionState = {};
 export function ProfileForm({
   email,
   fullName,
+  marketingOptIn,
 }: {
   email: string;
   fullName: string;
+  marketingOptIn: boolean;
 }) {
   const [state, formAction, pending] = useActionState(
     updatePortalProfileAction,
@@ -40,6 +42,18 @@ export function ProfileForm({
           maxLength={120}
         />
       </div>
+      <label className="flex items-start gap-3 rounded-lg border border-border p-4">
+        <input
+          type="checkbox"
+          name="marketingConsent"
+          value="true"
+          defaultChecked={marketingOptIn}
+          className="mt-1 accent-primary"
+        />
+        <span className="text-small">
+          Ik wil nieuws, tips en aanbiedingen van VDB Digital per e-mail ontvangen.
+        </span>
+      </label>
       {state.error && (
         <p className="text-small text-error" role="alert">
           {state.error}
