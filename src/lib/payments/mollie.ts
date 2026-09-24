@@ -1,5 +1,5 @@
 import "server-only";
-import createMollieClient from "@mollie/api-client";
+import createMollieClient, { SequenceType } from "@mollie/api-client";
 import type { OrderLine, OrderTotals, CustomerInput } from "@/types";
 import { resolveAppUrl } from "@/lib/url/app-url";
 import { buildMollieWebhookUrl } from "@/lib/payments/webhook-url";
@@ -91,7 +91,7 @@ export async function createMolliePayment(input: CreatePaymentInput) {
           value: (input.totals.totalCents / 100).toFixed(2),
         },
         description: `${line.productName} · ${input.orderNumber}`,
-        sequenceType: "first",
+        sequenceType: SequenceType.first,
         redirectUrl: `${appUrl}/checkout/complete?order=${input.orderId}`,
         cancelUrl: `${appUrl}/checkout/cancelled?order=${input.orderId}`,
         webhookUrl: webhook.url,
