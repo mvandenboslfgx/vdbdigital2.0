@@ -68,6 +68,7 @@ function getSeoVisual(pageKey: SeoLandingPageKey): ReactNode {
       return <WebshopCheckoutVisual />;
     case "aiAutomatisering":
     case "maatwerkSoftware":
+    case "appLatenMaken":
     case "klantportaalLatenMaken":
       return (
         <AutomationFlowVisual
@@ -101,6 +102,7 @@ const breadcrumbLabels: Record<SeoLandingPageKey, string> = {
   aiChatbot: "AI chatbot",
   whatsappAutomatisering: "WhatsApp automatisering",
   maatwerkSoftware: "Maatwerk software",
+  appLatenMaken: "App laten maken",
   klantportaalLatenMaken: "Klantportaal laten maken",
 };
 
@@ -143,6 +145,7 @@ export async function SeoLandingPage({ pageKey, location }: SeoLandingPageProps)
         description={content.description}
         path={path}
         locale={locale}
+        areaServed={localContent?.locationLabel}
       />
       {content.faq?.length ? <FaqJsonLd items={content.faq} /> : null}
       <BreadcrumbJsonLd items={breadcrumbs} locale={locale} />
