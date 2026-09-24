@@ -5,6 +5,11 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { verifyOrigin } from "@/lib/security/origin";
 import { createOrganizationWithInvite } from "@/server/repositories/admin-portal";
+import { requireAdmin } from "@/server/auth/require-admin";
+import { requirePermission } from "@/server/auth/require-permission";
+import { createServiceRoleClient } from "@/lib/database/server";
+import { revalidatePath } from "next/cache";
+import { writeAuditLog } from "@/lib/security/audit-log";
 import { createServiceRoleClient } from "@/lib/database/server";
 import { requireAdmin } from "@/server/auth/require-admin";
 import { requirePermission } from "@/server/auth/require-permission";
@@ -26,6 +31,163 @@ const createSchema = z.object({
   contactEmail: z.string().email().max(254),
   inviteEmail: z.string().email().max(254),
 });
+
+
+const adminConversationReplySchema = z.object({
+  conversationId: z.string().uuid(),
+  body: z.string().trim().min(1).max(5000),
+});
+
+const adminTicketReplySchema = z.object({
+  ticketId: z.string().uuid(),
+  body: z.string().trim().min(1).max(5000),
+  status: z.enum(["OPEN", "IN_PROGRESS", "WAITING_FOR_CUSTOMER", "RESOLVED", "CLOSED"]).optional(),
+});
+
+export async function adminReplyConversationAction(
+  _prev: AdminPortalActionState,
+  formData: FormData,
+): Promise<AdminPortalActionState> {
+  if (!(await verifyOrigin())) return { error: "Verzoek geweigerd." };
+
+  const parsed = adminConversationReplySchema.safeParse({
+    conversationId: formData.get("conversationId"),
+    body: formData.get("body"),
+  });
+  if (!parsed.success) return { error: "Ongeldig bericht." };
+
+  const ctx = await requireAdmin();
+  await requirePermission(ctx, "messages.manage");
+
+  const supabase = createServiceRoleClient();
+  if (!supabase) return { error: "Berichtenservice niet beschikbaar." };
+
+  const { data: conversation } = await supabase
+    .from("portal_conversations")
+    .select("id, organization_id, status, conversation_type")
+    .eq("id", parsed.data.conversationId)
+    .is("deleted_at", null)
+    .maybeSingle();
+
+  if (!conversation || conversation.conversation_type === "INTERNAL") {
+    return { error: "Gesprek niet gevonden." };
+  }
+
+  const now = new Date().toISOString();
+  const { error } = await supabase.from("portal_messages").insert({
+    conversation_id: conversation.id,
+    author_user_id: ctx.user.id,
+    body: parsed.data.body,
+    is_internal: false,
+    client_message_id: crypto.randomUUID(),
+  });
+  if (error) return { error: "Bericht kon niet worden geplaatst." };
+
+  await supabase
+    .from("portal_conversations")
+    .update({
+      last_message_at: now,
+      updated_at: now,
+      status: conversation.status === "CLOSED" ? "OPEN" : conversation.status,
+    })
+    .eq("id", conversation.id);
+
+  const { data: participants } = await supabase
+    .from("portal_conversation_participants")
+    .select("user_id")
+    .eq("conversation_id", conversation.id)
+    .is("removed_at", null);
+
+  const recipientIds = (participants ?? [])
+    .map((row) => row.user_id)
+    .filter((userId) => userId && userId !== ctx.user.id);
+
+  if (recipientIds.length > 0) {
+    await supabase.from("portal_notifications").insert(
+      recipientIds.map((userId) => ({
+        user_id: userId,
+        title: "Nieuw bericht van VDB Digital",
+        body: parsed.data.body.slice(0, 180),
+        href: `/portal/berichten/${conversation.id}`,
+      })),
+    );
+  }
+
+  await writeAuditLog({
+    userId: ctx.user.id,
+    action: "admin.conversation_replied",
+    metadata: { conversationId: conversation.id },
+  });
+
+  revalidatePath("/admin/messages");
+  revalidatePath(`/admin/messages/${conversation.id}`);
+  revalidatePath("/portal/berichten");
+  revalidatePath(`/portal/berichten/${conversation.id}`);
+  return { message: "Reactie verzonden." };
+}
+
+export async function adminReplySupportTicketAction(
+  _prev: AdminPortalActionState,
+  formData: FormData,
+): Promise<AdminPortalActionState> {
+  if (!(await verifyOrigin())) return { error: "Verzoek geweigerd." };
+
+  const parsed = adminTicketReplySchema.safeParse({
+    ticketId: formData.get("ticketId"),
+    body: formData.get("body"),
+    status: formData.get("status") || undefined,
+  });
+  if (!parsed.success) return { error: "Ongeldige reactie." };
+
+  const ctx = await requireAdmin();
+  await requirePermission(ctx, "support.manage");
+
+  const supabase = createServiceRoleClient();
+  if (!supabase) return { error: "Supportservice niet beschikbaar." };
+
+  const { data: ticket } = await supabase
+    .from("portal_support_tickets")
+    .select("id, created_by, status")
+    .eq("id", parsed.data.ticketId)
+    .maybeSingle();
+
+  if (!ticket) return { error: "Ticket niet gevonden." };
+
+  const { error } = await supabase.from("portal_support_replies").insert({
+    ticket_id: ticket.id,
+    author_user_id: ctx.user.id,
+    body: parsed.data.body,
+    is_internal: false,
+  });
+  if (error) return { error: "Reactie kon niet worden opgeslagen." };
+
+  const nextStatus = parsed.data.status ?? "WAITING_FOR_CUSTOMER";
+  await supabase
+    .from("portal_support_tickets")
+    .update({ status: nextStatus, updated_at: new Date().toISOString() })
+    .eq("id", ticket.id);
+
+  if (ticket.created_by) {
+    await supabase.from("portal_notifications").insert({
+      user_id: ticket.created_by,
+      title: "Nieuwe reactie op supportticket",
+      body: parsed.data.body.slice(0, 180),
+      href: `/portal/support/${ticket.id}`,
+    });
+  }
+
+  await writeAuditLog({
+    userId: ctx.user.id,
+    action: "admin.support_replied",
+    metadata: { ticketId: ticket.id, status: nextStatus },
+  });
+
+  revalidatePath("/admin/support");
+  revalidatePath(`/admin/support/${ticket.id}`);
+  revalidatePath("/portal/support");
+  revalidatePath(`/portal/support/${ticket.id}`);
+  return { message: "Reactie opgeslagen." };
+}
 
 export async function createCustomerAction(
   _prev: AdminPortalActionState,
