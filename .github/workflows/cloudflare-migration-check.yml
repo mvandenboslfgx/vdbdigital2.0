@@ -1,0 +1,47 @@
+name: Cloudflare migration check
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Normalize lockfile for verification
+        run: |
+          npm install --package-lock-only --ignore-scripts
+          git diff -- package-lock.json || true
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Secret scan
+        run: npm run env:scan-secrets
+
+      - name: Cloudflare Next.js compatibility
+        run: npx --yes vinext@latest check

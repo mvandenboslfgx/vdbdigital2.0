@@ -96,6 +96,29 @@ export function getMollieWebhookToken(): string | undefined {
   return undefined;
 }
 
+/**
+ * Deployment environment shared by Vercel and Cloudflare.
+ * DEPLOYMENT_ENV is the platform-neutral source of truth. VERCEL_ENV remains
+ * as a backwards-compatible fallback while Vercel is still available.
+ */
+export function getDeploymentEnvironment(): "production" | "preview" | undefined {
+  const explicit = process.env.DEPLOYMENT_ENV?.trim().toLowerCase();
+  if (explicit === "production" || explicit === "preview") return explicit;
+
+  const vercel = process.env.VERCEL_ENV?.trim().toLowerCase();
+  if (vercel === "production" || vercel === "preview") return vercel;
+
+  return undefined;
+}
+
+export function isProductionDeployment(): boolean {
+  return getDeploymentEnvironment() === "production";
+}
+
+export function isPreviewDeployment(): boolean {
+  return getDeploymentEnvironment() === "preview";
+}
+
 export function isProtectedPreviewDeployment(): boolean {
   return process.env.VERCEL === "1" && process.env.VERCEL_ENV === "preview";
 }
@@ -177,10 +200,9 @@ export function validateProductionEnv(): { ok: true } | { ok: false; missing: st
     return { ok: false, missing };
   }
 
-  // On Vercel production (or forced local prod gate), APP_URL must be exact apex.
+  // Productie op elk hostingplatform (of geforceerde lokale gate) moet exact apex zijn.
   const enforceOrigin =
-    process.env.REQUIRE_PRODUCTION_ENV === "1" ||
-    (process.env.VERCEL === "1" && process.env.VERCEL_ENV === "production");
+    process.env.REQUIRE_PRODUCTION_ENV === "1" || isProductionDeployment();
   if (enforceOrigin) {
     const originCheck = evaluateProductionAppUrl(env.NEXT_PUBLIC_APP_URL);
     if (!originCheck.ok) {
@@ -191,7 +213,7 @@ export function validateProductionEnv(): { ok: true } | { ok: false; missing: st
   return { ok: true };
 }
 
-/** Zelfde vereisten als production — gebruikt bij Vercel Preview builds. */
+/** Zelfde vereisten als production — gebruikt bij Preview builds. */
 export function validatePreviewBuildEnv(): { ok: true } | { ok: false; missing: string[] } {
   return validateProductionEnv();
 }
