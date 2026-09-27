@@ -10,6 +10,7 @@ export default defineConfig({
     "portal-full-routes.spec.ts",
     "portal-hard-nav.spec.ts",
     "portal-soft-nav-cookie-jar.spec.ts",
+    "portal-write-safe.spec.ts",
   ],
   fullyParallel: false,
   retries: 0,

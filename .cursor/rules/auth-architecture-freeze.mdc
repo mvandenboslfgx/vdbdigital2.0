@@ -1,0 +1,21 @@
+---
+description: Freeze proven production auth — do not redesign
+alwaysApply: true
+---
+
+# Auth architecture freeze (production-proven)
+
+Do **not** redesign OAuth, cookie Path/Domain, PKCE, or move auth authority client-side.
+
+Keep:
+- Official `@supabase/ssr` + Next 16 `src/proxy.ts`
+- `getClaims` validation; proxy-owned refresh
+- RSC read-only auth client (`setAll` no-op)
+- Callback-owned session establishment
+- **POST-only** logout (`GET /uitloggen` = 405 / non-mutating)
+- Path=/; host-only apex cookies; SameSite=Lax; Secure/HttpOnly
+- Idempotent customer/org bootstrap
+
+Regression must preserve: Google login, hard nav, F5, close/reopen, explicit POST logout, no GET session mutation.
+
+Worker: `vdbdigital-live-new` only. No new Worker / domain remap / Vercel auth path.

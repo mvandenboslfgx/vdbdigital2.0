@@ -22,10 +22,17 @@
 
 # OpenNext / Cloudflare Workers build output
 /.open-next/
+/.open-next.bak*/
 /.wrangler/
+/.wrangler-bundle-check/
 .wrangler.deploy.generated.json
 /cloudflare-env.d.ts
 .dev.vars
+
+# Local probes / operator dumps (never commit)
+/probe.json
+/scripts/tmp-auth-cookie-probe.*
+/tests/e2e/.auth/
 
 # production
 /build
