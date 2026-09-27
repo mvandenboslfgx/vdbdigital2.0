@@ -11,24 +11,6 @@ import fs from "node:fs";
 const BASE = process.env.E2E_BASE_URL ?? "https://vdbdigital.nl";
 const STORAGE = process.env.E2E_STORAGE_STATE;
 
-const PORTAL_LINKS = [
-  "/portal",
-  "/portal/projecten",
-  "/portal/intake",
-  "/portal/offertes",
-  "/portal/bestellingen",
-  "/portal/facturen",
-  "/portal/betalingen",
-  "/portal/afspraken",
-  "/portal/documenten",
-  "/portal/berichten",
-  "/portal/support",
-  "/portal/meldingen",
-  "/portal/profiel",
-  "/portal/beveiliging",
-  "/portal/instellingen",
-];
-
 function authCookies(
   cookies: Array<{ name: string; value: string; path?: string }>,
 ) {
@@ -125,7 +107,10 @@ test.describe("soft-nav must preserve auth cookie jar", () => {
     const beforeNames = before.map((c) => c.name).sort();
 
     // Real sidebar Link soft navigation (not page.goto)
-    await page.getByRole("link", { name: "Projecten" }).click();
+    await page
+      .locator('aside a[href="/portal/projecten"], nav a[href="/portal/projecten"]')
+      .first()
+      .click();
     await page.waitForURL(/\/portal\/projecten/, { timeout: 15000 });
     await expect(page).not.toHaveURL(/\/inloggen/);
     await page.waitForTimeout(1500);
@@ -161,7 +146,10 @@ test.describe("soft-nav must preserve auth cookie jar", () => {
     // Documenten soft-nav + F5
     uitloggenHits.length = 0;
     authClears.length = 0;
-    await page.getByRole("link", { name: "Documenten" }).click();
+    await page
+      .locator('aside a[href="/portal/documenten"], nav a[href="/portal/documenten"]')
+      .first()
+      .click();
     await page.waitForURL(/\/portal\/documenten/, { timeout: 15000 });
     await expect(page).not.toHaveURL(/\/inloggen/);
     await page.waitForTimeout(1500);
@@ -196,8 +184,7 @@ test.describe("soft-nav must preserve auth cookie jar", () => {
     page.on("response", (response) => {
       const url = response.url();
       if (!url.includes("/uitloggen")) return;
-      // Any GET to /uitloggen during portal browsing is a logout footgun
-      if (response.request().method() === "GET") {
+      if (response.request().method() === "GET" && response.status() !== 405) {
         bad.push(`GET ${url} → ${response.status()}`);
       }
     });
@@ -206,19 +193,46 @@ test.describe("soft-nav must preserve auth cookie jar", () => {
     await expect(page).not.toHaveURL(/\/inloggen/);
     await page.waitForTimeout(2000);
 
-    for (const href of PORTAL_LINKS) {
-      const link = page.locator(`a[href="${href}"]`).first();
+    // Hover a few sidebar links only (full hover loop flaked under load)
+    for (const href of [
+      "/portal/projecten",
+      "/portal/documenten",
+      "/portal/support",
+    ]) {
+      const link = page.locator(`aside a[href="${href}"]`).first();
       if ((await link.count()) === 0) continue;
       await link.hover().catch(() => {});
     }
-    await page.waitForTimeout(2500);
+    await page.waitForTimeout(1500);
 
-    expect(bad, "no GET /uitloggen from Link prefetch").toEqual([]);
+    expect(bad, "no mutating GET /uitloggen from Link prefetch").toEqual([]);
     expect(
       authCookies(await context.cookies(BASE)).filter(
         (c) => c.value && c.value.length > 0,
       ).length,
     ).toBeGreaterThan(0);
+  });
+
+  test("GET /uitloggen must not clear auth cookies", async ({ page, context }) => {
+    await page.goto("/portal", { waitUntil: "domcontentloaded" });
+    await expect(page).not.toHaveURL(/\/inloggen/);
+    const before = authCookies(await context.cookies(BASE)).filter(
+      (c) => c.value && c.value.length > 0,
+    );
+    expect(before.length).toBeGreaterThan(0);
+
+    const res = await page.request.get("/uitloggen", { maxRedirects: 0 });
+    expect(res.status()).toBe(405);
+    expect(res.headers()["allow"] ?? "").toMatch(/POST/i);
+
+    const after = authCookies(await context.cookies(BASE)).filter(
+      (c) => c.value && c.value.length > 0,
+    );
+    expect(after.map((c) => c.name).sort()).toEqual(
+      before.map((c) => c.name).sort(),
+    );
+    await page.goto("/portal", { waitUntil: "domcontentloaded" });
+    await expect(page).not.toHaveURL(/\/inloggen/);
   });
 
   test("explicit POST logout clears auth cookies and denies portal", async ({

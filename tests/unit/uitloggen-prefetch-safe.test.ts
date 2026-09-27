@@ -5,7 +5,6 @@ describe("GET /uitloggen must not sign out", () => {
   const src = readFileSync("src/app/(auth)/uitloggen/route.ts", "utf8");
 
   it("GET handler does not call signOut or applyPendingAuthCookies", () => {
-    // Extract GET function body only (before POST)
     const getIdx = src.indexOf("export async function GET");
     const postIdx = src.indexOf("export async function POST");
     expect(getIdx).toBeGreaterThanOrEqual(0);
@@ -13,7 +12,8 @@ describe("GET /uitloggen must not sign out", () => {
     const getBody = src.slice(getIdx, postIdx);
     expect(getBody).not.toMatch(/signOut/);
     expect(getBody).not.toMatch(/applyPendingAuthCookies/);
-    expect(getBody).toMatch(/redirect\(`\$\{appOrigin\}\/portal`/);
+    expect(getBody).toMatch(/405/);
+    expect(getBody).toMatch(/Allow/);
   });
 
   it("POST handler performs explicit logout", () => {
