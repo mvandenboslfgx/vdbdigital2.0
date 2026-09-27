@@ -26,7 +26,8 @@ describe("Customer data SSOT", () => {
     expect(src).toContain('.eq("status", "ACTIVE")');
     expect(src).toContain("isCustomerOrganizationStatus");
     expect(src).toContain('.from("organization_members")');
-    expect(src).toContain('reason: "no_membership"');
+    expect(src).toContain('reason: "no_membership_after_bootstrap"');
+    expect(src).toContain('reason: "no_membership_managed_or_invited"');
   });
 
   it("staff with an admin_roles row are sent to admin, not the customer portal", () => {
