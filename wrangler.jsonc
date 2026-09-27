@@ -1,0 +1,86 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  // Canonical LIVE production Worker. Apex + www are attached here.
+  // NEVER deploy production traffic to empty shell `vdbdigital`.
+  // NEVER remap domains away from this worker without explicit cutover auth.
+  "name": "vdbdigital-live-new",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-09-25",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  // Never wipe dashboard/runtime plaintext vars that are not in this file
+  // (e.g. NEXT_PUBLIC_SUPABASE_*, company fields, Upstash URL).
+  "keep_vars": true,
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  // Plain vars listed here are intentionally non-secret.
+  // Dashboard-managed production vars (Supabase URL/publishable, Upstash URL,
+  // company fields) are synced from the working rollback version at
+  // `npm run cf:predeploy-check` into docs/evidence/.wrangler.deploy.generated.json
+  // and must never be wiped. keep_vars alone is not enough if settings drift.
+  "vars": {
+    "APP_ENV": "production",
+    "CLOUDFLARE_ENV": "production",
+    // Match live working version (true). Predeploy sync overwrites from live SSOT.
+    "CHECKOUT_ENABLED": "true",
+    "GOOGLE_AUTH_ENABLED": "1",
+    "NEXT_PUBLIC_APP_URL": "https://vdbdigital.nl",
+    "NEXT_PUBLIC_SITE_NAME": "VDB Digital Software",
+    "NEXT_PUBLIC_CONTACT_EMAIL": "algemeen@vdbdigital.nl",
+    "NEXT_PUBLIC_SUPPORT_EMAIL": "support@vdbdigital.nl",
+    "NEXT_PUBLIC_PRIVACY_EMAIL": "privacy@vdbdigital.nl",
+    "EMAIL_FROM": "VDB Digital Software <noreply@vdbdigital.nl>",
+    "EMAIL_ADMIN": "algemeen@vdbdigital.nl",
+    "ALLOWED_ORIGINS": "https://vdbdigital.nl,https://www.vdbdigital.nl",
+    "BOOKING_ENABLED": "1",
+    "BOOKING_PROVIDER": "calendly",
+    "BOOKING_PROVIDER_URL": "https://calendly.com/verzamelvdbdigital/strategiegesprek",
+    "BOOKING_ONLINE_URL": "https://calendly.com/verzamelvdbdigital/strategiegesprek"
+  },
+  "env": {
+    // OpenNext/wrangler --env=production → same live worker (no domain remap).
+    "production": {
+      "name": "vdbdigital-live-new",
+      "vars": {
+        "APP_ENV": "production",
+        "CLOUDFLARE_ENV": "production",
+        "CHECKOUT_ENABLED": "true",
+        "GOOGLE_AUTH_ENABLED": "1",
+        "NEXT_PUBLIC_APP_URL": "https://vdbdigital.nl",
+        "NEXT_PUBLIC_SITE_NAME": "VDB Digital Software",
+        "NEXT_PUBLIC_CONTACT_EMAIL": "algemeen@vdbdigital.nl",
+        "NEXT_PUBLIC_SUPPORT_EMAIL": "support@vdbdigital.nl",
+        "NEXT_PUBLIC_PRIVACY_EMAIL": "privacy@vdbdigital.nl",
+        "EMAIL_FROM": "VDB Digital Software <noreply@vdbdigital.nl>",
+        "EMAIL_ADMIN": "algemeen@vdbdigital.nl",
+        "ALLOWED_ORIGINS": "https://vdbdigital.nl,https://www.vdbdigital.nl",
+        "BOOKING_ENABLED": "1",
+        "BOOKING_PROVIDER": "calendly",
+        "BOOKING_PROVIDER_URL": "https://calendly.com/verzamelvdbdigital/strategiegesprek",
+        "BOOKING_ONLINE_URL": "https://calendly.com/verzamelvdbdigital/strategiegesprek"
+      }
+    },
+    // Optional RC/staging worker name — do not attach apex/www here.
+    "preview": {
+      "name": "vdbdigital",
+      "vars": {
+        "APP_ENV": "preview",
+        "CLOUDFLARE_ENV": "preview",
+        "CHECKOUT_ENABLED": "false",
+        "GOOGLE_AUTH_ENABLED": "1",
+        "NEXT_PUBLIC_APP_URL": "https://vdbdigital.nl",
+        "NEXT_PUBLIC_SITE_NAME": "VDB Digital Software",
+        "NEXT_PUBLIC_CONTACT_EMAIL": "algemeen@vdbdigital.nl",
+        "NEXT_PUBLIC_SUPPORT_EMAIL": "support@vdbdigital.nl",
+        "EMAIL_FROM": "VDB Digital Software <noreply@vdbdigital.nl>",
+        "EMAIL_ADMIN": "algemeen@vdbdigital.nl",
+        "ALLOWED_ORIGINS": "https://vdbdigital.nl,https://www.vdbdigital.nl"
+      }
+    }
+  }
+}

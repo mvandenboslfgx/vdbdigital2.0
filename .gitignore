@@ -14,10 +14,18 @@
 /coverage
 /test-results/
 /playwright-report/
+/tests/e2e/.auth/
 
 # next.js
 /.next/
 /out/
+
+# OpenNext / Cloudflare Workers build output
+/.open-next/
+/.wrangler/
+.wrangler.deploy.generated.json
+/cloudflare-env.d.ts
+.dev.vars
 
 # production
 /build

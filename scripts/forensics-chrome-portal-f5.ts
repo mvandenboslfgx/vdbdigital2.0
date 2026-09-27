@@ -63,7 +63,6 @@ function relevantUrl(url: string): boolean {
     const p = u.pathname;
     return (
       p.startsWith("/portal") ||
-      p.startsWith("/auth/probe") ||
       p.startsWith("/inloggen") ||
       p.startsWith("/uitloggen") ||
       p.startsWith("/geen-toegang") ||
@@ -431,23 +430,25 @@ async function main() {
   snapshots.push(await snap("A_after_login_portal", context, page));
   console.log(JSON.stringify({ type: "snapshot", snap: snapshots.at(-1) }));
 
-  // Control: /auth/probe reload
-  await page.goto(`${BASE}/auth/probe`, { waitUntil: "domcontentloaded" });
+  // Control: hard reload of /portal (session must survive document nav)
+  await page.goto(`${BASE}/portal`, { waitUntil: "domcontentloaded" });
   await page.waitForTimeout(1000);
-  const probeBefore = await page.locator("h1").innerText().catch(() => "");
   snapshots.push(await snap("probe_before_reload", context, page));
+  const portalBeforeUrl = page.url();
   await page.reload({ waitUntil: "domcontentloaded" });
   await page.waitForTimeout(1000);
-  const probeAfter = await page.locator("h1").innerText().catch(() => "");
   snapshots.push(await snap("probe_after_reload", context, page));
+  const portalAfterUrl = page.url();
   const probePass =
-    /authenticated=true/i.test(probeBefore) &&
-    /authenticated=true/i.test(probeAfter);
+    portalBeforeUrl.includes("/portal") &&
+    !portalBeforeUrl.includes("/inloggen") &&
+    portalAfterUrl.includes("/portal") &&
+    !portalAfterUrl.includes("/inloggen");
   console.log(
     JSON.stringify({
       type: "probe_control",
-      before: probeBefore,
-      after: probeAfter,
+      before: portalBeforeUrl,
+      after: portalAfterUrl,
       pass: probePass,
     }),
   );

@@ -10,18 +10,18 @@ import { resolveAppUrl } from "@/lib/url/app-url";
 export const dynamic = "force-dynamic";
 
 /**
- * POST-only logout. GET must never sign out — Next.js Link prefetch of
- * href="/uitloggen" would otherwise clear sb-*-auth-token cookies during
- * soft-nav / viewport prefetch and leave the jar empty for the next F5.
+ * GET must never mutate auth. Next.js Link prefetch historically hit this
+ * route, ran signOut(), and cleared the browser cookie jar mid soft-nav.
+ * Prefer POST (portal shell form) for explicit logout.
  */
 export async function GET() {
-  const appOrigin = resolveAppUrl().replace(/\/$/, "");
-  const response = NextResponse.redirect(`${appOrigin}/portal`, 303);
-  response.headers.set(
-    "Cache-Control",
-    "private, no-store, max-age=0, must-revalidate",
-  );
-  return response;
+  return new NextResponse("Method Not Allowed — use POST to log out", {
+    status: 405,
+    headers: {
+      Allow: "POST",
+      "Cache-Control": "private, no-store, max-age=0, must-revalidate",
+    },
+  });
 }
 
 /**

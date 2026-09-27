@@ -4,13 +4,11 @@ import { defineCloudflareConfig } from "@opennextjs/cloudflare";
  * OpenNext adapter for Cloudflare Workers.
  *
  * Cookie ownership:
- * - /auth/callback, POST /uitloggen, /auth/session, /auth/probe/json: handler writes
- * - GET /uitloggen is prefetch-safe (no signOut) — must never clear auth cookies
- * - all other routes (incl. /auth/probe RSC): middleware/proxy owns refresh
+ * - /auth/callback, POST /uitloggen, /auth/session: handler writes
+ * - GET /uitloggen is 405 (never mutates auth)
+ * - all other routes: middleware/proxy owns refresh
  *
  * RSC must NOT write auth cookies (createServerSupabaseClient setAll is no-op).
- * That prevents Max-Age=0 clears on HTML responses from wiping a valid jar
- * when Proxy did not refresh on the same request.
  */
 const base = defineCloudflareConfig({});
 
@@ -23,7 +21,6 @@ export default {
       if (
         path.startsWith("/auth/callback") ||
         path.startsWith("/auth/session") ||
-        path.startsWith("/auth/probe/json") ||
         path.startsWith("/uitloggen")
       ) {
         return "handler" as const;
